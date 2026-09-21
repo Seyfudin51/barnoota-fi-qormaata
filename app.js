@@ -11,32 +11,25 @@ const db = createClient(
 );
 
 
-/* =========================
+/* =========================================================
    GLOBAL VARIABLES
-========================= */
+========================================================= */
 
 let currentStudent = null;
-
 let currentExam = null;
-
 let currentQuestions = [];
-
 let currentQuestionIndex = 0;
-
 let currentAnswers = [];
-
 let selectedAnswer = null;
-
 let currentAttempt = null;
 
 let examTimerInterval = null;
-
 let examSecondsLeft = 0;
 
 
-/* =========================
+/* =========================================================
    PAGE CONTROL
-========================= */
+========================================================= */
 
 function showPage(id) {
 
@@ -51,37 +44,32 @@ function showPage(id) {
   }
 }
 
-
 function openStudentLogin() {
   showPage("studentLoginPage");
 }
-
 
 function openAdminLogin() {
   showPage("adminLoginPage");
 }
 
 
-/* =========================
+/* =========================================================
    MESSAGES
-========================= */
+========================================================= */
 
 function showStudentMessage(message, type = "info") {
 
-  const el =
-    document.getElementById("studentLoginMessage");
+  const el = document.getElementById("studentLoginMessage");
 
   if (!el) return;
 
   el.innerHTML = message;
   el.className = `message ${type}`;
 }
-
 
 function showAdminMessage(message, type = "info") {
 
-  const el =
-    document.getElementById("adminLoginMessage");
+  const el = document.getElementById("adminLoginMessage");
 
   if (!el) return;
 
@@ -90,9 +78,9 @@ function showAdminMessage(message, type = "info") {
 }
 
 
-/* =========================
+/* =========================================================
    HELPERS
-========================= */
+========================================================= */
 
 function generateStudentCode() {
 
@@ -101,7 +89,6 @@ function generateStudentCode() {
       100000 + Math.random() * 900000
     );
 }
-
 
 function generateActivationCode() {
 
@@ -117,12 +104,10 @@ function generateActivationCode() {
         Math.random() * chars.length
       )
     );
-
   }
 
   return code;
 }
-
 
 function escapeHtml(value) {
 
@@ -141,7 +126,6 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-
 function truncate(text, length) {
 
   if (!text) return "";
@@ -151,25 +135,31 @@ function truncate(text, length) {
     : text.substring(0, length) + "...";
 }
 
-
 function formatText(text) {
 
   return escapeHtml(text)
     .replace(/\n/g, "<br>");
 }
 
+function getErrorMessage(error) {
 
-/* =========================
+  return error?.message ||
+    error?.details ||
+    error?.hint ||
+    "Rakkoo hin beekamne.";
+}
+
+
+/* =========================================================
    STUDENT REGISTER
-========================= */
+========================================================= */
 
 async function studentRegister() {
 
+  const input = document.getElementById("nameInput");
+
   const name =
-    document
-      .getElementById("nameInput")
-      .value
-      .trim();
+    input?.value.trim() || "";
 
   if (!name) {
 
@@ -188,11 +178,8 @@ async function studentRegister() {
       "info"
     );
 
-    let studentCode =
-      generateStudentCode();
-
-    let activationCode =
-      generateActivationCode();
+    let studentCode = generateStudentCode();
+    let activationCode = generateActivationCode();
 
     const { data, error } =
       await db
@@ -248,9 +235,9 @@ async function studentRegister() {
       "success"
     );
 
-    document.getElementById(
-      "nameInput"
-    ).value = "";
+    if (input) {
+      input.value = "";
+    }
 
   } catch (error) {
 
@@ -258,30 +245,28 @@ async function studentRegister() {
 
     showStudentMessage(
       "❌ Galmeen hin milkoofne: " +
-      escapeHtml(error.message),
+      escapeHtml(getErrorMessage(error)),
       "error"
     );
   }
 }
 
 
-/* =========================
+/* =========================================================
    STUDENT LOGIN
-========================= */
+========================================================= */
 
 async function studentLogin() {
 
   const studentId =
     document
       .getElementById("studentIdInput")
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const activationCode =
     document
       .getElementById("activationCodeInput")
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   if (!studentId || !activationCode) {
 
@@ -388,16 +373,16 @@ async function studentLogin() {
 
     showStudentMessage(
       "❌ Rakkoo uumame: " +
-      escapeHtml(error.message),
+      escapeHtml(getErrorMessage(error)),
       "error"
     );
   }
 }
 
 
-/* =========================
+/* =========================================================
    RESTORE STUDENT
-========================= */
+========================================================= */
 
 async function restoreStudent() {
 
@@ -436,25 +421,21 @@ async function restoreStudent() {
 
     console.error(error);
 
-    localStorage.removeItem(
-      "student_id"
-    );
+    localStorage.removeItem("student_id");
   }
 }
 
 
-/* =========================
-   STUDENT HOME
-========================= */
+/* =========================================================
+   STUDENT HOME / LESSONS
+========================================================= */
 
 async function loadStudentHome() {
 
   if (!currentStudent) return;
 
   const welcome =
-    document.getElementById(
-      "studentWelcomeName"
-    );
+    document.getElementById("studentWelcomeName");
 
   if (welcome) {
 
@@ -463,9 +444,7 @@ async function loadStudentHome() {
   }
 
   const homeMessage =
-    document.getElementById(
-      "studentHomeMessage"
-    );
+    document.getElementById("studentHomeMessage");
 
   if (homeMessage) {
 
@@ -474,9 +453,7 @@ async function loadStudentHome() {
   }
 
   const container =
-    document.getElementById(
-      "studentLessons"
-    );
+    document.getElementById("studentLessons");
 
   if (!container) return;
 
@@ -534,11 +511,6 @@ async function loadStudentHome() {
     `).join("");
 }
 
-
-/* =========================
-   LESSON
-========================= */
-
 async function openLesson(id) {
 
   const { data, error } =
@@ -550,7 +522,7 @@ async function openLesson(id) {
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -568,9 +540,9 @@ async function openLesson(id) {
 }
 
 
-/* =========================
-   EXAM TIME CHECK
-========================= */
+/* =========================================================
+   EXAM DATE / TIME
+========================================================= */
 
 function getExamWindowStatus(exam) {
 
@@ -631,7 +603,6 @@ function getExamWindowStatus(exam) {
   };
 }
 
-
 function formatDateTime(date) {
 
   try {
@@ -651,16 +622,14 @@ function formatDateTime(date) {
 }
 
 
-/* =========================
-   LOAD STUDENT EXAMS
-========================= */
+/* =========================================================
+   STUDENT EXAMS
+========================================================= */
 
 async function loadExams() {
 
   const container =
-    document.getElementById(
-      "studentExams"
-    );
+    document.getElementById("studentExams");
 
   if (!container) return;
 
@@ -703,9 +672,18 @@ async function loadExams() {
         await db
           .from("exam_attempts")
           .select("id")
-          .eq("student_id", currentStudent.id)
-          .eq("exam_id", exam.id)
-          .eq("completed", true);
+          .eq(
+            "student_id",
+            currentStudent.id
+          )
+          .eq(
+            "exam_id",
+            exam.id
+          )
+          .eq(
+            "completed",
+            true
+          );
 
       if (!attempts.error) {
 
@@ -807,9 +785,9 @@ async function loadExams() {
 }
 
 
-/* =========================
+/* =========================================================
    START EXAM
-========================= */
+========================================================= */
 
 async function startExam(examId) {
 
@@ -829,7 +807,7 @@ async function startExam(examId) {
 
   if (examResult.error) {
 
-    alert(examResult.error.message);
+    alert(getErrorMessage(examResult.error));
 
     return;
   }
@@ -847,8 +825,7 @@ async function startExam(examId) {
     return;
   }
 
-
-  /* CHECK ATTEMPTS */
+  /* CHECK COMPLETED ATTEMPTS */
 
   const attemptsResult =
     await db
@@ -863,7 +840,9 @@ async function startExam(examId) {
 
   if (attemptsResult.error) {
 
-    alert(attemptsResult.error.message);
+    alert(
+      getErrorMessage(attemptsResult.error)
+    );
 
     return;
   }
@@ -904,7 +883,9 @@ async function startExam(examId) {
   if (questionsResult.error) {
 
     alert(
-      questionsResult.error.message
+      getErrorMessage(
+        questionsResult.error
+      )
     );
 
     return;
@@ -948,13 +929,22 @@ async function startExam(examId) {
       .from("exam_attempts")
       .insert([
         {
-          student_id: currentStudent.id,
-          exam_id: exam.id,
+          student_id:
+            currentStudent.id,
+
+          exam_id:
+            exam.id,
+
           attempt_number:
             nextAttemptNumber,
+
           score: 0,
-          total: questions.length,
+
+          total:
+            questions.length,
+
           percentage: 0,
+
           completed: false
         }
       ])
@@ -965,35 +955,38 @@ async function startExam(examId) {
 
     alert(
       "Attempt jalqabsiisuu hin dandeenye: " +
-      attemptResult.error.message
+      getErrorMessage(
+        attemptResult.error
+      )
     );
 
     return;
   }
 
-
   currentAttempt =
     attemptResult.data;
 
-  currentExam = exam;
+  currentExam =
+    exam;
 
-  currentQuestions = questions;
+  currentQuestions =
+    questions;
 
-  currentQuestionIndex = 0;
+  currentQuestionIndex =
+    0;
 
   currentAnswers =
     new Array(
       currentQuestions.length
     ).fill(null);
 
-  selectedAnswer = null;
-
+  selectedAnswer =
+    null;
 
   document.getElementById(
     "examTitle"
   ).textContent =
     currentExam.title;
-
 
   startExamTimer(
     Number(
@@ -1001,16 +994,15 @@ async function startExam(examId) {
     )
   );
 
-
   showPage("examPage");
 
   showQuestion();
 }
 
 
-/* =========================
+/* =========================================================
    TIMER
-========================= */
+========================================================= */
 
 function startExamTimer(minutes) {
 
@@ -1047,7 +1039,6 @@ function startExamTimer(minutes) {
     }, 1000);
 }
 
-
 function stopExamTimer() {
 
   if (examTimerInterval) {
@@ -1059,7 +1050,6 @@ function stopExamTimer() {
     examTimerInterval = null;
   }
 }
-
 
 function updateExamTimerDisplay() {
 
@@ -1083,9 +1073,9 @@ function updateExamTimerDisplay() {
 }
 
 
-/* =========================
+/* =========================================================
    SHOW QUESTION
-========================= */
+========================================================= */
 
 function showQuestion() {
 
@@ -1174,9 +1164,9 @@ function showQuestion() {
 }
 
 
-/* =========================
+/* =========================================================
    SELECT ANSWER
-========================= */
+========================================================= */
 
 function selectAnswer(answer) {
 
@@ -1194,7 +1184,6 @@ function selectAnswer(answer) {
       button.classList.remove(
         "selected"
       );
-
     });
 
   document
@@ -1215,16 +1204,15 @@ function selectAnswer(answer) {
           "selected"
         );
       }
-
     });
 
   updateNextButton();
 }
 
 
-/* =========================
-   NEXT BUTTON
-========================= */
+/* =========================================================
+   NEXT QUESTION
+========================================================= */
 
 function updateNextButton() {
 
@@ -1253,7 +1241,6 @@ function updateNextButton() {
   }
 }
 
-
 function nextQuestion() {
 
   if (!selectedAnswer) {
@@ -1281,9 +1268,9 @@ function nextQuestion() {
 }
 
 
-/* =========================
+/* =========================================================
    SUBMIT CONFIRMATION
-========================= */
+========================================================= */
 
 function requestSubmitExam() {
 
@@ -1336,7 +1323,6 @@ function requestSubmitExam() {
   );
 }
 
-
 function confirmSubmitExam(yes) {
 
   if (yes) {
@@ -1346,10 +1332,10 @@ function confirmSubmitExam(yes) {
     return;
   }
 
-  /* 
-     "Hin xumirree"
-     -> gara qormaataatti deebi'a.
-     Deebiin duraan filatame hin badu.
+  /*
+     Hin xumirree:
+     qormaata keessa deebi'a.
+     Deebiiwwan duraan filataman hin badani.
   */
 
   if (
@@ -1357,7 +1343,6 @@ function confirmSubmitExam(yes) {
   ) {
 
     currentQuestionIndex--;
-
   }
 
   showPage("examPage");
@@ -1366,9 +1351,9 @@ function confirmSubmitExam(yes) {
 }
 
 
-/* =========================
+/* =========================================================
    DIRECT SUBMIT
-========================= */
+========================================================= */
 
 async function submitExamDirectly() {
 
@@ -1391,19 +1376,16 @@ async function submitExamDirectly() {
         String(
           question.correct_answer || ""
         )
-        .trim()
-        .toUpperCase();
+          .trim()
+          .toUpperCase();
 
       if (
         answer &&
-        answer
-          .toUpperCase() ===
-          correct
+        answer.toUpperCase() === correct
       ) {
 
         score++;
       }
-
     }
   );
 
@@ -1431,24 +1413,25 @@ async function submitExamDirectly() {
         submitted_at:
           new Date().toISOString()
       })
-      .eq("id", currentAttempt.id);
+      .eq(
+        "id",
+        currentAttempt.id
+      );
 
   if (attemptUpdate.error) {
 
     alert(
       "Attempt olkaa'uu hin dandeenye: " +
-      attemptUpdate.error.message
+      getErrorMessage(
+        attemptUpdate.error
+      )
     );
 
     return;
   }
 
 
-  /* 
-     RESULTS TABLE:
-     latest result eega.
-     Kun functionality duraan ture eega.
-  */
+  /* SAVE LATEST RESULT */
 
   const existing =
     await db
@@ -1467,7 +1450,7 @@ async function submitExamDirectly() {
   if (existing.error) {
 
     alert(
-      existing.error.message
+      getErrorMessage(existing.error)
     );
 
     return;
@@ -1520,17 +1503,15 @@ async function submitExamDirectly() {
 
     alert(
       "Qabxii olkaa'uu hin dandeenye: " +
-      resultError.message
+      getErrorMessage(resultError)
     );
 
     return;
   }
 
-
   alert(
     `✅ Qormaata xumurame!\n\nQabxii: ${score}/${total}\nDhibbeentaa: ${percentage}%`
   );
-
 
   showPage("scorePage");
 
@@ -1538,16 +1519,13 @@ async function submitExamDirectly() {
 
   renderExamReview();
 
-
   currentAttempt = null;
 }
 
 
-/* 
-   Backward compatibility:
-   HTML yoo finishExam() waame,
-   submitExamDirectly() hojjeta.
-*/
+/* =========================================================
+   BACKWARD COMPATIBILITY
+========================================================= */
 
 async function finishExam() {
 
@@ -1555,9 +1533,9 @@ async function finishExam() {
 }
 
 
-/* =========================
+/* =========================================================
    EXAM REVIEW
-========================= */
+========================================================= */
 
 function renderExamReview() {
 
@@ -1573,7 +1551,6 @@ function renderExamReview() {
     !currentQuestions.length
   ) return;
 
-
   const reviewHtml =
     currentQuestions.map(
       (question, index) => {
@@ -1585,8 +1562,8 @@ function renderExamReview() {
           String(
             question.correct_answer || ""
           )
-          .trim()
-          .toUpperCase();
+            .trim()
+            .toUpperCase();
 
         const options = [
           ["A", question.option_a],
@@ -1660,6 +1637,7 @@ function renderExamReview() {
                   >
 
                     ${icon}
+
                     <strong>
                       ${letter}.
                     </strong>
@@ -1680,12 +1658,9 @@ function renderExamReview() {
       }
     ).join("");
 
-
   container.innerHTML += `
 
-    <div
-      style="margin-top:25px;"
-    >
+    <div style="margin-top:25px;">
 
       <h3>
         📋 Deebii Qormaataa
@@ -1699,9 +1674,9 @@ function renderExamReview() {
 }
 
 
-/* =========================
+/* =========================================================
    STUDENT SCORE
-========================= */
+========================================================= */
 
 async function showScore() {
 
@@ -1775,37 +1750,56 @@ async function showScore() {
 }
 
 
-/* =========================
+/* =========================================================
    PROFILE
-========================= */
+========================================================= */
 
 function loadProfile() {
 
   if (!currentStudent) return;
 
-  document.getElementById(
-    "profileNameInput"
-  ).value =
-    currentStudent.name || "";
+  const name =
+    document.getElementById(
+      "profileNameInput"
+    );
 
-  document.getElementById(
-    "profileCode"
-  ).textContent =
-    currentStudent.student_code || "";
+  const code =
+    document.getElementById(
+      "profileCode"
+    );
 
-  document.getElementById(
-    "profileActivationCode"
-  ).textContent =
-    currentStudent.activation_code || "";
+  const activation =
+    document.getElementById(
+      "profileActivationCode"
+    );
 
-  document.getElementById(
-    "profileStatus"
-  ).textContent =
-    currentStudent.status === "active"
-      ? "✅ Active"
-      : currentStudent.status;
+  const status =
+    document.getElementById(
+      "profileStatus"
+    );
+
+  if (name) {
+    name.value =
+      currentStudent.name || "";
+  }
+
+  if (code) {
+    code.textContent =
+      currentStudent.student_code || "";
+  }
+
+  if (activation) {
+    activation.textContent =
+      currentStudent.activation_code || "";
+  }
+
+  if (status) {
+    status.textContent =
+      currentStudent.status === "active"
+        ? "✅ Active"
+        : currentStudent.status;
+  }
 }
-
 
 async function saveProfile() {
 
@@ -1814,8 +1808,7 @@ async function saveProfile() {
       .getElementById(
         "profileNameInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   if (!name) {
 
@@ -1839,7 +1832,7 @@ async function saveProfile() {
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -1856,9 +1849,9 @@ async function saveProfile() {
 }
 
 
-/* =========================
+/* =========================================================
    ADMIN LOGIN
-========================= */
+========================================================= */
 
 async function adminLogin() {
 
@@ -1867,13 +1860,12 @@ async function adminLogin() {
       .getElementById(
         "adminUsername"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const password =
     document.getElementById(
       "adminPassword"
-    ).value;
+    )?.value || "";
 
   if (!username || !password) {
 
@@ -1902,7 +1894,7 @@ async function adminLogin() {
   if (error) {
 
     showAdminMessage(
-      error.message,
+      getErrorMessage(error),
       "error"
     );
 
@@ -1930,9 +1922,9 @@ async function adminLogin() {
 }
 
 
-/* =========================
+/* =========================================================
    ADMIN PANELS
-========================= */
+========================================================= */
 
 function hideAdminPanels() {
 
@@ -1945,7 +1937,6 @@ function hideAdminPanels() {
 
     });
 }
-
 
 async function openAdminPanel(panel) {
 
@@ -1999,9 +1990,9 @@ async function openAdminPanel(panel) {
 }
 
 
-/* =========================
+/* =========================================================
    ADMIN STUDENTS
-========================= */
+========================================================= */
 
 async function loadAdminStudents() {
 
@@ -2009,6 +2000,8 @@ async function loadAdminStudents() {
     document.getElementById(
       "adminStudentsList"
     );
+
+  if (!container) return;
 
   const { data, error } =
     await db
@@ -2021,7 +2014,9 @@ async function loadAdminStudents() {
   if (error) {
 
     container.innerHTML =
-      `<p>❌ ${escapeHtml(error.message)}</p>`;
+      `<p>❌ ${escapeHtml(
+        getErrorMessage(error)
+      )}</p>`;
 
     return;
   }
@@ -2058,7 +2053,9 @@ async function loadAdminStudents() {
           ${data.map(
             (student, index) => `
 
-            <tr>
+            <tr
+              data-student-id="${escapeHtml(student.id)}"
+            >
 
               <td>
                 ${index + 1}
@@ -2141,7 +2138,6 @@ async function loadAdminStudents() {
   `;
 }
 
-
 async function approveStudent(id) {
 
   if (
@@ -2156,11 +2152,14 @@ async function approveStudent(id) {
       .update({
         status: "active"
       })
-      .eq("id", id);
+      .eq(
+        "id",
+        id
+      );
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -2171,7 +2170,6 @@ async function approveStudent(id) {
 
   await loadAdminStudents();
 }
-
 
 async function rejectStudent(id) {
 
@@ -2187,11 +2185,14 @@ async function rejectStudent(id) {
       .update({
         status: "rejected"
       })
-      .eq("id", id);
+      .eq(
+        "id",
+        id
+      );
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -2204,61 +2205,121 @@ async function rejectStudent(id) {
 }
 
 
+/* =========================================================
+   DELETE STUDENT — FIXED
+========================================================= */
+
 async function deleteStudent(id) {
 
   if (
     !confirm(
-      "Barataa kana guutummaatti haquu barbaaddaa?"
+      "Barataa kana guutummaatti haquu barbaaddaa?\n\n" +
+      "Qabxii fi exam attempts isaa ni haqamu."
     )
-  ) return;
+  ) {
+    return;
+  }
 
-  const resultDelete =
-    await db
-      .from("results")
-      .delete()
-      .eq(
-        "student_id",
-        id
+  try {
+
+    /*
+      1. Results haqi
+    */
+
+    const resultDelete =
+      await db
+        .from("results")
+        .delete()
+        .eq(
+          "student_id",
+          id
+        );
+
+    if (resultDelete.error) {
+      throw resultDelete.error;
+    }
+
+
+    /*
+      2. Exam attempts haqi
+    */
+
+    const attemptDelete =
+      await db
+        .from("exam_attempts")
+        .delete()
+        .eq(
+          "student_id",
+          id
+        );
+
+    if (attemptDelete.error) {
+      throw attemptDelete.error;
+    }
+
+
+    /*
+      3. Student mataa isaa haqi
+    */
+
+    const studentDelete =
+      await db
+        .from("students")
+        .delete()
+        .eq(
+          "id",
+          id
+        );
+
+    if (studentDelete.error) {
+      throw studentDelete.error;
+    }
+
+
+    /*
+      4. UI irraa battalum balleessi
+    */
+
+    const row =
+      document.querySelector(
+        `[data-student-id="${id}"]`
       );
 
-  if (resultDelete.error) {
+    if (row) {
+      row.remove();
+    }
+
+
+    /*
+      5. List haaromsi
+    */
+
+    await loadAdminStudents();
+
+    await loadAdminResults();
 
     alert(
-      resultDelete.error.message
+      "✅ Barataan guutummaatti haqame."
     );
 
-    return;
+  } catch (error) {
+
+    console.error(
+      "DELETE STUDENT ERROR:",
+      error
+    );
+
+    alert(
+      "❌ Barataa haquun hin milkoofne:\n\n" +
+      getErrorMessage(error)
+    );
   }
-
-  const { error } =
-    await db
-      .from("students")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-  if (error) {
-
-    alert(error.message);
-
-    return;
-  }
-
-  alert(
-    "✅ Barataan haqame."
-  );
-
-  await loadAdminStudents();
-
-  await loadAdminResults();
 }
 
 
-/* =========================
+/* =========================================================
    ADMIN RESULTS
-========================= */
+========================================================= */
 
 async function loadAdminResults() {
 
@@ -2296,15 +2357,19 @@ async function loadAdminResults() {
     resultsResult.error
   ) {
 
-    table.querySelector(
-      "tbody"
-    ).innerHTML = `
-      <tr>
-        <td>
-          ❌ Qabxii fe'uu hin dandeenye.
-        </td>
-      </tr>
-    `;
+    const tbody =
+      table.querySelector("tbody");
+
+    if (tbody) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td>
+            ❌ Qabxii fe'uu hin dandeenye.
+          </td>
+        </tr>
+      `;
+    }
 
     return;
   }
@@ -2361,10 +2426,8 @@ async function loadAdminResults() {
 
         const result =
           results.find(r =>
-            r.student_id ===
-              student.id &&
-            r.exam_id ===
-              exam.id
+            r.student_id === student.id &&
+            r.exam_id === exam.id
           );
 
         if (result) {
@@ -2407,7 +2470,6 @@ async function loadAdminResults() {
         average,
         count
       };
-
     });
 
   const ranked =
@@ -2424,7 +2486,6 @@ async function loadAdminResults() {
         row.count === 0
           ? "—"
           : index + 1;
-
     }
   );
 
@@ -2500,9 +2561,9 @@ async function loadAdminResults() {
 }
 
 
-/* =========================
-   LESSON ADMIN
-========================= */
+/* =========================================================
+   CREATE LESSON
+========================================================= */
 
 async function createLesson() {
 
@@ -2511,16 +2572,14 @@ async function createLesson() {
       .getElementById(
         "lessonTitleInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const content =
     document
       .getElementById(
         "lessonContentInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   if (!title || !content) {
 
@@ -2543,7 +2602,7 @@ async function createLesson() {
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -2557,7 +2616,7 @@ async function createLesson() {
   ).value = "";
 
   alert(
-    "✅ Barnoonni dabalamе."
+    "✅ Barnoonni dabale."
   );
 
   await loadAdminLessons();
@@ -2566,12 +2625,18 @@ async function createLesson() {
 }
 
 
+/* =========================================================
+   ADMIN LESSONS
+========================================================= */
+
 async function loadAdminLessons() {
 
   const container =
     document.getElementById(
       "adminLessonsList"
     );
+
+  if (!container) return;
 
   const { data, error } =
     await db
@@ -2585,17 +2650,28 @@ async function loadAdminLessons() {
 
     container.innerHTML =
       `<p>❌ ${escapeHtml(
-        error.message
+        getErrorMessage(error)
       )}</p>`;
 
     return;
   }
 
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      "<p>Barnoonni hin jiru.</p>";
+
+    return;
+  }
+
   container.innerHTML =
-    (data || []).map(
+    data.map(
       lesson => `
 
-      <div class="card">
+      <div
+        class="card"
+        data-lesson-id="${escapeHtml(lesson.id)}"
+      >
 
         <h3>
           📚 ${escapeHtml(
@@ -2632,7 +2708,6 @@ async function loadAdminLessons() {
     ).join("");
 }
 
-
 async function editLesson(id) {
 
   const { data, error } =
@@ -2644,7 +2719,7 @@ async function editLesson(id) {
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -2671,6 +2746,7 @@ async function editLesson(id) {
       .update({
         title:
           title.trim(),
+
         content:
           content.trim()
       })
@@ -2682,7 +2758,7 @@ async function editLesson(id) {
   if (updateError) {
 
     alert(
-      updateError.message
+      getErrorMessage(updateError)
     );
 
     return;
@@ -2698,43 +2774,74 @@ async function editLesson(id) {
 }
 
 
+/* =========================================================
+   DELETE LESSON — FIXED
+========================================================= */
+
 async function deleteLesson(id) {
 
   if (
     !confirm(
-      "Barnoota kana haquu barbaaddaa?"
+      "Barnoota kana guutummaatti haquu barbaaddaa?"
     )
-  ) return;
-
-  const { error } =
-    await db
-      .from("lessons")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-  if (error) {
-
-    alert(error.message);
-
+  ) {
     return;
   }
 
-  alert(
-    "✅ Barnoonni haqame."
-  );
+  try {
 
-  await loadAdminLessons();
+    const { error } =
+      await db
+        .from("lessons")
+        .delete()
+        .eq(
+          "id",
+          id
+        );
 
-  await loadStudentHome();
+    if (error) {
+      throw error;
+    }
+
+    /*
+      UI irraa battalum balleessi
+    */
+
+    const card =
+      document.querySelector(
+        `[data-lesson-id="${id}"]`
+      );
+
+    if (card) {
+      card.remove();
+    }
+
+    await loadAdminLessons();
+
+    await loadStudentHome();
+
+    alert(
+      "✅ Barnoonni guutummaatti haqame."
+    );
+
+  } catch (error) {
+
+    console.error(
+      "DELETE LESSON ERROR:",
+      error
+    );
+
+    alert(
+      "❌ Barnoota haquun hin milkoofne:\n\n" +
+      getErrorMessage(error)
+    );
+  }
 }
 
 
-/* =========================
+/* =========================================================
    CREATE EXAM
-========================= */
+========================================================= */
 
 async function createExam() {
 
@@ -2743,62 +2850,60 @@ async function createExam() {
       .getElementById(
         "examTitleInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const description =
     document
       .getElementById(
         "examDescriptionInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const questionLimit =
     Number(
       document.getElementById(
         "examQuestionLimitInput"
-      ).value || 10
+      )?.value || 10
     );
 
   const attemptLimit =
     Number(
       document.getElementById(
         "examAttemptLimitInput"
-      ).value || 1
+      )?.value || 1
     );
 
   const isFinal =
     document.getElementById(
       "examFinalInput"
-    ).value === "true";
+    )?.value === "true";
 
   const durationMinutes =
     Number(
       document.getElementById(
         "examDurationInput"
-      ).value || 30
+      )?.value || 30
     );
 
   const startDate =
     document.getElementById(
       "examStartDateInput"
-    ).value || null;
+    )?.value || null;
 
   const endDate =
     document.getElementById(
       "examEndDateInput"
-    ).value || null;
+    )?.value || null;
 
   const startTime =
     document.getElementById(
       "examStartTimeInput"
-    ).value || null;
+    )?.value || null;
 
   const endTime =
     document.getElementById(
       "examEndTimeInput"
-    ).value || null;
+    )?.value || null;
 
   if (!title) {
 
@@ -2816,20 +2921,28 @@ async function createExam() {
         {
           title,
           description,
+
           question_limit:
             questionLimit,
+
           attempt_limit:
             attemptLimit,
+
           is_final:
             isFinal,
+
           duration_minutes:
             durationMinutes,
+
           start_date:
             startDate,
+
           end_date:
             endDate,
+
           start_time:
             startTime,
+
           end_time:
             endTime
         }
@@ -2837,7 +2950,7 @@ async function createExam() {
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -2851,7 +2964,7 @@ async function createExam() {
   ).value = "";
 
   alert(
-    "✅ Qormaanni dabalamе."
+    "✅ Qormaanni dabale."
   );
 
   await loadAdminExams();
@@ -2862,9 +2975,9 @@ async function createExam() {
 }
 
 
-/* =========================
+/* =========================================================
    ADMIN EXAMS
-========================= */
+========================================================= */
 
 async function loadAdminExams() {
 
@@ -2872,6 +2985,8 @@ async function loadAdminExams() {
     document.getElementById(
       "adminExamsList"
     );
+
+  if (!container) return;
 
   const { data, error } =
     await db
@@ -2885,8 +3000,16 @@ async function loadAdminExams() {
 
     container.innerHTML =
       `<p>❌ ${escapeHtml(
-        error.message
+        getErrorMessage(error)
       )}</p>`;
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      "<p>Qormaanni hin jiru.</p>";
 
     return;
   }
@@ -2895,7 +3018,10 @@ async function loadAdminExams() {
     (data || []).map(
       exam => `
 
-      <div class="card">
+      <div
+        class="card"
+        data-exam-id="${escapeHtml(exam.id)}"
+      >
 
         <h3>
           📝 ${escapeHtml(
@@ -3004,9 +3130,9 @@ async function loadAdminExams() {
 }
 
 
-/* =========================
+/* =========================================================
    EDIT EXAM
-========================= */
+========================================================= */
 
 async function editExam(id) {
 
@@ -3019,7 +3145,7 @@ async function editExam(id) {
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -3170,7 +3296,7 @@ async function editExam(id) {
   if (updateError) {
 
     alert(
-      updateError.message
+      getErrorMessage(updateError)
     );
 
     return;
@@ -3190,93 +3316,147 @@ async function editExam(id) {
 }
 
 
-/* =========================
-   DELETE EXAM
-========================= */
+/* =========================================================
+   DELETE EXAM — FIXED
+========================================================= */
 
 async function deleteExam(id) {
 
   if (
     !confirm(
-      "Qormaata kana haquu barbaaddaa?\n\nQabxii fi gaaffileen isaa ni haqamu."
+      "Qormaata kana guutummaatti haquu barbaaddaa?\n\n" +
+      "Qormaata, gaaffii, qabxii fi attempt isaa ni haqamu."
     )
-  ) return;
-
-  const results =
-    await db
-      .from("results")
-      .delete()
-      .eq(
-        "exam_id",
-        id
-      );
-
-  if (results.error) {
-
-    alert(
-      results.error.message
-    );
-
+  ) {
     return;
   }
 
-  const questions =
-    await db
-      .from("questions")
-      .delete()
-      .eq(
-        "exam_id",
-        id
+  try {
+
+    /*
+      1. Results haqi
+    */
+
+    const results =
+      await db
+        .from("results")
+        .delete()
+        .eq(
+          "exam_id",
+          id
+        );
+
+    if (results.error) {
+      throw results.error;
+    }
+
+
+    /*
+      2. Exam attempts haqi
+    */
+
+    const attempts =
+      await db
+        .from("exam_attempts")
+        .delete()
+        .eq(
+          "exam_id",
+          id
+        );
+
+    if (attempts.error) {
+      throw attempts.error;
+    }
+
+
+    /*
+      3. Questions haqi
+    */
+
+    const questions =
+      await db
+        .from("questions")
+        .delete()
+        .eq(
+          "exam_id",
+          id
+        );
+
+    if (questions.error) {
+      throw questions.error;
+    }
+
+
+    /*
+      4. Exam mataa isaa haqi
+    */
+
+    const exam =
+      await db
+        .from("exams")
+        .delete()
+        .eq(
+          "id",
+          id
+        );
+
+    if (exam.error) {
+      throw exam.error;
+    }
+
+
+    /*
+      5. UI irraa battalum balleessi
+    */
+
+    const card =
+      document.querySelector(
+        `[data-exam-id="${id}"]`
       );
 
-  if (questions.error) {
+    if (card) {
+      card.remove();
+    }
+
+
+    /*
+      6. Tarreewwan haaromsi
+    */
+
+    await loadAdminExams();
+
+    await loadQuestionExamSelect();
+
+    await loadAIQuestionExamSelect();
+
+    await loadAdminQuestions();
+
+    await loadAdminResults();
+
+    await loadExams();
 
     alert(
-      questions.error.message
+      "✅ Qormaanni guutummaatti haqame."
     );
 
-    return;
-  }
+  } catch (error) {
 
-  const exam =
-    await db
-      .from("exams")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-  if (exam.error) {
+    console.error(
+      "DELETE EXAM ERROR:",
+      error
+    );
 
     alert(
-      exam.error.message
+      "❌ Qormaata haquun hin milkoofne:\n\n" +
+      getErrorMessage(error)
     );
-
-    return;
   }
-
-  alert(
-    "✅ Qormaanni haqame."
-  );
-
-  await loadAdminExams();
-
-  await loadQuestionExamSelect();
-
-  await loadAIQuestionExamSelect();
-
-  await loadAdminQuestions();
-
-  await loadAdminResults();
-
-  await loadExams();
 }
 
 
-/* =========================
+/* =========================================================
    QUESTION EXAM SELECT
-========================= */
+========================================================= */
 
 async function loadQuestionExamSelect() {
 
@@ -3312,67 +3492,61 @@ async function loadQuestionExamSelect() {
           )}
         </option>
       `;
-
     }
   );
 }
 
 
-/* =========================
+/* =========================================================
    MANUAL QUESTION
-========================= */
+========================================================= */
 
 async function createQuestion() {
 
   const examId =
     document.getElementById(
       "questionExamSelect"
-    ).value;
+    )?.value || "";
 
   const question =
     document
       .getElementById(
         "questionTextInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const a =
     document
       .getElementById(
         "optionAInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const b =
     document
       .getElementById(
         "optionBInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const c =
     document
       .getElementById(
         "optionCInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const d =
     document
       .getElementById(
         "optionDInput"
       )
-      .value
-      .trim();
+      ?.value.trim() || "";
 
   const correct =
     document.getElementById(
       "correctAnswerInput"
-    ).value;
+    )?.value || "";
 
   if (
     !examId ||
@@ -3426,7 +3600,7 @@ async function createQuestion() {
 
   if (error) {
 
-    alert(error.message);
+    alert(getErrorMessage(error));
 
     return;
   }
@@ -3456,16 +3630,16 @@ async function createQuestion() {
   ).value = "";
 
   alert(
-    "✅ Gaaffiin dabalamе."
+    "✅ Gaaffiin dabale."
   );
 
   await loadAdminQuestions();
 }
 
 
-/* =========================
-   LOAD ADMIN QUESTIONS
-========================= */
+/* =========================================================
+   ADMIN QUESTIONS
+========================================================= */
 
 async function loadAdminQuestions() {
 
@@ -3493,8 +3667,16 @@ async function loadAdminQuestions() {
 
     container.innerHTML =
       `<p>❌ ${escapeHtml(
-        error.message
+        getErrorMessage(error)
       )}</p>`;
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      "<p>Gaaffiin hin jiru.</p>";
 
     return;
   }
@@ -3503,7 +3685,10 @@ async function loadAdminQuestions() {
     (data || []).map(
       (question, index) => `
 
-      <div class="card">
+      <div
+        class="card"
+        data-question-id="${escapeHtml(question.id)}"
+      >
 
         <p>
           <strong>
@@ -3579,68 +3764,82 @@ async function loadAdminQuestions() {
 }
 
 
-/* =========================
-   DELETE QUESTION
-========================= */
+/* =========================================================
+   DELETE QUESTION — FIXED
+========================================================= */
 
 async function deleteQuestion(id) {
 
   if (
     !confirm(
-      "Gaaffii kana haquu barbaaddaa?"
+      "Gaaffii kana guutummaatti haquu barbaaddaa?"
     )
-  ) return;
-
-  const { error } =
-    await db
-      .from("questions")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
-
-  if (error) {
-
-    alert(error.message);
-
+  ) {
     return;
   }
 
-  alert(
-    "✅ Gaaffiin haqame."
-  );
+  try {
 
-  await loadAdminQuestions();
+    const { error } =
+      await db
+        .from("questions")
+        .delete()
+        .eq(
+          "id",
+          id
+        );
+
+    if (error) {
+      throw error;
+    }
+
+
+    /*
+      UI irraa battalum balleessi
+    */
+
+    const card =
+      document.querySelector(
+        `[data-question-id="${id}"]`
+      );
+
+    if (card) {
+      card.remove();
+    }
+
+
+    await loadAdminQuestions();
+
+    alert(
+      "✅ Gaaffiin guutummaatti haqame."
+    );
+
+  } catch (error) {
+
+    console.error(
+      "DELETE QUESTION ERROR:",
+      error
+    );
+
+    alert(
+      "❌ Gaaffii haquun hin milkoofne:\n\n" +
+      getErrorMessage(error)
+    );
+  }
 }
 
 
-/* ==================================================
+/* =========================================================
    AI QUESTION GENERATOR
-================================================== */
-
-
-/*
-   AI endpoint:
-   Supabase Edge Function maqaan isaa:
-
-   generate-ai-questions
-
-   URL:
-   https://xhkkaevhcqvkwabcsljm.supabase.co/functions/v1/generate-ai-questions
-
-   API KEY app.js keessa hin kaa'amne.
-   Key AI backend/Edge Function keessa qofa taa'a.
-*/
-
+========================================================= */
 
 const AI_FUNCTION_URL =
   `${SUPABASE_URL}/functions/v1/generate-ai-questions`;
 
 
-/* =========================
+/* =========================================================
    AI SOURCE CHANGE
-========================= */
+========================================================= */
 
 function changeAIQuestionSource() {
 
@@ -3670,6 +3869,7 @@ function changeAIQuestionSource() {
     );
 
   if (topic) {
+
     topic.style.display =
       type === "topic"
         ? "block"
@@ -3677,6 +3877,7 @@ function changeAIQuestionSource() {
   }
 
   if (text) {
+
     text.style.display =
       type === "text"
         ? "block"
@@ -3684,6 +3885,7 @@ function changeAIQuestionSource() {
   }
 
   if (pdf) {
+
     pdf.style.display =
       type === "pdf"
         ? "block"
@@ -3691,6 +3893,7 @@ function changeAIQuestionSource() {
   }
 
   if (image) {
+
     image.style.display =
       type === "image"
         ? "block"
@@ -3699,9 +3902,9 @@ function changeAIQuestionSource() {
 }
 
 
-/* =========================
+/* =========================================================
    AI EXAM SELECT
-========================= */
+========================================================= */
 
 async function loadAIQuestionExamSelect() {
 
@@ -3737,15 +3940,14 @@ async function loadAIQuestionExamSelect() {
           )}
         </option>
       `;
-
     }
   );
 }
 
 
-/* =========================
+/* =========================================================
    FILE TO BASE64
-========================= */
+========================================================= */
 
 function fileToBase64(file) {
 
@@ -3780,15 +3982,14 @@ function fileToBase64(file) {
       reader.readAsDataURL(
         file
       );
-
     }
   );
 }
 
 
-/* =========================
+/* =========================================================
    AI QUESTION GENERATION
-========================= */
+========================================================= */
 
 async function generateAIQuestions() {
 
@@ -3856,7 +4057,6 @@ async function generateAIQuestions() {
       "⏳ Gaaffilee AI irraa qopheessaa jira...";
   }
 
-
   try {
 
     let sourceData = {
@@ -3868,8 +4068,7 @@ async function generateAIQuestions() {
     /* TOPIC */
 
     if (
-      sourceType ===
-      "topic"
+      sourceType === "topic"
     ) {
 
       const topic =
@@ -3877,8 +4076,7 @@ async function generateAIQuestions() {
           .getElementById(
             "aiTopicInput"
           )
-          ?.value
-          .trim();
+          ?.value.trim();
 
       if (!topic) {
 
@@ -3895,8 +4093,7 @@ async function generateAIQuestions() {
     /* TEXT */
 
     if (
-      sourceType ===
-      "text"
+      sourceType === "text"
     ) {
 
       const text =
@@ -3904,8 +4101,7 @@ async function generateAIQuestions() {
           .getElementById(
             "aiTextInput"
           )
-          ?.value
-          .trim();
+          ?.value.trim();
 
       if (!text) {
 
@@ -3922,8 +4118,7 @@ async function generateAIQuestions() {
     /* PDF */
 
     if (
-      sourceType ===
-      "pdf"
+      sourceType === "pdf"
     ) {
 
       const input =
@@ -3942,9 +4137,7 @@ async function generateAIQuestions() {
       }
 
       const base64 =
-        await fileToBase64(
-          file
-        );
+        await fileToBase64(file);
 
       sourceData.fileName =
         file.name;
@@ -3961,8 +4154,7 @@ async function generateAIQuestions() {
     /* IMAGE */
 
     if (
-      sourceType ===
-      "image"
+      sourceType === "image"
     ) {
 
       const input =
@@ -3981,9 +4173,7 @@ async function generateAIQuestions() {
       }
 
       const base64 =
-        await fileToBase64(
-          file
-        );
+        await fileToBase64(file);
 
       sourceData.fileName =
         file.name;
@@ -3996,12 +4186,13 @@ async function generateAIQuestions() {
     }
 
 
+    /* CALL EDGE FUNCTION */
+
     const response =
       await fetch(
         AI_FUNCTION_URL,
         {
-          method:
-            "POST",
+          method: "POST",
 
           headers: {
             "Content-Type":
@@ -4050,9 +4241,7 @@ async function generateAIQuestions() {
 
 
     const questions =
-      Array.isArray(
-        result
-      )
+      Array.isArray(result)
         ? result
         : (
           result?.questions ||
@@ -4060,9 +4249,7 @@ async function generateAIQuestions() {
         );
 
 
-    if (
-      !questions.length
-    ) {
+    if (!questions.length) {
 
       throw new Error(
         "AI gaaffii hin deebifne."
@@ -4111,9 +4298,9 @@ async function generateAIQuestions() {
         String(
           correct
         )
-        .trim()
-        .toUpperCase()
-        .charAt(0);
+          .trim()
+          .toUpperCase()
+          .charAt(0);
 
 
       if (
@@ -4122,7 +4309,7 @@ async function generateAIQuestions() {
         !optionB ||
         !optionC ||
         !optionD ||
-        !["A","B","C","D"]
+        !["A", "B", "C", "D"]
           .includes(correct)
       ) {
 
@@ -4160,11 +4347,9 @@ async function generateAIQuestions() {
                 sourceType,
 
               source_text:
-                sourceType ===
-                "topic"
+                sourceType === "topic"
                   ? sourceData.topic
-                  : sourceType ===
-                    "text"
+                  : sourceType === "text"
                   ? sourceData.text
                   : sourceData.fileName ||
                     null
@@ -4189,9 +4374,7 @@ async function generateAIQuestions() {
         `;
     }
 
-
     await loadAdminQuestions();
-
 
   } catch (error) {
 
@@ -4206,7 +4389,7 @@ async function generateAIQuestions() {
         `
         <div class="error-box">
           ❌ ${escapeHtml(
-            error.message
+            getErrorMessage(error)
           )}
         </div>
         `;
@@ -4226,9 +4409,9 @@ async function generateAIQuestions() {
 }
 
 
-/* =========================
+/* =========================================================
    LOGOUT
-========================= */
+========================================================= */
 
 function studentLogout() {
 
@@ -4239,20 +4422,16 @@ function studentLogout() {
   );
 
   currentStudent = null;
-
   currentExam = null;
-
   currentQuestions = [];
-
   currentAnswers = [];
-
   currentAttempt = null;
+  selectedAnswer = null;
 
   showPage(
     "rolePage"
   );
 }
-
 
 function adminLogout() {
 
@@ -4266,9 +4445,9 @@ function adminLogout() {
 }
 
 
-/* =========================
+/* =========================================================
    PAGE START
-========================= */
+========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
@@ -4278,6 +4457,10 @@ document.addEventListener(
 
     changeAIQuestionSource();
 
+
+    /*
+      ADMIN LOGIN RESTORE
+    */
 
     if (
       localStorage.getItem(
@@ -4297,6 +4480,10 @@ document.addEventListener(
     }
 
 
+    /*
+      STUDENT LOGIN RESTORE
+    */
+
     if (
       localStorage.getItem(
         "student_id"
@@ -4310,6 +4497,10 @@ document.addEventListener(
       ) return;
     }
 
+
+    /*
+      DEFAULT PAGE
+    */
 
     showPage(
       "rolePage"
