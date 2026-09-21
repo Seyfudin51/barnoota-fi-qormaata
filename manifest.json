@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Akkaadaamii Oromiyaa",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Akkaadaamii",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "akkaadaamii-oromiyaa",
+  "description": "Akkaadaami Oromiyaa – Barnoota fi Qormaata Barattootaa"
+}
