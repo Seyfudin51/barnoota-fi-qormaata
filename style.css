@@ -1,3 +1,8 @@
+/* =========================================================
+   AKKAADAAMII OROMIYAA
+   Modern Mobile-First App UI
+========================================================= */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,23 +12,50 @@
 :root {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
+  --primary-soft: #eff6ff;
+
   --secondary: #7c3aed;
+  --secondary-dark: #6d28d9;
+  --secondary-soft: #f5f3ff;
+
   --success: #16a34a;
+  --success-soft: #f0fdf4;
+
   --danger: #dc2626;
+  --danger-soft: #fef2f2;
+
   --warning: #f59e0b;
+  --warning-soft: #fffbeb;
+
+  --cyan: #0891b2;
+  --cyan-soft: #ecfeff;
 
   --bg: #f4f7fb;
-  --card: #ffffff;
+  --bg-soft: #f8fafc;
+  --card: rgba(255, 255, 255, 0.96);
+
   --text: #172033;
+  --text-dark: #0f172a;
   --muted: #64748b;
   --border: #e2e8f0;
 
+  --radius-sm: 12px;
   --radius: 18px;
-  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --radius-lg: 24px;
+
+  --shadow-sm:
+    0 4px 14px rgba(15, 23, 42, 0.06);
+
+  --shadow:
+    0 10px 30px rgba(15, 23, 42, 0.08);
+
+  --shadow-lg:
+    0 18px 45px rgba(15, 23, 42, 0.12);
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -36,32 +68,71 @@ body {
     Arial,
     sans-serif;
 
-  background: var(--bg);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, 0.07),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(124, 58, 237, 0.05),
+      transparent 25%
+    ),
+    var(--bg);
+
   color: var(--text);
 
   min-height: 100vh;
   line-height: 1.6;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font-family: inherit;
 }
 
 
-/* =========================
+/* =========================================================
    PAGE SYSTEM
-========================= */
+========================================================= */
 
 .page {
   display: none;
   min-height: 100vh;
-  padding-bottom: 90px;
+  padding-bottom: 100px;
+  animation: pageIn 0.25s ease;
 }
 
 .page.active {
   display: block;
 }
 
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 
-/* =========================
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
    CONTAINER
-========================= */
+========================================================= */
 
 .container {
   width: min(100% - 28px, 1100px);
@@ -70,48 +141,86 @@ body {
 }
 
 
-/* =========================
+/* =========================================================
    HERO
-========================= */
+========================================================= */
 
 .hero {
   text-align: center;
-  padding: 55px 20px 35px;
+  padding: 58px 20px 38px;
 }
 
 .hero h1 {
-  font-size: clamp(28px, 7vw, 44px);
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin-bottom: 10px;
+  font-size: clamp(30px, 7vw, 46px);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  line-height: 1.15;
+  margin-bottom: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--secondary)
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .hero p {
   color: var(--muted);
   font-size: 16px;
+  max-width: 620px;
+  margin: 0 auto;
 }
 
 
-/* =========================
+/* =========================================================
    CARDS
-========================= */
+========================================================= */
 
 .card {
+  position: relative;
+
   background: var(--card);
-  border: 1px solid var(--border);
+
+  border: 1px solid rgba(226, 232, 240, 0.9);
+
   border-radius: var(--radius);
+
   padding: 22px;
+
   margin-bottom: 18px;
+
   box-shadow: var(--shadow);
+
+  backdrop-filter: blur(12px);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: #dbe4f0;
 }
 
 .card h2 {
   font-size: 24px;
+  font-weight: 850;
+  line-height: 1.25;
   margin-bottom: 16px;
 }
 
 .card h3 {
   font-size: 19px;
+  font-weight: 800;
+  line-height: 1.3;
   margin-bottom: 10px;
 }
 
@@ -121,26 +230,28 @@ body {
 }
 
 
-/* =========================
+/* =========================================================
    GRID
-========================= */
+========================================================= */
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
   gap: 18px;
   margin-bottom: 25px;
 }
 
 
-/* =========================
+/* =========================================================
    BUTTONS
-========================= */
+========================================================= */
 
 button {
-  font-family: inherit;
   border: none;
   cursor: pointer;
+
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease,
@@ -152,50 +263,106 @@ button:active {
   transform: scale(0.97);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .primary-btn,
 .secondary-btn,
 .danger-btn,
 .success-btn {
   width: 100%;
   min-height: 48px;
+
   padding: 12px 18px;
-  border-radius: 13px;
+
+  border-radius: 14px;
+
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
+
   margin-top: 10px;
 }
 
+
+/* PRIMARY */
+
 .primary-btn {
-  background: var(--primary);
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary-dark)
+    );
+
   color: white;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.22);
+
+  box-shadow:
+    0 8px 20px rgba(37, 99, 235, 0.22);
 }
 
 .primary-btn:hover {
-  background: var(--primary-dark);
+  box-shadow:
+    0 11px 25px rgba(37, 99, 235, 0.30);
+
+  transform: translateY(-1px);
 }
 
+
+/* SECONDARY */
+
 .secondary-btn {
-  background: #ede9fe;
-  color: #6d28d9;
+  background:
+    linear-gradient(
+      135deg,
+      #f5f3ff,
+      #ede9fe
+    );
+
+  color: var(--secondary-dark);
+
+  border: 1px solid #ddd6fe;
 }
 
 .secondary-btn:hover {
   background: #ddd6fe;
 }
 
+
+/* DANGER */
+
 .danger-btn {
-  background: #fee2e2;
+  background:
+    linear-gradient(
+      135deg,
+      #fef2f2,
+      #fee2e2
+    );
+
   color: var(--danger);
+
+  border: 1px solid #fecaca;
 }
 
 .danger-btn:hover {
   background: #fecaca;
 }
 
+
+/* SUCCESS */
+
 .success-btn {
-  background: #dcfce7;
+  background:
+    linear-gradient(
+      135deg,
+      #f0fdf4,
+      #dcfce7
+    );
+
   color: #15803d;
+
+  border: 1px solid #bbf7d0;
 }
 
 .success-btn:hover {
@@ -203,15 +370,24 @@ button:active {
 }
 
 
-/* =========================
-   ROLE BUTTONS
-========================= */
+/* =========================================================
+   ROLE PAGE
+========================================================= */
+
+#rolePage .hero {
+  padding-bottom: 28px;
+}
 
 #rolePage .card {
   max-width: 520px;
   margin: 0 auto;
   text-align: center;
   padding: 30px;
+
+  border-radius: 26px;
+
+  box-shadow:
+    0 20px 55px rgba(37, 99, 235, 0.10);
 }
 
 #rolePage .card h2 {
@@ -220,59 +396,90 @@ button:active {
 
 #rolePage .primary-btn,
 #rolePage .secondary-btn {
-  min-height: 58px;
+  min-height: 60px;
   font-size: 17px;
-  border-radius: 16px;
+  border-radius: 17px;
 }
 
 
-/* =========================
+/* =========================================================
    BACK BUTTON
-========================= */
+========================================================= */
 
 .back-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
 
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   color: var(--text);
 
   border: 1px solid var(--border);
-  border-radius: 12px;
+
+  border-radius: 13px;
 
   padding: 10px 15px;
   margin-bottom: 18px;
 
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  font-weight: 800;
+
+  box-shadow: var(--shadow-sm);
+}
+
+.back-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: #bfdbfe;
 }
 
 
-/* =========================
+/* =========================================================
    INPUTS
-========================= */
+========================================================= */
 
 input,
 textarea,
 select {
   width: 100%;
+
   border: 1px solid var(--border);
+
   background: #fff;
   color: var(--text);
 
-  border-radius: 13px;
+  border-radius: 14px;
+
   padding: 13px 15px;
 
   font-family: inherit;
   font-size: 15px;
 
   margin-top: 10px;
+
   outline: none;
 
   transition:
-    border 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: #cbd5e1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.10);
+
+  transform: translateY(-1px);
 }
 
 textarea {
@@ -280,53 +487,56 @@ textarea {
   min-height: 120px;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
-}
-
 label {
   display: block;
-  margin-top: 12px;
+
+  margin-top: 14px;
   margin-bottom: 4px;
-  font-weight: 700;
+
+  font-weight: 800;
+  color: #334155;
+
+  font-size: 14px;
 }
 
 
-/* =========================
+/* =========================================================
    NOTICE / MESSAGE
-========================= */
+========================================================= */
 
 .notice,
 .success-box,
 .warning-box,
 .error-box {
-  border-radius: 14px;
+  border-radius: 15px;
+
   padding: 15px;
+
   margin: 15px 0;
+
+  line-height: 1.5;
 }
 
 .notice {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
+  color: #1e40af;
 }
 
 .success-box {
-  background: #f0fdf4;
+  background: var(--success-soft);
   border: 1px solid #bbf7d0;
   color: #166534;
 }
 
 .warning-box {
-  background: #fffbeb;
+  background: var(--warning-soft);
   border: 1px solid #fde68a;
   color: #92400e;
 }
 
 .error-box {
-  background: #fef2f2;
+  background: var(--danger-soft);
   border: 1px solid #fecaca;
   color: #991b1b;
 }
@@ -336,23 +546,35 @@ label {
 }
 
 
-/* =========================
+/* =========================================================
    CODE BOX
-========================= */
+========================================================= */
 
 .code-box {
-  background: #0f172a;
+  background:
+    linear-gradient(
+      135deg,
+      #0f172a,
+      #1e293b
+    );
+
   color: #fff;
 
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 14px;
+
+  padding: 15px;
 
   font-family: monospace;
   font-size: 16px;
   font-weight: 700;
 
   word-break: break-all;
+
   margin-bottom: 15px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 8px 20px rgba(15,23,42,0.12);
 }
 
 .big-code {
@@ -361,20 +583,26 @@ label {
   background: #0f172a;
   color: #fff;
 
-  padding: 9px 13px;
+  padding: 10px 14px;
+
   margin-top: 5px;
 
-  border-radius: 10px;
+  border-radius: 11px;
 
   font-family: monospace;
-  font-weight: 800;
+
+  font-weight: 900;
+
   letter-spacing: 1px;
+
+  box-shadow:
+    0 6px 16px rgba(15,23,42,0.15);
 }
 
 
-/* =========================
-   HEADER
-========================= */
+/* =========================================================
+   TOP HEADER
+========================================================= */
 
 .top-header {
   position: sticky;
@@ -387,16 +615,22 @@ label {
 
   gap: 15px;
 
-  padding: 17px 20px;
+  padding: 15px 20px;
 
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(14px);
+  background:
+    rgba(255, 255, 255, 0.90);
 
-  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+
+  box-shadow:
+    0 5px 20px rgba(15,23,42,0.04);
 }
 
 .top-header h2 {
   font-size: 21px;
+  font-weight: 900;
 }
 
 .top-header p {
@@ -405,12 +639,13 @@ label {
 }
 
 
-/* =========================
+/* =========================================================
    BOTTOM NAV
-========================= */
+========================================================= */
 
 .bottom-nav {
   position: fixed;
+
   left: 50%;
   bottom: 12px;
 
@@ -422,18 +657,25 @@ label {
   );
 
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
 
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(18px);
+  grid-template-columns:
+    repeat(4, 1fr);
 
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  gap: 4px;
+
+  background:
+    rgba(255, 255, 255, 0.94);
+
+  backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(226,232,240,0.95);
+
+  border-radius: 22px;
 
   padding: 7px;
 
   box-shadow:
-    0 15px 35px rgba(15, 23, 42, 0.14);
+    0 18px 40px rgba(15, 23, 42, 0.16);
 
   z-index: 100;
 }
@@ -444,10 +686,11 @@ label {
 
   min-height: 58px;
 
-  border-radius: 15px;
+  border-radius: 16px;
 
   display: flex;
   flex-direction: column;
+
   align-items: center;
   justify-content: center;
 
@@ -458,24 +701,77 @@ label {
 
 .bottom-nav button span {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .bottom-nav button:hover {
-  background: #eff6ff;
+  background: var(--primary-soft);
   color: var(--primary);
 }
 
 
-/* =========================
+/* =========================================================
+   EXAM AREA
+========================================================= */
+
+#examPage .card {
+  overflow: hidden;
+}
+
+#examTimer {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+#examTimerValue {
+  font-weight: 900;
+}
+
+
+/* QUESTION NUMBER */
+
+#questionNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 34px;
+
+  padding: 5px 12px;
+
+  background: var(--primary-soft);
+  color: var(--primary);
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  margin-bottom: 12px;
+}
+
+
+/* QUESTION TEXT */
+
+#questionText {
+  font-size: 20px;
+  font-weight: 850;
+  line-height: 1.5;
+
+  margin-bottom: 15px;
+}
+
+
+/* =========================================================
    EXAM ANSWERS
-========================= */
+========================================================= */
 
 .answer-btn {
   width: 100%;
 
   display: flex;
   align-items: center;
+
   gap: 13px;
 
   text-align: left;
@@ -485,34 +781,54 @@ label {
 
   border: 2px solid var(--border);
 
-  border-radius: 14px;
+  border-radius: 16px;
 
   padding: 15px;
 
   margin-top: 11px;
 
   font-size: 15px;
+  font-weight: 650;
+
+  box-shadow:
+    0 3px 10px rgba(15,23,42,0.03);
+}
+
+.answer-btn:hover {
+  border-color: #93c5fd;
+  background: #f8fbff;
+  transform: translateY(-1px);
 }
 
 .answer-btn strong {
-  min-width: 34px;
-  height: 34px;
+  min-width: 36px;
+  height: 36px;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 
-  border-radius: 10px;
+  border-radius: 11px;
 
-  background: #eff6ff;
+  background: var(--primary-soft);
   color: var(--primary);
+
+  font-weight: 900;
 }
 
 .answer-btn.selected {
   border-color: var(--primary);
-  background: #eff6ff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff,
+      #f8fbff
+    );
+
   box-shadow:
-    0 5px 18px rgba(37, 99, 235, 0.10);
+    0 7px 20px rgba(37, 99, 235, 0.12);
 }
 
 .answer-btn.selected strong {
@@ -521,9 +837,9 @@ label {
 }
 
 
-/* =========================
-   ADMIN
-========================= */
+/* =========================================================
+   ADMIN AREA
+========================================================= */
 
 .admin-nav {
   display: grid;
@@ -537,24 +853,40 @@ label {
 }
 
 .admin-nav button {
-  min-height: 62px;
+  min-height: 65px;
 
-  background: white;
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fafc
+    );
+
   color: var(--text);
 
   border: 1px solid var(--border);
-  border-radius: 15px;
+
+  border-radius: 16px;
 
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 850;
 
-  box-shadow:
-    0 5px 15px rgba(15, 23, 42, 0.05);
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
 }
 
 .admin-nav button:hover {
-  background: #eff6ff;
+  background: var(--primary-soft);
   color: var(--primary);
+
+  border-color: #bfdbfe;
+
+  transform: translateY(-2px);
 }
 
 .admin-panel {
@@ -562,22 +894,98 @@ label {
 }
 
 
-/* =========================
+/* =========================================================
+   ADMIN QORMAATA UUMUU
+========================================================= */
+
+/*
+  Existing HTML classes/IDs can use these styles
+  without changing app.js.
+*/
+
+#aiQuestionSourceType,
+#questionExamSelect,
+#aiQuestionExamSelect,
+#aiQuestionCount,
+#correctAnswerInput {
+  font-weight: 650;
+}
+
+
+/* AI SOURCE BLOCK */
+
+#aiTopicSource,
+#aiTextSource,
+#aiPdfSource,
+#aiImageSource {
+  margin-top: 12px;
+}
+
+
+/* AI BUTTON */
+
+#generateAIQuestionsButton {
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5
+    );
+
+  color: white;
+
+  box-shadow:
+    0 9px 24px rgba(124,58,237,0.22);
+}
+
+#generateAIQuestionsButton:hover {
+  box-shadow:
+    0 12px 28px rgba(124,58,237,0.30);
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MODERN EXAM CARDS
+========================================================= */
+
+#adminExamsList > *,
+#adminQuestionsList > *,
+#adminLessonsList > * {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+#adminExamsList > *:hover,
+#adminQuestionsList > *:hover,
+#adminLessonsList > *:hover {
+  transform: translateY(-2px);
+}
+
+
+/* =========================================================
    TABLE
-========================= */
+========================================================= */
 
 .table-wrapper {
   width: 100%;
+
   overflow-x: auto;
 
-  border-radius: 14px;
+  border-radius: 16px;
+
   border: 1px solid var(--border);
 
   background: white;
+
+  box-shadow: var(--shadow-sm);
 }
 
 table {
   width: 100%;
+
   border-collapse: collapse;
 
   min-width: 720px;
@@ -587,18 +995,26 @@ th,
 td {
   padding: 13px 12px;
 
-  border-bottom: 1px solid var(--border);
+  border-bottom:
+    1px solid var(--border);
 
   text-align: left;
+
   white-space: nowrap;
 }
 
 th {
-  background: #f8fafc;
+  background:
+    linear-gradient(
+      180deg,
+      #f8fafc,
+      #f1f5f9
+    );
+
   color: #334155;
 
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 td {
@@ -610,24 +1026,27 @@ tr:last-child td {
 }
 
 tr:hover td {
-  background: #f8fafc;
+  background: #f8fbff;
 }
 
 
-/* =========================
+/* =========================================================
    HR
-========================= */
+========================================================= */
 
 hr {
   border: 0;
-  border-top: 1px solid var(--border);
+
+  border-top:
+    1px solid var(--border);
+
   margin: 25px 0;
 }
 
 
-/* =========================
+/* =========================================================
    SMALL TEXT
-========================= */
+========================================================= */
 
 small {
   color: var(--muted);
@@ -638,15 +1057,52 @@ strong {
 }
 
 
-/* =========================
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection {
+  background: #bfdbfe;
+  color: #172033;
+}
+
+
+/* =========================================================
    MOBILE
-========================= */
+========================================================= */
 
 @media (max-width: 700px) {
 
+  body {
+    overflow-x: hidden;
+  }
+
   .container {
-    width: min(100% - 20px, 600px);
-    padding-top: 18px;
+    width: min(100% - 18px, 600px);
+    padding-top: 17px;
   }
 
   .hero {
@@ -654,78 +1110,147 @@ strong {
   }
 
   .hero h1 {
-    font-size: 29px;
+    font-size: 30px;
+    letter-spacing: -1px;
+  }
+
+  .hero p {
+    font-size: 14px;
   }
 
   .card {
-    padding: 18px;
-    border-radius: 16px;
+    padding: 17px;
+
+    border-radius: 18px;
+
+    margin-bottom: 14px;
+  }
+
+  .card h2 {
+    font-size: 21px;
+  }
+
+  .card h3 {
+    font-size: 17px;
   }
 
   .grid {
     grid-template-columns: 1fr;
-    gap: 13px;
+    gap: 12px;
   }
 
-  .admin-nav {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+
+  /* BUTTONS */
+
+  .primary-btn,
+  .secondary-btn,
+  .danger-btn,
+  .success-btn {
+    min-height: 50px;
+    border-radius: 14px;
   }
 
-  .admin-nav button {
-    min-height: 58px;
-    font-size: 13px;
+
+  /* ROLE */
+
+  #rolePage .card {
+    padding: 22px 18px;
+    border-radius: 22px;
   }
+
+  #rolePage .primary-btn,
+  #rolePage .secondary-btn {
+    min-height: 57px;
+    font-size: 16px;
+  }
+
+
+  /* HEADER */
 
   .top-header {
-    padding: 14px 13px;
+    padding: 13px 12px;
+
+    gap: 10px;
   }
 
   .top-header h2 {
     font-size: 18px;
   }
 
-  .top-header .danger-btn {
-    width: auto;
-    margin-top: 0;
-    padding: 9px 13px;
-  }
-
-  .bottom-nav {
-    bottom: 8px;
-    width: calc(100% - 16px);
-  }
-
-  .bottom-nav button {
-    min-height: 54px;
-  }
-
-}
-
-
-/* =========================
-   VERY SMALL PHONES
-========================= */
-
-@media (max-width: 380px) {
-
-  .container {
-    width: calc(100% - 16px);
-  }
-
-  .card {
-    padding: 15px;
-  }
-
-  .hero h1 {
-    font-size: 25px;
-  }
-
-  .admin-nav button {
+  .top-header p {
     font-size: 12px;
   }
 
+  .top-header .danger-btn {
+    width: auto;
+
+    margin-top: 0;
+
+    padding: 9px 12px;
+
+    min-height: 42px;
+
+    border-radius: 12px;
+  }
+
+
+  /* ADMIN NAV */
+
+  .admin-nav {
+    grid-template-columns:
+      repeat(2, 1fr);
+
+    gap: 9px;
+
+    margin-bottom: 17px;
+  }
+
+  .admin-nav button {
+    min-height: 59px;
+
+    border-radius: 14px;
+
+    font-size: 12.5px;
+  }
+
+
+  /* EXAM */
+
+  #questionText {
+    font-size: 18px;
+  }
+
+  .answer-btn {
+    padding: 13px;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+  }
+
+  .answer-btn strong {
+    min-width: 34px;
+    height: 34px;
+  }
+
+
+  /* BOTTOM NAV */
+
+  .bottom-nav {
+    bottom: 7px;
+
+    width: calc(100% - 14px);
+
+    border-radius: 20px;
+
+    padding: 6px;
+  }
+
   .bottom-nav button {
+    min-height: 53px;
+
+    border-radius: 14px;
+
     font-size: 18px;
   }
 
@@ -733,4 +1258,102 @@ strong {
     font-size: 10px;
   }
 
+
+  /* TABLE */
+
+  .table-wrapper {
+    border-radius: 13px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+========================================================= */
+
+@media (max-width: 380px) {
+
+  .container {
+    width: calc(100% - 14px);
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .hero {
+    padding-top: 30px;
+  }
+
+  .hero h1 {
+    font-size: 25px;
+  }
+
+  .hero p {
+    font-size: 13px;
+  }
+
+  .admin-nav {
+    gap: 7px;
+  }
+
+  .admin-nav button {
+    min-height: 55px;
+    font-size: 11px;
+  }
+
+  .bottom-nav button {
+    font-size: 17px;
+  }
+
+  .bottom-nav button span {
+    font-size: 9px;
+  }
+
+  #questionText {
+    font-size: 17px;
+  }
+
+  .answer-btn {
+    padding: 11px;
+    gap: 9px;
+  }
+}
+
+
+/* =========================================================
+   LARGE SCREENS
+========================================================= */
+
+@media (min-width: 900px) {
+
+  .container {
+    padding-top: 30px;
+  }
+
+  .card {
+    padding: 25px;
+  }
+
+  .admin-nav button {
+    min-height: 70px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
