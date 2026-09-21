@@ -1357,3 +1357,338 @@ strong {
     transition-duration: 0.01ms !important;
   }
 }
+/* =========================================================
+   MODERN QORMAATA UUMUU OPTIONS
+========================================================= */
+
+.exam-create-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.exam-create-header h2 {
+  font-size: 25px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.exam-create-header p {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+
+/* OPTIONS CONTAINER */
+
+.exam-create-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+
+/* EACH OPTION */
+
+.exam-create-option {
+  position: relative;
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  background: #fff;
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.exam-create-option:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+
+/* AI CARD */
+
+.exam-create-option.ai-option {
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #faf5ff 100%
+    );
+
+  border-color: #ddd6fe;
+}
+
+.exam-create-option.ai-option:hover {
+  border-color: #a78bfa;
+}
+
+
+/* ADMIN CARD */
+
+.exam-create-option.admin-option {
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #eff6ff 100%
+    );
+
+  border-color: #bfdbfe;
+}
+
+.exam-create-option.admin-option:hover {
+  border-color: #60a5fa;
+}
+
+
+/* SUMMARY */
+
+.exam-create-option > summary {
+  list-style: none;
+
+  cursor: pointer;
+
+  min-height: 150px;
+
+  padding: 25px 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  user-select: none;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.exam-create-option > summary::-webkit-details-marker {
+  display: none;
+}
+
+.exam-create-option > summary::marker {
+  display: none;
+}
+
+
+/* BIG ICON / TITLE */
+
+.exam-create-option > summary::first-line {
+  font-weight: 900;
+}
+
+
+/* SUMMARY HOVER */
+
+.exam-create-option > summary:hover {
+  transform: scale(1.01);
+}
+
+
+/* OPEN STATE */
+
+.exam-create-option[open] {
+  grid-column: 1 / -1;
+
+  box-shadow: var(--shadow-lg);
+}
+
+.exam-create-option[open] > summary {
+  min-height: auto;
+
+  padding: 20px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+
+/* OPTION BODY */
+
+.exam-create-option .option-body {
+  padding: 20px;
+  animation: optionOpen 0.25s ease;
+}
+
+@keyframes optionOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* AI BODY */
+
+.ai-option .option-body {
+  background:
+    linear-gradient(
+      180deg,
+      #faf5ff,
+      #ffffff
+    );
+}
+
+
+/* ADMIN BODY */
+
+.admin-option .option-body {
+  background:
+    linear-gradient(
+      180deg,
+      #eff6ff,
+      #ffffff
+    );
+}
+
+
+/* FORM GRID */
+
+.exam-form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+
+/* FULL WIDTH ITEMS */
+
+.exam-form-full {
+  grid-column: 1 / -1;
+}
+
+
+/* QUESTION ANSWERS */
+
+.answer-input-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+
+/* INPUT INSIDE FORM */
+
+.exam-create-option input,
+.exam-create-option textarea,
+.exam-create-option select {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+
+/* FORM BUTTON */
+
+.exam-create-option .primary-btn,
+.exam-create-option .secondary-btn {
+  margin-top: 14px;
+}
+
+
+/* AI BUTTON SPECIAL */
+
+.ai-option #generateAIQuestionsButton {
+  min-height: 54px;
+
+  border-radius: 15px;
+
+  font-size: 15px;
+}
+
+
+/* ADMIN CREATE BUTTON */
+
+.admin-option button {
+  border-radius: 15px;
+}
+
+
+/* =========================================================
+   MOBILE QORMAATA UUMUU
+========================================================= */
+
+@media (max-width: 700px) {
+
+  .exam-create-options {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .exam-create-option > summary {
+    min-height: 125px;
+
+    padding: 20px 15px;
+  }
+
+  .exam-create-option[open] {
+    grid-column: auto;
+  }
+
+  .exam-create-option .option-body {
+    padding: 16px;
+  }
+
+  .exam-form-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .exam-form-full {
+    grid-column: auto;
+  }
+
+  .answer-input-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-create-header h2 {
+    font-size: 21px;
+  }
+
+  .exam-create-header p {
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONE
+========================================================= */
+
+@media (max-width: 380px) {
+
+  .exam-create-option > summary {
+    min-height: 115px;
+    padding: 17px 12px;
+  }
+
+  .exam-create-option .option-body {
+    padding: 13px;
+  }
+
+  .exam-create-header h2 {
+    font-size: 19px;
+  }
+}
