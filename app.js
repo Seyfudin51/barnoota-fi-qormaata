@@ -156,7 +156,8 @@ function getErrorMessage(error) {
 
 async function studentRegister() {
 
-  const input = document.getElementById("nameInput");
+  const input =
+    document.getElementById("nameInput");
 
   const name =
     input?.value.trim() || "";
@@ -178,8 +179,11 @@ async function studentRegister() {
       "info"
     );
 
-    let studentCode = generateStudentCode();
-    let activationCode = generateActivationCode();
+    let studentCode =
+      generateStudentCode();
+
+    let activationCode =
+      generateActivationCode();
 
     const { data, error } =
       await db
@@ -435,7 +439,9 @@ async function loadStudentHome() {
   if (!currentStudent) return;
 
   const welcome =
-    document.getElementById("studentWelcomeName");
+    document.getElementById(
+      "studentWelcomeName"
+    );
 
   if (welcome) {
 
@@ -444,7 +450,9 @@ async function loadStudentHome() {
   }
 
   const homeMessage =
-    document.getElementById("studentHomeMessage");
+    document.getElementById(
+      "studentHomeMessage"
+    );
 
   if (homeMessage) {
 
@@ -453,7 +461,9 @@ async function loadStudentHome() {
   }
 
   const container =
-    document.getElementById("studentLessons");
+    document.getElementById(
+      "studentLessons"
+    );
 
   if (!container) return;
 
@@ -629,7 +639,9 @@ function formatDateTime(date) {
 async function loadExams() {
 
   const container =
-    document.getElementById("studentExams");
+    document.getElementById(
+      "studentExams"
+    );
 
   if (!container) return;
 
@@ -807,7 +819,11 @@ async function startExam(examId) {
 
   if (examResult.error) {
 
-    alert(getErrorMessage(examResult.error));
+    alert(
+      getErrorMessage(
+        examResult.error
+      )
+    );
 
     return;
   }
@@ -820,28 +836,42 @@ async function startExam(examId) {
 
   if (!windowStatus.allowed) {
 
-    alert(windowStatus.message);
+    alert(
+      windowStatus.message
+    );
 
     return;
   }
-
-  /* CHECK COMPLETED ATTEMPTS */
 
   const attemptsResult =
     await db
       .from("exam_attempts")
       .select("*")
-      .eq("student_id", currentStudent.id)
-      .eq("exam_id", examId)
-      .eq("completed", true)
-      .order("attempt_number", {
-        ascending: false
-      });
+      .eq(
+        "student_id",
+        currentStudent.id
+      )
+      .eq(
+        "exam_id",
+        examId
+      )
+      .eq(
+        "completed",
+        true
+      )
+      .order(
+        "attempt_number",
+        {
+          ascending: false
+        }
+      );
 
   if (attemptsResult.error) {
 
     alert(
-      getErrorMessage(attemptsResult.error)
+      getErrorMessage(
+        attemptsResult.error
+      )
     );
 
     return;
@@ -851,7 +881,9 @@ async function startExam(examId) {
     attemptsResult.data || [];
 
   const attemptLimit =
-    Number(exam.attempt_limit || 1);
+    Number(
+      exam.attempt_limit || 1
+    );
 
   if (
     completedAttempts.length >=
@@ -868,17 +900,20 @@ async function startExam(examId) {
   const nextAttemptNumber =
     completedAttempts.length + 1;
 
-
-  /* LOAD QUESTIONS */
-
   const questionsResult =
     await db
       .from("questions")
       .select("*")
-      .eq("exam_id", examId)
-      .order("created_at", {
-        ascending: true
-      });
+      .eq(
+        "exam_id",
+        examId
+      )
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
 
   if (questionsResult.error) {
 
@@ -903,11 +938,10 @@ async function startExam(examId) {
     return;
   }
 
-
-  /* QUESTION LIMIT */
-
   const questionLimit =
-    Number(exam.question_limit || 0);
+    Number(
+      exam.question_limit || 0
+    );
 
   if (
     questionLimit > 0 &&
@@ -920,9 +954,6 @@ async function startExam(examId) {
         questionLimit
       );
   }
-
-
-  /* CREATE ATTEMPT */
 
   const attemptResult =
     await db
@@ -994,7 +1025,9 @@ async function startExam(examId) {
     )
   );
 
-  showPage("examPage");
+  showPage(
+    "examPage"
+  );
 
   showQuestion();
 }
@@ -1332,12 +1365,6 @@ function confirmSubmitExam(yes) {
     return;
   }
 
-  /*
-     Hin xumirree:
-     qormaata keessa deebi'a.
-     Deebiiwwan duraan filataman hin badani.
-  */
-
   if (
     currentQuestionIndex > 0
   ) {
@@ -1345,7 +1372,9 @@ function confirmSubmitExam(yes) {
     currentQuestionIndex--;
   }
 
-  showPage("examPage");
+  showPage(
+    "examPage"
+  );
 
   showQuestion();
 }
@@ -1357,7 +1386,10 @@ function confirmSubmitExam(yes) {
 
 async function submitExamDirectly() {
 
-  if (!currentExam || !currentAttempt) {
+  if (
+    !currentExam ||
+    !currentAttempt
+  ) {
 
     return;
   }
@@ -1399,9 +1431,6 @@ async function submitExamDirectly() {
         )
       : 0;
 
-
-  /* UPDATE ATTEMPT */
-
   const attemptUpdate =
     await db
       .from("exam_attempts")
@@ -1430,9 +1459,6 @@ async function submitExamDirectly() {
     return;
   }
 
-
-  /* SAVE LATEST RESULT */
-
   const existing =
     await db
       .from("results")
@@ -1450,7 +1476,9 @@ async function submitExamDirectly() {
   if (existing.error) {
 
     alert(
-      getErrorMessage(existing.error)
+      getErrorMessage(
+        existing.error
+      )
     );
 
     return;
@@ -1503,7 +1531,9 @@ async function submitExamDirectly() {
 
     alert(
       "Qabxii olkaa'uu hin dandeenye: " +
-      getErrorMessage(resultError)
+      getErrorMessage(
+        resultError
+      )
     );
 
     return;
@@ -1513,7 +1543,9 @@ async function submitExamDirectly() {
     `✅ Qormaata xumurame!\n\nQabxii: ${score}/${total}\nDhibbeentaa: ${percentage}%`
   );
 
-  showPage("scorePage");
+  showPage(
+    "scorePage"
+  );
 
   await showScore();
 
@@ -1702,9 +1734,12 @@ async function showScore() {
         "student_id",
         currentStudent.id
       )
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) {
 
@@ -1779,21 +1814,25 @@ function loadProfile() {
     );
 
   if (name) {
+
     name.value =
       currentStudent.name || "";
   }
 
   if (code) {
+
     code.textContent =
       currentStudent.student_code || "";
   }
 
   if (activation) {
+
     activation.textContent =
       currentStudent.activation_code || "";
   }
 
   if (status) {
+
     status.textContent =
       currentStudent.status === "active"
         ? "✅ Active"
@@ -1812,7 +1851,9 @@ async function saveProfile() {
 
   if (!name) {
 
-    alert("Maqaa galchi.");
+    alert(
+      "Maqaa galchi."
+    );
 
     return;
   }
@@ -1832,7 +1873,9 @@ async function saveProfile() {
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -1863,9 +1906,10 @@ async function adminLogin() {
       ?.value.trim() || "";
 
   const password =
-    document.getElementById(
-      "adminPassword"
-    )?.value || "";
+    document
+      .getElementById(
+        "adminPassword"
+      )?.value || "";
 
   if (!username || !password) {
 
@@ -1916,9 +1960,13 @@ async function adminLogin() {
     "true"
   );
 
-  showPage("adminPage");
+  showPage(
+    "adminPage"
+  );
 
-  openAdminPanel("students");
+  openAdminPanel(
+    "students"
+  );
 }
 
 
@@ -2007,9 +2055,12 @@ async function loadAdminStudents() {
     await db
       .from("students")
       .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) {
 
@@ -2159,7 +2210,9 @@ async function approveStudent(id) {
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -2192,7 +2245,9 @@ async function rejectStudent(id) {
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -2206,7 +2261,7 @@ async function rejectStudent(id) {
 
 
 /* =========================================================
-   DELETE STUDENT — FIXED
+   DELETE STUDENT — FULLY FIXED
 ========================================================= */
 
 async function deleteStudent(id) {
@@ -2223,10 +2278,12 @@ async function deleteStudent(id) {
   try {
 
     /*
-      1. Results haqi
+      1. RESULTS HAQI
     */
 
-    const resultDelete =
+    const {
+      error: resultsError
+    } =
       await db
         .from("results")
         .delete()
@@ -2235,16 +2292,18 @@ async function deleteStudent(id) {
           id
         );
 
-    if (resultDelete.error) {
-      throw resultDelete.error;
+    if (resultsError) {
+      throw resultsError;
     }
 
 
     /*
-      2. Exam attempts haqi
+      2. EXAM ATTEMPTS HAQI
     */
 
-    const attemptDelete =
+    const {
+      error: attemptsError
+    } =
       await db
         .from("exam_attempts")
         .delete()
@@ -2253,50 +2312,87 @@ async function deleteStudent(id) {
           id
         );
 
-    if (attemptDelete.error) {
-      throw attemptDelete.error;
+    if (attemptsError) {
+      throw attemptsError;
     }
 
 
     /*
-      3. Student mataa isaa haqi
+      3. STUDENT HAQI
+      
+      .select("id") dabalameera.
+      Kun barataan dhugumaan
+      database irraa haqame moo
+      hin haqamne mirkaneessa.
     */
 
-    const studentDelete =
+    const {
+      data: deletedStudent,
+      error: studentError
+    } =
       await db
         .from("students")
         .delete()
         .eq(
           "id",
           id
-        );
+        )
+        .select("id");
 
-    if (studentDelete.error) {
-      throw studentDelete.error;
+    if (studentError) {
+      throw studentError;
     }
 
 
     /*
-      4. UI irraa battalum balleessi
+      4. DHUGAAN HAQAMEE?
+      
+      Yoo array duwwaa ta'e,
+      Supabase irraa row hin haqamne.
     */
 
-    const row =
-      document.querySelector(
-        `[data-student-id="${id}"]`
-      );
+    if (
+      !deletedStudent ||
+      deletedStudent.length === 0
+    ) {
 
-    if (row) {
-      row.remove();
+      throw new Error(
+        "Barataan database irraa hin haqamne. Supabase RLS DELETE policy ilaali."
+      );
     }
 
 
     /*
-      5. List haaromsi
+      5. APP KEESSA TARREE HAAROMSI
     */
 
     await loadAdminStudents();
 
+
+    /*
+      6. QABXII HAAROMSI
+    */
+
     await loadAdminResults();
+
+
+    /*
+      7. YOO BARATAAN AMMA LOGGED-IN TA'E
+         LOCAL STORAGE ILLEE HAQI
+    */
+
+    if (
+      currentStudent &&
+      currentStudent.id === id
+    ) {
+
+      currentStudent = null;
+
+      localStorage.removeItem(
+        "student_id"
+      );
+    }
+
 
     alert(
       "✅ Barataan guutummaatti haqame."
@@ -2334,17 +2430,23 @@ async function loadAdminResults() {
     await db
       .from("students")
       .select("*")
-      .order("name", {
-        ascending: true
-      });
+      .order(
+        "name",
+        {
+          ascending: true
+        }
+      );
 
   const examsResult =
     await db
       .from("exams")
       .select("*")
-      .order("created_at", {
-        ascending: true
-      });
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
 
   const resultsResult =
     await db
@@ -2358,7 +2460,9 @@ async function loadAdminResults() {
   ) {
 
     const tbody =
-      table.querySelector("tbody");
+      table.querySelector(
+        "tbody"
+      );
 
     if (tbody) {
 
@@ -2602,7 +2706,9 @@ async function createLesson() {
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -2642,9 +2748,12 @@ async function loadAdminLessons() {
     await db
       .from("lessons")
       .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) {
 
@@ -2714,12 +2823,17 @@ async function editLesson(id) {
     await db
       .from("lessons")
       .select("*")
-      .eq("id", id)
+      .eq(
+        "id",
+        id
+      )
       .single();
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -2740,7 +2854,9 @@ async function editLesson(id) {
 
   if (content === null) return;
 
-  const { error: updateError } =
+  const {
+    error: updateError
+  } =
     await db
       .from("lessons")
       .update({
@@ -2758,7 +2874,9 @@ async function editLesson(id) {
   if (updateError) {
 
     alert(
-      getErrorMessage(updateError)
+      getErrorMessage(
+        updateError
+      )
     );
 
     return;
@@ -2775,7 +2893,7 @@ async function editLesson(id) {
 
 
 /* =========================================================
-   DELETE LESSON — FIXED
+   DELETE LESSON
 ========================================================= */
 
 async function deleteLesson(id) {
@@ -2790,30 +2908,31 @@ async function deleteLesson(id) {
 
   try {
 
-    const { error } =
+    const {
+      data: deletedLesson,
+      error
+    } =
       await db
         .from("lessons")
         .delete()
         .eq(
           "id",
           id
-        );
+        )
+        .select("id");
 
     if (error) {
       throw error;
     }
 
-    /*
-      UI irraa battalum balleessi
-    */
+    if (
+      !deletedLesson ||
+      deletedLesson.length === 0
+    ) {
 
-    const card =
-      document.querySelector(
-        `[data-lesson-id="${id}"]`
+      throw new Error(
+        "Barnoonni database irraa hin haqamne."
       );
-
-    if (card) {
-      card.remove();
     }
 
     await loadAdminLessons();
@@ -2950,7 +3069,9 @@ async function createExam() {
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -2992,9 +3113,12 @@ async function loadAdminExams() {
     await db
       .from("exams")
       .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) {
 
@@ -3015,7 +3139,7 @@ async function loadAdminExams() {
   }
 
   container.innerHTML =
-    (data || []).map(
+    data.map(
       exam => `
 
       <div
@@ -3140,12 +3264,17 @@ async function editExam(id) {
     await db
       .from("exams")
       .select("*")
-      .eq("id", id)
+      .eq(
+        "id",
+        id
+      )
       .single();
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -3235,7 +3364,9 @@ async function editExam(id) {
 
   if (endTime === null) return;
 
-  const { error: updateError } =
+  const {
+    error: updateError
+  } =
     await db
       .from("exams")
       .update({
@@ -3296,7 +3427,9 @@ async function editExam(id) {
   if (updateError) {
 
     alert(
-      getErrorMessage(updateError)
+      getErrorMessage(
+        updateError
+      )
     );
 
     return;
@@ -3317,7 +3450,7 @@ async function editExam(id) {
 
 
 /* =========================================================
-   DELETE EXAM — FIXED
+   DELETE EXAM
 ========================================================= */
 
 async function deleteExam(id) {
@@ -3333,11 +3466,9 @@ async function deleteExam(id) {
 
   try {
 
-    /*
-      1. Results haqi
-    */
-
-    const results =
+    const {
+      error: resultsError
+    } =
       await db
         .from("results")
         .delete()
@@ -3346,16 +3477,13 @@ async function deleteExam(id) {
           id
         );
 
-    if (results.error) {
-      throw results.error;
+    if (resultsError) {
+      throw resultsError;
     }
 
-
-    /*
-      2. Exam attempts haqi
-    */
-
-    const attempts =
+    const {
+      error: attemptsError
+    } =
       await db
         .from("exam_attempts")
         .delete()
@@ -3364,16 +3492,13 @@ async function deleteExam(id) {
           id
         );
 
-    if (attempts.error) {
-      throw attempts.error;
+    if (attemptsError) {
+      throw attemptsError;
     }
 
-
-    /*
-      3. Questions haqi
-    */
-
-    const questions =
+    const {
+      error: questionsError
+    } =
       await db
         .from("questions")
         .delete()
@@ -3382,46 +3507,36 @@ async function deleteExam(id) {
           id
         );
 
-    if (questions.error) {
-      throw questions.error;
+    if (questionsError) {
+      throw questionsError;
     }
 
-
-    /*
-      4. Exam mataa isaa haqi
-    */
-
-    const exam =
+    const {
+      data: deletedExam,
+      error: examError
+    } =
       await db
         .from("exams")
         .delete()
         .eq(
           "id",
           id
-        );
+        )
+        .select("id");
 
-    if (exam.error) {
-      throw exam.error;
+    if (examError) {
+      throw examError;
     }
 
+    if (
+      !deletedExam ||
+      deletedExam.length === 0
+    ) {
 
-    /*
-      5. UI irraa battalum balleessi
-    */
-
-    const card =
-      document.querySelector(
-        `[data-exam-id="${id}"]`
+      throw new Error(
+        "Qormaanni database irraa hin haqamne."
       );
-
-    if (card) {
-      card.remove();
     }
-
-
-    /*
-      6. Tarreewwan haaromsi
-    */
 
     await loadAdminExams();
 
@@ -3471,9 +3586,12 @@ async function loadQuestionExamSelect() {
     await db
       .from("exams")
       .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) return;
 
@@ -3600,7 +3718,9 @@ async function createQuestion() {
 
   if (error) {
 
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
 
     return;
   }
@@ -3659,9 +3779,12 @@ async function loadAdminQuestions() {
           title
         )
       `)
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) {
 
@@ -3682,7 +3805,7 @@ async function loadAdminQuestions() {
   }
 
   container.innerHTML =
-    (data || []).map(
+    data.map(
       (question, index) => `
 
       <div
@@ -3765,7 +3888,7 @@ async function loadAdminQuestions() {
 
 
 /* =========================================================
-   DELETE QUESTION — FIXED
+   DELETE QUESTION
 ========================================================= */
 
 async function deleteQuestion(id) {
@@ -3780,33 +3903,32 @@ async function deleteQuestion(id) {
 
   try {
 
-    const { error } =
+    const {
+      data: deletedQuestion,
+      error
+    } =
       await db
         .from("questions")
         .delete()
         .eq(
           "id",
           id
-        );
+        )
+        .select("id");
 
     if (error) {
       throw error;
     }
 
+    if (
+      !deletedQuestion ||
+      deletedQuestion.length === 0
+    ) {
 
-    /*
-      UI irraa battalum balleessi
-    */
-
-    const card =
-      document.querySelector(
-        `[data-question-id="${id}"]`
+      throw new Error(
+        "Gaaffiin database irraa hin haqamne."
       );
-
-    if (card) {
-      card.remove();
     }
-
 
     await loadAdminQuestions();
 
@@ -3919,9 +4041,12 @@ async function loadAIQuestionExamSelect() {
     await db
       .from("exams")
       .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) return;
 
