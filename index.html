@@ -1,1283 +1,506 @@
 <!DOCTYPE html>
 <html lang="om">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Akkaadaami Oromiyaa</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#FFFFFF">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-    const SUPABASE_URL = "https://xhkkaevhcqvkwabcsljm.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_8nBE4n2bQ1jRnEr_83FrdA_vSqqIpSz";
-
-    const supabaseClient =
-      window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Akkaadaamii Oromiyaa - Barnoota fi Qormaata" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Akkaadaamii Oromiyaa</title>
 </head>
 
 <body>
 
-  <!-- =========================
-       ROLE PAGE
-  ========================== -->
+  <!-- ROLE PAGE -->
   <section id="rolePage" class="page active">
+    <div class="container">
+      <div class="hero">
+        <h1>🎓 Akkaadaamii Oromiyaa</h1>
+        <p>Barnoota fi Qormaata</p>
+      </div>
 
-    <div class="welcome-box">
+      <div class="card">
+        <h2>Seensa Filadhu</h2>
 
-      <div class="logo-circle">📚</div>
+        <button class="primary-btn" onclick="openStudentLogin()">
+          👨‍🎓 Barataa
+        </button>
 
-      <h1>Akkaadaami Oromiyaa</h1>
-
-      <p>
-        Baradhu • Qormaata fudhadhu • Bu'aa kee ilaali
-      </p>
-
-      <button
-        id="studentRoleButton"
-        class="big-role student"
-      >
-        <span>👨‍🎓</span>
-
-        <div>
-          <b>Barataa</b>
-          <small>Akka barataa seeni</small>
-        </div>
-
-        <strong>›</strong>
-      </button>
-
-      <button
-        id="adminRoleButton"
-        class="big-role admin"
-      >
-        <span>👨‍💼</span>
-
-        <div>
-          <b>Admin</b>
-          <small>Sirna bulchi</small>
-        </div>
-
-        <strong>›</strong>
-      </button>
-
+        <button class="secondary-btn" onclick="openAdminLogin()">
+          🔐 Admin
+        </button>
+      </div>
     </div>
-
   </section>
 
 
-  <!-- =========================
-       STUDENT LOGIN / REGISTER
-  ========================== -->
-  <section id="loginPage" class="page">
+  <!-- STUDENT LOGIN -->
+  <section id="studentLoginPage" class="page">
+    <div class="container">
+      <div class="card">
 
-    <div class="auth-box">
-
-      <button
-        id="studentBackButton"
-        class="back-btn"
-      >
-        ← Deebi'i
-      </button>
-
-      <div class="auth-icon">👨‍🎓</div>
-
-      <h2>Seensa Barataa</h2>
-
-      <p id="studentAuthDescription">
-        Account haaraa uumuuf maqaa kee galchi.
-      </p>
-
-
-      <!-- AUTH MODE -->
-      <div class="auth-switch">
-
-        <button
-          id="newStudentModeButton"
-          class="auth-switch-btn active"
-          type="button"
-        >
-          🆕 Haaraa
+        <button class="back-btn" onclick="showPage('rolePage')">
+          ← Duubatti
         </button>
 
-        <button
-          id="existingStudentModeButton"
-          class="auth-switch-btn"
-          type="button"
-        >
-          🔐 Account qaba
+        <h2>👨‍🎓 Seensa Barataa</h2>
+
+        <div class="notice">
+          <strong>Barataa haaraa?</strong>
+          <p>Maqaa kee qofa galchi. Erga galmaa'ee booda Student ID fi Activation Code argatta.</p>
+        </div>
+
+        <input
+          id="nameInput"
+          type="text"
+          placeholder="Maqaa guutuu kee galchi"
+          autocomplete="name"
+        />
+
+        <button id="studentRegisterButton" class="primary-btn" onclick="studentRegister()">
+          📝 Galmaa'i
         </button>
 
-      </div>
+        <hr />
 
-
-      <!-- NAME -->
-      <input
-        id="nameInput"
-        type="text"
-        placeholder="Maqaa guutuu kee galchi"
-        autocomplete="name"
-      >
-
-
-      <!-- STUDENT ID -->
-      <div id="studentIdBox" style="display:none;">
+        <h3>Barataa duraan galmaa'e</h3>
 
         <input
           id="studentIdInput"
           type="text"
-          placeholder="Student ID galchi"
-          autocomplete="off"
-        >
-
-      </div>
-
-
-      <!-- ACTIVATION CODE -->
-      <div id="activationCodeBox" style="display:none;">
+          placeholder="Student ID"
+          autocomplete="username"
+        />
 
         <input
           id="activationCodeInput"
           type="text"
-          placeholder="Activation Code galchi"
+          placeholder="Activation Code"
           autocomplete="off"
-        >
+        />
+
+        <button id="studentLoginButton" class="primary-btn" onclick="studentLogin()">
+          🔑 Seeni
+        </button>
+
+        <div id="studentLoginMessage" class="message"></div>
 
       </div>
-
-
-      <!-- NEW ACCOUNT -->
-      <button
-        id="studentRegisterButton"
-        class="primary-btn"
-        type="button"
-      >
-        Account Uumi →
-      </button>
-
-
-      <!-- EXISTING ACCOUNT -->
-      <button
-        id="studentLoginButton"
-        class="primary-btn"
-        type="button"
-        style="display:none;"
-      >
-        Seeni →
-      </button>
-
-
-      <div
-        id="studentLoginMessage"
-        class="message"
-      ></div>
-
     </div>
-
   </section>
 
 
-  <!-- =========================
-       ADMIN LOGIN
-  ========================== -->
-  <section id="adminLoginPage" class="page">
-
-    <div class="auth-box">
-
-      <button
-        id="adminBackButton"
-        class="back-btn"
-      >
-        ← Deebi'i
-      </button>
-
-      <div class="auth-icon">🔐</div>
-
-      <h2>Seensa Admin</h2>
-
-      <p>
-        Username fi password kee galchi.
-      </p>
-
-      <input
-        id="adminUsername"
-        type="text"
-        placeholder="Username"
-        autocomplete="username"
-      >
-
-      <input
-        id="adminPassword"
-        type="password"
-        placeholder="Password"
-        autocomplete="current-password"
-      >
-
-      <button
-        id="adminLoginButton"
-        class="primary-btn"
-        type="button"
-      >
-        Admin Seeni →
-      </button>
-
-      <div
-        id="adminLoginMessage"
-        class="message"
-      ></div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =========================
-       STUDENT HOME
-  ========================== -->
-  <section
-    id="homePage"
-    class="page app-page"
-  >
+  <!-- STUDENT HOME -->
+  <section id="studentHomePage" class="page">
 
     <header class="top-header">
-
       <div>
-
-        <span class="small-title">
-          Baga nagaan dhuftan 👋
-        </span>
-
-        <h2 id="studentWelcomeName">
-          Barataa
-        </h2>
-
+        <h2>🎓 Akkaadaamii</h2>
+        <p id="studentWelcomeName">Baga nagaan dhuftan</p>
       </div>
-
-      <div class="avatar">
-        👨‍🎓
-      </div>
-
     </header>
 
+    <main class="container">
 
-    <main class="content">
-
-      <!-- STUDENT ACCOUNT INFO -->
-      <div
-        id="studentAccountStatus"
-        class="account-status"
-      ></div>
-
-
-      <div class="hero">
-
-        <div>
-
-          <span>🎓</span>
-
-          <h2>
-            Barnoota kee itti fufi
-          </h2>
-
-          <p>
-            Baradhu, qormaata fudhadhu,
-            bu'aa kee hordofi.
-          </p>
-
-        </div>
-
+      <div class="card">
+        <h3>👋 Baga nagaan dhuftan!</h3>
+        <p id="studentHomeMessage"></p>
       </div>
 
-
-      <!-- LESSONS -->
       <div class="section-title">
-
-        <h3>
-          📚 Barnoota
-        </h3>
-
+        <h3>📚 Barnoota</h3>
       </div>
 
-      <div
-        id="studentLessons"
-        class="cards"
-      ></div>
+      <div id="studentLessons" class="grid"></div>
 
-
-      <!-- EXAMS -->
-      <div class="quick-exam">
-
-        <div>
-
-          <span class="quick-icon">
-            📝
-          </span>
-
-          <h3>
-            Qormaata
-          </h3>
-
-          <p>
-            Qormaata jiran ilaali.
-          </p>
-
-        </div>
-
-        <button
-          id="quickExamButton"
-          type="button"
-        >
-          Ilaali →
-        </button>
-
+      <div class="section-title">
+        <h3>📝 Qormaata</h3>
       </div>
+
+      <button id="quickExamButton" class="primary-btn" onclick="showPage('examListPage'); loadExams();">
+        📝 Qormaata Ilaali
+      </button>
 
     </main>
 
-
-    <!-- STUDENT NAVIGATION -->
     <nav class="bottom-nav">
-
-      <button
-        id="navHome"
-        class="nav-item active"
-        type="button"
-      >
-        <span>⌂</span>
-        <small>Mana</small>
-      </button>
-
-      <button
-        id="navExams"
-        class="nav-item"
-        type="button"
-      >
-        <span>📝</span>
-        <small>Qormaata</small>
-      </button>
-
-      <button
-        id="navScore"
-        class="nav-item"
-        type="button"
-      >
-        <span>🏆</span>
-        <small>Qabxii</small>
-      </button>
-
-      <button
-        id="navProfile"
-        class="nav-item"
-        type="button"
-      >
-        <span>👤</span>
-        <small>Profile</small>
-      </button>
-
+      <button onclick="showPage('studentHomePage'); loadStudentHome();">🏠<span>Home</span></button>
+      <button onclick="showPage('examListPage'); loadExams();">📝<span>Qormaata</span></button>
+      <button onclick="showPage('scorePage'); showScore();">📊<span>Qabxii</span></button>
+      <button onclick="showPage('profilePage'); loadProfile();">👤<span>Profile</span></button>
     </nav>
 
   </section>
 
 
-  <!-- =========================
-       LESSON DETAIL
-  ========================== -->
-  <section
-    id="lessonDetailPage"
-    class="page app-page"
-  >
+  <!-- LESSON DETAIL -->
+  <section id="lessonDetailPage" class="page">
 
-    <header class="simple-header">
-
-      <button
-        id="lessonBackButton"
-        class="back-btn"
-        type="button"
-      >
-        ←
+    <div class="container">
+      <button class="back-btn" onclick="showPage('studentHomePage')">
+        ← Duubatti
       </button>
 
-      <h2>
-        Barnoota
-      </h2>
-
-      <div></div>
-
-    </header>
-
-
-    <main class="content">
-
-      <div class="detail-card">
-
-        <div class="detail-icon">
-          📖
-        </div>
-
-        <h2 id="lessonDetailTitle">
-          Barnoota
-        </h2>
-
-        <p id="lessonDetailDescription"></p>
-
-        <div
-          id="lessonDetailContent"
-          class="lesson-content"
-        ></div>
-
+      <div class="card">
+        <h2 id="lessonDetailTitle"></h2>
+        <div id="lessonDetailContent"></div>
       </div>
-
-    </main>
+    </div>
 
   </section>
 
 
-  <!-- =========================
-       EXAM LIST
-  ========================== -->
-  <section
-    id="examListPage"
-    class="page app-page"
-  >
+  <!-- EXAM LIST -->
+  <section id="examListPage" class="page">
 
-    <header class="simple-header">
+    <div class="container">
 
-      <button
-        id="examListBackButton"
-        class="back-btn"
-        type="button"
-      >
-        ←
+      <button class="back-btn" onclick="showPage('studentHomePage')">
+        ← Duubatti
       </button>
 
-      <h2>
-        Qormaata
-      </h2>
+      <h2>📝 Qormaata</h2>
 
-      <div></div>
+      <div id="studentExams" class="grid"></div>
 
-    </header>
-
-
-    <main class="content">
-
-      <div
-        id="examList"
-        class="cards"
-      ></div>
-
-    </main>
+    </div>
 
   </section>
 
 
-  <!-- =========================
-       EXAM PAGE
-  ========================== -->
-  <section
-    id="examPage"
-    class="page app-page"
-  >
+  <!-- EXAM PAGE -->
+  <section id="examPage" class="page">
 
-    <header class="simple-header">
+    <div class="container">
 
-      <button
-        id="examBackButton"
-        class="back-btn"
-        type="button"
-      >
-        ←
-      </button>
+      <div class="card">
 
-      <h2 id="examTitle">
-        Qormaata
-      </h2>
+        <h2 id="examTitle"></h2>
 
-      <div></div>
-
-    </header>
-
-
-    <main class="content">
-
-      <div class="progress-box">
-
-        <div class="progress-text">
-
-          <span>
-            Gaaffii
-          </span>
-
-          <b id="questionNumber">
-            1 / 1
-          </b>
-
+        <div class="exam-progress">
+          Gaaffii <span id="questionNumber">1</span>
         </div>
 
-        <div class="progress">
+        <h3 id="questionText"></h3>
 
-          <div id="progressBar"></div>
+        <div id="answersContainer"></div>
 
-        </div>
+        <button
+          id="nextQuestionButton"
+          class="primary-btn"
+          onclick="nextQuestion()"
+          disabled
+        >
+          Itti Aanuu →
+        </button>
 
       </div>
 
-
-      <div class="question-card">
-
-        <h3 id="questionText">
-          Gaaffii
-        </h3>
-
-        <div
-          id="optionsBox"
-          class="options"
-        ></div>
-
-      </div>
-
-
-      <button
-        id="nextQuestionButton"
-        class="primary-btn"
-        type="button"
-      >
-        Itti Aanee →
-      </button>
-
-    </main>
+    </div>
 
   </section>
 
 
-  <!-- =========================
-       SCORE PAGE
-  ========================== -->
-  <section
-    id="scorePage"
-    class="page app-page"
-  >
+  <!-- SCORE PAGE -->
+  <section id="scorePage" class="page">
 
-    <main class="score-page">
+    <div class="container">
 
-      <div class="trophy">
-        🏆
-      </div>
-
-      <h1>
-        Qormaanni xumurame!
-      </h1>
-
-      <p>
-        Bu'aa qormaata kee
-      </p>
-
-
-      <div class="score-circle">
-
-        <strong id="scoreText">
-          0 / 0
-        </strong>
-
-        <span id="percentageText">
-          0%
-        </span>
-
-      </div>
-
-
-      <div class="score-info">
-
-        <div>
-
-          <span>
-            Qabxii
-          </span>
-
-          <b id="scoreValue">
-            0
-          </b>
-
-        </div>
-
-        <div>
-
-          <span>
-            Waliigala
-          </span>
-
-          <b id="totalValue">
-            0
-          </b>
-
-        </div>
-
-      </div>
-
-
-      <button
-        id="scoreHomeButton"
-        class="primary-btn"
-        type="button"
-      >
-        Gara Manaatti →
+      <button class="back-btn" onclick="showPage('studentHomePage')">
+        ← Duubatti
       </button>
 
-    </main>
+      <div class="card">
+
+        <h2>📊 Qabxii Koo</h2>
+
+        <div id="studentScore"></div>
+
+      </div>
+
+    </div>
 
   </section>
 
 
-  <!-- =========================
-       STUDENT PROFILE
-  ========================== -->
-  <section
-    id="profilePage"
-    class="page app-page"
-  >
+  <!-- PROFILE PAGE -->
+  <section id="profilePage" class="page">
 
-    <header class="simple-header">
+    <div class="container">
 
-      <button
-        id="profileBackButton"
-        class="back-btn"
-        type="button"
-      >
-        ←
+      <button class="back-btn" onclick="showPage('studentHomePage')">
+        ← Duubatti
       </button>
 
-      <h2>
-        Profile
-      </h2>
+      <div class="card">
 
-      <div></div>
+        <h2>👤 Profile Koo</h2>
 
-    </header>
+        <label>Maqaa</label>
+        <input id="profileNameInput" type="text" />
 
+        <button class="primary-btn" onclick="saveProfile()">
+          💾 Maqaa Olkaa'i
+        </button>
 
-    <main class="content">
+        <hr />
 
-      <div class="profile-card">
+        <p><strong>Student ID:</strong></p>
+        <div id="profileCode" class="code-box"></div>
 
-        <div class="profile-avatar">
-          👨‍🎓
-        </div>
+        <p><strong>Activation Code:</strong></p>
+        <div id="profileActivationCode" class="code-box"></div>
 
-        <h2 id="profileName">
-          Barataa
-        </h2>
+        <p><strong>Status:</strong></p>
+        <div id="profileStatus"></div>
 
-        <p>
-          🆔 <span id="profileCode">
-            Student ID
-          </span>
-        </p>
-
-        <p>
-          🔐 <span id="profileActivationCode">
-            Activation Code
-          </span>
-        </p>
-
-        <p>
-          📌 <span id="profileStatus">
-            Status
-          </span>
-        </p>
+        <button class="danger-btn" onclick="studentLogout()">
+          🚪 Ba'i
+        </button>
 
       </div>
 
+    </div>
 
-      <div class="form-card">
+  </section>
 
-        <label>
-          Maqaa kee
-        </label>
+
+  <!-- ADMIN LOGIN -->
+  <section id="adminLoginPage" class="page">
+
+    <div class="container">
+
+      <div class="card">
+
+        <button class="back-btn" onclick="showPage('rolePage')">
+          ← Duubatti
+        </button>
+
+        <h2>🔐 Admin Login</h2>
 
         <input
-          id="profileNameInput"
+          id="adminUsername"
           type="text"
-        >
+          placeholder="Username"
+        />
 
-        <button
-          id="profileSaveButton"
-          class="primary-btn"
-          type="button"
-        >
-          Maqaa Haaromsi
+        <input
+          id="adminPassword"
+          type="password"
+          placeholder="Password"
+        />
+
+        <button class="primary-btn" onclick="adminLogin()">
+          Seeni
         </button>
+
+        <div id="adminLoginMessage" class="message"></div>
 
       </div>
 
-
-      <button
-        id="studentLogoutButton"
-        class="logout-btn"
-        type="button"
-      >
-        🚪 Ba'i
-      </button>
-
-    </main>
-
-
-    <nav class="bottom-nav">
-
-      <button
-        id="profileNavHome"
-        class="nav-item"
-        type="button"
-      >
-        <span>⌂</span>
-        <small>Mana</small>
-      </button>
-
-      <button
-        id="profileNavExams"
-        class="nav-item"
-        type="button"
-      >
-        <span>📝</span>
-        <small>Qormaata</small>
-      </button>
-
-      <button
-        id="profileNavScore"
-        class="nav-item"
-        type="button"
-      >
-        <span>🏆</span>
-        <small>Qabxii</small>
-      </button>
-
-      <button
-        id="profileNavProfile"
-        class="nav-item active"
-        type="button"
-      >
-        <span>👤</span>
-        <small>Profile</small>
-      </button>
-
-    </nav>
+    </div>
 
   </section>
 
 
-  <!-- =========================
-       ADMIN PAGE
-  ========================== -->
-  <section
-    id="adminPage"
-    class="page app-page"
-  >
+  <!-- ADMIN PAGE -->
+  <section id="adminPage" class="page">
 
-    <header class="admin-header">
-
+    <header class="top-header">
       <div>
-
-        <span>👨‍💼</span>
-
-        <h2>
-          Admin Panel
-        </h2>
-
-        <small>
-          Akkaadaami Oromiyaa
-        </small>
-
+        <h2>⚙️ Admin Dashboard</h2>
+        <p>Akkaadaamii Oromiyaa</p>
       </div>
 
-      <button
-        id="adminLogoutButton"
-        type="button"
-      >
-        🚪
+      <button class="danger-btn small-btn" onclick="adminLogout()">
+        Ba'i
       </button>
-
     </header>
 
 
-    <main class="content">
+    <div class="container">
 
-      <div class="admin-welcome">
+      <!-- ADMIN NAV -->
+      <div class="admin-nav">
 
-        <h2>
-          👋 Baga nagaan dhuftan Admin
-        </h2>
-
-        <p>
-          Sirna barnootaa as irraa qindeessi.
-        </p>
-
-      </div>
-
-
-      <!-- ADMIN MENU -->
-      <div class="admin-grid">
-
-        <button
-          id="adminStudentsButton"
-          class="admin-menu"
-          type="button"
-        >
-          <span>👨‍🎓</span>
-          <b>Barattoota</b>
-          <small>
-            Tarree fi eeyyama barattootaa
-          </small>
+        <button onclick="openAdminPanel('students')">
+          👨‍🎓 Barattoota
         </button>
 
-
-        <button
-          id="adminResultsButton"
-          class="admin-menu"
-          type="button"
-        >
-          <span>📊</span>
-          <b>Bu'aa</b>
-          <small>
-            Qabxii fi ranking barattootaa
-          </small>
+        <button onclick="openAdminPanel('results')">
+          📊 Qabxii
         </button>
 
-
-        <button
-          id="adminLessonsButton"
-          class="admin-menu"
-          type="button"
-        >
-          <span>📚</span>
-          <b>Barnoota</b>
-          <small>
-            Uumi, sirreessi, haqii
-          </small>
+        <button onclick="openAdminPanel('lessons')">
+          📚 Barnoota
         </button>
 
-
-        <button
-          id="adminExamsButton"
-          class="admin-menu"
-          type="button"
-        >
-          <span>📝</span>
-          <b>Qormaata</b>
-          <small>
-            Qormaata fi gaaffii
-          </small>
+        <button onclick="openAdminPanel('exams')">
+          📝 Qormaata
         </button>
 
       </div>
 
 
-      <!-- =========================
-           ADMIN STUDENTS
-      ========================== -->
-      <div
-        id="adminStudentsPanel"
-        class="admin-panel"
-      >
+      <!-- STUDENTS PANEL -->
+      <div id="adminStudentsPanel" class="admin-panel">
 
-        <div class="panel-title">
+        <div class="card">
 
-          <h3>
-            👨‍🎓 Barattoota
-          </h3>
+          <h2>👨‍🎓 Barattoota</h2>
 
-          <button
-            id="closeStudentsPanel"
-            type="button"
-          >
-            ×
-          </button>
+          <div id="adminStudentsList"></div>
 
         </div>
-
-
-        <div
-          id="adminStudentsMessage"
-          class="message"
-        ></div>
-
-
-        <div
-          id="adminStudentsList"
-        ></div>
 
       </div>
 
 
-      <!-- =========================
-           ADMIN RESULTS
-      ========================== -->
-      <div
-        id="adminResultsPanel"
-        class="admin-panel"
-      >
+      <!-- RESULTS PANEL -->
+      <div id="adminResultsPanel" class="admin-panel">
 
-        <div class="panel-title">
+        <div class="card">
 
-          <h3>
-            📊 Bu'aa Qormaataa
-          </h3>
+          <h2>📊 Gabatee Qabxii Barattootaa</h2>
 
-          <button
-            id="closeResultsPanel"
-            type="button"
-          >
-            ×
-          </button>
+          <div class="table-wrapper">
+            <table id="adminResultsTable">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
 
         </div>
-
-
-        <div
-          id="adminResultsMessage"
-          class="message"
-        ></div>
-
-
-        <!-- DYNAMIC RESULT TABLE -->
-        <div class="results-table-wrapper">
-
-          <table
-            id="adminResultsTable"
-            class="results-table"
-          >
-
-            <thead id="adminResultsTableHead">
-              <tr>
-                <th>#</th>
-                <th>Barataa</th>
-                <th>Student ID</th>
-                <th>Total</th>
-                <th>Average</th>
-                <th>Rank</th>
-              </tr>
-            </thead>
-
-            <tbody id="adminResultsTableBody">
-            </tbody>
-
-          </table>
-
-        </div>
-
-
-        <!-- OLD LIST SUPPORT -->
-        <div
-          id="adminResultsList"
-          style="display:none;"
-        ></div>
 
       </div>
 
 
-      <!-- =========================
-           ADMIN LESSONS
-      ========================== -->
-      <div
-        id="adminLessonsPanel"
-        class="admin-panel"
-      >
+      <!-- LESSONS PANEL -->
+      <div id="adminLessonsPanel" class="admin-panel">
 
-        <div class="panel-title">
+        <div class="card">
 
-          <h3>
-            📚 Barnoota
-          </h3>
-
-          <button
-            id="closeLessonsPanel"
-            type="button"
-          >
-            ×
-          </button>
-
-        </div>
-
-
-        <div class="admin-form">
+          <h2>📚 Barnoota Haaraa</h2>
 
           <input
             id="lessonTitleInput"
             type="text"
-            placeholder="Mata duree barnootaa"
-          >
-
-
-          <input
-            id="lessonDescriptionInput"
-            type="text"
-            placeholder="Ibsa gabaabaa"
-          >
-
+            placeholder="Mata-duree barnootaa"
+          />
 
           <textarea
             id="lessonContentInput"
             placeholder="Qabiyyee barnootaa..."
+            rows="8"
           ></textarea>
 
-
-          <button
-            id="createLessonButton"
-            class="primary-btn"
-            type="button"
-          >
-            ➕ Barnoota Uumi
+          <button class="primary-btn" onclick="createLesson()">
+            ➕ Barnoota Dabali
           </button>
-
-
-          <div
-            id="lessonCreateMessage"
-            class="message"
-          ></div>
 
         </div>
 
 
-        <h4>
-          Barnoota jiran
-        </h4>
+        <div class="card">
 
+          <h2>📚 Barnoota Jiran</h2>
 
-        <div
-          id="adminLessonsList"
-        ></div>
+          <div id="adminLessonsList"></div>
+
+        </div>
 
       </div>
 
 
-      <!-- =========================
-           ADMIN EXAMS
-      ========================== -->
-      <div
-        id="adminExamsPanel"
-        class="admin-panel"
-      >
+      <!-- EXAMS PANEL -->
+      <div id="adminExamsPanel" class="admin-panel">
 
-        <div class="panel-title">
+        <div class="card">
 
-          <h3>
-            📝 Qormaata
-          </h3>
-
-          <button
-            id="closeExamsPanel"
-            type="button"
-          >
-            ×
-          </button>
-
-        </div>
-
-
-        <!-- CREATE EXAM -->
-        <div class="admin-form">
+          <h2>📝 Qormaata Haaraa</h2>
 
           <input
             id="examTitleInput"
             type="text"
-            placeholder="Maqaa qormaataa"
-          >
-
+            placeholder="Mata-duree qormaataa"
+          />
 
           <textarea
             id="examDescriptionInput"
-            placeholder="Ibsa qormaataa"
+            placeholder="Ibsa qormaataa..."
+            rows="5"
           ></textarea>
 
-
-          <button
-            id="createExamButton"
-            class="primary-btn"
-            type="button"
-          >
-            ➕ Qormaata Uumi
+          <button class="primary-btn" onclick="createExam()">
+            ➕ Qormaata Dabali
           </button>
-
-
-          <div
-            id="examCreateMessage"
-            class="message"
-          ></div>
 
         </div>
 
 
-        <h4>
-          Qormaata jiran
-        </h4>
+        <div class="card">
+
+          <h2>📝 Qormaata Jiran</h2>
+
+          <div id="adminExamsList"></div>
+
+        </div>
 
 
-        <div
-          id="adminExamsList"
-        ></div>
+        <div class="card">
 
+          <h2>❓ Gaaffii Qormaataa Dabali</h2>
 
-        <hr>
-
-
-        <!-- CREATE QUESTION -->
-        <h3>
-          ➕ Gaaffii Qormaataa Dabali
-        </h3>
-
-
-        <div class="admin-form">
-
-          <select
-            id="questionExamSelect"
-          >
-
-            <option value="">
-              Qormaata filadhu
-            </option>
-
+          <select id="questionExamSelect">
+            <option value="">Qormaata filadhu</option>
           </select>
-
 
           <textarea
-            id="questionInput"
-            placeholder="Gaaffii barreessi..."
+            id="questionTextInput"
+            placeholder="Gaaffii..."
+            rows="4"
           ></textarea>
 
+          <input id="optionAInput" type="text" placeholder="A" />
+          <input id="optionBInput" type="text" placeholder="B" />
+          <input id="optionCInput" type="text" placeholder="C" />
+          <input id="optionDInput" type="text" placeholder="D" />
 
-          <input
-            id="optionAInput"
-            type="text"
-            placeholder="A) Filannoo A"
-          >
-
-
-          <input
-            id="optionBInput"
-            type="text"
-            placeholder="B) Filannoo B"
-          >
-
-
-          <input
-            id="optionCInput"
-            type="text"
-            placeholder="C) Filannoo C"
-          >
-
-
-          <input
-            id="optionDInput"
-            type="text"
-            placeholder="D) Filannoo D"
-          >
-
-
-          <select
-            id="correctAnswerInput"
-          >
-
-            <option value="">
-              Deebii sirrii filadhu
-            </option>
-
-            <option value="A">
-              A
-            </option>
-
-            <option value="B">
-              B
-            </option>
-
-            <option value="C">
-              C
-            </option>
-
-            <option value="D">
-              D
-            </option>
-
+          <select id="correctAnswerInput">
+            <option value="">Deebii sirrii filadhu</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
           </select>
 
-
-          <button
-            id="createQuestionButton"
-            class="primary-btn"
-            type="button"
-          >
+          <button class="primary-btn" onclick="createQuestion()">
             ➕ Gaaffii Dabali
           </button>
 
-
-          <div
-            id="questionCreateMessage"
-            class="message"
-          ></div>
-
         </div>
 
 
-        <h4>
-          Gaaffiiwwan jiran
-        </h4>
+        <div class="card">
 
+          <h2>❓ Gaaffilee Jiran</h2>
 
-        <div
-          id="adminQuestionsList"
-        ></div>
+          <div id="adminQuestionsList"></div>
+
+        </div>
 
       </div>
 
-    </main>
+    </div>
 
   </section>
 
 
-  <!-- =========================
-       APP JS
-  ========================== -->
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="app.js"></script>
-
-
-  <!-- =========================
-       SERVICE WORKER
-  ========================== -->
-  <script>
-
-    if ("serviceWorker" in navigator) {
-
-      window.addEventListener("load", () => {
-
-        navigator.serviceWorker
-          .register("/sw.js")
-          .then(() => {
-
-            console.log(
-              "Service Worker registered successfully."
-            );
-
-          })
-          .catch((error) => {
-
-            console.error(
-              "Service Worker registration failed:",
-              error
-            );
-
-          });
-
-      });
-
-    }
-
-  </script>
 
 </body>
 </html>
