@@ -4115,7 +4115,6 @@ function fileToBase64(file) {
 /* =========================================================
    AI QUESTION GENERATION
 ========================================================= */
-
 async function generateAIQuestions() {
 
   const message =
@@ -4126,12 +4125,12 @@ async function generateAIQuestions() {
   const examId =
     document.getElementById(
       "aiQuestionExamSelect"
-    )?.value;
+    )?.value || "";
 
   const sourceType =
     document.getElementById(
       "aiQuestionSourceType"
-    )?.value;
+    )?.value || "";
 
   const count =
     Number(
@@ -4140,10 +4139,14 @@ async function generateAIQuestions() {
       )?.value || 5
     );
 
+  const button =
+    document.getElementById(
+      "generateAIQuestionsButton"
+    );
+
   if (!examId) {
 
     if (message) {
-
       message.innerHTML =
         "❌ Qormaata filadhu.";
     }
@@ -4154,7 +4157,6 @@ async function generateAIQuestions() {
   if (!sourceType) {
 
     if (message) {
-
       message.innerHTML =
         "❌ Madda gaaffii filadhu.";
     }
@@ -4162,15 +4164,9 @@ async function generateAIQuestions() {
     return;
   }
 
-  const button =
-    document.getElementById(
-      "generateAIQuestionsButton"
-    );
-
   if (button) {
 
-    button.disabled =
-      true;
+    button.disabled = true;
 
     button.textContent =
       "⏳ AI qopheessaa jira...";
@@ -4179,68 +4175,63 @@ async function generateAIQuestions() {
   if (message) {
 
     message.innerHTML =
-      "⏳ Gaaffilee AI irraa qopheessaa jira...";
+      "⏳ AI irraa gaaffii qopheessaa jira...";
   }
 
   try {
 
-    let sourceData = {
-      type:
-        sourceType
-    };
+    let topic = "";
+    let sourceText = "";
+    let fileBase64 = "";
+    let fileMimeType = "";
 
-
-    /* TOPIC */
+    /* =====================================================
+       TOPIC
+    ===================================================== */
 
     if (
       sourceType === "topic"
     ) {
 
-      const topic =
+      topic =
         document
           .getElementById(
             "aiTopicInput"
           )
-          ?.value.trim();
+          ?.value.trim() || "";
 
       if (!topic) {
-
         throw new Error(
           "Mata-duree galchi."
         );
       }
-
-      sourceData.topic =
-        topic;
     }
 
-
-    /* TEXT */
+    /* =====================================================
+       TEXT
+    ===================================================== */
 
     if (
       sourceType === "text"
     ) {
 
-      const text =
+      sourceText =
         document
           .getElementById(
             "aiTextInput"
           )
-          ?.value.trim();
+          ?.value.trim() || "";
 
-      if (!text) {
-
+      if (!sourceText) {
         throw new Error(
           "Barreeffama galchi."
         );
       }
-
-      sourceData.text =
-        text;
     }
 
-
-    /* PDF */
+    /* =====================================================
+       PDF
+    ===================================================== */
 
     if (
       sourceType === "pdf"
@@ -4255,28 +4246,44 @@ async function generateAIQuestions() {
         input?.files?.[0];
 
       if (!file) {
-
         throw new Error(
           "PDF filadhu."
         );
       }
 
-      const base64 =
-        await fileToBase64(file);
+      if (
+        file.type !==
+          "application/pdf" &&
+        !file.name
+          .toLowerCase()
+          .endsWith(".pdf")
+      ) {
+        throw new Error(
+          "Faayilichi PDF ta'uu qaba."
+        );
+      }
 
-      sourceData.fileName =
-        file.name;
+      if (
+        file.size >
+        50 * 1024 * 1024
+      ) {
+        throw new Error(
+          "PDF 50MB ol ta'uu hin qabu."
+        );
+      }
 
-      sourceData.mimeType =
-        file.type ||
+      fileBase64 =
+        await fileToBase64(
+          file
+        );
+
+      fileMimeType =
         "application/pdf";
-
-      sourceData.base64 =
-        base64;
     }
 
-
-    /* IMAGE */
+    /* =====================================================
+       IMAGE
+    ===================================================== */
 
     if (
       sourceType === "image"
@@ -4291,27 +4298,70 @@ async function generateAIQuestions() {
         input?.files?.[0];
 
       if (!file) {
-
         throw new Error(
           "Suuraa filadhu."
         );
       }
 
-      const base64 =
-        await fileToBase64(file);
+      if (
+        !file.type.startsWith(
+          "image/"
+        )
+      ) {
+        throw new Error(
+          "Faayilichi suuraa ta'uu qaba."
+        );
+      }
 
-      sourceData.fileName =
-        file.name;
+      if (
+        file.size >
+        15 * 1024 * 1024
+      ) {
+        throw new Error(
+          "Suuraan 15MB ol ta'uu hin qabu."
+        );
+      }
 
-      sourceData.mimeType =
+      fileBase64 =
+        await fileToBase64(
+          file
+        );
+
+      fileMimeType =
         file.type;
-
-      sourceData.base64 =
-        base64;
     }
 
+    /* =====================================================
+       REQUEST
+    ===================================================== */
 
-    /* CALL EDGE FUNCTION */
+    const requestBody = {
+
+      exam_id:
+        examId,
+
+      source_type:
+        sourceType,
+
+      topic:
+        topic,
+
+      source_text:
+        sourceText,
+
+      count:
+        count,
+
+      file_base64:
+        fileBase64,
+
+      file_mime_type:
+        fileMimeType
+    };
+
+    /* =====================================================
+       CALL EDGE FUNCTION
+    ===================================================== */
 
     const response =
       await fetch(
@@ -4320,29 +4370,22 @@ async function generateAIQuestions() {
           method: "POST",
 
           headers: {
+
             "Content-Type":
-              "application/json"
+              "application/json",
+
+            "apikey":
+              SUPABASE_KEY
           },
 
           body:
-            JSON.stringify({
-              exam_id:
-                examId,
-
-              source_type:
-                sourceType,
-
-              source:
-                sourceData,
-
-              count:
-                count
-            })
+            JSON.stringify(
+              requestBody
+            )
         }
       );
 
-
-    let result = null;
+    let result;
 
     try {
 
@@ -4354,152 +4397,89 @@ async function generateAIQuestions() {
       result = null;
     }
 
-
-    if (!response.ok) {
+    if (
+      !response.ok ||
+      !result?.success
+    ) {
 
       throw new Error(
         result?.error ||
-        result?.message ||
         `AI server error: ${response.status}`
       );
     }
 
+    /* =====================================================
+       SUCCESS
+       Edge Function'n ofumaan
+       database keessa galcheera.
+    ===================================================== */
 
-    const questions =
-      Array.isArray(result)
-        ? result
-        : (
-          result?.questions ||
-          []
-        );
+    const insertedCount =
+      Number(
+        result?.count || 0
+      );
 
-
-    if (!questions.length) {
-
+    if (!insertedCount) {
       throw new Error(
-        "AI gaaffii hin deebifne."
+        "Gaaffiiwwan database keessa hin galin."
       );
     }
 
-
-    let inserted = 0;
-
-
-    for (
-      const q of questions
-    ) {
-
-      const questionText =
-        q.question ||
-        q.text ||
-        "";
-
-      const optionA =
-        q.option_a ||
-        q.a ||
-        "";
-
-      const optionB =
-        q.option_b ||
-        q.b ||
-        "";
-
-      const optionC =
-        q.option_c ||
-        q.c ||
-        "";
-
-      const optionD =
-        q.option_d ||
-        q.d ||
-        "";
-
-      let correct =
-        q.correct_answer ||
-        q.correct ||
-        "";
-
-      correct =
-        String(
-          correct
-        )
-          .trim()
-          .toUpperCase()
-          .charAt(0);
-
-
-      if (
-        !questionText ||
-        !optionA ||
-        !optionB ||
-        !optionC ||
-        !optionD ||
-        !["A", "B", "C", "D"]
-          .includes(correct)
-      ) {
-
-        continue;
-      }
-
-
-      const insertResult =
-        await db
-          .from("questions")
-          .insert([
-            {
-              exam_id:
-                examId,
-
-              question:
-                questionText,
-
-              option_a:
-                optionA,
-
-              option_b:
-                optionB,
-
-              option_c:
-                optionC,
-
-              option_d:
-                optionD,
-
-              correct_answer:
-                correct,
-
-              source_type:
-                sourceType,
-
-              source_text:
-                sourceType === "topic"
-                  ? sourceData.topic
-                  : sourceType === "text"
-                  ? sourceData.text
-                  : sourceData.fileName ||
-                    null
-            }
-          ]);
-
-      if (!insertResult.error) {
-
-        inserted++;
-      }
-    }
-
-
     if (message) {
 
-      message.innerHTML =
-        `
+      message.innerHTML = `
         <div class="success-box">
-          ✅ ${inserted} gaaffii AI irraa
-          qormaata keessa galchame.
+          ✅ Gaaffiiwwan ${insertedCount}
+          milkaa'inaan qormaata keessa galaniiru.
         </div>
-        `;
+      `;
     }
 
+    /* =====================================================
+       RELOAD
+    ===================================================== */
+
     await loadAdminQuestions();
+
+    /* =====================================================
+       CLEAR INPUT
+    ===================================================== */
+
+    const topicInput =
+      document.getElementById(
+        "aiTopicInput"
+      );
+
+    const textInput =
+      document.getElementById(
+        "aiTextInput"
+      );
+
+    const pdfInput =
+      document.getElementById(
+        "aiPdfInput"
+      );
+
+    const imageInput =
+      document.getElementById(
+        "aiImageInput"
+      );
+
+    if (topicInput) {
+      topicInput.value = "";
+    }
+
+    if (textInput) {
+      textInput.value = "";
+    }
+
+    if (pdfInput) {
+      pdfInput.value = "";
+    }
+
+    if (imageInput) {
+      imageInput.value = "";
+    }
 
   } catch (error) {
 
@@ -4510,14 +4490,13 @@ async function generateAIQuestions() {
 
     if (message) {
 
-      message.innerHTML =
-        `
+      message.innerHTML = `
         <div class="error-box">
           ❌ ${escapeHtml(
             getErrorMessage(error)
           )}
         </div>
-        `;
+      `;
     }
 
   } finally {
