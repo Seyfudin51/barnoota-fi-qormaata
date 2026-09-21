@@ -38,6 +38,15 @@ function openAdminLogin() {
 
 
 /* =========================================================
+   ADMIN SECURITY CHECK
+========================================================= */
+
+function isAdminLoggedIn() {
+  return localStorage.getItem("admin_logged") === "true";
+}
+
+
+/* =========================================================
    STUDENT LOGIN
 ========================================================= */
 
@@ -859,6 +868,8 @@ async function adminLogin() {
 
 async function loadAdminStudents() {
 
+  if (!isAdminLoggedIn()) return;
+
   const box =
     document.getElementById(
       "adminStudentsList"
@@ -927,6 +938,8 @@ async function loadAdminStudents() {
 
 async function loadAdminResults() {
 
+  if (!isAdminLoggedIn()) return;
+
   const box =
     document.getElementById(
       "adminResultsList"
@@ -975,7 +988,7 @@ async function loadAdminResults() {
       result => `
         <div class="admin-list-item result-item">
 
-          <div>
+          <div style="flex:1">
 
             <b>
               ${escapeHTML(
@@ -1003,13 +1016,37 @@ async function loadAdminResults() {
 
           </div>
 
-          <div class="result-score">
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              gap:10px;
+            "
+          >
 
-            ${result.score}/${result.total}
+            <div class="result-score">
 
-            <br>
+              ${result.score}/${result.total}
 
-            ${result.percentage || 0}%
+              <br>
+
+              ${result.percentage || 0}%
+
+            </div>
+
+            <button
+              onclick="deleteResult(${result.id})"
+              style="
+                padding:8px 12px;
+                border:0;
+                border-radius:9px;
+                background:#dc2626;
+                color:white;
+                cursor:pointer;
+              "
+            >
+              🗑️
+            </button>
 
           </div>
 
@@ -1020,10 +1057,59 @@ async function loadAdminResults() {
 
 
 /* =========================================================
+   DELETE RESULT / SCORE
+========================================================= */
+
+async function deleteResult(id) {
+
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Hojii kana Admin qofa raawwachuu danda'a.");
+    return;
+  }
+
+  const confirmation =
+    confirm(
+      "⚠️ Qabxii kana haquu akka barbaaddu mirkaneeffattaa?\n\n" +
+      "Qabxiin barataa kun bu'aa keessatti guutumaan guutuutti ni haqama."
+    );
+
+  if (!confirmation) return;
+
+  const {
+    error
+  } = await supabaseClient
+    .from("results")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+
+    alert(
+      "Qabxii haquun hin danda'amne: " +
+      error.message
+    );
+
+    return;
+  }
+
+  alert(
+    "🗑️ Qabxiin haqameera."
+  );
+
+  await loadAdminResults();
+}
+
+
+/* =========================================================
    CREATE LESSON
 ========================================================= */
 
 async function createLesson() {
+
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    return;
+  }
 
   const title =
     document.getElementById(
@@ -1107,6 +1193,8 @@ async function createLesson() {
 ========================================================= */
 
 async function loadAdminLessons() {
+
+  if (!isAdminLoggedIn()) return;
 
   const box =
     document.getElementById(
@@ -1215,6 +1303,11 @@ async function loadAdminLessons() {
 
 async function editLesson(id) {
 
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    return;
+  }
+
   const {
     data: lesson,
     error
@@ -1305,9 +1398,14 @@ async function editLesson(id) {
 
 async function deleteLesson(id) {
 
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    return;
+  }
+
   const confirmation =
     confirm(
-      "Barnoota kana haquu akka barbaaddu mirkaneeffattaa?"
+      "⚠️ Barnoota kana haquu akka barbaaddu mirkaneeffattaa?"
     );
 
   if (!confirmation) return;
@@ -1343,6 +1441,11 @@ async function deleteLesson(id) {
 ========================================================= */
 
 async function createExam() {
+
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    return;
+  }
 
   const title =
     document.getElementById(
@@ -1417,6 +1520,8 @@ async function createExam() {
 ========================================================= */
 
 async function loadAdminExams() {
+
+  if (!isAdminLoggedIn()) return;
 
   const box =
     document.getElementById(
@@ -1525,6 +1630,11 @@ async function loadAdminExams() {
 
 async function editExam(id) {
 
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    return;
+  }
+
   const {
     data: exam,
     error
@@ -1599,57 +1709,54 @@ async function editExam(id) {
 
 
 /* =========================================================
-   DELETE EXAM
+   DELETE EXAM + RESULTS + QUESTIONS
 ========================================================= */
 
 async function deleteExam(id) {
 
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    return;
+  }
+
   const confirmation =
     confirm(
-      "Qormaata kana haquu akka barbaaddu mirkaneeffattaa?"
+      "⚠️ Qormaata kana haquu barbaaddaa?\n\n" +
+      "Qormaata kanaan walqabatan:\n" +
+      "• Qabxiiwwan barattootaa\n" +
+      "• Gaaffiiwwan qormaataa\n" +
+      "hundi ni haqamu.\n\n" +
+      "Kun deebifamee argamuu hin danda'u."
     );
 
   if (!confirmation) return;
 
 
-  /* Bu'aa barattootaa ilaali.
-     Bu'aan yoo jiraate hin haqu. */
+  /* =====================================================
+     1. QABXIIWWAN / RESULTS HAQI
+  ===================================================== */
 
   const {
-    data: results,
-    error: resultsError
+    error: resultsDeleteError
   } = await supabaseClient
     .from("results")
-    .select("id")
-    .eq("exam_id", id)
-    .limit(1);
+    .delete()
+    .eq("exam_id", id);
 
-  if (resultsError) {
-
-    alert(
-      "Bu'aa qormaataa ilaaluu irratti rakkoon uumame: " +
-      resultsError.message
-    );
-
-    return;
-  }
-
-  if (
-    results &&
-    results.length > 0
-  ) {
+  if (resultsDeleteError) {
 
     alert(
-      "⚠️ Qormaata kana irratti bu'aan barattootaa jira.\n\n" +
-      "Qormaata kana haquun qabxiiwwan barattootaa wajjin walqabatu waan ta'eef hin haqamu.\n\n" +
-      "Maqaa fi ibsa isaa qofa sirreessuu dandeessa."
+      "❌ Qabxiiwwan haquun hin danda'amne:\n\n" +
+      resultsDeleteError.message
     );
 
     return;
   }
 
 
-  /* Gaaffiiwwan qormaataa haqi */
+  /* =====================================================
+     2. GAAFFIIWWAN HAQI
+  ===================================================== */
 
   const {
     error: questionDeleteError
@@ -1661,7 +1768,7 @@ async function deleteExam(id) {
   if (questionDeleteError) {
 
     alert(
-      "Gaaffiiwwan qormaataa haquun hin danda'amne: " +
+      "❌ Gaaffiiwwan qormaataa haquun hin danda'amne:\n\n" +
       questionDeleteError.message
     );
 
@@ -1669,32 +1776,36 @@ async function deleteExam(id) {
   }
 
 
-  /* Qormaata haqi */
+  /* =====================================================
+     3. QORMAATA HAQI
+  ===================================================== */
 
   const {
-    error
+    error: examDeleteError
   } = await supabaseClient
     .from("exams")
     .delete()
     .eq("id", id);
 
-  if (error) {
+  if (examDeleteError) {
 
     alert(
-      "Qormaata haquun hin danda'amne: " +
-      error.message
+      "❌ Qormaata haquun hin danda'amne:\n\n" +
+      examDeleteError.message
     );
 
     return;
   }
 
   alert(
-    "🗑️ Qormaanni haqameera."
+    "✅ Qormaanni haqameera.\n\n" +
+    "Qabxiiwwan isaa fi gaaffiiwwan isaa waliin haqamaniiru."
   );
 
   await loadAdminExams();
   await loadQuestionExamSelect();
   await loadAdminQuestions();
+  await loadAdminResults();
   await loadExams();
 }
 
@@ -1704,6 +1815,8 @@ async function deleteExam(id) {
 ========================================================= */
 
 async function loadQuestionExamSelect() {
+
+  if (!isAdminLoggedIn()) return;
 
   const select =
     document.getElementById(
@@ -1750,6 +1863,11 @@ async function loadQuestionExamSelect() {
 ========================================================= */
 
 async function createQuestion() {
+
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    return;
+  }
 
   const examId =
     document.getElementById(
@@ -1891,6 +2009,8 @@ async function createQuestion() {
 
 async function loadAdminQuestions() {
 
+  if (!isAdminLoggedIn()) return;
+
   const box =
     document.getElementById(
       "adminQuestionsList"
@@ -2022,6 +2142,12 @@ function hideAdminPanels() {
 
 async function openAdminPanel(id) {
 
+  if (!isAdminLoggedIn()) {
+    alert("⛔ Admin qofa.");
+    showPage("rolePage");
+    return;
+  }
+
   hideAdminPanels();
 
   const panel =
@@ -2104,6 +2230,8 @@ function adminLogout() {
   localStorage.removeItem(
     "admin_logged"
   );
+
+  hideAdminPanels();
 
   showPage("rolePage");
 }
@@ -2559,7 +2687,9 @@ document.addEventListener(
       );
 
 
-    /* ADMIN BUTTONS */
+    /* =====================================================
+       ADMIN BUTTONS
+    ===================================================== */
 
     document
       .getElementById(
@@ -2693,7 +2823,9 @@ document.addEventListener(
       );
 
 
-    /* RESTORE */
+    /* =====================================================
+       RESTORE
+    ===================================================== */
 
     await restoreStudent();
 
