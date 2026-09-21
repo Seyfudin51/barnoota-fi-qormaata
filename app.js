@@ -4,6 +4,7 @@ let currentQuestions = [];
 let currentQuestionIndex = 0;
 let currentAnswers = [];
 let selectedAnswer = null;
+let studentAuthMode = "new";
 
 
 /* =========================================================
@@ -25,12 +26,64 @@ function showPage(id) {
 
 
 /* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function generateActivationCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(
+      Math.floor(Math.random() * chars.length)
+    );
+  }
+
+  return code;
+}
+
+
+function generateStudentCode(name) {
+  const cleanName = name
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 6);
+
+  const random = Math.floor(1000 + Math.random() * 9000);
+
+  return `ST-${cleanName || "USER"}-${random}`;
+}
+
+
+function setMessage(id, text, color = "#2563eb") {
+  const el = document.getElementById(id);
+
+  if (!el) return;
+
+  el.textContent = text;
+  el.style.color = color;
+}
+
+
+/* =========================================================
    ROLE
 ========================================================= */
 
 function openStudentLogin() {
   showPage("loginPage");
+  setStudentAuthMode("new");
 }
+
 
 function openAdminLogin() {
   showPage("adminLoginPage");
@@ -38,7 +91,7 @@ function openAdminLogin() {
 
 
 /* =========================================================
-   ADMIN SECURITY CHECK
+   ADMIN SECURITY
 ========================================================= */
 
 function isAdminLoggedIn() {
@@ -47,89 +100,392 @@ function isAdminLoggedIn() {
 
 
 /* =========================================================
-   STUDENT LOGIN
+   STUDENT AUTH MODE
 ========================================================= */
 
-async function studentLogin() {
-  const input = document.getElementById("nameInput");
-  const message = document.getElementById("studentLoginMessage");
+function setStudentAuthMode(mode) {
+  studentAuthMode = mode;
 
-  const name = input.value.trim();
+  const description =
+    document.getElementById("studentAuthDescription");
+
+  const newButton =
+    document.getElementById("newStudentModeButton");
+
+  const existingButton =
+    document.getElementById("existingStudentModeButton");
+
+  const idBox =
+    document.getElementById("studentIdBox");
+
+  const codeBox =
+    document.getElementById("activationCodeBox");
+
+  const registerButton =
+    document.getElementById("studentRegisterButton");
+
+  const loginButton =
+    document.getElementById("studentLoginButton");
+
+  if (mode === "new") {
+
+    description.textContent =
+      "Account haaraa uumuuf maqaa kee galchi.";
+
+    newButton.classList.add("active");
+    existingButton.classList.remove("active");
+
+    idBox.style.display = "none";
+    codeBox.style.display = "none";
+
+    registerButton.style.display = "block";
+    loginButton.style.display = "none";
+
+  } else {
+
+    description.textContent =
+      "Maqaa, Student ID fi Activation Code kee galchi.";
+
+    newButton.classList.remove("active");
+    existingButton.classList.add("active");
+
+    idBox.style.display = "block";
+    codeBox.style.display = "block";
+
+    registerButton.style.display = "none";
+    loginButton.style.display = "block";
+  }
+
+  setMessage(
+    "studentLoginMessage",
+    "",
+    "#2563eb"
+  );
+}
+
+
+/* =========================================================
+   NEW STUDENT REGISTRATION
+========================================================= */
+
+async function registerStudent() {
+
+  const nameInput =
+    document.getElementById("nameInput");
+
+  const name =
+    nameInput.value.trim();
 
   if (!name) {
-    message.textContent = "Maqaa kee galchi.";
-    message.style.color = "#dc2626";
+    setMessage(
+      "studentLoginMessage",
+      "Maqaa kee galchi.",
+      "#dc2626"
+    );
     return;
   }
 
-  message.textContent = "Seenaa jira...";
-  message.style.color = "#2563eb";
+  setMessage(
+    "studentLoginMessage",
+    "Account kee uumaa jira...",
+    "#2563eb"
+  );
 
   try {
-    let {
-      data: students,
+
+    /* Prevent exact duplicate registration */
+    const {
+      data: existingStudents,
+      error: checkError
+    } = await supabaseClient
+      .from("students")
+      .select("id,name,status,student_code,activation_code")
+      .ilike("name", name)
+      .limit(1);
+
+    if (checkError) throw checkError;
+
+    if (
+      existingStudents &&
+      existingStudents.length > 0
+    ) {
+
+      const existing =
+        existingStudents[0];
+
+      setMessage(
+        "studentLoginMessage",
+        "Maqaan kun duraan account qaba. 'Account qaba' filadhu; Student ID fi Activation Code galchi.",
+        "#dc2626"
+      );
+
+      return;
+    }
+
+
+    const studentCode =
+      generateStudentCode(name);
+
+    const activationCode =
+      generateActivationCode();
+
+
+    const {
+      data,
       error
     } = await supabaseClient
       .from("students")
-      .select("*")
-      .eq("name", name)
-      .limit(1);
+      .insert([
+        {
+          name: name,
+          student_code: studentCode,
+          activation_code: activationCode,
+          status: "pending"
+        }
+      ])
+      .select()
+      .single();
 
     if (error) throw error;
 
-    if (students && students.length > 0) {
 
-      currentStudent = students[0];
+    currentStudent = data;
 
-    } else {
+    localStorage.setItem(
+      "student_id",
+      data.id
+    );
 
-      const cleanName = name
-        .toUpperCase()
-        .replace(/[^A-Z0-9]/g, "")
-        .slice(0, 8);
 
-      const studentCode =
-        "ST-" +
-        (cleanName || "USER") +
-        "-" +
-        Math.floor(1000 + Math.random() * 9000);
+    /* Show credentials immediately */
+    const message = document.getElementById(
+      "studentLoginMessage"
+    );
 
-      const {
-        data,
-        error: insertError
-      } = await supabaseClient
-        .from("students")
-        .insert([
-          {
-            name: name,
-            student_code: studentCode
-          }
-        ])
-        .select()
-        .single();
+    message.innerHTML = `
+      <div style="
+        padding:14px;
+        margin-top:10px;
+        border-radius:12px;
+        background:#eff6ff;
+        color:#1e3a8a;
+        line-height:1.7;
+      ">
+        <b>✅ Galmeen kee milkaa'eera!</b><br><br>
 
-      if (insertError) throw insertError;
+        🆔 <b>Student ID:</b>
+        ${escapeHTML(data.student_code)}
+        <br>
 
-      currentStudent = data;
-    }
+        🔐 <b>Activation Code:</b>
+        ${escapeHTML(data.activation_code)}
+        <br><br>
 
-    localStorage.setItem("student_id", currentStudent.id);
+        ⏳ <b>Status:</b> Eegaa jiru
+        <br><br>
 
-    document.getElementById("studentWelcomeName").textContent =
-      currentStudent.name;
+        Admin 1 ykn Admin 2 akka siif eeyyamu eegi.
+        ID fi Activation Code kee hin dagatin.
+      </div>
+    `;
 
-    await loadStudentHome();
+    message.style.color = "#1e3a8a";
 
-    showPage("homePage");
+    /* Do not enter student home while pending */
+    localStorage.removeItem("student_id");
 
   } catch (error) {
 
     console.error(error);
 
-    message.textContent =
-      "Dogoggorri uumame: " + error.message;
+    setMessage(
+      "studentLoginMessage",
+      "Dogoggorri uumame: " + error.message,
+      "#dc2626"
+    );
+  }
+}
 
-    message.style.color = "#dc2626";
+
+/* =========================================================
+   EXISTING STUDENT LOGIN
+========================================================= */
+
+async function studentLogin() {
+
+  const name =
+    document.getElementById(
+      "nameInput"
+    ).value.trim();
+
+  const studentCode =
+    document.getElementById(
+      "studentIdInput"
+    ).value.trim();
+
+  const activationCode =
+    document.getElementById(
+      "activationCodeInput"
+    ).value.trim().toUpperCase();
+
+
+  if (!name) {
+
+    setMessage(
+      "studentLoginMessage",
+      "Maqaa kee galchi.",
+      "#dc2626"
+    );
+
+    return;
+  }
+
+
+  if (!studentCode) {
+
+    setMessage(
+      "studentLoginMessage",
+      "Student ID kee galchi.",
+      "#dc2626"
+    );
+
+    return;
+  }
+
+
+  if (!activationCode) {
+
+    setMessage(
+      "studentLoginMessage",
+      "Activation Code kee galchi.",
+      "#dc2626"
+    );
+
+    return;
+  }
+
+
+  setMessage(
+    "studentLoginMessage",
+    "Account kee mirkaneessaa jira...",
+    "#2563eb"
+  );
+
+
+  try {
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("students")
+      .select("*")
+      .eq(
+        "student_code",
+        studentCode
+      )
+      .eq(
+        "activation_code",
+        activationCode
+      )
+      .limit(1);
+
+
+    if (error) throw error;
+
+
+    if (
+      !data ||
+      data.length === 0
+    ) {
+
+      setMessage(
+        "studentLoginMessage",
+        "Student ID ykn Activation Code sirrii miti.",
+        "#dc2626"
+      );
+
+      return;
+    }
+
+
+    const student =
+      data[0];
+
+
+    if (
+      student.status !== "active"
+    ) {
+
+      if (
+        student.status === "pending" ||
+        !student.status
+      ) {
+
+        setMessage(
+          "studentLoginMessage",
+          "⏳ Account kee ammallee Admin irraa hin eeyyamamne.",
+          "#d97706"
+        );
+
+      } else if (
+        student.status === "rejected"
+      ) {
+
+        setMessage(
+          "studentLoginMessage",
+          "❌ Account kee Admin irraa didameera.",
+          "#dc2626"
+        );
+
+      } else {
+
+        setMessage(
+          "studentLoginMessage",
+          "Account kee hojii irra hin jiru.",
+          "#dc2626"
+        );
+      }
+
+      return;
+    }
+
+
+    /*
+      Name is NOT used to identify the account.
+      Student ID + Activation Code identify it.
+      Therefore a small name spelling difference
+      does not change the account.
+    */
+
+    currentStudent = student;
+
+    localStorage.setItem(
+      "student_id",
+      student.id
+    );
+
+
+    document.getElementById(
+      "studentWelcomeName"
+    ).textContent =
+      student.name;
+
+
+    await loadStudentHome();
+
+    showPage("homePage");
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setMessage(
+      "studentLoginMessage",
+      "Dogoggora: " + error.message,
+      "#dc2626"
+    );
   }
 }
 
@@ -140,9 +496,11 @@ async function studentLogin() {
 
 async function restoreStudent() {
 
-  const id = localStorage.getItem("student_id");
+  const id =
+    localStorage.getItem("student_id");
 
   if (!id) return;
+
 
   const {
     data,
@@ -153,9 +511,51 @@ async function restoreStudent() {
     .eq("id", id)
     .single();
 
-  if (!error && data) {
+
+  if (
+    !error &&
+    data &&
+    data.status === "active"
+  ) {
+
     currentStudent = data;
+
+  } else {
+
+    localStorage.removeItem(
+      "student_id"
+    );
+
+    currentStudent = null;
   }
+}
+
+
+/* =========================================================
+   STUDENT ACCOUNT STATUS
+========================================================= */
+
+function showStudentAccountStatus() {
+
+  const box =
+    document.getElementById(
+      "studentAccountStatus"
+    );
+
+  if (!box || !currentStudent) return;
+
+  box.innerHTML = `
+    <div style="
+      padding:12px;
+      border-radius:12px;
+      background:#f0fdf4;
+      color:#166534;
+      margin-bottom:14px;
+    ">
+      🆔 <b>Student ID:</b>
+      ${escapeHTML(currentStudent.student_code)}
+    </div>
+  `;
 }
 
 
@@ -167,12 +567,24 @@ async function loadStudentHome() {
 
   if (!currentStudent) return;
 
-  document.getElementById("studentWelcomeName").textContent =
+
+  document.getElementById(
+    "studentWelcomeName"
+  ).textContent =
     currentStudent.name;
 
-  const box = document.getElementById("studentLessons");
 
-  box.innerHTML = "<p>Barnoota fe'aa jira...</p>";
+  showStudentAccountStatus();
+
+
+  const box =
+    document.getElementById(
+      "studentLessons"
+    );
+
+  box.innerHTML =
+    "<p>Barnoota fe'aa jira...</p>";
+
 
   const {
     data,
@@ -184,6 +596,7 @@ async function loadStudentHome() {
       ascending: false
     });
 
+
   if (error) {
 
     box.innerHTML =
@@ -192,7 +605,11 @@ async function loadStudentHome() {
     return;
   }
 
-  if (!data || data.length === 0) {
+
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
     box.innerHTML = `
       <div class="lesson-card">
@@ -206,30 +623,41 @@ async function loadStudentHome() {
     return;
   }
 
-  box.innerHTML = data.map(lesson => `
-    <div class="lesson-card">
 
-      <div class="card-icon">📖</div>
+  box.innerHTML =
+    data.map(
+      lesson => `
+        <div class="lesson-card">
 
-      <div>
-        <h3>${escapeHTML(lesson.title)}</h3>
+          <div class="card-icon">
+            📖
+          </div>
 
-        <p>
-          ${escapeHTML(
-            lesson.description || "Barnoota haaraa"
-          )}
-        </p>
-      </div>
+          <div>
 
-      <button
-        class="open-btn"
-        onclick="openLesson(${lesson.id})"
-      >
-        Ilaali
-      </button>
+            <h3>
+              ${escapeHTML(lesson.title)}
+            </h3>
 
-    </div>
-  `).join("");
+            <p>
+              ${escapeHTML(
+                lesson.description ||
+                "Barnoota haaraa"
+              )}
+            </p>
+
+          </div>
+
+          <button
+            class="open-btn"
+            onclick="openLesson(${lesson.id})"
+          >
+            Ilaali
+          </button>
+
+        </div>
+      `
+    ).join("");
 }
 
 
@@ -248,23 +676,38 @@ async function openLesson(id) {
     .eq("id", id)
     .single();
 
+
   if (error) {
 
-    alert("Barnoota banuun hin danda'amne.");
+    alert(
+      "Barnoota banuun hin danda'amne."
+    );
 
     return;
   }
 
-  document.getElementById("lessonDetailTitle").textContent =
+
+  document.getElementById(
+    "lessonDetailTitle"
+  ).textContent =
     data.title;
 
-  document.getElementById("lessonDetailDescription").textContent =
+
+  document.getElementById(
+    "lessonDetailDescription"
+  ).textContent =
     data.description || "";
 
-  document.getElementById("lessonDetailContent").textContent =
+
+  document.getElementById(
+    "lessonDetailContent"
+  ).textContent =
     data.content || "";
 
-  showPage("lessonDetailPage");
+
+  showPage(
+    "lessonDetailPage"
+  );
 }
 
 
@@ -274,9 +717,14 @@ async function openLesson(id) {
 
 async function loadExams() {
 
-  const box = document.getElementById("examList");
+  const box =
+    document.getElementById(
+      "examList"
+    );
 
-  box.innerHTML = "<p>Qormaata fe'aa jira...</p>";
+  box.innerHTML =
+    "<p>Qormaata fe'aa jira...</p>";
+
 
   const {
     data,
@@ -288,6 +736,7 @@ async function loadExams() {
       ascending: false
     });
 
+
   if (error) {
 
     box.innerHTML =
@@ -296,41 +745,61 @@ async function loadExams() {
     return;
   }
 
-  if (!data || data.length === 0) {
+
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
     box.innerHTML = `
       <div class="exam-card">
-        <h3>📝 Qormaanni hin jiru</h3>
-        <p>Admin qormaata yeroo booda ni uuma.</p>
+
+        <h3>
+          📝 Qormaanni hin jiru
+        </h3>
+
+        <p>
+          Admin qormaata yeroo booda ni uuma.
+        </p>
+
       </div>
     `;
 
     return;
   }
 
-  box.innerHTML = data.map(exam => `
-    <div class="exam-card">
 
-      <div class="card-icon">📝</div>
+  box.innerHTML =
+    data.map(
+      exam => `
+        <div class="exam-card">
 
-      <h3>${escapeHTML(exam.title)}</h3>
+          <div class="card-icon">
+            📝
+          </div>
 
-      <p>
-        ${escapeHTML(
-          exam.description || "Qormaata"
-        )}
-      </p>
+          <h3>
+            ${escapeHTML(exam.title)}
+          </h3>
 
-      <button
-        class="primary-btn"
-        style="margin-top:14px"
-        onclick="startExam(${exam.id})"
-      >
-        Qormaata Jalqabi →
-      </button>
+          <p>
+            ${escapeHTML(
+              exam.description ||
+              "Qormaata"
+            )}
+          </p>
 
-    </div>
-  `).join("");
+          <button
+            class="primary-btn"
+            style="margin-top:14px"
+            onclick="startExam(${exam.id})"
+          >
+            Qormaata Jalqabi →
+          </button>
+
+        </div>
+      `
+    ).join("");
 }
 
 
@@ -339,6 +808,16 @@ async function loadExams() {
 ========================================================= */
 
 async function startExam(examId) {
+
+  if (!currentStudent) {
+
+    alert(
+      "Mee jalqaba akka barataa seeni."
+    );
+
+    return;
+  }
+
 
   const {
     data: exam,
@@ -349,12 +828,16 @@ async function startExam(examId) {
     .eq("id", examId)
     .single();
 
+
   if (examError) {
 
-    alert("Qormaata banuun hin danda'amne.");
+    alert(
+      "Qormaata banuun hin danda'amne."
+    );
 
     return;
   }
+
 
   const {
     data: questions,
@@ -367,6 +850,7 @@ async function startExam(examId) {
       ascending: true
     });
 
+
   if (error) {
 
     alert(
@@ -376,7 +860,11 @@ async function startExam(examId) {
     return;
   }
 
-  if (!questions || questions.length === 0) {
+
+  if (
+    !questions ||
+    questions.length === 0
+  ) {
 
     alert(
       "Qormaata kana keessatti gaaffiin hin jiru."
@@ -385,16 +873,24 @@ async function startExam(examId) {
     return;
   }
 
+
   currentExam = exam;
   currentQuestions = questions;
   currentQuestionIndex = 0;
   currentAnswers = [];
   selectedAnswer = null;
 
-  document.getElementById("examTitle").textContent =
+
+  document.getElementById(
+    "examTitle"
+  ).textContent =
     exam.title;
 
-  showPage("examPage");
+
+  showPage(
+    "examPage"
+  );
+
 
   showQuestion();
 }
@@ -407,26 +903,45 @@ async function startExam(examId) {
 function showQuestion() {
 
   const q =
-    currentQuestions[currentQuestionIndex];
+    currentQuestions[
+      currentQuestionIndex
+    ];
+
 
   if (!q) return;
 
-  selectedAnswer =
-    currentAnswers[currentQuestionIndex] || null;
 
-  document.getElementById("questionNumber").textContent =
+  selectedAnswer =
+    currentAnswers[
+      currentQuestionIndex
+    ] || null;
+
+
+  document.getElementById(
+    "questionNumber"
+  ).textContent =
     `${currentQuestionIndex + 1} / ${currentQuestions.length}`;
 
-  document.getElementById("questionText").textContent =
+
+  document.getElementById(
+    "questionText"
+  ).textContent =
     q.question;
 
-  const percent =
-    ((currentQuestionIndex + 1) /
-      currentQuestions.length) *
-    100;
 
-  document.getElementById("progressBar").style.width =
+  const percent =
+    (
+      ((currentQuestionIndex + 1) /
+        currentQuestions.length) *
+      100
+    );
+
+
+  document.getElementById(
+    "progressBar"
+  ).style.width =
     percent + "%";
+
 
   const options = [
     ["A", q.option_a],
@@ -435,25 +950,33 @@ function showQuestion() {
     ["D", q.option_d]
   ];
 
-  document.getElementById("optionsBox").innerHTML =
-    options.map(([letter, text]) => `
-      <button
-        class="option ${
-          selectedAnswer === letter
-            ? "selected"
-            : ""
-        }"
-        onclick="selectAnswer('${letter}')"
-      >
-        <b>${letter})</b>
-        ${escapeHTML(text)}
-      </button>
-    `).join("");
+
+  document.getElementById(
+    "optionsBox"
+  ).innerHTML =
+    options.map(
+      ([letter, text]) => `
+        <button
+          class="option ${
+            selectedAnswer === letter
+              ? "selected"
+              : ""
+          }"
+          onclick="selectAnswer('${letter}')"
+          type="button"
+        >
+          <b>${letter})</b>
+          ${escapeHTML(text)}
+        </button>
+      `
+    ).join("");
+
 
   const next =
     document.getElementById(
       "nextQuestionButton"
     );
+
 
   if (
     currentQuestionIndex ===
@@ -477,24 +1000,37 @@ function showQuestion() {
 
 function selectAnswer(answer) {
 
-  selectedAnswer = answer;
+  selectedAnswer =
+    answer;
+
 
   currentAnswers[
     currentQuestionIndex
   ] = answer;
 
+
   document
     .querySelectorAll(".option")
     .forEach(btn => {
 
-      btn.classList.remove("selected");
+      btn.classList.remove(
+        "selected"
+      );
+
+
+      const text =
+        btn.textContent.trim();
+
 
       if (
-        btn.textContent
-          .trim()
-          .startsWith(answer + ")")
+        text.startsWith(
+          answer + ")"
+        )
       ) {
-        btn.classList.add("selected");
+
+        btn.classList.add(
+          "selected"
+        );
       }
 
     });
@@ -516,9 +1052,11 @@ async function nextQuestion() {
     return;
   }
 
+
   currentAnswers[
     currentQuestionIndex
   ] = selectedAnswer;
+
 
   if (
     currentQuestionIndex <
@@ -544,6 +1082,7 @@ async function finishExam() {
 
   let score = 0;
 
+
   currentQuestions.forEach(
     (q, index) => {
 
@@ -551,8 +1090,9 @@ async function finishExam() {
         currentAnswers[index] &&
         currentAnswers[index]
           .toUpperCase() ===
-        q.correct_answer
-          .toUpperCase()
+        String(
+          q.correct_answer || ""
+        ).toUpperCase()
       ) {
 
         score++;
@@ -561,13 +1101,19 @@ async function finishExam() {
     }
   );
 
+
   const total =
     currentQuestions.length;
 
+
   const percentage =
     total > 0
-      ? ((score / total) * 100).toFixed(1)
+      ? Number(
+          ((score / total) * 100)
+            .toFixed(1)
+        )
       : 0;
+
 
   if (
     currentStudent &&
@@ -597,6 +1143,7 @@ async function finishExam() {
         }
       ]);
 
+
     if (error) {
 
       console.error(error);
@@ -606,6 +1153,7 @@ async function finishExam() {
       );
     }
   }
+
 
   showScore(
     score,
@@ -630,28 +1178,39 @@ function showScore(
   ).textContent =
     `${score} / ${total}`;
 
+
   document.getElementById(
     "percentageText"
   ).textContent =
     `${percentage}%`;
+
 
   document.getElementById(
     "scoreValue"
   ).textContent =
     score;
 
+
   document.getElementById(
     "totalValue"
   ).textContent =
     total;
 
-  showPage("scorePage");
+
+  showPage(
+    "scorePage"
+  );
 }
 
+
+/* =========================================================
+   STUDENT SCORE
+========================================================= */
 
 async function showLatestStudentScore() {
 
   if (!currentStudent) return;
+
 
   const {
     data,
@@ -672,12 +1231,21 @@ async function showLatestStudentScore() {
     .limit(1)
     .maybeSingle();
 
-  if (error || !data) {
 
-    showScore(0, 0, 0);
+  if (
+    error ||
+    !data
+  ) {
+
+    showScore(
+      0,
+      0,
+      0
+    );
 
     return;
   }
+
 
   showScore(
     data.score,
@@ -695,15 +1263,45 @@ function loadProfile() {
 
   if (!currentStudent) return;
 
+
   document.getElementById(
     "profileName"
   ).textContent =
     currentStudent.name;
 
+
   document.getElementById(
     "profileCode"
   ).textContent =
-    currentStudent.student_code;
+    currentStudent.student_code ||
+    "-";
+
+
+  const activation =
+    document.getElementById(
+      "profileActivationCode"
+    );
+
+  if (activation) {
+    activation.textContent =
+      currentStudent.activation_code ||
+      "-";
+  }
+
+
+  const status =
+    document.getElementById(
+      "profileStatus"
+    );
+
+  if (status) {
+
+    status.textContent =
+      currentStudent.status === "active"
+        ? "Active"
+        : currentStudent.status || "-";
+  }
+
 
   document.getElementById(
     "profileNameInput"
@@ -714,20 +1312,28 @@ function loadProfile() {
 
 async function saveProfile() {
 
+  if (!currentStudent) return;
+
+
   const input =
     document.getElementById(
       "profileNameInput"
     );
 
+
   const name =
     input.value.trim();
 
+
   if (!name) {
 
-    alert("Maqaa galchi.");
+    alert(
+      "Maqaa galchi."
+    );
 
     return;
   }
+
 
   const {
     data,
@@ -744,6 +1350,7 @@ async function saveProfile() {
     .select()
     .single();
 
+
   if (error) {
 
     alert(
@@ -753,17 +1360,22 @@ async function saveProfile() {
     return;
   }
 
-  currentStudent = data;
+
+  currentStudent =
+    data;
+
 
   document.getElementById(
     "profileName"
   ).textContent =
     data.name;
 
+
   document.getElementById(
     "studentWelcomeName"
   ).textContent =
     data.name;
+
 
   alert(
     "Maqaan kee sirriitti haaromfame."
@@ -782,17 +1394,23 @@ async function adminLogin() {
       "adminUsername"
     ).value.trim();
 
+
   const password =
     document.getElementById(
       "adminPassword"
     ).value;
+
 
   const message =
     document.getElementById(
       "adminLoginMessage"
     );
 
-  if (!username || !password) {
+
+  if (
+    !username ||
+    !password
+  ) {
 
     message.textContent =
       "Username fi password guuti.";
@@ -803,11 +1421,13 @@ async function adminLogin() {
     return;
   }
 
+
   message.textContent =
     "Seenaa jira...";
 
   message.style.color =
     "#2563eb";
+
 
   const {
     data,
@@ -825,6 +1445,7 @@ async function adminLogin() {
     )
     .limit(1);
 
+
   if (error) {
 
     message.textContent =
@@ -836,6 +1457,7 @@ async function adminLogin() {
 
     return;
   }
+
 
   if (
     !data ||
@@ -851,12 +1473,17 @@ async function adminLogin() {
     return;
   }
 
+
   localStorage.setItem(
     "admin_logged",
     "true"
   );
 
-  showPage("adminPage");
+
+  showPage(
+    "adminPage"
+  );
+
 
   hideAdminPanels();
 }
@@ -870,13 +1497,16 @@ async function loadAdminStudents() {
 
   if (!isAdminLoggedIn()) return;
 
+
   const box =
     document.getElementById(
       "adminStudentsList"
     );
 
+
   box.innerHTML =
-    "<p>Fe'aa jira...</p>";
+    "<p>Barattoota fe'aa jira...</p>";
+
 
   const {
     data,
@@ -888,15 +1518,19 @@ async function loadAdminStudents() {
       ascending: false
     });
 
+
   if (error) {
 
     box.innerHTML =
       "<p>" +
-      escapeHTML(error.message) +
+      escapeHTML(
+        error.message
+      ) +
       "</p>";
 
     return;
   }
+
 
   if (
     !data ||
@@ -909,44 +1543,758 @@ async function loadAdminStudents() {
     return;
   }
 
+
   box.innerHTML =
     data.map(
-      (student, i) => `
-        <div class="admin-list-item">
+      (student, index) => {
 
-          <b>
-            ${i + 1}.
-            ${escapeHTML(student.name)}
-          </b>
+        const status =
+          student.status ||
+          "pending";
 
-          <small>
-            Code:
-            ${escapeHTML(
-              student.student_code
-            )}
-          </small>
 
-        </div>
-      `
+        let statusText =
+          "⏳ Pending";
+
+        let statusColor =
+          "#d97706";
+
+
+        if (
+          status === "active"
+        ) {
+
+          statusText =
+            "✅ Active";
+
+          statusColor =
+            "#16a34a";
+
+        } else if (
+          status === "rejected"
+        ) {
+
+          statusText =
+            "❌ Rejected";
+
+          statusColor =
+            "#dc2626";
+        }
+
+
+        return `
+          <div
+            class="admin-list-item"
+            style="margin-bottom:12px;"
+          >
+
+            <b>
+              ${index + 1}.
+              ${escapeHTML(
+                student.name
+              )}
+            </b>
+
+            <small>
+
+              🆔 Student ID:
+              <b>
+                ${escapeHTML(
+                  student.student_code || "-"
+                )}
+              </b>
+
+              <br>
+
+              🔐 Activation Code:
+              <b>
+                ${escapeHTML(
+                  student.activation_code || "-"
+                )}
+              </b>
+
+              <br>
+
+              📌 Status:
+              <b style="color:${statusColor}">
+                ${statusText}
+              </b>
+
+            </small>
+
+
+            <div
+              style="
+                display:flex;
+                gap:7px;
+                flex-wrap:wrap;
+                margin-top:10px;
+              "
+            >
+
+              ${
+                status !== "active"
+                  ? `
+                    <button
+                      onclick="approveStudent('${student.id}')"
+                      style="
+                        padding:8px 12px;
+                        border:0;
+                        border-radius:9px;
+                        background:#16a34a;
+                        color:white;
+                        cursor:pointer;
+                      "
+                    >
+                      ✅ Eeyyami
+                    </button>
+                  `
+                  : ""
+              }
+
+
+              ${
+                status !== "rejected"
+                  ? `
+                    <button
+                      onclick="rejectStudent('${student.id}')"
+                      style="
+                        padding:8px 12px;
+                        border:0;
+                        border-radius:9px;
+                        background:#dc2626;
+                        color:white;
+                        cursor:pointer;
+                      "
+                    >
+                      ❌ Didii
+                    </button>
+                  `
+                  : ""
+              }
+
+
+              <button
+                onclick="deleteStudent('${student.id}')"
+                style="
+                  padding:8px 12px;
+                  border:0;
+                  border-radius:9px;
+                  background:#6b7280;
+                  color:white;
+                  cursor:pointer;
+                "
+              >
+                🗑️ Haqi
+              </button>
+
+            </div>
+
+          </div>
+        `;
+      }
     ).join("");
 }
 
 
 /* =========================================================
-   ADMIN RESULTS
+   APPROVE STUDENT
+========================================================= */
+
+async function approveStudent(id) {
+
+  if (!isAdminLoggedIn()) return;
+
+
+  const {
+    error
+  } = await supabaseClient
+    .from("students")
+    .update({
+      status: "active"
+    })
+    .eq(
+      "id",
+      id
+    );
+
+
+  if (error) {
+
+    alert(
+      "Barataa eeyyamuu hin dandeenye:\n" +
+      error.message
+    );
+
+    return;
+  }
+
+
+  alert(
+    "✅ Barataan eeyyamameera."
+  );
+
+
+  await loadAdminStudents();
+}
+
+
+/* =========================================================
+   REJECT STUDENT
+========================================================= */
+
+async function rejectStudent(id) {
+
+  if (!isAdminLoggedIn()) return;
+
+
+  const confirmation =
+    confirm(
+      "Barataa kana diduu barbaaddaa?"
+    );
+
+
+  if (!confirmation) return;
+
+
+  const {
+    error
+  } = await supabaseClient
+    .from("students")
+    .update({
+      status: "rejected"
+    })
+    .eq(
+      "id",
+      id
+    );
+
+
+  if (error) {
+
+    alert(
+      "Barataa diduun hin danda'amne:\n" +
+      error.message
+    );
+
+    return;
+  }
+
+
+  alert(
+    "❌ Barataan didameera."
+  );
+
+
+  await loadAdminStudents();
+}
+
+
+/* =========================================================
+   DELETE STUDENT
+========================================================= */
+
+async function deleteStudent(id) {
+
+  if (!isAdminLoggedIn()) return;
+
+
+  const confirmation =
+    confirm(
+      "⚠️ Barataa kana haquu barbaaddaa?\n\n" +
+      "Qabxiiwwan isaa waliin account isaa ni haqama."
+    );
+
+
+  if (!confirmation) return;
+
+
+  /* Delete results first */
+  const {
+    error: resultError
+  } = await supabaseClient
+    .from("results")
+    .delete()
+    .eq(
+      "student_id",
+      id
+    );
+
+
+  if (resultError) {
+
+    alert(
+      "Qabxiiwwan barataa haquun hin danda'amne:\n" +
+      resultError.message
+    );
+
+    return;
+  }
+
+
+  const {
+    error
+  } = await supabaseClient
+    .from("students")
+    .delete()
+    .eq(
+      "id",
+      id
+    );
+
+
+  if (error) {
+
+    alert(
+      "Barataa haquun hin danda'amne:\n" +
+      error.message
+    );
+
+    return;
+  }
+
+
+  alert(
+    "🗑️ Account barataa haqameera."
+  );
+
+
+  await loadAdminStudents();
+  await loadAdminResults();
+}
+
+
+/* =========================================================
+   ADMIN RESULTS TABLE
 ========================================================= */
 
 async function loadAdminResults() {
 
   if (!isAdminLoggedIn()) return;
 
+
+  const tbody =
+    document.getElementById(
+      "adminResultsTableBody"
+    );
+
+
+  const thead =
+    document.getElementById(
+      "adminResultsTableHead"
+    );
+
+
+  if (!tbody || !thead) return;
+
+
+  tbody.innerHTML =
+    `<tr>
+      <td colspan="10">
+        Bu'aa fe'aa jira...
+      </td>
+    </tr>`;
+
+
+  const [
+    studentsResponse,
+    examsResponse,
+    resultsResponse
+  ] = await Promise.all([
+
+    supabaseClient
+      .from("students")
+      .select("*")
+      .order("created_at", {
+        ascending: true
+      }),
+
+    supabaseClient
+      .from("exams")
+      .select("*")
+      .order("created_at", {
+        ascending: true
+      }),
+
+    supabaseClient
+      .from("results")
+      .select("*")
+  ]);
+
+
+  if (
+    studentsResponse.error ||
+    examsResponse.error ||
+    resultsResponse.error
+  ) {
+
+    const error =
+      studentsResponse.error ||
+      examsResponse.error ||
+      resultsResponse.error;
+
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10">
+          ${escapeHTML(
+            error.message
+          )}
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  const students =
+    studentsResponse.data || [];
+
+  const exams =
+    examsResponse.data || [];
+
+  const results =
+    resultsResponse.data || [];
+
+
+  /*
+    Dynamic exam columns
+  */
+
+  thead.innerHTML = `
+    <tr>
+
+      <th>#</th>
+
+      <th>Barataa</th>
+
+      <th>Student ID</th>
+
+      ${exams.map(
+        exam => `
+          <th>
+            ${escapeHTML(
+              exam.title
+            )}
+          </th>
+        `
+      ).join("")}
+
+      <th>Total</th>
+
+      <th>Average</th>
+
+      <th>Rank</th>
+
+    </tr>
+  `;
+
+
+  if (
+    students.length === 0
+  ) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="${6 + exams.length}">
+          Barataan hin jiru.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  /*
+    Calculate student statistics
+  */
+
+  const studentStats =
+    students.map(
+      student => {
+
+        const studentResults =
+          results.filter(
+            result =>
+              String(
+                result.student_id
+              ) ===
+              String(
+                student.id
+              )
+          );
+
+
+        let totalScore = 0;
+        let totalPossible = 0;
+        let percentageSum = 0;
+
+
+        studentResults.forEach(
+          result => {
+
+            totalScore +=
+              Number(
+                result.score || 0
+              );
+
+            totalPossible +=
+              Number(
+                result.total || 0
+              );
+
+            percentageSum +=
+              Number(
+                result.percentage || 0
+              );
+          }
+        );
+
+
+        const completed =
+          studentResults.length;
+
+
+        const average =
+          completed > 0
+            ? Number(
+                (
+                  percentageSum /
+                  completed
+                ).toFixed(1)
+              )
+            : 0;
+
+
+        return {
+          student,
+          studentResults,
+          totalScore,
+          totalPossible,
+          average
+        };
+      }
+    );
+
+
+  /*
+    Rank:
+    higher average first.
+    Students with no result remain without rank.
+  */
+
+  const ranked =
+    studentStats
+      .filter(
+        item =>
+          item.studentResults.length > 0
+      )
+      .sort(
+        (a, b) =>
+          b.average -
+          a.average
+      );
+
+
+  let previousAverage = null;
+  let currentRank = 0;
+
+
+  ranked.forEach(
+    (item, index) => {
+
+      if (
+        previousAverage === null ||
+        item.average !== previousAverage
+      ) {
+
+        currentRank =
+          index + 1;
+      }
+
+
+      item.rank =
+        currentRank;
+
+
+      previousAverage =
+        item.average;
+    }
+  );
+
+
+  const rankMap =
+    new Map();
+
+
+  ranked.forEach(
+    item => {
+
+      rankMap.set(
+        String(
+          item.student.id
+        ),
+        item.rank
+      );
+
+    }
+  );
+
+
+  /*
+    Build table
+  */
+
+  tbody.innerHTML =
+    studentStats.map(
+      (item, index) => {
+
+        const {
+          student,
+          studentResults,
+          totalScore,
+          average
+        } = item;
+
+
+        const resultMap =
+          new Map();
+
+
+        studentResults.forEach(
+          result => {
+
+            resultMap.set(
+              String(
+                result.exam_id
+              ),
+              result
+            );
+
+          }
+        );
+
+
+        const examCells =
+          exams.map(
+            exam => {
+
+              const result =
+                resultMap.get(
+                  String(exam.id)
+                );
+
+
+              if (!result) {
+
+                return `
+                  <td>
+                    —
+                  </td>
+                `;
+              }
+
+
+              return `
+                <td>
+                  <b>
+                    ${escapeHTML(
+                      result.score
+                    )}/${escapeHTML(
+                      result.total
+                    )}
+                  </b>
+                  <br>
+                  <small>
+                    ${escapeHTML(
+                      result.percentage || 0
+                    )}%
+                  </small>
+                </td>
+              `;
+            }
+          ).join("");
+
+
+        const rank =
+          rankMap.get(
+            String(
+              student.id
+            )
+          );
+
+
+        return `
+          <tr>
+
+            <td>
+              ${index + 1}
+            </td>
+
+            <td>
+              <b>
+                ${escapeHTML(
+                  student.name
+                )}
+              </b>
+            </td>
+
+            <td>
+              ${escapeHTML(
+                student.student_code || "-"
+              )}
+            </td>
+
+            ${examCells}
+
+            <td>
+              <b>
+                ${totalScore}
+              </b>
+            </td>
+
+            <td>
+              <b>
+                ${
+                  studentResults.length > 0
+                    ? average + "%"
+                    : "—"
+                }
+              </b>
+            </td>
+
+            <td>
+              <b>
+                ${
+                  rank
+                    ? "#" + rank
+                    : "—"
+                }
+              </b>
+            </td>
+
+          </tr>
+        `;
+      }
+    ).join("");
+}
+
+
+/* =========================================================
+   OLD RESULT LIST SUPPORT
+========================================================= */
+
+async function loadOldAdminResults() {
+
   const box =
     document.getElementById(
       "adminResultsList"
     );
 
-  box.innerHTML =
-    "<p>Bu'aa fe'aa jira...</p>";
+  if (!box) return;
+
 
   const {
     data,
@@ -962,15 +2310,19 @@ async function loadAdminResults() {
       ascending: false
     });
 
+
   if (error) {
 
     box.innerHTML =
       "<p>" +
-      escapeHTML(error.message) +
+      escapeHTML(
+        error.message
+      ) +
       "</p>";
 
     return;
   }
+
 
   if (
     !data ||
@@ -978,77 +2330,49 @@ async function loadAdminResults() {
   ) {
 
     box.innerHTML =
-      "<p>Bu'aan qormaataa hin jiru.</p>";
+      "<p>Bu'aan hin jiru.</p>";
 
     return;
   }
 
+
   box.innerHTML =
     data.map(
       result => `
-        <div class="admin-list-item result-item">
+        <div class="admin-list-item">
 
-          <div style="flex:1">
+          <b>
+            ${escapeHTML(
+              result.students?.name ||
+              "Barataa"
+            )}
+          </b>
 
-            <b>
-              ${escapeHTML(
-                result.students?.name ||
-                "Barataa"
-              )}
-            </b>
+          <small>
+            ${escapeHTML(
+              result.exams?.title ||
+              "Qormaata"
+            )}
 
-            <small>
+            <br>
 
-              ${escapeHTML(
-                result.exams?.title ||
-                "Qormaata"
-              )}
+            ${result.score}/${result.total}
+            (${result.percentage || 0}%)
+          </small>
 
-              <br>
-
-              Code:
-              ${escapeHTML(
-                result.students?.student_code ||
-                ""
-              )}
-
-            </small>
-
-          </div>
-
-          <div
+          <button
+            onclick="deleteResult(${result.id})"
             style="
-              display:flex;
-              align-items:center;
-              gap:10px;
+              padding:8px 12px;
+              border:0;
+              border-radius:9px;
+              background:#dc2626;
+              color:white;
+              cursor:pointer;
             "
           >
-
-            <div class="result-score">
-
-              ${result.score}/${result.total}
-
-              <br>
-
-              ${result.percentage || 0}%
-
-            </div>
-
-            <button
-              onclick="deleteResult(${result.id})"
-              style="
-                padding:8px 12px;
-                border:0;
-                border-radius:9px;
-                background:#dc2626;
-                color:white;
-                cursor:pointer;
-              "
-            >
-              🗑️
-            </button>
-
-          </div>
+            🗑️ Haqi
+          </button>
 
         </div>
       `
@@ -1057,44 +2381,54 @@ async function loadAdminResults() {
 
 
 /* =========================================================
-   DELETE RESULT / SCORE
+   DELETE RESULT
 ========================================================= */
 
 async function deleteResult(id) {
 
   if (!isAdminLoggedIn()) {
-    alert("⛔ Hojii kana Admin qofa raawwachuu danda'a.");
+    alert(
+      "⛔ Admin qofa."
+    );
     return;
   }
 
+
   const confirmation =
     confirm(
-      "⚠️ Qabxii kana haquu akka barbaaddu mirkaneeffattaa?\n\n" +
-      "Qabxiin barataa kun bu'aa keessatti guutumaan guutuutti ni haqama."
+      "⚠️ Qabxii kana haquu akka barbaaddu mirkaneeffattaa?"
     );
 
+
   if (!confirmation) return;
+
 
   const {
     error
   } = await supabaseClient
     .from("results")
     .delete()
-    .eq("id", id);
+    .eq(
+      "id",
+      id
+    );
+
 
   if (error) {
 
     alert(
-      "Qabxii haquun hin danda'amne: " +
+      "Qabxii haquun hin danda'amne:\n" +
       error.message
     );
 
     return;
   }
 
+
   alert(
     "🗑️ Qabxiin haqameera."
   );
+
 
   await loadAdminResults();
 }
@@ -1111,27 +2445,35 @@ async function createLesson() {
     return;
   }
 
+
   const title =
     document.getElementById(
       "lessonTitleInput"
     ).value.trim();
+
 
   const description =
     document.getElementById(
       "lessonDescriptionInput"
     ).value.trim();
 
+
   const content =
     document.getElementById(
       "lessonContentInput"
     ).value.trim();
+
 
   const message =
     document.getElementById(
       "lessonCreateMessage"
     );
 
-  if (!title || !content) {
+
+  if (
+    !title ||
+    !content
+  ) {
 
     message.textContent =
       "Mata duree fi qabiyyee guuti.";
@@ -1141,6 +2483,7 @@ async function createLesson() {
 
     return;
   }
+
 
   const {
     error
@@ -1154,6 +2497,7 @@ async function createLesson() {
       }
     ]);
 
+
   if (error) {
 
     message.textContent =
@@ -1166,11 +2510,13 @@ async function createLesson() {
     return;
   }
 
+
   message.textContent =
     "✅ Barnoonni uumameera.";
 
   message.style.color =
     "#16a34a";
+
 
   document.getElementById(
     "lessonTitleInput"
@@ -1184,6 +2530,7 @@ async function createLesson() {
     "lessonContentInput"
   ).value = "";
 
+
   await loadAdminLessons();
 }
 
@@ -1196,13 +2543,16 @@ async function loadAdminLessons() {
 
   if (!isAdminLoggedIn()) return;
 
+
   const box =
     document.getElementById(
       "adminLessonsList"
     );
 
+
   box.innerHTML =
     "<p>Barnoota fe'aa jira...</p>";
+
 
   const {
     data,
@@ -1214,15 +2564,19 @@ async function loadAdminLessons() {
       ascending: false
     });
 
+
   if (error) {
 
     box.innerHTML =
       "<p>" +
-      escapeHTML(error.message) +
+      escapeHTML(
+        error.message
+      ) +
       "</p>";
 
     return;
   }
+
 
   if (
     !data ||
@@ -1234,6 +2588,7 @@ async function loadAdminLessons() {
 
     return;
   }
+
 
   box.innerHTML =
     data.map(
@@ -1275,6 +2630,7 @@ async function loadAdminLessons() {
               ✏️ Sirreessi
             </button>
 
+
             <button
               onclick="deleteLesson(${lesson.id})"
               style="
@@ -1308,6 +2664,7 @@ async function editLesson(id) {
     return;
   }
 
+
   const {
     data: lesson,
     error
@@ -1317,7 +2674,11 @@ async function editLesson(id) {
     .eq("id", id)
     .single();
 
-  if (error || !lesson) {
+
+  if (
+    error ||
+    !lesson
+  ) {
 
     alert(
       "Barnoota argachuun hin danda'amne."
@@ -1326,13 +2687,16 @@ async function editLesson(id) {
     return;
   }
 
+
   const title =
     prompt(
       "Mata duree barnootaa:",
       lesson.title || ""
     );
 
+
   if (title === null) return;
+
 
   const description =
     prompt(
@@ -1340,7 +2704,9 @@ async function editLesson(id) {
       lesson.description || ""
     );
 
+
   if (description === null) return;
+
 
   const content =
     prompt(
@@ -1348,7 +2714,9 @@ async function editLesson(id) {
       lesson.content || ""
     );
 
+
   if (content === null) return;
+
 
   if (
     !title.trim() ||
@@ -1362,30 +2730,42 @@ async function editLesson(id) {
     return;
   }
 
+
   const {
     error: updateError
   } = await supabaseClient
     .from("lessons")
     .update({
-      title: title.trim(),
-      description: description.trim(),
-      content: content.trim()
+      title:
+        title.trim(),
+
+      description:
+        description.trim(),
+
+      content:
+        content.trim()
     })
-    .eq("id", id);
+    .eq(
+      "id",
+      id
+    );
+
 
   if (updateError) {
 
     alert(
-      "Barnoota sirreessuun hin danda'amne: " +
+      "Barnoota sirreessuun hin danda'amne:\n" +
       updateError.message
     );
 
     return;
   }
 
+
   alert(
-    "✅ Barnoonni sirriitti haaromfameera."
+    "✅ Barnoonni haaromfameera."
   );
+
 
   await loadAdminLessons();
   await loadStudentHome();
@@ -1403,33 +2783,42 @@ async function deleteLesson(id) {
     return;
   }
 
+
   const confirmation =
     confirm(
       "⚠️ Barnoota kana haquu akka barbaaddu mirkaneeffattaa?"
     );
 
+
   if (!confirmation) return;
+
 
   const {
     error
   } = await supabaseClient
     .from("lessons")
     .delete()
-    .eq("id", id);
+    .eq(
+      "id",
+      id
+    );
+
 
   if (error) {
 
     alert(
-      "Barnoota haquun hin danda'amne: " +
+      "Barnoota haquun hin danda'amne:\n" +
       error.message
     );
 
     return;
   }
 
+
   alert(
     "🗑️ Barnoonni haqameera."
   );
+
 
   await loadAdminLessons();
   await loadStudentHome();
@@ -1447,20 +2836,24 @@ async function createExam() {
     return;
   }
 
+
   const title =
     document.getElementById(
       "examTitleInput"
     ).value.trim();
+
 
   const description =
     document.getElementById(
       "examDescriptionInput"
     ).value.trim();
 
+
   const message =
     document.getElementById(
       "examCreateMessage"
     );
+
 
   if (!title) {
 
@@ -1473,6 +2866,7 @@ async function createExam() {
     return;
   }
 
+
   const {
     error
   } = await supabaseClient
@@ -1483,6 +2877,7 @@ async function createExam() {
         description
       }
     ]);
+
 
   if (error) {
 
@@ -1496,19 +2891,23 @@ async function createExam() {
     return;
   }
 
+
   message.textContent =
     "✅ Qormaanni uumameera.";
 
   message.style.color =
     "#16a34a";
 
+
   document.getElementById(
     "examTitleInput"
   ).value = "";
 
+
   document.getElementById(
     "examDescriptionInput"
   ).value = "";
+
 
   await loadAdminExams();
   await loadQuestionExamSelect();
@@ -1523,13 +2922,16 @@ async function loadAdminExams() {
 
   if (!isAdminLoggedIn()) return;
 
+
   const box =
     document.getElementById(
       "adminExamsList"
     );
 
+
   box.innerHTML =
     "<p>Qormaata fe'aa jira...</p>";
+
 
   const {
     data,
@@ -1541,15 +2943,19 @@ async function loadAdminExams() {
       ascending: false
     });
 
+
   if (error) {
 
     box.innerHTML =
       "<p>" +
-      escapeHTML(error.message) +
+      escapeHTML(
+        error.message
+      ) +
       "</p>";
 
     return;
   }
+
 
   if (
     !data ||
@@ -1561,6 +2967,7 @@ async function loadAdminExams() {
 
     return;
   }
+
 
   box.innerHTML =
     data.map(
@@ -1602,6 +3009,7 @@ async function loadAdminExams() {
               ✏️ Sirreessi
             </button>
 
+
             <button
               onclick="deleteExam(${exam.id})"
               style="
@@ -1635,6 +3043,7 @@ async function editExam(id) {
     return;
   }
 
+
   const {
     data: exam,
     error
@@ -1644,7 +3053,11 @@ async function editExam(id) {
     .eq("id", id)
     .single();
 
-  if (error || !exam) {
+
+  if (
+    error ||
+    !exam
+  ) {
 
     alert(
       "Qormaata argachuun hin danda'amne."
@@ -1653,13 +3066,16 @@ async function editExam(id) {
     return;
   }
 
+
   const title =
     prompt(
       "Maqaa qormaataa:",
       exam.title || ""
     );
 
+
   if (title === null) return;
+
 
   const description =
     prompt(
@@ -1667,7 +3083,9 @@ async function editExam(id) {
       exam.description || ""
     );
 
+
   if (description === null) return;
+
 
   if (!title.trim()) {
 
@@ -1678,29 +3096,39 @@ async function editExam(id) {
     return;
   }
 
+
   const {
     error: updateError
   } = await supabaseClient
     .from("exams")
     .update({
-      title: title.trim(),
-      description: description.trim()
+      title:
+        title.trim(),
+
+      description:
+        description.trim()
     })
-    .eq("id", id);
+    .eq(
+      "id",
+      id
+    );
+
 
   if (updateError) {
 
     alert(
-      "Qormaata sirreessuun hin danda'amne: " +
+      "Qormaata sirreessuun hin danda'amne:\n" +
       updateError.message
     );
 
     return;
   }
 
+
   alert(
-    "✅ Qormaanni sirriitti haaromfameera."
+    "✅ Qormaanni haaromfameera."
   );
+
 
   await loadAdminExams();
   await loadQuestionExamSelect();
@@ -1719,34 +3147,32 @@ async function deleteExam(id) {
     return;
   }
 
+
   const confirmation =
     confirm(
       "⚠️ Qormaata kana haquu barbaaddaa?\n\n" +
-      "Qormaata kanaan walqabatan:\n" +
-      "• Qabxiiwwan barattootaa\n" +
-      "• Gaaffiiwwan qormaataa\n" +
-      "hundi ni haqamu.\n\n" +
-      "Kun deebifamee argamuu hin danda'u."
+      "Qabxiiwwan barattootaa fi gaaffiiwwan isaa hundi ni haqamu."
     );
+
 
   if (!confirmation) return;
 
-
-  /* =====================================================
-     1. QABXIIWWAN / RESULTS HAQI
-  ===================================================== */
 
   const {
     error: resultsDeleteError
   } = await supabaseClient
     .from("results")
     .delete()
-    .eq("exam_id", id);
+    .eq(
+      "exam_id",
+      id
+    );
+
 
   if (resultsDeleteError) {
 
     alert(
-      "❌ Qabxiiwwan haquun hin danda'amne:\n\n" +
+      "Qabxiiwwan haquun hin danda'amne:\n" +
       resultsDeleteError.message
     );
 
@@ -1754,21 +3180,21 @@ async function deleteExam(id) {
   }
 
 
-  /* =====================================================
-     2. GAAFFIIWWAN HAQI
-  ===================================================== */
-
   const {
     error: questionDeleteError
   } = await supabaseClient
     .from("questions")
     .delete()
-    .eq("exam_id", id);
+    .eq(
+      "exam_id",
+      id
+    );
+
 
   if (questionDeleteError) {
 
     alert(
-      "❌ Gaaffiiwwan qormaataa haquun hin danda'amne:\n\n" +
+      "Gaaffiiwwan haquun hin danda'amne:\n" +
       questionDeleteError.message
     );
 
@@ -1776,31 +3202,32 @@ async function deleteExam(id) {
   }
 
 
-  /* =====================================================
-     3. QORMAATA HAQI
-  ===================================================== */
-
   const {
     error: examDeleteError
   } = await supabaseClient
     .from("exams")
     .delete()
-    .eq("id", id);
+    .eq(
+      "id",
+      id
+    );
+
 
   if (examDeleteError) {
 
     alert(
-      "❌ Qormaata haquun hin danda'amne:\n\n" +
+      "Qormaata haquun hin danda'amne:\n" +
       examDeleteError.message
     );
 
     return;
   }
 
+
   alert(
-    "✅ Qormaanni haqameera.\n\n" +
-    "Qabxiiwwan isaa fi gaaffiiwwan isaa waliin haqamaniiru."
+    "✅ Qormaanni, gaaffiiwwan isaa fi qabxiiwwan isaa haqamaniiru."
   );
+
 
   await loadAdminExams();
   await loadQuestionExamSelect();
@@ -1811,17 +3238,19 @@ async function deleteExam(id) {
 
 
 /* =========================================================
-   QUESTION SELECT
+   QUESTION EXAM SELECT
 ========================================================= */
 
 async function loadQuestionExamSelect() {
 
   if (!isAdminLoggedIn()) return;
 
+
   const select =
     document.getElementById(
       "questionExamSelect"
     );
+
 
   const {
     data,
@@ -1833,28 +3262,36 @@ async function loadQuestionExamSelect() {
       ascending: false
     });
 
+
   if (error) return;
+
 
   select.innerHTML =
     '<option value="">Qormaata filadhu</option>';
 
-  data.forEach(exam => {
 
-    const option =
-      document.createElement(
-        "option"
+  (data || []).forEach(
+    exam => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        exam.id;
+
+
+      option.textContent =
+        exam.title;
+
+
+      select.appendChild(
+        option
       );
-
-    option.value =
-      exam.id;
-
-    option.textContent =
-      exam.title;
-
-    select.appendChild(
-      option
-    );
-  });
+    }
+  );
 }
 
 
@@ -1869,45 +3306,54 @@ async function createQuestion() {
     return;
   }
 
+
   const examId =
     document.getElementById(
       "questionExamSelect"
     ).value;
+
 
   const question =
     document.getElementById(
       "questionInput"
     ).value.trim();
 
+
   const optionA =
     document.getElementById(
       "optionAInput"
     ).value.trim();
+
 
   const optionB =
     document.getElementById(
       "optionBInput"
     ).value.trim();
 
+
   const optionC =
     document.getElementById(
       "optionCInput"
     ).value.trim();
+
 
   const optionD =
     document.getElementById(
       "optionDInput"
     ).value.trim();
 
+
   const correct =
     document.getElementById(
       "correctAnswerInput"
     ).value;
 
+
   const message =
     document.getElementById(
       "questionCreateMessage"
     );
+
 
   if (
     !examId ||
@@ -1927,6 +3373,7 @@ async function createQuestion() {
 
     return;
   }
+
 
   const {
     error
@@ -1957,6 +3404,7 @@ async function createQuestion() {
       }
     ]);
 
+
   if (error) {
 
     message.textContent =
@@ -1969,11 +3417,13 @@ async function createQuestion() {
     return;
   }
 
+
   message.textContent =
-    "✅ Gaaffiin qormaataa dabalamera.";
+    "✅ Gaaffiin dabalameera.";
 
   message.style.color =
     "#16a34a";
+
 
   document.getElementById(
     "questionInput"
@@ -1999,6 +3449,7 @@ async function createQuestion() {
     "correctAnswerInput"
   ).value = "";
 
+
   await loadAdminQuestions();
 }
 
@@ -2011,13 +3462,16 @@ async function loadAdminQuestions() {
 
   if (!isAdminLoggedIn()) return;
 
+
   const box =
     document.getElementById(
       "adminQuestionsList"
     );
 
+
   box.innerHTML =
     "<p>Gaaffiiwwan fe'aa jira...</p>";
+
 
   const {
     data,
@@ -2032,15 +3486,19 @@ async function loadAdminQuestions() {
       ascending: false
     });
 
+
   if (error) {
 
     box.innerHTML =
       "<p>" +
-      escapeHTML(error.message) +
+      escapeHTML(
+        error.message
+      ) +
       "</p>";
 
     return;
   }
+
 
   if (
     !data ||
@@ -2053,6 +3511,7 @@ async function loadAdminQuestions() {
     return;
   }
 
+
   box.innerHTML =
     data.map(
       (q, index) => `
@@ -2060,7 +3519,9 @@ async function loadAdminQuestions() {
 
           <b>
             ${index + 1}.
-            ${escapeHTML(q.question)}
+            ${escapeHTML(
+              q.question
+            )}
           </b>
 
           <small>
@@ -2143,20 +3604,32 @@ function hideAdminPanels() {
 async function openAdminPanel(id) {
 
   if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    showPage("rolePage");
+
+    alert(
+      "⛔ Admin qofa."
+    );
+
+    showPage(
+      "rolePage"
+    );
+
     return;
   }
 
+
   hideAdminPanels();
+
 
   const panel =
     document.getElementById(id);
 
+
   if (!panel) return;
+
 
   panel.style.display =
     "block";
+
 
   if (
     id ===
@@ -2166,6 +3639,7 @@ async function openAdminPanel(id) {
     await loadAdminStudents();
   }
 
+
   if (
     id ===
     "adminResultsPanel"
@@ -2174,6 +3648,7 @@ async function openAdminPanel(id) {
     await loadAdminResults();
   }
 
+
   if (
     id ===
     "adminLessonsPanel"
@@ -2181,6 +3656,7 @@ async function openAdminPanel(id) {
 
     await loadAdminLessons();
   }
+
 
   if (
     id ===
@@ -2194,14 +3670,18 @@ async function openAdminPanel(id) {
     await loadAdminQuestions();
   }
 
-  setTimeout(() => {
 
-    panel.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+  setTimeout(
+    () => {
 
-  }, 50);
+      panel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    },
+    50
+  );
 }
 
 
@@ -2215,13 +3695,38 @@ function studentLogout() {
     "student_id"
   );
 
+
   currentStudent = null;
+
 
   document.getElementById(
     "nameInput"
   ).value = "";
 
-  showPage("rolePage");
+
+  const idInput =
+    document.getElementById(
+      "studentIdInput"
+    );
+
+  if (idInput) {
+    idInput.value = "";
+  }
+
+
+  const codeInput =
+    document.getElementById(
+      "activationCodeInput"
+    );
+
+  if (codeInput) {
+    codeInput.value = "";
+  }
+
+
+  showPage(
+    "rolePage"
+  );
 }
 
 
@@ -2231,9 +3736,13 @@ function adminLogout() {
     "admin_logged"
   );
 
+
   hideAdminPanels();
 
-  showPage("rolePage");
+
+  showPage(
+    "rolePage"
+  );
 }
 
 
@@ -2253,10 +3762,12 @@ function setNav(activeId) {
 
     });
 
+
   const active =
     document.getElementById(
       activeId
     );
+
 
   if (active) {
     active.classList.add(
@@ -2267,42 +3778,14 @@ function setNav(activeId) {
 
 
 /* =========================================================
-   HELPERS
-========================================================= */
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
-}
-
-
-/* =========================================================
-   START
+   START APP
 ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
   async () => {
+
+    /* ROLE */
 
     document
       .getElementById(
@@ -2312,6 +3795,7 @@ document.addEventListener(
         "click",
         openStudentLogin
       );
+
 
     document
       .getElementById(
@@ -2323,6 +3807,36 @@ document.addEventListener(
       );
 
 
+    /* STUDENT AUTH MODE */
+
+    document
+      .getElementById(
+        "newStudentModeButton"
+      )
+      .addEventListener(
+        "click",
+        () =>
+          setStudentAuthMode(
+            "new"
+          )
+      );
+
+
+    document
+      .getElementById(
+        "existingStudentModeButton"
+      )
+      .addEventListener(
+        "click",
+        () =>
+          setStudentAuthMode(
+            "existing"
+          )
+      );
+
+
+    /* BACK */
+
     document
       .getElementById(
         "studentBackButton"
@@ -2330,9 +3844,11 @@ document.addEventListener(
       .addEventListener(
         "click",
         () => {
+
           showPage(
             "rolePage"
           );
+
         }
       );
 
@@ -2344,10 +3860,24 @@ document.addEventListener(
       .addEventListener(
         "click",
         () => {
+
           showPage(
             "rolePage"
           );
+
         }
+      );
+
+
+    /* STUDENT */
+
+    document
+      .getElementById(
+        "studentRegisterButton"
+      )
+      .addEventListener(
+        "click",
+        registerStudent
       );
 
 
@@ -2361,6 +3891,8 @@ document.addEventListener(
       );
 
 
+    /* ADMIN */
+
     document
       .getElementById(
         "adminLoginButton"
@@ -2370,6 +3902,8 @@ document.addEventListener(
         adminLogin
       );
 
+
+    /* QUICK EXAM */
 
     document
       .getElementById(
@@ -2393,6 +3927,8 @@ document.addEventListener(
       );
 
 
+    /* HOME */
+
     document
       .getElementById(
         "navHome"
@@ -2414,6 +3950,8 @@ document.addEventListener(
         }
       );
 
+
+    /* EXAMS */
 
     document
       .getElementById(
@@ -2437,6 +3975,8 @@ document.addEventListener(
       );
 
 
+    /* SCORE */
+
     document
       .getElementById(
         "navScore"
@@ -2454,6 +3994,8 @@ document.addEventListener(
         }
       );
 
+
+    /* PROFILE */
 
     document
       .getElementById(
@@ -2477,6 +4019,8 @@ document.addEventListener(
       );
 
 
+    /* LESSON BACK */
+
     document
       .getElementById(
         "lessonBackButton"
@@ -2492,6 +4036,8 @@ document.addEventListener(
         }
       );
 
+
+    /* EXAM LIST BACK */
 
     document
       .getElementById(
@@ -2513,6 +4059,8 @@ document.addEventListener(
       );
 
 
+    /* EXAM BACK */
+
     document
       .getElementById(
         "examBackButton"
@@ -2530,6 +4078,8 @@ document.addEventListener(
         }
       );
 
+
+    /* SCORE HOME */
 
     document
       .getElementById(
@@ -2553,6 +4103,8 @@ document.addEventListener(
       );
 
 
+    /* PROFILE BACK */
+
     document
       .getElementById(
         "profileBackButton"
@@ -2573,6 +4125,8 @@ document.addEventListener(
       );
 
 
+    /* SAVE PROFILE */
+
     document
       .getElementById(
         "profileSaveButton"
@@ -2583,6 +4137,8 @@ document.addEventListener(
       );
 
 
+    /* STUDENT LOGOUT */
+
     document
       .getElementById(
         "studentLogoutButton"
@@ -2592,6 +4148,8 @@ document.addEventListener(
         studentLogout
       );
 
+
+    /* PROFILE NAV HOME */
 
     document
       .getElementById(
@@ -2615,6 +4173,8 @@ document.addEventListener(
       );
 
 
+    /* PROFILE NAV EXAMS */
+
     document
       .getElementById(
         "profileNavExams"
@@ -2637,6 +4197,8 @@ document.addEventListener(
       );
 
 
+    /* PROFILE NAV SCORE */
+
     document
       .getElementById(
         "profileNavScore"
@@ -2654,6 +4216,8 @@ document.addEventListener(
         }
       );
 
+
+    /* PROFILE NAV PROFILE */
 
     document
       .getElementById(
@@ -2676,6 +4240,8 @@ document.addEventListener(
         }
       );
 
+
+    /* NEXT QUESTION */
 
     document
       .getElementById(
@@ -2753,6 +4319,8 @@ document.addEventListener(
       );
 
 
+    /* CLOSE PANELS */
+
     document
       .getElementById(
         "closeStudentsPanel"
@@ -2793,6 +4361,8 @@ document.addEventListener(
       );
 
 
+    /* ADMIN CREATE */
+
     document
       .getElementById(
         "createLessonButton"
@@ -2824,10 +4394,11 @@ document.addEventListener(
 
 
     /* =====================================================
-       RESTORE
+       RESTORE SESSION
     ===================================================== */
 
     await restoreStudent();
+
 
     const adminLogged =
       localStorage.getItem(
@@ -2856,7 +4427,6 @@ document.addEventListener(
       showPage(
         "rolePage"
       );
-
     }
 
   }
