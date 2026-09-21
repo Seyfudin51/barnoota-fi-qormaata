@@ -3,54 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <meta name="theme-color" content="#2563eb">
-  <meta name="description" content="Akkaadaamii Oromiyaa - Barnoota fi Qormaata">
+  <meta
+    name="description"
+    content="Akkaadaamii Oromiyaa - Barnoota fi Qormaata"
+  >
+
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+
   <title>Akkaadaamii Oromiyaa</title>
 </head>
 
 <body>
 
+
+<!-- =========================
+     ROLE PAGE
+========================= -->
+
 <section id="rolePage" class="page active">
+
   <div class="container">
+
     <div class="hero">
+
       <h1>🎓 Akkaadaamii Oromiyaa</h1>
-      <p>Barnoota fi Qormaata</p>
+
+      <p>
+        Barnoota fi Qormaata
+      </p>
+
     </div>
 
-    <div class="card">
-      <h2>Seensa Filadhu</h2>
 
-      <button class="primary-btn" onclick="openStudentLogin()">
+    <div class="card">
+
+      <h2>
+        Seensa Filadhu
+      </h2>
+
+      <button
+        class="primary-btn"
+        onclick="openStudentLogin()"
+      >
         👨‍🎓 Barataa
       </button>
 
-      <button class="secondary-btn" onclick="openAdminLogin()">
+      <button
+        class="secondary-btn"
+        onclick="openAdminLogin()"
+      >
         🔐 Admin
       </button>
+
     </div>
+
   </div>
+
 </section>
 
 
+
+<!-- =========================
+     STUDENT LOGIN
+========================= -->
+
 <section id="studentLoginPage" class="page">
+
   <div class="container">
+
     <div class="card">
 
-      <button class="back-btn" onclick="showPage('rolePage')">
+      <button
+        class="back-btn"
+        onclick="showPage('rolePage')"
+      >
         ← Duubatti
       </button>
 
-      <h2>👨‍🎓 Seensa Barataa</h2>
+
+      <h2>
+        👨‍🎓 Seensa Barataa
+      </h2>
+
 
       <div class="notice">
-        <strong>Barataa haaraa?</strong>
+
+        <strong>
+          Barataa haaraa?
+        </strong>
+
         <p>
-          Maqaa kee galchi. Galmee booda Student ID fi
-          Activation Code argatta.
+          Maqaa kee galchi. Galmee booda
+          Student ID fi Activation Code argatta.
         </p>
+
       </div>
+
 
       <input
         id="nameInput"
@@ -58,13 +109,22 @@
         placeholder="Maqaa guutuu kee galchi"
       >
 
-      <button class="primary-btn" onclick="studentRegister()">
+
+      <button
+        class="primary-btn"
+        onclick="studentRegister()"
+      >
         📝 Galmaa'i
       </button>
 
+
       <hr>
 
-      <h3>Barataa duraan galmaa'e</h3>
+
+      <h3>
+        Barataa duraan galmaa'e
+      </h3>
+
 
       <input
         id="studentIdInput"
@@ -72,44 +132,85 @@
         placeholder="Student ID"
       >
 
+
       <input
         id="activationCodeInput"
         type="text"
         placeholder="Activation Code"
       >
 
-      <button class="primary-btn" onclick="studentLogin()">
+
+      <button
+        class="primary-btn"
+        onclick="studentLogin()"
+      >
         🔑 Seeni
       </button>
 
-      <div id="studentLoginMessage" class="message"></div>
+
+      <div
+        id="studentLoginMessage"
+        class="message"
+      ></div>
 
     </div>
+
   </div>
+
 </section>
 
+
+
+<!-- =========================
+     STUDENT HOME
+========================= -->
 
 <section id="studentHomePage" class="page">
 
   <header class="top-header">
+
     <div>
-      <h2>🎓 Akkaadaamii</h2>
+
+      <h2>
+        🎓 Akkaadaamii
+      </h2>
+
       <p id="studentWelcomeName"></p>
+
     </div>
+
   </header>
+
 
   <main class="container">
 
+
     <div class="card">
-      <h3>👋 Baga nagaan dhuftan!</h3>
+
+      <h3>
+        👋 Baga nagaan dhuftan!
+      </h3>
+
       <p id="studentHomeMessage"></p>
+
     </div>
 
-    <h3>📚 Barnoota</h3>
 
-    <div id="studentLessons" class="grid"></div>
+    <h3>
+      📚 Barnoota
+    </h3>
 
-    <h3>📝 Qormaata</h3>
+
+    <div
+      id="studentLessons"
+      class="grid"
+    ></div>
+
+
+    <h3>
+      📝 Qormaata
+    </h3>
+
 
     <button
       id="quickExamButton"
@@ -119,74 +220,177 @@
       📝 Qormaata Ilaali
     </button>
 
+
   </main>
 
+
   <nav class="bottom-nav">
-    <button onclick="showPage('studentHomePage'); loadStudentHome();">
-      🏠<span>Home</span>
+
+    <button
+      onclick="showPage('studentHomePage'); loadStudentHome();"
+    >
+      🏠
+      <span>
+        Home
+      </span>
     </button>
 
-    <button onclick="showPage('examListPage'); loadExams();">
-      📝<span>Qormaata</span>
+
+    <button
+      onclick="showPage('examListPage'); loadExams();"
+    >
+      📝
+      <span>
+        Qormaata
+      </span>
     </button>
 
-    <button onclick="showPage('scorePage'); showScore();">
-      📊<span>Qabxii</span>
+
+    <button
+      onclick="showPage('scorePage'); showScore();"
+    >
+      📊
+      <span>
+        Qabxii
+      </span>
     </button>
 
-    <button onclick="showPage('profilePage'); loadProfile();">
-      👤<span>Profile</span>
+
+    <button
+      onclick="showPage('profilePage'); loadProfile();"
+    >
+      👤
+      <span>
+        Profile
+      </span>
     </button>
+
   </nav>
 
 </section>
 
 
+
+<!-- =========================
+     LESSON DETAIL
+========================= -->
+
 <section id="lessonDetailPage" class="page">
+
   <div class="container">
 
-    <button class="back-btn" onclick="showPage('studentHomePage')">
+    <button
+      class="back-btn"
+      onclick="showPage('studentHomePage')"
+    >
       ← Duubatti
     </button>
 
+
     <div class="card">
+
       <h2 id="lessonDetailTitle"></h2>
-      <div id="lessonDetailContent"></div>
+
+      <div
+        id="lessonDetailContent"
+      ></div>
+
     </div>
 
   </div>
+
 </section>
 
 
+
+<!-- =========================
+     EXAM LIST
+========================= -->
+
 <section id="examListPage" class="page">
+
   <div class="container">
 
-    <button class="back-btn" onclick="showPage('studentHomePage')">
+    <button
+      class="back-btn"
+      onclick="showPage('studentHomePage')"
+    >
       ← Duubatti
     </button>
 
-    <h2>📝 Qormaata</h2>
 
-    <div id="studentExams" class="grid"></div>
+    <h2>
+      📝 Qormaata
+    </h2>
+
+
+    <div
+      id="studentExams"
+      class="grid"
+    ></div>
 
   </div>
+
 </section>
 
 
+
+<!-- =========================
+     EXAM PAGE
+========================= -->
+
 <section id="examPage" class="page">
+
   <div class="container">
+
 
     <div class="card">
 
       <h2 id="examTitle"></h2>
 
-      <div>
-        Gaaffii <span id="questionNumber"></span>
+
+      <!-- EXAM TIMER -->
+
+      <div
+        id="examTimer"
+        class="notice"
+      >
+        ⏱️ Yeroo:
+        <strong id="examTimerValue">
+          --:--
+        </strong>
       </div>
 
-      <h3 id="questionText"></h3>
 
-      <div id="answersContainer"></div>
+      <!-- QUESTION NUMBER -->
+
+      <div>
+
+        Gaaffii
+
+        <span
+          id="questionNumber"
+        >
+        </span>
+
+      </div>
+
+
+      <!-- QUESTION -->
+
+      <h3
+        id="questionText"
+      ></h3>
+
+
+      <!-- ANSWERS -->
+
+      <div
+        id="answersContainer"
+      ></div>
+
+
+      <!-- NEXT -->
 
       <button
         id="nextQuestionButton"
@@ -197,81 +401,230 @@
         Itti Aanuu →
       </button>
 
+
+      <!-- SUBMIT -->
+
+      <button
+        id="submitExamButton"
+        class="secondary-btn"
+        onclick="requestSubmitExam()"
+        style="display:none;"
+      >
+        ✅ Submit Qormaataa
+      </button>
+
     </div>
 
   </div>
+
 </section>
 
+
+
+<!-- =========================
+     SUBMIT CONFIRMATION
+========================= -->
+
+<section
+  id="submitConfirmPage"
+  class="page"
+>
+
+  <div class="container">
+
+    <div class="card">
+
+      <h2>
+        ⚠️ Qormaata Submit
+      </h2>
+
+
+      <p id="submitWarningMessage">
+
+        Gaaffii hunda xumurteettaa?
+        Qormaata submit gochuu barbaaddaa?
+
+      </p>
+
+
+      <button
+        class="primary-btn"
+        onclick="confirmSubmitExam(true)"
+      >
+        Eyyee
+      </button>
+
+
+      <button
+        class="secondary-btn"
+        onclick="confirmSubmitExam(false)"
+      >
+        Hin xumirree
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- =========================
+     SCORE PAGE
+========================= -->
 
 <section id="scorePage" class="page">
+
   <div class="container">
 
-    <button class="back-btn" onclick="showPage('studentHomePage')">
+    <button
+      class="back-btn"
+      onclick="showPage('studentHomePage')"
+    >
       ← Duubatti
     </button>
 
+
     <div class="card">
-      <h2>📊 Qabxii Koo</h2>
-      <div id="studentScore"></div>
+
+      <h2>
+        📊 Qabxii Koo
+      </h2>
+
+
+      <div
+        id="studentScore"
+      ></div>
+
     </div>
 
   </div>
+
 </section>
 
 
+
+<!-- =========================
+     PROFILE
+========================= -->
+
 <section id="profilePage" class="page">
+
   <div class="container">
 
-    <button class="back-btn" onclick="showPage('studentHomePage')">
+    <button
+      class="back-btn"
+      onclick="showPage('studentHomePage')"
+    >
       ← Duubatti
     </button>
 
+
     <div class="card">
 
-      <h2>👤 Profile Koo</h2>
+      <h2>
+        👤 Profile Koo
+      </h2>
 
-      <label>Maqaa</label>
+
+      <label>
+        Maqaa
+      </label>
+
 
       <input
         id="profileNameInput"
         type="text"
       >
 
-      <button class="primary-btn" onclick="saveProfile()">
+
+      <button
+        class="primary-btn"
+        onclick="saveProfile()"
+      >
         💾 Maqaa Olkaa'i
       </button>
 
+
       <hr>
 
-      <p><strong>Student ID:</strong></p>
-      <div id="profileCode" class="code-box"></div>
 
-      <p><strong>Activation Code:</strong></p>
-      <div id="profileActivationCode" class="code-box"></div>
+      <p>
+        <strong>
+          Student ID:
+        </strong>
+      </p>
 
-      <p><strong>Status:</strong></p>
-      <div id="profileStatus"></div>
 
-      <button class="danger-btn" onclick="studentLogout()">
+      <div
+        id="profileCode"
+        class="code-box"
+      ></div>
+
+
+      <p>
+        <strong>
+          Activation Code:
+        </strong>
+      </p>
+
+
+      <div
+        id="profileActivationCode"
+        class="code-box"
+      ></div>
+
+
+      <p>
+        <strong>
+          Status:
+        </strong>
+      </p>
+
+
+      <div
+        id="profileStatus"
+      ></div>
+
+
+      <button
+        class="danger-btn"
+        onclick="studentLogout()"
+      >
         🚪 Ba'i
       </button>
 
     </div>
 
   </div>
+
 </section>
 
 
+
+<!-- =========================
+     ADMIN LOGIN
+========================= -->
+
 <section id="adminLoginPage" class="page">
+
   <div class="container">
 
     <div class="card">
 
-      <button class="back-btn" onclick="showPage('rolePage')">
+      <button
+        class="back-btn"
+        onclick="showPage('rolePage')"
+      >
         ← Duubatti
       </button>
 
-      <h2>🔐 Admin Login</h2>
+
+      <h2>
+        🔐 Admin Login
+      </h2>
+
 
       <input
         id="adminUsername"
@@ -279,79 +632,153 @@
         placeholder="Username"
       >
 
+
       <input
         id="adminPassword"
         type="password"
         placeholder="Password"
       >
 
-      <button class="primary-btn" onclick="adminLogin()">
+
+      <button
+        class="primary-btn"
+        onclick="adminLogin()"
+      >
         Seeni
       </button>
 
-      <div id="adminLoginMessage" class="message"></div>
+
+      <div
+        id="adminLoginMessage"
+        class="message"
+      ></div>
 
     </div>
 
   </div>
+
 </section>
 
 
+
+<!-- =========================
+     ADMIN DASHBOARD
+========================= -->
+
 <section id="adminPage" class="page">
 
+
   <header class="top-header">
+
     <div>
-      <h2>⚙️ Admin Dashboard</h2>
-      <p>Akkaadaamii Oromiyaa</p>
+
+      <h2>
+        ⚙️ Admin Dashboard
+      </h2>
+
+      <p>
+        Akkaadaamii Oromiyaa
+      </p>
+
     </div>
 
-    <button class="danger-btn" onclick="adminLogout()">
+
+    <button
+      class="danger-btn"
+      onclick="adminLogout()"
+    >
       Ba'i
     </button>
+
   </header>
+
+
 
   <div class="container">
 
+
+    <!-- ADMIN NAV -->
+
     <div class="admin-nav">
 
-      <button onclick="openAdminPanel('students')">
+
+      <button
+        onclick="openAdminPanel('students')"
+      >
         👨‍🎓 Barattoota
       </button>
 
-      <button onclick="openAdminPanel('results')">
+
+      <button
+        onclick="openAdminPanel('results')"
+      >
         📊 Qabxii
       </button>
 
-      <button onclick="openAdminPanel('lessons')">
+
+      <button
+        onclick="openAdminPanel('lessons')"
+      >
         📚 Barnoota
       </button>
 
-      <button onclick="openAdminPanel('exams')">
+
+      <button
+        onclick="openAdminPanel('exams')"
+      >
         📝 Qormaata
       </button>
 
     </div>
 
 
-    <div id="adminStudentsPanel" class="admin-panel">
+
+    <!-- =========================
+         STUDENTS
+    ========================= -->
+
+    <div
+      id="adminStudentsPanel"
+      class="admin-panel"
+    >
 
       <div class="card">
-        <h2>👨‍🎓 Barattoota</h2>
-        <div id="adminStudentsList"></div>
+
+        <h2>
+          👨‍🎓 Barattoota
+        </h2>
+
+        <div
+          id="adminStudentsList"
+        ></div>
+
       </div>
 
     </div>
 
 
-    <div id="adminResultsPanel" class="admin-panel">
+
+    <!-- =========================
+         RESULTS
+    ========================= -->
+
+    <div
+      id="adminResultsPanel"
+      class="admin-panel"
+    >
 
       <div class="card">
 
-        <h2>📊 Gabatee Qabxii</h2>
+        <h2>
+          📊 Gabatee Qabxii
+        </h2>
+
 
         <div class="table-wrapper">
 
-          <table id="adminResultsTable">
+          <table
+            id="adminResultsTable"
+          >
 
             <thead></thead>
 
@@ -366,11 +793,23 @@
     </div>
 
 
-    <div id="adminLessonsPanel" class="admin-panel">
+
+    <!-- =========================
+         LESSONS
+    ========================= -->
+
+    <div
+      id="adminLessonsPanel"
+      class="admin-panel"
+    >
+
 
       <div class="card">
 
-        <h2>📚 Barnoota Haaraa</h2>
+        <h2>
+          📚 Barnoota Haaraa
+        </h2>
+
 
         <input
           id="lessonTitleInput"
@@ -378,34 +817,61 @@
           placeholder="Mata-duree barnootaa"
         >
 
+
         <textarea
           id="lessonContentInput"
           rows="8"
           placeholder="Qabiyyee barnootaa..."
         ></textarea>
 
-        <button class="primary-btn" onclick="createLesson()">
+
+        <button
+          class="primary-btn"
+          onclick="createLesson()"
+        >
           ➕ Barnoota Dabali
         </button>
 
       </div>
 
+
+
       <div class="card">
 
-        <h2>📚 Barnoota Jiran</h2>
+        <h2>
+          📚 Barnoota Jiran
+        </h2>
 
-        <div id="adminLessonsList"></div>
+
+        <div
+          id="adminLessonsList"
+        ></div>
 
       </div>
+
 
     </div>
 
 
-    <div id="adminExamsPanel" class="admin-panel">
+
+    <!-- =========================
+         EXAMS
+    ========================= -->
+
+    <div
+      id="adminExamsPanel"
+      class="admin-panel"
+    >
+
+
+      <!-- CREATE EXAM -->
 
       <div class="card">
 
-        <h2>📝 Qormaata Haaraa</h2>
+        <h2>
+          📝 Qormaata Haaraa
+        </h2>
+
 
         <input
           id="examTitleInput"
@@ -413,35 +879,481 @@
           placeholder="Mata-duree qormaataa"
         >
 
+
         <textarea
           id="examDescriptionInput"
-          rows="5"
+          rows="4"
           placeholder="Ibsa qormaataa..."
         ></textarea>
 
-        <button class="primary-btn" onclick="createExam()">
+
+
+        <!-- QUESTION LIMIT -->
+
+        <label>
+          🔢 Gaaffii meeqa?
+        </label>
+
+
+        <select
+          id="examQuestionLimitInput"
+        >
+
+          <option value="5">
+            5 Gaaffii
+          </option>
+
+          <option value="10">
+            10 Gaaffii
+          </option>
+
+          <option value="20">
+            20 Gaaffii
+          </option>
+
+          <option value="30">
+            30 Gaaffii
+          </option>
+
+          <option value="40">
+            40 Gaaffii
+          </option>
+
+          <option value="50">
+            50 Gaaffii
+          </option>
+
+          <option value="75">
+            75 Gaaffii
+          </option>
+
+          <option value="100">
+            100 Gaaffii
+          </option>
+
+          <option value="0">
+            Gaaffii hunda
+          </option>
+
+        </select>
+
+
+
+        <!-- ATTEMPT -->
+
+        <label>
+          🔢 Yeroo meeqa qorachuu danda'a?
+        </label>
+
+
+        <select
+          id="examAttemptLimitInput"
+        >
+
+          <option value="1">
+            Yeroo 1
+          </option>
+
+          <option value="2">
+            Yeroo 2
+          </option>
+
+          <option value="3">
+            Yeroo 3
+          </option>
+
+          <option value="4">
+            Yeroo 4
+          </option>
+
+          <option value="5">
+            Yeroo 5
+          </option>
+
+          <option value="10">
+            Yeroo 10
+          </option>
+
+        </select>
+
+
+
+        <!-- FINAL EXAM -->
+
+        <label>
+          🏆 Gosa Qormaataa
+        </label>
+
+
+        <select
+          id="examFinalInput"
+        >
+
+          <option value="false">
+            Qormaata Idilee
+          </option>
+
+          <option value="true">
+            🏆 Qormaata Guddaa / Final
+          </option>
+
+        </select>
+
+
+
+        <!-- DURATION -->
+
+        <label>
+          ⏱️ Yeroo qormaataa
+        </label>
+
+
+        <select
+          id="examDurationInput"
+        >
+
+          <option value="10">
+            10 daqiiqaa
+          </option>
+
+          <option value="20">
+            20 daqiiqaa
+          </option>
+
+          <option value="30">
+            30 daqiiqaa
+          </option>
+
+          <option value="45">
+            45 daqiiqaa
+          </option>
+
+          <option value="60">
+            60 daqiiqaa
+          </option>
+
+          <option value="90">
+            90 daqiiqaa
+          </option>
+
+          <option value="120">
+            120 daqiiqaa
+          </option>
+
+        </select>
+
+
+
+        <!-- START DATE -->
+
+        <label>
+          📅 Guyyaa jalqabaa
+        </label>
+
+
+        <input
+          id="examStartDateInput"
+          type="date"
+        >
+
+
+
+        <!-- END DATE -->
+
+        <label>
+          📅 Guyyaa xumuraa
+        </label>
+
+
+        <input
+          id="examEndDateInput"
+          type="date"
+        >
+
+
+
+        <!-- START TIME -->
+
+        <label>
+          🕐 Sa'aatii jalqabaa
+        </label>
+
+
+        <input
+          id="examStartTimeInput"
+          type="time"
+        >
+
+
+
+        <!-- END TIME -->
+
+        <label>
+          🕐 Sa'aatii xumuraa
+        </label>
+
+
+        <input
+          id="examEndTimeInput"
+          type="time"
+        >
+
+
+
+        <button
+          class="primary-btn"
+          onclick="createExam()"
+        >
           ➕ Qormaata Dabali
         </button>
 
       </div>
 
 
+
+      <!-- EXISTING EXAMS -->
+
       <div class="card">
 
-        <h2>📝 Qormaata Jiran</h2>
+        <h2>
+          📝 Qormaata Jiran
+        </h2>
 
-        <div id="adminExamsList"></div>
+
+        <div
+          id="adminExamsList"
+        ></div>
 
       </div>
 
 
+
+      <!-- =========================
+           AI QUESTION GENERATOR
+      ========================= -->
+
       <div class="card">
 
-        <h2>❓ Gaaffii Dabali</h2>
+        <h2>
+          🤖 AI'n Gaaffii Uumi
+        </h2>
 
-        <select id="questionExamSelect">
-          <option value="">Qormaata filadhu</option>
+
+        <p>
+          Gaaffii karaa PDF, suuraa,
+          barreeffama ykn mata-duree irraa uumi.
+        </p>
+
+
+
+        <!-- SELECT EXAM -->
+
+        <label>
+          📝 Qormaata gaaffiin itti galuu
+        </label>
+
+
+        <select
+          id="aiQuestionExamSelect"
+        >
+
+          <option value="">
+            Qormaata filadhu
+          </option>
+
         </select>
+
+
+
+        <!-- SOURCE -->
+
+        <label>
+          📚 Madda gaaffii
+        </label>
+
+
+        <select
+          id="aiQuestionSourceType"
+          onchange="changeAIQuestionSource()"
+        >
+
+          <option value="topic">
+            🎯 Mata-duree
+          </option>
+
+          <option value="text">
+            📝 Barreeffama
+          </option>
+
+          <option value="pdf">
+            📄 PDF
+          </option>
+
+          <option value="image">
+            🖼️ Suuraa
+          </option>
+
+        </select>
+
+
+
+        <!-- TOPIC -->
+
+        <div
+          id="aiTopicSource"
+        >
+
+          <input
+            id="aiTopicInput"
+            type="text"
+            placeholder="Mata-duree, fakkeenyaaf: Artificial Intelligence"
+          >
+
+        </div>
+
+
+
+        <!-- TEXT -->
+
+        <div
+          id="aiTextSource"
+          style="display:none;"
+        >
+
+          <textarea
+            id="aiTextInput"
+            rows="8"
+            placeholder="Barreeffama asitti galchi..."
+          ></textarea>
+
+        </div>
+
+
+
+        <!-- PDF -->
+
+        <div
+          id="aiPdfSource"
+          style="display:none;"
+        >
+
+          <input
+            id="aiPdfInput"
+            type="file"
+            accept=".pdf,application/pdf"
+          >
+
+          <small>
+            PDF barnootaa filadhu.
+          </small>
+
+        </div>
+
+
+
+        <!-- IMAGE -->
+
+        <div
+          id="aiImageSource"
+          style="display:none;"
+        >
+
+          <input
+            id="aiImageInput"
+            type="file"
+            accept="image/*"
+          >
+
+          <small>
+            Suuraa barnootaa filadhu.
+          </small>
+
+        </div>
+
+
+
+        <!-- NUMBER -->
+
+        <label>
+          🔢 Gaaffii meeqa uumuu?
+        </label>
+
+
+        <select
+          id="aiQuestionCount"
+        >
+
+          <option value="5">
+            5
+          </option>
+
+          <option value="10">
+            10
+          </option>
+
+          <option value="20">
+            20
+          </option>
+
+          <option value="30">
+            30
+          </option>
+
+          <option value="50">
+            50
+          </option>
+
+          <option value="75">
+            75
+          </option>
+
+          <option value="100">
+            100
+          </option>
+
+        </select>
+
+
+
+        <button
+          id="generateAIQuestionsButton"
+          class="primary-btn"
+          onclick="generateAIQuestions()"
+        >
+          🤖 Gaaffii AI Uumi
+        </button>
+
+
+        <div
+          id="aiQuestionMessage"
+          class="message"
+        ></div>
+
+      </div>
+
+
+
+      <!-- =========================
+           ADMIN MANUAL QUESTION
+      ========================= -->
+
+      <div class="card">
+
+        <h2>
+          👨‍💼 Adminiin Gaaffii Uumi
+        </h2>
+
+
+        <select
+          id="questionExamSelect"
+        >
+
+          <option value="">
+            Qormaata filadhu
+          </option>
+
+        </select>
+
 
         <textarea
           id="questionTextInput"
@@ -449,33 +1361,86 @@
           placeholder="Gaaffii..."
         ></textarea>
 
-        <input id="optionAInput" placeholder="A">
-        <input id="optionBInput" placeholder="B">
-        <input id="optionCInput" placeholder="C">
-        <input id="optionDInput" placeholder="D">
 
-        <select id="correctAnswerInput">
-          <option value="">Deebii sirrii filadhu</option>
-          <option value="A">A</option>
-          <option value="B">B</option>
-          <option value="C">C</option>
-          <option value="D">D</option>
+        <input
+          id="optionAInput"
+          placeholder="A"
+        >
+
+
+        <input
+          id="optionBInput"
+          placeholder="B"
+        >
+
+
+        <input
+          id="optionCInput"
+          placeholder="C"
+        >
+
+
+        <input
+          id="optionDInput"
+          placeholder="D"
+        >
+
+
+        <select
+          id="correctAnswerInput"
+        >
+
+          <option value="">
+            Deebii sirrii filadhu
+          </option>
+
+          <option value="A">
+            A
+          </option>
+
+          <option value="B">
+            B
+          </option>
+
+          <option value="C">
+            C
+          </option>
+
+          <option value="D">
+            D
+          </option>
+
         </select>
 
-        <button class="primary-btn" onclick="createQuestion()">
+
+        <button
+          class="primary-btn"
+          onclick="createQuestion()"
+        >
           ➕ Gaaffii Dabali
         </button>
 
       </div>
 
 
+
+      <!-- =========================
+           QUESTIONS
+      ========================= -->
+
       <div class="card">
 
-        <h2>❓ Gaaffilee Jiran</h2>
+        <h2>
+          ❓ Gaaffilee Jiran
+        </h2>
 
-        <div id="adminQuestionsList"></div>
+
+        <div
+          id="adminQuestionsList"
+        ></div>
 
       </div>
+
 
     </div>
 
@@ -484,8 +1449,17 @@
 </section>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- =========================
+     SCRIPTS
+========================= -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
 <script src="app.js"></script>
+
 
 </body>
 </html>
