@@ -3,10 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barnoota fi Qormaata</title>
 
+  <title>Akkaadaami Oromiyaa</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FFFFFF">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -24,7 +31,9 @@
   <section id="rolePage" class="page active">
     <div class="welcome-box">
       <div class="logo-circle">📚</div>
-      <h1>Barnoota fi Qormaata</h1>
+
+      <h1>Akkaadaami Oromiyaa</h1>
+
       <p>Baradhu • Qormaata fudhadhu • Bu'aa kee ilaali</p>
 
       <button id="studentRoleButton" class="big-role student">
@@ -56,7 +65,11 @@
       <h2>Seensa Barataa</h2>
       <p>Maqaa kee qofa galchi.</p>
 
-      <input id="nameInput" type="text" placeholder="Maqaa guutuu kee galchi">
+      <input
+        id="nameInput"
+        type="text"
+        placeholder="Maqaa guutuu kee galchi"
+      >
 
       <button id="studentLoginButton" class="primary-btn">
         Seeni →
@@ -75,8 +88,17 @@
       <h2>Seensa Admin</h2>
       <p>Username fi password kee galchi.</p>
 
-      <input id="adminUsername" type="text" placeholder="Username">
-      <input id="adminPassword" type="password" placeholder="Password">
+      <input
+        id="adminUsername"
+        type="text"
+        placeholder="Username"
+      >
+
+      <input
+        id="adminPassword"
+        type="password"
+        placeholder="Password"
+      >
 
       <button id="adminLoginButton" class="primary-btn">
         Admin Seeni →
@@ -86,7 +108,6 @@
     </div>
   </section>
 
-
   <!-- STUDENT HOME -->
   <section id="homePage" class="page app-page">
 
@@ -95,6 +116,7 @@
         <span class="small-title">Baga nagaan dhuftan 👋</span>
         <h2 id="studentWelcomeName">Barataa</h2>
       </div>
+
       <div class="avatar">👨‍🎓</div>
     </header>
 
@@ -104,7 +126,9 @@
         <div>
           <span>🎓</span>
           <h2>Barnoota kee itti fufi</h2>
-          <p>Baradhu, qormaata fudhadhu, bu'aa kee hordofi.</p>
+          <p>
+            Baradhu, qormaata fudhadhu, bu'aa kee hordofi.
+          </p>
         </div>
       </div>
 
@@ -120,220 +144,375 @@
           <h3>Qormaata</h3>
           <p>Qormaata jiran ilaali.</p>
         </div>
-        <button id="quickExamButton">Ilaali →</button>
+
+        <button id="quickExamButton">
+          Ilaali →
+        </button>
       </div>
 
     </main>
 
     <nav class="bottom-nav">
+
       <button id="navHome" class="nav-item active">
-        <span>⌂</span><small>Mana</small>
+        <span>⌂</span>
+        <small>Mana</small>
       </button>
 
       <button id="navExams" class="nav-item">
-        <span>📝</span><small>Qormaata</small>
+        <span>📝</span>
+        <small>Qormaata</small>
       </button>
 
       <button id="navScore" class="nav-item">
-        <span>🏆</span><small>Qabxii</small>
+        <span>🏆</span>
+        <small>Qabxii</small>
       </button>
 
       <button id="navProfile" class="nav-item">
-        <span>👤</span><small>Profile</small>
+        <span>👤</span>
+        <small>Profile</small>
       </button>
-    </nav>
-  </section>
 
+    </nav>
+
+  </section>
 
   <!-- LESSON DETAIL -->
   <section id="lessonDetailPage" class="page app-page">
+
     <header class="simple-header">
-      <button id="lessonBackButton" class="back-btn">←</button>
+      <button id="lessonBackButton" class="back-btn">
+        ←
+      </button>
+
       <h2>Barnoota</h2>
+
       <div></div>
     </header>
 
     <main class="content">
-      <div class="detail-card">
-        <div class="detail-icon">📖</div>
-        <h2 id="lessonDetailTitle">Barnoota</h2>
-        <p id="lessonDetailDescription"></p>
-        <div id="lessonDetailContent" class="lesson-content"></div>
-      </div>
-    </main>
-  </section>
 
+      <div class="detail-card">
+
+        <div class="detail-icon">📖</div>
+
+        <h2 id="lessonDetailTitle">
+          Barnoota
+        </h2>
+
+        <p id="lessonDetailDescription"></p>
+
+        <div
+          id="lessonDetailContent"
+          class="lesson-content"
+        ></div>
+
+      </div>
+
+    </main>
+
+  </section>
 
   <!-- EXAM LIST -->
   <section id="examListPage" class="page app-page">
+
     <header class="simple-header">
-      <button id="examListBackButton" class="back-btn">←</button>
+
+      <button id="examListBackButton" class="back-btn">
+        ←
+      </button>
+
       <h2>Qormaata</h2>
+
       <div></div>
+
     </header>
 
     <main class="content">
-      <div id="examList" class="cards"></div>
-    </main>
-  </section>
 
+      <div
+        id="examList"
+        class="cards"
+      ></div>
+
+    </main>
+
+  </section>
 
   <!-- EXAM -->
   <section id="examPage" class="page app-page">
+
     <header class="simple-header">
-      <button id="examBackButton" class="back-btn">←</button>
-      <h2 id="examTitle">Qormaata</h2>
+
+      <button id="examBackButton" class="back-btn">
+        ←
+      </button>
+
+      <h2 id="examTitle">
+        Qormaata
+      </h2>
+
       <div></div>
+
     </header>
 
     <main class="content">
 
       <div class="progress-box">
+
         <div class="progress-text">
           <span>Gaaffii</span>
-          <b id="questionNumber">1 / 1</b>
+          <b id="questionNumber">
+            1 / 1
+          </b>
         </div>
+
         <div class="progress">
           <div id="progressBar"></div>
         </div>
+
       </div>
 
       <div class="question-card">
-        <h3 id="questionText">Gaaffii</h3>
 
-        <div id="optionsBox" class="options"></div>
+        <h3 id="questionText">
+          Gaaffii
+        </h3>
+
+        <div
+          id="optionsBox"
+          class="options"
+        ></div>
+
       </div>
 
-      <button id="nextQuestionButton" class="primary-btn">
+      <button
+        id="nextQuestionButton"
+        class="primary-btn"
+      >
         Itti Aanee →
       </button>
 
     </main>
-  </section>
 
+  </section>
 
   <!-- SCORE -->
   <section id="scorePage" class="page app-page">
+
     <main class="score-page">
+
       <div class="trophy">🏆</div>
 
       <h1>Qormaanni xumurame!</h1>
+
       <p>Bu'aa qormaata kee</p>
 
       <div class="score-circle">
-        <strong id="scoreText">0 / 0</strong>
-        <span id="percentageText">0%</span>
+
+        <strong id="scoreText">
+          0 / 0
+        </strong>
+
+        <span id="percentageText">
+          0%
+        </span>
+
       </div>
 
       <div class="score-info">
+
         <div>
           <span>Qabxii</span>
           <b id="scoreValue">0</b>
         </div>
+
         <div>
           <span>Waliigala</span>
           <b id="totalValue">0</b>
         </div>
+
       </div>
 
-      <button id="scoreHomeButton" class="primary-btn">
+      <button
+        id="scoreHomeButton"
+        class="primary-btn"
+      >
         Gara Manaatti →
       </button>
-    </main>
-  </section>
 
+    </main>
+
+  </section>
 
   <!-- PROFILE -->
   <section id="profilePage" class="page app-page">
 
     <header class="simple-header">
-      <button id="profileBackButton" class="back-btn">←</button>
+
+      <button
+        id="profileBackButton"
+        class="back-btn"
+      >
+        ←
+      </button>
+
       <h2>Profile</h2>
+
       <div></div>
+
     </header>
 
     <main class="content">
 
       <div class="profile-card">
-        <div class="profile-avatar">👨‍🎓</div>
-        <h2 id="profileName">Barataa</h2>
-        <p id="profileCode">Student Code</p>
+
+        <div class="profile-avatar">
+          👨‍🎓
+        </div>
+
+        <h2 id="profileName">
+          Barataa
+        </h2>
+
+        <p id="profileCode">
+          Student Code
+        </p>
+
       </div>
 
       <div class="form-card">
-        <label>Maqaa kee</label>
-        <input id="profileNameInput" type="text">
 
-        <button id="profileSaveButton" class="primary-btn">
+        <label>Maqaa kee</label>
+
+        <input
+          id="profileNameInput"
+          type="text"
+        >
+
+        <button
+          id="profileSaveButton"
+          class="primary-btn"
+        >
           Maqaa Haaromsi
         </button>
+
       </div>
 
-      <button id="studentLogoutButton" class="logout-btn">
+      <button
+        id="studentLogoutButton"
+        class="logout-btn"
+      >
         🚪 Ba'i
       </button>
 
     </main>
 
     <nav class="bottom-nav">
-      <button id="profileNavHome" class="nav-item">
-        <span>⌂</span><small>Mana</small>
+
+      <button
+        id="profileNavHome"
+        class="nav-item"
+      >
+        <span>⌂</span>
+        <small>Mana</small>
       </button>
-      <button id="profileNavExams" class="nav-item">
-        <span>📝</span><small>Qormaata</small>
+
+      <button
+        id="profileNavExams"
+        class="nav-item"
+      >
+        <span>📝</span>
+        <small>Qormaata</small>
       </button>
-      <button id="profileNavScore" class="nav-item">
-        <span>🏆</span><small>Qabxii</small>
+
+      <button
+        id="profileNavScore"
+        class="nav-item"
+      >
+        <span>🏆</span>
+        <small>Qabxii</small>
       </button>
-      <button id="profileNavProfile" class="nav-item active">
-        <span>👤</span><small>Profile</small>
+
+      <button
+        id="profileNavProfile"
+        class="nav-item active"
+      >
+        <span>👤</span>
+        <small>Profile</small>
       </button>
+
     </nav>
 
   </section>
-
 
   <!-- ADMIN -->
   <section id="adminPage" class="page app-page">
 
     <header class="admin-header">
+
       <div>
         <span>👨‍💼</span>
+
         <h2>Admin Panel</h2>
-        <small>Barnoota fi Qormaata</small>
+
+        <small>Akkaadaami Oromiyaa</small>
       </div>
 
-      <button id="adminLogoutButton">🚪</button>
+      <button id="adminLogoutButton">
+        🚪
+      </button>
+
     </header>
 
     <main class="content">
 
       <div class="admin-welcome">
-        <h2>👋 Baga nagaan dhuftan Admin</h2>
-        <p>Sirna barnootaa as irraa qindeessi.</p>
+
+        <h2>
+          👋 Baga nagaan dhuftan Admin
+        </h2>
+
+        <p>
+          Sirna barnootaa as irraa qindeessi.
+        </p>
+
       </div>
 
       <div class="admin-grid">
 
-        <button id="adminStudentsButton" class="admin-menu">
+        <button
+          id="adminStudentsButton"
+          class="admin-menu"
+        >
           <span>👨‍🎓</span>
           <b>Barattoota</b>
           <small>Tarree barattootaa</small>
         </button>
 
-        <button id="adminResultsButton" class="admin-menu">
+        <button
+          id="adminResultsButton"
+          class="admin-menu"
+        >
           <span>📊</span>
           <b>Bu'aa</b>
           <small>Qabxii barattootaa</small>
         </button>
 
-        <button id="adminLessonsButton" class="admin-menu">
+        <button
+          id="adminLessonsButton"
+          class="admin-menu"
+        >
           <span>📚</span>
           <b>Barnoota</b>
           <small>Barnoota uumi</small>
         </button>
 
-        <button id="adminExamsButton" class="admin-menu">
+        <button
+          id="adminExamsButton"
+          class="admin-menu"
+        >
           <span>📝</span>
           <b>Qormaata</b>
           <small>Qormaata fi gaaffii</small>
@@ -341,87 +520,146 @@
 
       </div>
 
-
       <!-- STUDENTS -->
-      <div id="adminStudentsPanel" class="admin-panel">
-        <div class="panel-title">
-          <h3>👨‍🎓 Barattoota</h3>
-          <button id="closeStudentsPanel">×</button>
-        </div>
-        <div id="adminStudentsList"></div>
-      </div>
+      <div
+        id="adminStudentsPanel"
+        class="admin-panel"
+      >
 
+        <div class="panel-title">
+
+          <h3>👨‍🎓 Barattoota</h3>
+
+          <button id="closeStudentsPanel">
+            ×
+          </button>
+
+        </div>
+
+        <div id="adminStudentsList"></div>
+
+      </div>
 
       <!-- RESULTS -->
-      <div id="adminResultsPanel" class="admin-panel">
+      <div
+        id="adminResultsPanel"
+        class="admin-panel"
+      >
+
         <div class="panel-title">
+
           <h3>📊 Bu'aa Qormaataa</h3>
-          <button id="closeResultsPanel">×</button>
+
+          <button id="closeResultsPanel">
+            ×
+          </button>
+
         </div>
+
         <div id="adminResultsList"></div>
+
       </div>
 
-
       <!-- LESSONS -->
-      <div id="adminLessonsPanel" class="admin-panel">
+      <div
+        id="adminLessonsPanel"
+        class="admin-panel"
+      >
 
         <div class="panel-title">
+
           <h3>📚 Barnoota</h3>
-          <button id="closeLessonsPanel">×</button>
+
+          <button id="closeLessonsPanel">
+            ×
+          </button>
+
         </div>
 
         <div class="admin-form">
 
-          <input id="lessonTitleInput"
-                 type="text"
-                 placeholder="Mata duree barnootaa">
+          <input
+            id="lessonTitleInput"
+            type="text"
+            placeholder="Mata duree barnootaa"
+          >
 
-          <input id="lessonDescriptionInput"
-                 type="text"
-                 placeholder="Ibsa gabaabaa">
+          <input
+            id="lessonDescriptionInput"
+            type="text"
+            placeholder="Ibsa gabaabaa"
+          >
 
-          <textarea id="lessonContentInput"
-                    placeholder="Qabiyyee barnootaa..."></textarea>
+          <textarea
+            id="lessonContentInput"
+            placeholder="Qabiyyee barnootaa..."
+          ></textarea>
 
-          <button id="createLessonButton" class="primary-btn">
+          <button
+            id="createLessonButton"
+            class="primary-btn"
+          >
             ➕ Barnoota Uumi
           </button>
 
-          <div id="lessonCreateMessage" class="message"></div>
+          <div
+            id="lessonCreateMessage"
+            class="message"
+          ></div>
+
         </div>
 
         <h4>Barnoota jiran</h4>
+
         <div id="adminLessonsList"></div>
 
       </div>
 
-
       <!-- EXAMS -->
-      <div id="adminExamsPanel" class="admin-panel">
+      <div
+        id="adminExamsPanel"
+        class="admin-panel"
+      >
 
         <div class="panel-title">
+
           <h3>📝 Qormaata</h3>
-          <button id="closeExamsPanel">×</button>
+
+          <button id="closeExamsPanel">
+            ×
+          </button>
+
         </div>
 
         <div class="admin-form">
 
-          <input id="examTitleInput"
-                 type="text"
-                 placeholder="Maqaa qormaataa">
+          <input
+            id="examTitleInput"
+            type="text"
+            placeholder="Maqaa qormaataa"
+          >
 
-          <textarea id="examDescriptionInput"
-                    placeholder="Ibsa qormaataa"></textarea>
+          <textarea
+            id="examDescriptionInput"
+            placeholder="Ibsa qormaataa"
+          ></textarea>
 
-          <button id="createExamButton" class="primary-btn">
+          <button
+            id="createExamButton"
+            class="primary-btn"
+          >
             ➕ Qormaata Uumi
           </button>
 
-          <div id="examCreateMessage" class="message"></div>
+          <div
+            id="examCreateMessage"
+            class="message"
+          ></div>
 
         </div>
 
         <h4>Qormaata jiran</h4>
+
         <div id="adminExamsList"></div>
 
         <hr>
@@ -431,53 +669,81 @@
         <div class="admin-form">
 
           <select id="questionExamSelect">
-            <option value="">Qormaata filadhu</option>
+
+            <option value="">
+              Qormaata filadhu
+            </option>
+
           </select>
 
-          <textarea id="questionInput"
-                    placeholder="Gaaffii barreessi..."></textarea>
+          <textarea
+            id="questionInput"
+            placeholder="Gaaffii barreessi..."
+          ></textarea>
 
-          <input id="optionAInput"
-                 type="text"
-                 placeholder="A) Filannoo A">
+          <input
+            id="optionAInput"
+            type="text"
+            placeholder="A) Filannoo A"
+          >
 
-          <input id="optionBInput"
-                 type="text"
-                 placeholder="B) Filannoo B">
+          <input
+            id="optionBInput"
+            type="text"
+            placeholder="B) Filannoo B"
+          >
 
-          <input id="optionCInput"
-                 type="text"
-                 placeholder="C) Filannoo C">
+          <input
+            id="optionCInput"
+            type="text"
+            placeholder="C) Filannoo C"
+          >
 
-          <input id="optionDInput"
-                 type="text"
-                 placeholder="D) Filannoo D">
+          <input
+            id="optionDInput"
+            type="text"
+            placeholder="D) Filannoo D"
+          >
 
           <select id="correctAnswerInput">
-            <option value="">Deebii sirrii filadhu</option>
+
+            <option value="">
+              Deebii sirrii filadhu
+            </option>
+
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
             <option value="D">D</option>
+
           </select>
 
-          <button id="createQuestionButton" class="primary-btn">
+          <button
+            id="createQuestionButton"
+            class="primary-btn"
+          >
             ➕ Gaaffii Dabali
           </button>
 
-          <div id="questionCreateMessage" class="message"></div>
+          <div
+            id="questionCreateMessage"
+            class="message"
+          ></div>
 
         </div>
 
         <h4>Gaaffiiwwan jiran</h4>
+
         <div id="adminQuestionsList"></div>
 
       </div>
 
     </main>
+
   </section>
 
-
+  <!-- APP JS -->
   <script src="app.js"></script>
+
 </body>
 </html>
