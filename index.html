@@ -27,149 +27,358 @@
 
 <body>
 
-  <!-- ROLE -->
+  <!-- =========================
+       ROLE PAGE
+  ========================== -->
   <section id="rolePage" class="page active">
+
     <div class="welcome-box">
+
       <div class="logo-circle">📚</div>
 
       <h1>Akkaadaami Oromiyaa</h1>
 
-      <p>Baradhu • Qormaata fudhadhu • Bu'aa kee ilaali</p>
+      <p>
+        Baradhu • Qormaata fudhadhu • Bu'aa kee ilaali
+      </p>
 
-      <button id="studentRoleButton" class="big-role student">
+      <button
+        id="studentRoleButton"
+        class="big-role student"
+      >
         <span>👨‍🎓</span>
+
         <div>
           <b>Barataa</b>
           <small>Akka barataa seeni</small>
         </div>
+
         <strong>›</strong>
       </button>
 
-      <button id="adminRoleButton" class="big-role admin">
+      <button
+        id="adminRoleButton"
+        class="big-role admin"
+      >
         <span>👨‍💼</span>
+
         <div>
           <b>Admin</b>
           <small>Sirna bulchi</small>
         </div>
+
         <strong>›</strong>
       </button>
+
     </div>
+
   </section>
 
-  <!-- STUDENT LOGIN -->
+
+  <!-- =========================
+       STUDENT LOGIN / REGISTER
+  ========================== -->
   <section id="loginPage" class="page">
+
     <div class="auth-box">
-      <button id="studentBackButton" class="back-btn">← Deebi'i</button>
+
+      <button
+        id="studentBackButton"
+        class="back-btn"
+      >
+        ← Deebi'i
+      </button>
 
       <div class="auth-icon">👨‍🎓</div>
-      <h2>Seensa Barataa</h2>
-      <p>Maqaa kee qofa galchi.</p>
 
+      <h2>Seensa Barataa</h2>
+
+      <p id="studentAuthDescription">
+        Account haaraa uumuuf maqaa kee galchi.
+      </p>
+
+
+      <!-- AUTH MODE -->
+      <div class="auth-switch">
+
+        <button
+          id="newStudentModeButton"
+          class="auth-switch-btn active"
+          type="button"
+        >
+          🆕 Haaraa
+        </button>
+
+        <button
+          id="existingStudentModeButton"
+          class="auth-switch-btn"
+          type="button"
+        >
+          🔐 Account qaba
+        </button>
+
+      </div>
+
+
+      <!-- NAME -->
       <input
         id="nameInput"
         type="text"
         placeholder="Maqaa guutuu kee galchi"
+        autocomplete="name"
       >
 
-      <button id="studentLoginButton" class="primary-btn">
+
+      <!-- STUDENT ID -->
+      <div id="studentIdBox" style="display:none;">
+
+        <input
+          id="studentIdInput"
+          type="text"
+          placeholder="Student ID galchi"
+          autocomplete="off"
+        >
+
+      </div>
+
+
+      <!-- ACTIVATION CODE -->
+      <div id="activationCodeBox" style="display:none;">
+
+        <input
+          id="activationCodeInput"
+          type="text"
+          placeholder="Activation Code galchi"
+          autocomplete="off"
+        >
+
+      </div>
+
+
+      <!-- NEW ACCOUNT -->
+      <button
+        id="studentRegisterButton"
+        class="primary-btn"
+        type="button"
+      >
+        Account Uumi →
+      </button>
+
+
+      <!-- EXISTING ACCOUNT -->
+      <button
+        id="studentLoginButton"
+        class="primary-btn"
+        type="button"
+        style="display:none;"
+      >
         Seeni →
       </button>
 
-      <div id="studentLoginMessage" class="message"></div>
+
+      <div
+        id="studentLoginMessage"
+        class="message"
+      ></div>
+
     </div>
+
   </section>
 
-  <!-- ADMIN LOGIN -->
+
+  <!-- =========================
+       ADMIN LOGIN
+  ========================== -->
   <section id="adminLoginPage" class="page">
+
     <div class="auth-box">
-      <button id="adminBackButton" class="back-btn">← Deebi'i</button>
+
+      <button
+        id="adminBackButton"
+        class="back-btn"
+      >
+        ← Deebi'i
+      </button>
 
       <div class="auth-icon">🔐</div>
+
       <h2>Seensa Admin</h2>
-      <p>Username fi password kee galchi.</p>
+
+      <p>
+        Username fi password kee galchi.
+      </p>
 
       <input
         id="adminUsername"
         type="text"
         placeholder="Username"
+        autocomplete="username"
       >
 
       <input
         id="adminPassword"
         type="password"
         placeholder="Password"
+        autocomplete="current-password"
       >
 
-      <button id="adminLoginButton" class="primary-btn">
+      <button
+        id="adminLoginButton"
+        class="primary-btn"
+        type="button"
+      >
         Admin Seeni →
       </button>
 
-      <div id="adminLoginMessage" class="message"></div>
+      <div
+        id="adminLoginMessage"
+        class="message"
+      ></div>
+
     </div>
+
   </section>
 
-  <!-- STUDENT HOME -->
-  <section id="homePage" class="page app-page">
+
+  <!-- =========================
+       STUDENT HOME
+  ========================== -->
+  <section
+    id="homePage"
+    class="page app-page"
+  >
 
     <header class="top-header">
+
       <div>
-        <span class="small-title">Baga nagaan dhuftan 👋</span>
-        <h2 id="studentWelcomeName">Barataa</h2>
+
+        <span class="small-title">
+          Baga nagaan dhuftan 👋
+        </span>
+
+        <h2 id="studentWelcomeName">
+          Barataa
+        </h2>
+
       </div>
 
-      <div class="avatar">👨‍🎓</div>
+      <div class="avatar">
+        👨‍🎓
+      </div>
+
     </header>
+
 
     <main class="content">
 
+      <!-- STUDENT ACCOUNT INFO -->
+      <div
+        id="studentAccountStatus"
+        class="account-status"
+      ></div>
+
+
       <div class="hero">
+
         <div>
+
           <span>🎓</span>
-          <h2>Barnoota kee itti fufi</h2>
+
+          <h2>
+            Barnoota kee itti fufi
+          </h2>
+
           <p>
-            Baradhu, qormaata fudhadhu, bu'aa kee hordofi.
+            Baradhu, qormaata fudhadhu,
+            bu'aa kee hordofi.
           </p>
+
         </div>
+
       </div>
 
+
+      <!-- LESSONS -->
       <div class="section-title">
-        <h3>📚 Barnoota</h3>
+
+        <h3>
+          📚 Barnoota
+        </h3>
+
       </div>
 
-      <div id="studentLessons" class="cards"></div>
+      <div
+        id="studentLessons"
+        class="cards"
+      ></div>
 
+
+      <!-- EXAMS -->
       <div class="quick-exam">
+
         <div>
-          <span class="quick-icon">📝</span>
-          <h3>Qormaata</h3>
-          <p>Qormaata jiran ilaali.</p>
+
+          <span class="quick-icon">
+            📝
+          </span>
+
+          <h3>
+            Qormaata
+          </h3>
+
+          <p>
+            Qormaata jiran ilaali.
+          </p>
+
         </div>
 
-        <button id="quickExamButton">
+        <button
+          id="quickExamButton"
+          type="button"
+        >
           Ilaali →
         </button>
+
       </div>
 
     </main>
 
+
+    <!-- STUDENT NAVIGATION -->
     <nav class="bottom-nav">
 
-      <button id="navHome" class="nav-item active">
+      <button
+        id="navHome"
+        class="nav-item active"
+        type="button"
+      >
         <span>⌂</span>
         <small>Mana</small>
       </button>
 
-      <button id="navExams" class="nav-item">
+      <button
+        id="navExams"
+        class="nav-item"
+        type="button"
+      >
         <span>📝</span>
         <small>Qormaata</small>
       </button>
 
-      <button id="navScore" class="nav-item">
+      <button
+        id="navScore"
+        class="nav-item"
+        type="button"
+      >
         <span>🏆</span>
         <small>Qabxii</small>
       </button>
 
-      <button id="navProfile" class="nav-item">
+      <button
+        id="navProfile"
+        class="nav-item"
+        type="button"
+      >
         <span>👤</span>
         <small>Profile</small>
       </button>
@@ -178,24 +387,41 @@
 
   </section>
 
-  <!-- LESSON DETAIL -->
-  <section id="lessonDetailPage" class="page app-page">
+
+  <!-- =========================
+       LESSON DETAIL
+  ========================== -->
+  <section
+    id="lessonDetailPage"
+    class="page app-page"
+  >
 
     <header class="simple-header">
-      <button id="lessonBackButton" class="back-btn">
+
+      <button
+        id="lessonBackButton"
+        class="back-btn"
+        type="button"
+      >
         ←
       </button>
 
-      <h2>Barnoota</h2>
+      <h2>
+        Barnoota
+      </h2>
 
       <div></div>
+
     </header>
+
 
     <main class="content">
 
       <div class="detail-card">
 
-        <div class="detail-icon">📖</div>
+        <div class="detail-icon">
+          📖
+        </div>
 
         <h2 id="lessonDetailTitle">
           Barnoota
@@ -214,20 +440,33 @@
 
   </section>
 
-  <!-- EXAM LIST -->
-  <section id="examListPage" class="page app-page">
+
+  <!-- =========================
+       EXAM LIST
+  ========================== -->
+  <section
+    id="examListPage"
+    class="page app-page"
+  >
 
     <header class="simple-header">
 
-      <button id="examListBackButton" class="back-btn">
+      <button
+        id="examListBackButton"
+        class="back-btn"
+        type="button"
+      >
         ←
       </button>
 
-      <h2>Qormaata</h2>
+      <h2>
+        Qormaata
+      </h2>
 
       <div></div>
 
     </header>
+
 
     <main class="content">
 
@@ -240,12 +479,22 @@
 
   </section>
 
-  <!-- EXAM -->
-  <section id="examPage" class="page app-page">
+
+  <!-- =========================
+       EXAM PAGE
+  ========================== -->
+  <section
+    id="examPage"
+    class="page app-page"
+  >
 
     <header class="simple-header">
 
-      <button id="examBackButton" class="back-btn">
+      <button
+        id="examBackButton"
+        class="back-btn"
+        type="button"
+      >
         ←
       </button>
 
@@ -257,22 +506,31 @@
 
     </header>
 
+
     <main class="content">
 
       <div class="progress-box">
 
         <div class="progress-text">
-          <span>Gaaffii</span>
+
+          <span>
+            Gaaffii
+          </span>
+
           <b id="questionNumber">
             1 / 1
           </b>
+
         </div>
 
         <div class="progress">
+
           <div id="progressBar"></div>
+
         </div>
 
       </div>
+
 
       <div class="question-card">
 
@@ -287,9 +545,11 @@
 
       </div>
 
+
       <button
         id="nextQuestionButton"
         class="primary-btn"
+        type="button"
       >
         Itti Aanee →
       </button>
@@ -298,16 +558,29 @@
 
   </section>
 
-  <!-- SCORE -->
-  <section id="scorePage" class="page app-page">
+
+  <!-- =========================
+       SCORE PAGE
+  ========================== -->
+  <section
+    id="scorePage"
+    class="page app-page"
+  >
 
     <main class="score-page">
 
-      <div class="trophy">🏆</div>
+      <div class="trophy">
+        🏆
+      </div>
 
-      <h1>Qormaanni xumurame!</h1>
+      <h1>
+        Qormaanni xumurame!
+      </h1>
 
-      <p>Bu'aa qormaata kee</p>
+      <p>
+        Bu'aa qormaata kee
+      </p>
+
 
       <div class="score-circle">
 
@@ -321,23 +594,40 @@
 
       </div>
 
+
       <div class="score-info">
 
         <div>
-          <span>Qabxii</span>
-          <b id="scoreValue">0</b>
+
+          <span>
+            Qabxii
+          </span>
+
+          <b id="scoreValue">
+            0
+          </b>
+
         </div>
 
         <div>
-          <span>Waliigala</span>
-          <b id="totalValue">0</b>
+
+          <span>
+            Waliigala
+          </span>
+
+          <b id="totalValue">
+            0
+          </b>
+
         </div>
 
       </div>
 
+
       <button
         id="scoreHomeButton"
         class="primary-btn"
+        type="button"
       >
         Gara Manaatti →
       </button>
@@ -346,23 +636,33 @@
 
   </section>
 
-  <!-- PROFILE -->
-  <section id="profilePage" class="page app-page">
+
+  <!-- =========================
+       STUDENT PROFILE
+  ========================== -->
+  <section
+    id="profilePage"
+    class="page app-page"
+  >
 
     <header class="simple-header">
 
       <button
         id="profileBackButton"
         class="back-btn"
+        type="button"
       >
         ←
       </button>
 
-      <h2>Profile</h2>
+      <h2>
+        Profile
+      </h2>
 
       <div></div>
 
     </header>
+
 
     <main class="content">
 
@@ -376,15 +676,32 @@
           Barataa
         </h2>
 
-        <p id="profileCode">
-          Student Code
+        <p>
+          🆔 <span id="profileCode">
+            Student ID
+          </span>
+        </p>
+
+        <p>
+          🔐 <span id="profileActivationCode">
+            Activation Code
+          </span>
+        </p>
+
+        <p>
+          📌 <span id="profileStatus">
+            Status
+          </span>
         </p>
 
       </div>
 
+
       <div class="form-card">
 
-        <label>Maqaa kee</label>
+        <label>
+          Maqaa kee
+        </label>
 
         <input
           id="profileNameInput"
@@ -394,26 +711,31 @@
         <button
           id="profileSaveButton"
           class="primary-btn"
+          type="button"
         >
           Maqaa Haaromsi
         </button>
 
       </div>
 
+
       <button
         id="studentLogoutButton"
         class="logout-btn"
+        type="button"
       >
         🚪 Ba'i
       </button>
 
     </main>
 
+
     <nav class="bottom-nav">
 
       <button
         id="profileNavHome"
         class="nav-item"
+        type="button"
       >
         <span>⌂</span>
         <small>Mana</small>
@@ -422,6 +744,7 @@
       <button
         id="profileNavExams"
         class="nav-item"
+        type="button"
       >
         <span>📝</span>
         <small>Qormaata</small>
@@ -430,6 +753,7 @@
       <button
         id="profileNavScore"
         class="nav-item"
+        type="button"
       >
         <span>🏆</span>
         <small>Qabxii</small>
@@ -438,6 +762,7 @@
       <button
         id="profileNavProfile"
         class="nav-item active"
+        type="button"
       >
         <span>👤</span>
         <small>Profile</small>
@@ -447,24 +772,40 @@
 
   </section>
 
-  <!-- ADMIN -->
-  <section id="adminPage" class="page app-page">
+
+  <!-- =========================
+       ADMIN PAGE
+  ========================== -->
+  <section
+    id="adminPage"
+    class="page app-page"
+  >
 
     <header class="admin-header">
 
       <div>
+
         <span>👨‍💼</span>
 
-        <h2>Admin Panel</h2>
+        <h2>
+          Admin Panel
+        </h2>
 
-        <small>Akkaadaami Oromiyaa</small>
+        <small>
+          Akkaadaami Oromiyaa
+        </small>
+
       </div>
 
-      <button id="adminLogoutButton">
+      <button
+        id="adminLogoutButton"
+        type="button"
+      >
         🚪
       </button>
 
     </header>
+
 
     <main class="content">
 
@@ -480,47 +821,67 @@
 
       </div>
 
+
+      <!-- ADMIN MENU -->
       <div class="admin-grid">
 
         <button
           id="adminStudentsButton"
           class="admin-menu"
+          type="button"
         >
           <span>👨‍🎓</span>
           <b>Barattoota</b>
-          <small>Tarree barattootaa</small>
+          <small>
+            Tarree fi eeyyama barattootaa
+          </small>
         </button>
+
 
         <button
           id="adminResultsButton"
           class="admin-menu"
+          type="button"
         >
           <span>📊</span>
           <b>Bu'aa</b>
-          <small>Qabxii barattootaa</small>
+          <small>
+            Qabxii fi ranking barattootaa
+          </small>
         </button>
+
 
         <button
           id="adminLessonsButton"
           class="admin-menu"
+          type="button"
         >
           <span>📚</span>
           <b>Barnoota</b>
-          <small>Barnoota uumi</small>
+          <small>
+            Uumi, sirreessi, haqii
+          </small>
         </button>
+
 
         <button
           id="adminExamsButton"
           class="admin-menu"
+          type="button"
         >
           <span>📝</span>
           <b>Qormaata</b>
-          <small>Qormaata fi gaaffii</small>
+          <small>
+            Qormaata fi gaaffii
+          </small>
         </button>
 
       </div>
 
-      <!-- STUDENTS -->
+
+      <!-- =========================
+           ADMIN STUDENTS
+      ========================== -->
       <div
         id="adminStudentsPanel"
         class="admin-panel"
@@ -528,19 +889,36 @@
 
         <div class="panel-title">
 
-          <h3>👨‍🎓 Barattoota</h3>
+          <h3>
+            👨‍🎓 Barattoota
+          </h3>
 
-          <button id="closeStudentsPanel">
+          <button
+            id="closeStudentsPanel"
+            type="button"
+          >
             ×
           </button>
 
         </div>
 
-        <div id="adminStudentsList"></div>
+
+        <div
+          id="adminStudentsMessage"
+          class="message"
+        ></div>
+
+
+        <div
+          id="adminStudentsList"
+        ></div>
 
       </div>
 
-      <!-- RESULTS -->
+
+      <!-- =========================
+           ADMIN RESULTS
+      ========================== -->
       <div
         id="adminResultsPanel"
         class="admin-panel"
@@ -548,19 +926,65 @@
 
         <div class="panel-title">
 
-          <h3>📊 Bu'aa Qormaataa</h3>
+          <h3>
+            📊 Bu'aa Qormaataa
+          </h3>
 
-          <button id="closeResultsPanel">
+          <button
+            id="closeResultsPanel"
+            type="button"
+          >
             ×
           </button>
 
         </div>
 
-        <div id="adminResultsList"></div>
+
+        <div
+          id="adminResultsMessage"
+          class="message"
+        ></div>
+
+
+        <!-- DYNAMIC RESULT TABLE -->
+        <div class="results-table-wrapper">
+
+          <table
+            id="adminResultsTable"
+            class="results-table"
+          >
+
+            <thead id="adminResultsTableHead">
+              <tr>
+                <th>#</th>
+                <th>Barataa</th>
+                <th>Student ID</th>
+                <th>Total</th>
+                <th>Average</th>
+                <th>Rank</th>
+              </tr>
+            </thead>
+
+            <tbody id="adminResultsTableBody">
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- OLD LIST SUPPORT -->
+        <div
+          id="adminResultsList"
+          style="display:none;"
+        ></div>
 
       </div>
 
-      <!-- LESSONS -->
+
+      <!-- =========================
+           ADMIN LESSONS
+      ========================== -->
       <div
         id="adminLessonsPanel"
         class="admin-panel"
@@ -568,13 +992,19 @@
 
         <div class="panel-title">
 
-          <h3>📚 Barnoota</h3>
+          <h3>
+            📚 Barnoota
+          </h3>
 
-          <button id="closeLessonsPanel">
+          <button
+            id="closeLessonsPanel"
+            type="button"
+          >
             ×
           </button>
 
         </div>
+
 
         <div class="admin-form">
 
@@ -584,23 +1014,28 @@
             placeholder="Mata duree barnootaa"
           >
 
+
           <input
             id="lessonDescriptionInput"
             type="text"
             placeholder="Ibsa gabaabaa"
           >
 
+
           <textarea
             id="lessonContentInput"
             placeholder="Qabiyyee barnootaa..."
           ></textarea>
 
+
           <button
             id="createLessonButton"
             class="primary-btn"
+            type="button"
           >
             ➕ Barnoota Uumi
           </button>
+
 
           <div
             id="lessonCreateMessage"
@@ -609,13 +1044,22 @@
 
         </div>
 
-        <h4>Barnoota jiran</h4>
 
-        <div id="adminLessonsList"></div>
+        <h4>
+          Barnoota jiran
+        </h4>
+
+
+        <div
+          id="adminLessonsList"
+        ></div>
 
       </div>
 
-      <!-- EXAMS -->
+
+      <!-- =========================
+           ADMIN EXAMS
+      ========================== -->
       <div
         id="adminExamsPanel"
         class="admin-panel"
@@ -623,14 +1067,21 @@
 
         <div class="panel-title">
 
-          <h3>📝 Qormaata</h3>
+          <h3>
+            📝 Qormaata
+          </h3>
 
-          <button id="closeExamsPanel">
+          <button
+            id="closeExamsPanel"
+            type="button"
+          >
             ×
           </button>
 
         </div>
 
+
+        <!-- CREATE EXAM -->
         <div class="admin-form">
 
           <input
@@ -639,17 +1090,21 @@
             placeholder="Maqaa qormaataa"
           >
 
+
           <textarea
             id="examDescriptionInput"
             placeholder="Ibsa qormaataa"
           ></textarea>
 
+
           <button
             id="createExamButton"
             class="primary-btn"
+            type="button"
           >
             ➕ Qormaata Uumi
           </button>
+
 
           <div
             id="examCreateMessage"
@@ -658,17 +1113,31 @@
 
         </div>
 
-        <h4>Qormaata jiran</h4>
 
-        <div id="adminExamsList"></div>
+        <h4>
+          Qormaata jiran
+        </h4>
+
+
+        <div
+          id="adminExamsList"
+        ></div>
+
 
         <hr>
 
-        <h3>➕ Gaaffii Qormaataa Dabali</h3>
+
+        <!-- CREATE QUESTION -->
+        <h3>
+          ➕ Gaaffii Qormaataa Dabali
+        </h3>
+
 
         <div class="admin-form">
 
-          <select id="questionExamSelect">
+          <select
+            id="questionExamSelect"
+          >
 
             <option value="">
               Qormaata filadhu
@@ -676,10 +1145,12 @@
 
           </select>
 
+
           <textarea
             id="questionInput"
             placeholder="Gaaffii barreessi..."
           ></textarea>
+
 
           <input
             id="optionAInput"
@@ -687,11 +1158,13 @@
             placeholder="A) Filannoo A"
           >
 
+
           <input
             id="optionBInput"
             type="text"
             placeholder="B) Filannoo B"
           >
+
 
           <input
             id="optionCInput"
@@ -699,31 +1172,49 @@
             placeholder="C) Filannoo C"
           >
 
+
           <input
             id="optionDInput"
             type="text"
             placeholder="D) Filannoo D"
           >
 
-          <select id="correctAnswerInput">
+
+          <select
+            id="correctAnswerInput"
+          >
 
             <option value="">
               Deebii sirrii filadhu
             </option>
 
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
+            <option value="A">
+              A
+            </option>
+
+            <option value="B">
+              B
+            </option>
+
+            <option value="C">
+              C
+            </option>
+
+            <option value="D">
+              D
+            </option>
 
           </select>
+
 
           <button
             id="createQuestionButton"
             class="primary-btn"
+            type="button"
           >
             ➕ Gaaffii Dabali
           </button>
+
 
           <div
             id="questionCreateMessage"
@@ -732,9 +1223,15 @@
 
         </div>
 
-        <h4>Gaaffiiwwan jiran</h4>
 
-        <div id="adminQuestionsList"></div>
+        <h4>
+          Gaaffiiwwan jiran
+        </h4>
+
+
+        <div
+          id="adminQuestionsList"
+        ></div>
 
       </div>
 
@@ -742,22 +1239,44 @@
 
   </section>
 
-  <!-- APP JS -->
+
+  <!-- =========================
+       APP JS
+  ========================== -->
   <script src="app.js"></script>
 
-  <!-- SERVICE WORKER -->
+
+  <!-- =========================
+       SERVICE WORKER
+  ========================== -->
   <script>
+
     if ("serviceWorker" in navigator) {
+
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js")
+
+        navigator.serviceWorker
+          .register("/sw.js")
           .then(() => {
-            console.log("Service Worker registered successfully.");
+
+            console.log(
+              "Service Worker registered successfully."
+            );
+
           })
           .catch((error) => {
-            console.error("Service Worker registration failed:", error);
+
+            console.error(
+              "Service Worker registration failed:",
+              error
+            );
+
           });
+
       });
+
     }
+
   </script>
 
 </body>
