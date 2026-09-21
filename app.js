@@ -1,17 +1,26 @@
+const SUPABASE_URL = "https://xhkkaevhcqvkwabcsljm.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_8nBE4n2bQ1jRnEr_83FrdA_vSqqIpSz";
+
+const { createClient } = supabase;
+
+const db = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
 let currentStudent = null;
 let currentExam = null;
 let currentQuestions = [];
 let currentQuestionIndex = 0;
 let currentAnswers = [];
 let selectedAnswer = null;
-let studentAuthMode = "new";
 
-
-/* =========================================================
-   PAGE
-========================================================= */
 
 function showPage(id) {
+
   document.querySelectorAll(".page").forEach(page => {
     page.classList.remove("active");
   });
@@ -20,68 +29,12 @@ function showPage(id) {
 
   if (page) {
     page.classList.add("active");
-    window.scrollTo(0, 0);
   }
 }
 
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function escapeHTML(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-
-function generateActivationCode() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(
-      Math.floor(Math.random() * chars.length)
-    );
-  }
-
-  return code;
-}
-
-
-function generateStudentCode(name) {
-  const cleanName = name
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "")
-    .slice(0, 6);
-
-  const random = Math.floor(1000 + Math.random() * 9000);
-
-  return `ST-${cleanName || "USER"}-${random}`;
-}
-
-
-function setMessage(id, text, color = "#2563eb") {
-  const el = document.getElementById(id);
-
-  if (!el) return;
-
-  el.textContent = text;
-  el.style.color = color;
-}
-
-
-/* =========================================================
-   ROLE
-========================================================= */
 
 function openStudentLogin() {
-  showPage("loginPage");
-  setStudentAuthMode("new");
+  showPage("studentLoginPage");
 }
 
 
@@ -90,166 +43,289 @@ function openAdminLogin() {
 }
 
 
-/* =========================================================
-   ADMIN SECURITY
-========================================================= */
+function showStudentMessage(message, type = "info") {
 
-function isAdminLoggedIn() {
-  return localStorage.getItem("admin_logged") === "true";
+  const el = document.getElementById(
+    "studentLoginMessage"
+  );
+
+  if (!el) return;
+
+  el.innerHTML = message;
+  el.className = `message ${type}`;
 }
 
 
-/* =========================================================
-   STUDENT AUTH MODE
-========================================================= */
+function showAdminMessage(message, type = "info") {
 
-function setStudentAuthMode(mode) {
-  studentAuthMode = mode;
+  const el = document.getElementById(
+    "adminLoginMessage"
+  );
 
-  const description =
-    document.getElementById("studentAuthDescription");
+  if (!el) return;
 
-  const newButton =
-    document.getElementById("newStudentModeButton");
+  el.innerHTML = message;
+  el.className = `message ${type}`;
+}
 
-  const existingButton =
-    document.getElementById("existingStudentModeButton");
 
-  const idBox =
-    document.getElementById("studentIdBox");
+function generateStudentCode() {
 
-  const codeBox =
-    document.getElementById("activationCodeBox");
+  return "ST-" +
+    Math.floor(
+      100000 + Math.random() * 900000
+    );
+}
 
-  const registerButton =
-    document.getElementById("studentRegisterButton");
 
-  const loginButton =
-    document.getElementById("studentLoginButton");
+function generateActivationCode() {
 
-  if (mode === "new") {
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-    description.textContent =
-      "Account haaraa uumuuf maqaa kee galchi.";
+  let code = "";
 
-    newButton.classList.add("active");
-    existingButton.classList.remove("active");
+  for (let i = 0; i < 8; i++) {
 
-    idBox.style.display = "none";
-    codeBox.style.display = "none";
+    code += chars.charAt(
+      Math.floor(
+        Math.random() * chars.length
+      )
+    );
 
-    registerButton.style.display = "block";
-    loginButton.style.display = "none";
-
-  } else {
-
-    description.textContent =
-      "Maqaa, Student ID fi Activation Code kee galchi.";
-
-    newButton.classList.remove("active");
-    existingButton.classList.add("active");
-
-    idBox.style.display = "block";
-    codeBox.style.display = "block";
-
-    registerButton.style.display = "none";
-    loginButton.style.display = "block";
   }
 
-  setMessage(
-    "studentLoginMessage",
-    "",
-    "#2563eb"
-  );
+  return code;
 }
 
 
-/* =========================================================
-   NEW STUDENT REGISTRATION
-========================================================= */
-
-async function registerStudent() {
-
-  const nameInput =
-    document.getElementById("nameInput");
+async function studentRegister() {
 
   const name =
-    nameInput.value.trim();
+    document
+      .getElementById("nameInput")
+      .value
+      .trim();
 
   if (!name) {
-    setMessage(
-      "studentLoginMessage",
+
+    showStudentMessage(
       "Maqaa kee galchi.",
-      "#dc2626"
+      "error"
     );
+
     return;
   }
 
-  setMessage(
-    "studentLoginMessage",
-    "Account kee uumaa jira...",
-    "#2563eb"
-  );
 
   try {
 
-    /* Prevent exact duplicate registration */
-    const {
-      data: existingStudents,
-      error: checkError
-    } = await supabaseClient
-      .from("students")
-      .select("id,name,status,student_code,activation_code")
-      .ilike("name", name)
-      .limit(1);
+    showStudentMessage(
+      "⏳ Galmaa'aa jira...",
+      "info"
+    );
 
-    if (checkError) throw checkError;
 
-    if (
-      existingStudents &&
-      existingStudents.length > 0
-    ) {
+    let studentCode =
+      generateStudentCode();
 
-      const existing =
-        existingStudents[0];
 
-      setMessage(
-        "studentLoginMessage",
-        "Maqaan kun duraan account qaba. 'Account qaba' filadhu; Student ID fi Activation Code galchi.",
-        "#dc2626"
+    let activationCode =
+      generateActivationCode();
+
+
+    const { data, error } =
+      await db
+        .from("students")
+        .insert([
+          {
+            name: name,
+            student_code: studentCode,
+            activation_code: activationCode,
+            status: "pending"
+          }
+        ])
+        .select()
+        .single();
+
+
+    if (error) throw error;
+
+
+    showStudentMessage(
+      `
+      <div class="success-box">
+
+        <h3>✅ Galmeen milkaa'e!</h3>
+
+        <p>
+          <strong>Maqaa:</strong>
+          ${escapeHtml(data.name)}
+        </p>
+
+        <p>
+          <strong>Student ID:</strong><br>
+          <span class="big-code">
+            ${escapeHtml(data.student_code)}
+          </span>
+        </p>
+
+        <p>
+          <strong>Activation Code:</strong><br>
+          <span class="big-code">
+            ${escapeHtml(data.activation_code)}
+          </span>
+        </p>
+
+        <p>
+          ⏳ Amma Admin akka siif hayyamu eeguu qabda.
+        </p>
+
+        <p>
+          Student ID fi Activation Code kee eegi.
+        </p>
+
+      </div>
+      `,
+      "success"
+    );
+
+
+    document.getElementById(
+      "nameInput"
+    ).value = "";
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showStudentMessage(
+      "❌ Galmeen hin milkoofne: " +
+      escapeHtml(error.message),
+      "error"
+    );
+  }
+}
+
+
+async function studentLogin() {
+
+  const studentId =
+    document
+      .getElementById("studentIdInput")
+      .value
+      .trim();
+
+
+  const activationCode =
+    document
+      .getElementById("activationCodeInput")
+      .value
+      .trim();
+
+
+  if (!studentId || !activationCode) {
+
+    showStudentMessage(
+      "Student ID fi Activation Code lamaan galchi.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  try {
+
+    showStudentMessage(
+      "⏳ Odeeffannoo kee mirkaneessaa jira...",
+      "info"
+    );
+
+
+    const { data, error } =
+      await db
+        .from("students")
+        .select("*")
+        .eq("student_code", studentId)
+        .eq("activation_code", activationCode)
+        .maybeSingle();
+
+
+    if (error) throw error;
+
+
+    if (!data) {
+
+      showStudentMessage(
+        "❌ Student ID ykn Activation Code sirrii miti.",
+        "error"
       );
 
       return;
     }
 
 
-    const studentCode =
-      generateStudentCode(name);
+    if (data.status === "pending") {
 
-    const activationCode =
-      generateActivationCode();
+      showStudentMessage(
+        `
+        <div class="warning-box">
+
+          <h3>⏳ Admin Hayyama Eegaa Jirta</h3>
+
+          <p>
+            Galmeen kee fudhatameera.
+          </p>
+
+          <p>
+            Admin erga siif hayyamee booda seenuu dandeessa.
+          </p>
+
+        </div>
+        `,
+        "warning"
+      );
+
+      return;
+    }
 
 
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from("students")
-      .insert([
-        {
-          name: name,
-          student_code: studentCode,
-          activation_code: activationCode,
-          status: "pending"
-        }
-      ])
-      .select()
-      .single();
+    if (data.status === "rejected") {
 
-    if (error) throw error;
+      showStudentMessage(
+        `
+        <div class="error-box">
+
+          <h3>❌ Galmeen Kee Didame</h3>
+
+          <p>
+            Maaloo Admin qunnami.
+          </p>
+
+        </div>
+        `,
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (data.status !== "active") {
+
+      showStudentMessage(
+        "Status account kee sirrii miti.",
+        "error"
+      );
+
+      return;
+    }
 
 
     currentStudent = data;
+
 
     localStorage.setItem(
       "student_id",
@@ -257,242 +333,33 @@ async function registerStudent() {
     );
 
 
-    /* Show credentials immediately */
-    const message = document.getElementById(
-      "studentLoginMessage"
-    );
-
-    message.innerHTML = `
-      <div style="
-        padding:14px;
-        margin-top:10px;
-        border-radius:12px;
-        background:#eff6ff;
-        color:#1e3a8a;
-        line-height:1.7;
-      ">
-        <b>✅ Galmeen kee milkaa'eera!</b><br><br>
-
-        🆔 <b>Student ID:</b>
-        ${escapeHTML(data.student_code)}
-        <br>
-
-        🔐 <b>Activation Code:</b>
-        ${escapeHTML(data.activation_code)}
-        <br><br>
-
-        ⏳ <b>Status:</b> Eegaa jiru
-        <br><br>
-
-        Admin 1 ykn Admin 2 akka siif eeyyamu eegi.
-        ID fi Activation Code kee hin dagatin.
-      </div>
-    `;
-
-    message.style.color = "#1e3a8a";
-
-    /* Do not enter student home while pending */
-    localStorage.removeItem("student_id");
-
-  } catch (error) {
-
-    console.error(error);
-
-    setMessage(
-      "studentLoginMessage",
-      "Dogoggorri uumame: " + error.message,
-      "#dc2626"
-    );
-  }
-}
-
-
-/* =========================================================
-   EXISTING STUDENT LOGIN
-========================================================= */
-
-async function studentLogin() {
-
-  const name =
-    document.getElementById(
-      "nameInput"
-    ).value.trim();
-
-  const studentCode =
     document.getElementById(
       "studentIdInput"
-    ).value.trim();
+    ).value = "";
 
-  const activationCode =
+
     document.getElementById(
       "activationCodeInput"
-    ).value.trim().toUpperCase();
-
-
-  if (!name) {
-
-    setMessage(
-      "studentLoginMessage",
-      "Maqaa kee galchi.",
-      "#dc2626"
-    );
-
-    return;
-  }
-
-
-  if (!studentCode) {
-
-    setMessage(
-      "studentLoginMessage",
-      "Student ID kee galchi.",
-      "#dc2626"
-    );
-
-    return;
-  }
-
-
-  if (!activationCode) {
-
-    setMessage(
-      "studentLoginMessage",
-      "Activation Code kee galchi.",
-      "#dc2626"
-    );
-
-    return;
-  }
-
-
-  setMessage(
-    "studentLoginMessage",
-    "Account kee mirkaneessaa jira...",
-    "#2563eb"
-  );
-
-
-  try {
-
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from("students")
-      .select("*")
-      .eq(
-        "student_code",
-        studentCode
-      )
-      .eq(
-        "activation_code",
-        activationCode
-      )
-      .limit(1);
-
-
-    if (error) throw error;
-
-
-    if (
-      !data ||
-      data.length === 0
-    ) {
-
-      setMessage(
-        "studentLoginMessage",
-        "Student ID ykn Activation Code sirrii miti.",
-        "#dc2626"
-      );
-
-      return;
-    }
-
-
-    const student =
-      data[0];
-
-
-    if (
-      student.status !== "active"
-    ) {
-
-      if (
-        student.status === "pending" ||
-        !student.status
-      ) {
-
-        setMessage(
-          "studentLoginMessage",
-          "⏳ Account kee ammallee Admin irraa hin eeyyamamne.",
-          "#d97706"
-        );
-
-      } else if (
-        student.status === "rejected"
-      ) {
-
-        setMessage(
-          "studentLoginMessage",
-          "❌ Account kee Admin irraa didameera.",
-          "#dc2626"
-        );
-
-      } else {
-
-        setMessage(
-          "studentLoginMessage",
-          "Account kee hojii irra hin jiru.",
-          "#dc2626"
-        );
-      }
-
-      return;
-    }
-
-
-    /*
-      Name is NOT used to identify the account.
-      Student ID + Activation Code identify it.
-      Therefore a small name spelling difference
-      does not change the account.
-    */
-
-    currentStudent = student;
-
-    localStorage.setItem(
-      "student_id",
-      student.id
-    );
-
-
-    document.getElementById(
-      "studentWelcomeName"
-    ).textContent =
-      student.name;
+    ).value = "";
 
 
     await loadStudentHome();
 
-    showPage("homePage");
+    showPage("studentHomePage");
 
 
   } catch (error) {
 
     console.error(error);
 
-    setMessage(
-      "studentLoginMessage",
-      "Dogoggora: " + error.message,
-      "#dc2626"
+    showStudentMessage(
+      "❌ Rakkoo uumame: " +
+      escapeHtml(error.message),
+      "error"
     );
   }
 }
 
-
-/* =========================================================
-   RESTORE STUDENT
-========================================================= */
 
 async function restoreStudent() {
 
@@ -502,66 +369,48 @@ async function restoreStudent() {
   if (!id) return;
 
 
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("students")
-    .select("*")
-    .eq("id", id)
-    .single();
+  try {
+
+    const { data, error } =
+      await db
+        .from("students")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
 
 
-  if (
-    !error &&
-    data &&
-    data.status === "active"
-  ) {
+    if (error) throw error;
+
+
+    if (!data || data.status !== "active") {
+
+      localStorage.removeItem(
+        "student_id"
+      );
+
+      currentStudent = null;
+
+      return;
+    }
+
 
     currentStudent = data;
 
-  } else {
+    await loadStudentHome();
+
+    showPage("studentHomePage");
+
+
+  } catch (error) {
+
+    console.error(error);
 
     localStorage.removeItem(
       "student_id"
     );
-
-    currentStudent = null;
   }
 }
 
-
-/* =========================================================
-   STUDENT ACCOUNT STATUS
-========================================================= */
-
-function showStudentAccountStatus() {
-
-  const box =
-    document.getElementById(
-      "studentAccountStatus"
-    );
-
-  if (!box || !currentStudent) return;
-
-  box.innerHTML = `
-    <div style="
-      padding:12px;
-      border-radius:12px;
-      background:#f0fdf4;
-      color:#166534;
-      margin-bottom:14px;
-    ">
-      🆔 <b>Student ID:</b>
-      ${escapeHTML(currentStudent.student_code)}
-    </div>
-  `;
-}
-
-
-/* =========================================================
-   STUDENT HOME
-========================================================= */
 
 async function loadStudentHome() {
 
@@ -571,117 +420,92 @@ async function loadStudentHome() {
   document.getElementById(
     "studentWelcomeName"
   ).textContent =
-    currentStudent.name;
+    `Baga nagaan dhuftan, ${currentStudent.name}`;
 
 
-  showStudentAccountStatus();
+  document.getElementById(
+    "studentHomeMessage"
+  ).textContent =
+    `Student ID: ${currentStudent.student_code}`;
 
 
-  const box =
+  const container =
     document.getElementById(
       "studentLessons"
     );
 
-  box.innerHTML =
-    "<p>Barnoota fe'aa jira...</p>";
 
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("lessons")
-    .select("*")
-    .order("created_at", {
-      ascending: false
-    });
+  const { data, error } =
+    await db
+      .from("lessons")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
 
   if (error) {
 
-    box.innerHTML =
-      "<p>Barnoota argachuu hin dandeenye.</p>";
+    container.innerHTML =
+      "<p>❌ Barnoota fe'uu hin dandeenye.</p>";
 
     return;
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  if (!data || data.length === 0) {
 
-    box.innerHTML = `
-      <div class="lesson-card">
-        <div>
-          <h3>📚 Barnoonni hin jiru</h3>
-          <p>Admin barnoota yeroo booda ni dabala.</p>
-        </div>
+    container.innerHTML =
+      "<p>Barnoonni ammaaf hin jiru.</p>";
+
+    return;
+  }
+
+
+  container.innerHTML =
+    data.map(lesson => `
+
+      <div class="card">
+
+        <h3>
+          📚 ${escapeHtml(lesson.title)}
+        </h3>
+
+        <p>
+          ${escapeHtml(
+            truncate(
+              lesson.content || "",
+              120
+            )
+          )}
+        </p>
+
+        <button
+          class="primary-btn"
+          onclick="openLesson('${lesson.id}')"
+        >
+          Baradhu →
+        </button>
+
       </div>
-    `;
 
-    return;
-  }
-
-
-  box.innerHTML =
-    data.map(
-      lesson => `
-        <div class="lesson-card">
-
-          <div class="card-icon">
-            📖
-          </div>
-
-          <div>
-
-            <h3>
-              ${escapeHTML(lesson.title)}
-            </h3>
-
-            <p>
-              ${escapeHTML(
-                lesson.description ||
-                "Barnoota haaraa"
-              )}
-            </p>
-
-          </div>
-
-          <button
-            class="open-btn"
-            onclick="openLesson(${lesson.id})"
-          >
-            Ilaali
-          </button>
-
-        </div>
-      `
-    ).join("");
+    `).join("");
 }
 
 
-/* =========================================================
-   LESSON DETAIL
-========================================================= */
-
 async function openLesson(id) {
 
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("lessons")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data, error } =
+    await db
+      .from("lessons")
+      .select("*")
+      .eq("id", id)
+      .single();
 
 
   if (error) {
 
-    alert(
-      "Barnoota banuun hin danda'amne."
-    );
+    alert(error.message);
 
     return;
   }
@@ -689,182 +513,125 @@ async function openLesson(id) {
 
   document.getElementById(
     "lessonDetailTitle"
-  ).textContent =
-    data.title;
-
-
-  document.getElementById(
-    "lessonDetailDescription"
-  ).textContent =
-    data.description || "";
+  ).textContent = data.title;
 
 
   document.getElementById(
     "lessonDetailContent"
-  ).textContent =
-    data.content || "";
+  ).innerHTML =
+    formatText(data.content || "");
 
 
-  showPage(
-    "lessonDetailPage"
-  );
+  showPage("lessonDetailPage");
 }
 
-
-/* =========================================================
-   EXAMS - STUDENT
-========================================================= */
 
 async function loadExams() {
 
-  const box =
+  const container =
     document.getElementById(
-      "examList"
+      "studentExams"
     );
 
-  box.innerHTML =
-    "<p>Qormaata fe'aa jira...</p>";
 
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("exams")
-    .select("*")
-    .order("created_at", {
-      ascending: false
-    });
+  const { data, error } =
+    await db
+      .from("exams")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
 
   if (error) {
 
-    box.innerHTML =
-      "<p>Qormaata argachuu hin dandeenye.</p>";
+    container.innerHTML =
+      "<p>❌ Qormaata fe'uu hin dandeenye.</p>";
 
     return;
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  if (!data || data.length === 0) {
 
-    box.innerHTML = `
-      <div class="exam-card">
+    container.innerHTML =
+      "<p>Qormaanni ammaaf hin jiru.</p>";
+
+    return;
+  }
+
+
+  container.innerHTML =
+    data.map(exam => `
+
+      <div class="card">
 
         <h3>
-          📝 Qormaanni hin jiru
+          📝 ${escapeHtml(exam.title)}
         </h3>
 
         <p>
-          Admin qormaata yeroo booda ni uuma.
+          ${escapeHtml(
+            exam.description || ""
+          )}
         </p>
 
+        <button
+          class="primary-btn"
+          onclick="startExam('${exam.id}')"
+        >
+          Qormaata Jalqabi →
+        </button>
+
       </div>
-    `;
 
-    return;
-  }
-
-
-  box.innerHTML =
-    data.map(
-      exam => `
-        <div class="exam-card">
-
-          <div class="card-icon">
-            📝
-          </div>
-
-          <h3>
-            ${escapeHTML(exam.title)}
-          </h3>
-
-          <p>
-            ${escapeHTML(
-              exam.description ||
-              "Qormaata"
-            )}
-          </p>
-
-          <button
-            class="primary-btn"
-            style="margin-top:14px"
-            onclick="startExam(${exam.id})"
-          >
-            Qormaata Jalqabi →
-          </button>
-
-        </div>
-      `
-    ).join("");
+    `).join("");
 }
 
 
-/* =========================================================
-   START EXAM
-========================================================= */
-
 async function startExam(examId) {
 
-  if (!currentStudent) {
-
-    alert(
-      "Mee jalqaba akka barataa seeni."
-    );
-
-    return;
-  }
+  const exam =
+    await db
+      .from("exams")
+      .select("*")
+      .eq("id", examId)
+      .single();
 
 
-  const {
-    data: exam,
-    error: examError
-  } = await supabaseClient
-    .from("exams")
-    .select("*")
-    .eq("id", examId)
-    .single();
+  if (exam.error) {
 
-
-  if (examError) {
-
-    alert(
-      "Qormaata banuun hin danda'amne."
-    );
+    alert(exam.error.message);
 
     return;
   }
 
 
-  const {
-    data: questions,
-    error
-  } = await supabaseClient
-    .from("questions")
-    .select("*")
-    .eq("exam_id", examId)
-    .order("id", {
-      ascending: true
-    });
+  const questions =
+    await db
+      .from("questions")
+      .select("*")
+      .eq("exam_id", examId)
+      .order("created_at", {
+        ascending: true
+      });
 
 
-  if (error) {
+  if (questions.error) {
 
-    alert(
-      "Gaaffiiwwan qormaataa argachuu hin dandeenye."
-    );
+    alert(questions.error.message);
 
     return;
   }
 
 
-  if (
-    !questions ||
-    questions.length === 0
-  ) {
+  currentExam = exam.data;
+
+  currentQuestions =
+    questions.data || [];
+
+
+  if (currentQuestions.length === 0) {
 
     alert(
       "Qormaata kana keessatti gaaffiin hin jiru."
@@ -874,41 +641,38 @@ async function startExam(examId) {
   }
 
 
-  currentExam = exam;
-  currentQuestions = questions;
   currentQuestionIndex = 0;
-  currentAnswers = [];
+
+  currentAnswers =
+    new Array(
+      currentQuestions.length
+    ).fill(null);
+
+
   selectedAnswer = null;
 
 
   document.getElementById(
     "examTitle"
   ).textContent =
-    exam.title;
+    currentExam.title;
 
 
-  showPage(
-    "examPage"
-  );
-
+  showPage("examPage");
 
   showQuestion();
 }
 
 
-/* =========================================================
-   QUESTION
-========================================================= */
-
 function showQuestion() {
 
-  const q =
+  const question =
     currentQuestions[
       currentQuestionIndex
     ];
 
 
-  if (!q) return;
+  if (!question) return;
 
 
   selectedAnswer =
@@ -926,82 +690,65 @@ function showQuestion() {
   document.getElementById(
     "questionText"
   ).textContent =
-    q.question;
-
-
-  const percent =
-    (
-      ((currentQuestionIndex + 1) /
-        currentQuestions.length) *
-      100
-    );
-
-
-  document.getElementById(
-    "progressBar"
-  ).style.width =
-    percent + "%";
+    question.question ||
+    question.text ||
+    "";
 
 
   const options = [
-    ["A", q.option_a],
-    ["B", q.option_b],
-    ["C", q.option_c],
-    ["D", q.option_d]
+    ["A", question.option_a],
+    ["B", question.option_b],
+    ["C", question.option_c],
+    ["D", question.option_d]
   ];
 
 
-  document.getElementById(
-    "optionsBox"
-  ).innerHTML =
-    options.map(
-      ([letter, text]) => `
-        <button
-          class="option ${
-            selectedAnswer === letter
-              ? "selected"
-              : ""
-          }"
-          onclick="selectAnswer('${letter}')"
-          type="button"
-        >
-          <b>${letter})</b>
-          ${escapeHTML(text)}
-        </button>
-      `
-    ).join("");
-
-
-  const next =
+  const container =
     document.getElementById(
-      "nextQuestionButton"
+      "answersContainer"
     );
 
 
-  if (
-    currentQuestionIndex ===
-    currentQuestions.length - 1
-  ) {
+  container.innerHTML =
+    options.map(option => {
 
-    next.textContent =
-      "Qormaata Xumuri ✓";
+      if (!option[1]) return "";
 
-  } else {
+      const selected =
+        selectedAnswer === option[0]
+          ? "selected"
+          : "";
 
-    next.textContent =
-      "Itti Aanee →";
-  }
+
+      return `
+
+        <button
+          class="answer-btn ${selected}"
+          onclick="selectAnswer('${option[0]}')"
+        >
+
+          <strong>
+            ${option[0]}
+          </strong>
+
+          <span>
+            ${escapeHtml(option[1])}
+          </span>
+
+        </button>
+
+      `;
+
+    }).join("");
+
+
+  updateNextButton();
 }
 
 
-/* =========================================================
-   SELECT ANSWER
-========================================================= */
-
 function selectAnswer(answer) {
 
-  selectedAnswer =
-    answer;
+  selectedAnswer = answer;
 
 
   currentAnswers[
@@ -1010,52 +757,69 @@ function selectAnswer(answer) {
 
 
   document
-    .querySelectorAll(".option")
-    .forEach(btn => {
+    .querySelectorAll(".answer-btn")
+    .forEach(button => {
 
-      btn.classList.remove(
+      button.classList.remove(
         "selected"
       );
 
-
-      const text =
-        btn.textContent.trim();
+    });
 
 
-      if (
-        text.startsWith(
-          answer + ")"
-        )
-      ) {
+  document
+    .querySelectorAll(".answer-btn")
+    .forEach(button => {
 
-        btn.classList.add(
+      const letter =
+        button
+          .querySelector("strong")
+          ?.textContent;
+
+
+      if (letter === answer) {
+
+        button.classList.add(
           "selected"
         );
+
       }
 
     });
+
+
+  updateNextButton();
 }
 
 
-/* =========================================================
-   NEXT QUESTION
-========================================================= */
+function updateNextButton() {
 
-async function nextQuestion() {
+  const button =
+    document.getElementById(
+      "nextQuestionButton"
+    );
+
+
+  button.disabled =
+    !selectedAnswer;
+
+
+  button.textContent =
+    currentQuestionIndex ===
+    currentQuestions.length - 1
+      ? "Qormaata Xumuri ✓"
+      : "Itti Aanuu →";
+}
+
+
+function nextQuestion() {
 
   if (!selectedAnswer) {
 
-    alert(
-      "Mee deebii tokko filadhu."
-    );
+    alert("Deebii tokko filadhu.");
 
     return;
   }
-
-
-  currentAnswers[
-    currentQuestionIndex
-  ] = selectedAnswer;
 
 
   if (
@@ -1069,14 +833,10 @@ async function nextQuestion() {
 
   } else {
 
-    await finishExam();
+    finishExam();
   }
 }
 
-
-/* =========================================================
-   FINISH EXAM
-========================================================= */
 
 async function finishExam() {
 
@@ -1084,18 +844,25 @@ async function finishExam() {
 
 
   currentQuestions.forEach(
-    (q, index) => {
+    (question, index) => {
+
+      const answer =
+        currentAnswers[index];
+
+
+      const correct =
+        String(
+          question.correct_answer || ""
+        ).toUpperCase();
+
 
       if (
-        currentAnswers[index] &&
-        currentAnswers[index]
-          .toUpperCase() ===
-        String(
-          q.correct_answer || ""
-        ).toUpperCase()
+        answer &&
+        answer.toUpperCase() === correct
       ) {
 
         score++;
+
       }
 
     }
@@ -1108,156 +875,160 @@ async function finishExam() {
 
   const percentage =
     total > 0
-      ? Number(
-          ((score / total) * 100)
-            .toFixed(1)
+      ? Math.round(
+          (score / total) * 100
         )
       : 0;
 
 
-  if (
-    currentStudent &&
-    currentExam
-  ) {
-
-    const {
-      error
-    } = await supabaseClient
+  const existing =
+    await db
       .from("results")
-      .insert([
-        {
-          student_id:
-            currentStudent.id,
-
-          exam_id:
-            currentExam.id,
-
-          score:
-            score,
-
-          total:
-            total,
-
-          percentage:
-            percentage
-        }
-      ]);
+      .select("id")
+      .eq("student_id", currentStudent.id)
+      .eq("exam_id", currentExam.id)
+      .maybeSingle();
 
 
-    if (error) {
+  if (existing.error) {
 
-      console.error(error);
+    alert(existing.error.message);
 
-      alert(
-        "Qormaanni xumurame, garuu bu'aa kuusuu irratti rakkoon uumame."
-      );
-    }
+    return;
   }
 
 
-  showScore(
-    score,
-    total,
-    percentage
-  );
-}
+  let error;
 
 
-/* =========================================================
-   SCORE
-========================================================= */
+  if (existing.data) {
 
-function showScore(
-  score,
-  total,
-  percentage
-) {
-
-  document.getElementById(
-    "scoreText"
-  ).textContent =
-    `${score} / ${total}`;
+    const result =
+      await db
+        .from("results")
+        .update({
+          score,
+          total,
+          percentage
+        })
+        .eq("id", existing.data.id);
 
 
-  document.getElementById(
-    "percentageText"
-  ).textContent =
-    `${percentage}%`;
+    error = result.error;
+
+  } else {
+
+    const result =
+      await db
+        .from("results")
+        .insert([
+          {
+            student_id: currentStudent.id,
+            exam_id: currentExam.id,
+            score,
+            total,
+            percentage
+          }
+        ]);
 
 
-  document.getElementById(
-    "scoreValue"
-  ).textContent =
-    score;
+    error = result.error;
+  }
 
 
-  document.getElementById(
-    "totalValue"
-  ).textContent =
-    total;
+  if (error) {
 
-
-  showPage(
-    "scorePage"
-  );
-}
-
-
-/* =========================================================
-   STUDENT SCORE
-========================================================= */
-
-async function showLatestStudentScore() {
-
-  if (!currentStudent) return;
-
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("results")
-    .select(`
-      *,
-      exams(title)
-    `)
-    .eq(
-      "student_id",
-      currentStudent.id
-    )
-    .order("created_at", {
-      ascending: false
-    })
-    .limit(1)
-    .maybeSingle();
-
-
-  if (
-    error ||
-    !data
-  ) {
-
-    showScore(
-      0,
-      0,
-      0
+    alert(
+      "Qabxii olkaa'uu hin dandeenye: " +
+      error.message
     );
 
     return;
   }
 
 
-  showScore(
-    data.score,
-    data.total,
-    data.percentage || 0
+  alert(
+    `Qormaata xumurame!\n\nQabxii: ${score}/${total}\nDhibbeentaa: ${percentage}%`
   );
+
+
+  showPage("scorePage");
+
+  await showScore();
 }
 
 
-/* =========================================================
-   PROFILE
-========================================================= */
+async function showScore() {
+
+  const container =
+    document.getElementById(
+      "studentScore"
+    );
+
+
+  if (!currentStudent) return;
+
+
+  const { data, error } =
+    await db
+      .from("results")
+      .select(`
+        *,
+        exams (
+          title
+        )
+      `)
+      .eq("student_id", currentStudent.id)
+      .order("created_at", {
+        ascending: false
+      });
+
+
+  if (error) {
+
+    container.innerHTML =
+      "<p>❌ Qabxii fe'uu hin dandeenye.</p>";
+
+    return;
+  }
+
+
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      "<p>Ati ammallee qormaata hin fudhanne.</p>";
+
+    return;
+  }
+
+
+  container.innerHTML =
+    data.map(result => `
+
+      <div class="card">
+
+        <h3>
+          📝 ${escapeHtml(
+            result.exams?.title ||
+            "Qormaata"
+          )}
+        </h3>
+
+        <p>
+          <strong>Qabxii:</strong>
+          ${result.score}/${result.total}
+        </p>
+
+        <p>
+          <strong>Dhibbeentaa:</strong>
+          ${result.percentage}%
+        </p>
+
+      </div>
+
+    `).join("");
+}
+
 
 function loadProfile() {
 
@@ -1265,134 +1036,90 @@ function loadProfile() {
 
 
   document.getElementById(
-    "profileName"
-  ).textContent =
-    currentStudent.name;
+    "profileNameInput"
+  ).value =
+    currentStudent.name || "";
 
 
   document.getElementById(
     "profileCode"
   ).textContent =
-    currentStudent.student_code ||
-    "-";
-
-
-  const activation =
-    document.getElementById(
-      "profileActivationCode"
-    );
-
-  if (activation) {
-    activation.textContent =
-      currentStudent.activation_code ||
-      "-";
-  }
-
-
-  const status =
-    document.getElementById(
-      "profileStatus"
-    );
-
-  if (status) {
-
-    status.textContent =
-      currentStudent.status === "active"
-        ? "Active"
-        : currentStudent.status || "-";
-  }
+    currentStudent.student_code || "";
 
 
   document.getElementById(
-    "profileNameInput"
-  ).value =
-    currentStudent.name;
+    "profileActivationCode"
+  ).textContent =
+    currentStudent.activation_code || "";
+
+
+  document.getElementById(
+    "profileStatus"
+  ).textContent =
+    currentStudent.status === "active"
+      ? "✅ Active"
+      : currentStudent.status;
 }
 
 
 async function saveProfile() {
 
-  if (!currentStudent) return;
-
-
-  const input =
-    document.getElementById(
-      "profileNameInput"
-    );
-
-
   const name =
-    input.value.trim();
+    document
+      .getElementById(
+        "profileNameInput"
+      )
+      .value
+      .trim();
 
 
   if (!name) {
 
-    alert(
-      "Maqaa galchi."
-    );
+    alert("Maqaa galchi.");
 
     return;
   }
 
 
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("students")
-    .update({
-      name: name
-    })
-    .eq(
-      "id",
-      currentStudent.id
-    )
-    .select()
-    .single();
+  const { data, error } =
+    await db
+      .from("students")
+      .update({
+        name
+      })
+      .eq("id", currentStudent.id)
+      .select()
+      .single();
 
 
   if (error) {
 
-    alert(
-      "Maqaa haaromsuun hin danda'amne."
-    );
+    alert(error.message);
 
     return;
   }
 
 
-  currentStudent =
-    data;
+  currentStudent = data;
 
 
-  document.getElementById(
-    "profileName"
-  ).textContent =
-    data.name;
+  alert("✅ Maqaan kee jijjiirame.");
 
+  await loadStudentHome();
 
-  document.getElementById(
-    "studentWelcomeName"
-  ).textContent =
-    data.name;
-
-
-  alert(
-    "Maqaan kee sirriitti haaromfame."
-  );
+  loadProfile();
 }
 
-
-/* =========================================================
-   ADMIN LOGIN
-========================================================= */
 
 async function adminLogin() {
 
   const username =
-    document.getElementById(
-      "adminUsername"
-    ).value.trim();
+    document
+      .getElementById(
+        "adminUsername"
+      )
+      .value
+      .trim();
 
 
   const password =
@@ -1401,74 +1128,43 @@ async function adminLogin() {
     ).value;
 
 
-  const message =
-    document.getElementById(
-      "adminLoginMessage"
+  if (!username || !password) {
+
+    showAdminMessage(
+      "Username fi password galchi.",
+      "error"
     );
-
-
-  if (
-    !username ||
-    !password
-  ) {
-
-    message.textContent =
-      "Username fi password guuti.";
-
-    message.style.color =
-      "#dc2626";
 
     return;
   }
 
 
-  message.textContent =
-    "Seenaa jira...";
-
-  message.style.color =
-    "#2563eb";
-
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("admins")
-    .select("*")
-    .eq(
-      "username",
-      username
-    )
-    .eq(
-      "password",
-      password
-    )
-    .limit(1);
+  const { data, error } =
+    await db
+      .from("admins")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .maybeSingle();
 
 
   if (error) {
 
-    message.textContent =
-      "Dogoggora: " +
-      error.message;
-
-    message.style.color =
-      "#dc2626";
+    showAdminMessage(
+      error.message,
+      "error"
+    );
 
     return;
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  if (!data) {
 
-    message.textContent =
-      "Username ykn password sirrii miti.";
-
-    message.style.color =
-      "#dc2626";
+    showAdminMessage(
+      "❌ Username ykn password sirrii miti.",
+      "error"
+    );
 
     return;
   }
@@ -1480,466 +1176,374 @@ async function adminLogin() {
   );
 
 
-  showPage(
-    "adminPage"
-  );
+  showPage("adminPage");
 
-
-  hideAdminPanels();
+  openAdminPanel("students");
 }
 
 
-/* =========================================================
-   ADMIN STUDENTS
-========================================================= */
+function hideAdminPanels() {
+
+  document
+    .querySelectorAll(".admin-panel")
+    .forEach(panel => {
+
+      panel.style.display = "none";
+
+    });
+}
+
+
+async function openAdminPanel(panel) {
+
+  hideAdminPanels();
+
+
+  if (panel === "students") {
+
+    document.getElementById(
+      "adminStudentsPanel"
+    ).style.display = "block";
+
+    await loadAdminStudents();
+
+  }
+
+
+  if (panel === "results") {
+
+    document.getElementById(
+      "adminResultsPanel"
+    ).style.display = "block";
+
+    await loadAdminResults();
+
+  }
+
+
+  if (panel === "lessons") {
+
+    document.getElementById(
+      "adminLessonsPanel"
+    ).style.display = "block";
+
+    await loadAdminLessons();
+
+  }
+
+
+  if (panel === "exams") {
+
+    document.getElementById(
+      "adminExamsPanel"
+    ).style.display = "block";
+
+    await loadAdminExams();
+
+    await loadQuestionExamSelect();
+
+    await loadAdminQuestions();
+
+  }
+}
+
 
 async function loadAdminStudents() {
 
-  if (!isAdminLoggedIn()) return;
-
-
-  const box =
+  const container =
     document.getElementById(
       "adminStudentsList"
     );
 
 
-  box.innerHTML =
-    "<p>Barattoota fe'aa jira...</p>";
-
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("students")
-    .select("*")
-    .order("created_at", {
-      ascending: false
-    });
+  const { data, error } =
+    await db
+      .from("students")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
 
   if (error) {
 
-    box.innerHTML =
-      "<p>" +
-      escapeHTML(
-        error.message
-      ) +
-      "</p>";
+    container.innerHTML =
+      `<p>❌ ${escapeHtml(error.message)}</p>`;
 
     return;
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  if (!data || data.length === 0) {
 
-    box.innerHTML =
+    container.innerHTML =
       "<p>Barataan hin jiru.</p>";
 
     return;
   }
 
 
-  box.innerHTML =
-    data.map(
-      (student, index) => {
+  container.innerHTML = `
 
-        const status =
-          student.status ||
-          "pending";
+    <div class="table-wrapper">
 
+      <table>
 
-        let statusText =
-          "⏳ Pending";
+        <thead>
 
-        let statusColor =
-          "#d97706";
+          <tr>
+            <th>#</th>
+            <th>Maqaa</th>
+            <th>Student ID</th>
+            <th>Activation Code</th>
+            <th>Status</th>
+            <th>Gocha</th>
+          </tr>
 
+        </thead>
 
-        if (
-          status === "active"
-        ) {
+        <tbody>
 
-          statusText =
-            "✅ Active";
+          ${data.map(
+            (student, index) => `
 
-          statusColor =
-            "#16a34a";
+            <tr>
 
-        } else if (
-          status === "rejected"
-        ) {
+              <td>
+                ${index + 1}
+              </td>
 
-          statusText =
-            "❌ Rejected";
+              <td>
+                ${escapeHtml(student.name)}
+              </td>
 
-          statusColor =
-            "#dc2626";
-        }
+              <td>
+                <strong>
+                  ${escapeHtml(
+                    student.student_code
+                  )}
+                </strong>
+              </td>
 
+              <td>
+                <strong>
+                  ${escapeHtml(
+                    student.activation_code ||
+                    "-"
+                  )}
+                </strong>
+              </td>
 
-        return `
-          <div
-            class="admin-list-item"
-            style="margin-bottom:12px;"
-          >
+              <td>
+                ${
+                  student.status === "active"
+                    ? "✅ Active"
+                    : student.status === "pending"
+                    ? "⏳ Pending"
+                    : "❌ Rejected"
+                }
+              </td>
 
-            <b>
-              ${index + 1}.
-              ${escapeHTML(
-                student.name
-              )}
-            </b>
+              <td>
 
-            <small>
+                ${
+                  student.status === "pending"
+                    ? `
+                      <button
+                        class="success-btn"
+                        onclick="approveStudent('${student.id}')"
+                      >
+                        ✅ Hayyami
+                      </button>
 
-              🆔 Student ID:
-              <b>
-                ${escapeHTML(
-                  student.student_code || "-"
-                )}
-              </b>
+                      <button
+                        class="danger-btn"
+                        onclick="rejectStudent('${student.id}')"
+                      >
+                        ❌ Diduu
+                      </button>
+                    `
+                    : `
+                      <button
+                        class="danger-btn"
+                        onclick="deleteStudent('${student.id}')"
+                      >
+                        🗑️ Haqi
+                      </button>
+                    `
+                }
 
-              <br>
+              </td>
 
-              🔐 Activation Code:
-              <b>
-                ${escapeHTML(
-                  student.activation_code || "-"
-                )}
-              </b>
+            </tr>
 
-              <br>
+          `
+          ).join("")}
 
-              📌 Status:
-              <b style="color:${statusColor}">
-                ${statusText}
-              </b>
+        </tbody>
 
-            </small>
+      </table>
 
-
-            <div
-              style="
-                display:flex;
-                gap:7px;
-                flex-wrap:wrap;
-                margin-top:10px;
-              "
-            >
-
-              ${
-                status !== "active"
-                  ? `
-                    <button
-                      onclick="approveStudent('${student.id}')"
-                      style="
-                        padding:8px 12px;
-                        border:0;
-                        border-radius:9px;
-                        background:#16a34a;
-                        color:white;
-                        cursor:pointer;
-                      "
-                    >
-                      ✅ Eeyyami
-                    </button>
-                  `
-                  : ""
-              }
-
-
-              ${
-                status !== "rejected"
-                  ? `
-                    <button
-                      onclick="rejectStudent('${student.id}')"
-                      style="
-                        padding:8px 12px;
-                        border:0;
-                        border-radius:9px;
-                        background:#dc2626;
-                        color:white;
-                        cursor:pointer;
-                      "
-                    >
-                      ❌ Didii
-                    </button>
-                  `
-                  : ""
-              }
-
-
-              <button
-                onclick="deleteStudent('${student.id}')"
-                style="
-                  padding:8px 12px;
-                  border:0;
-                  border-radius:9px;
-                  background:#6b7280;
-                  color:white;
-                  cursor:pointer;
-                "
-              >
-                🗑️ Haqi
-              </button>
-
-            </div>
-
-          </div>
-        `;
-      }
-    ).join("");
+    </div>
+  `;
 }
 
-
-/* =========================================================
-   APPROVE STUDENT
-========================================================= */
 
 async function approveStudent(id) {
 
-  if (!isAdminLoggedIn()) return;
+  if (
+    !confirm(
+      "Barataa kanaaf hayyama kennuu barbaaddaa?"
+    )
+  ) return;
 
 
-  const {
-    error
-  } = await supabaseClient
-    .from("students")
-    .update({
-      status: "active"
-    })
-    .eq(
-      "id",
-      id
-    );
+  const { error } =
+    await db
+      .from("students")
+      .update({
+        status: "active"
+      })
+      .eq("id", id);
 
 
   if (error) {
 
-    alert(
-      "Barataa eeyyamuu hin dandeenye:\n" +
-      error.message
-    );
+    alert(error.message);
 
     return;
   }
 
 
-  alert(
-    "✅ Barataan eeyyamameera."
-  );
-
+  alert("✅ Barataan hayyamame.");
 
   await loadAdminStudents();
 }
 
-
-/* =========================================================
-   REJECT STUDENT
-========================================================= */
 
 async function rejectStudent(id) {
 
-  if (!isAdminLoggedIn()) return;
-
-
-  const confirmation =
-    confirm(
+  if (
+    !confirm(
       "Barataa kana diduu barbaaddaa?"
-    );
+    )
+  ) return;
 
 
-  if (!confirmation) return;
-
-
-  const {
-    error
-  } = await supabaseClient
-    .from("students")
-    .update({
-      status: "rejected"
-    })
-    .eq(
-      "id",
-      id
-    );
+  const { error } =
+    await db
+      .from("students")
+      .update({
+        status: "rejected"
+      })
+      .eq("id", id);
 
 
   if (error) {
 
-    alert(
-      "Barataa diduun hin danda'amne:\n" +
-      error.message
-    );
+    alert(error.message);
 
     return;
   }
 
 
-  alert(
-    "❌ Barataan didameera."
-  );
-
+  alert("❌ Barataan didame.");
 
   await loadAdminStudents();
 }
 
 
-/* =========================================================
-   DELETE STUDENT
-========================================================= */
-
 async function deleteStudent(id) {
 
-  if (!isAdminLoggedIn()) return;
+  if (
+    !confirm(
+      "Barataa kana guutummaatti haquu barbaaddaa?"
+    )
+  ) return;
 
 
-  const confirmation =
-    confirm(
-      "⚠️ Barataa kana haquu barbaaddaa?\n\n" +
-      "Qabxiiwwan isaa waliin account isaa ni haqama."
-    );
+  const resultDelete =
+    await db
+      .from("results")
+      .delete()
+      .eq("student_id", id);
 
 
-  if (!confirmation) return;
+  if (resultDelete.error) {
 
-
-  /* Delete results first */
-  const {
-    error: resultError
-  } = await supabaseClient
-    .from("results")
-    .delete()
-    .eq(
-      "student_id",
-      id
-    );
-
-
-  if (resultError) {
-
-    alert(
-      "Qabxiiwwan barataa haquun hin danda'amne:\n" +
-      resultError.message
-    );
+    alert(resultDelete.error.message);
 
     return;
   }
 
 
-  const {
-    error
-  } = await supabaseClient
-    .from("students")
-    .delete()
-    .eq(
-      "id",
-      id
-    );
+  const { error } =
+    await db
+      .from("students")
+      .delete()
+      .eq("id", id);
 
 
   if (error) {
 
-    alert(
-      "Barataa haquun hin danda'amne:\n" +
-      error.message
-    );
+    alert(error.message);
 
     return;
   }
 
 
-  alert(
-    "🗑️ Account barataa haqameera."
-  );
-
+  alert("✅ Barataan haqame.");
 
   await loadAdminStudents();
+
   await loadAdminResults();
 }
 
 
-/* =========================================================
-   ADMIN RESULTS TABLE
-========================================================= */
-
 async function loadAdminResults() {
 
-  if (!isAdminLoggedIn()) return;
-
-
-  const tbody =
+  const table =
     document.getElementById(
-      "adminResultsTableBody"
+      "adminResultsTable"
     );
 
 
-  const thead =
-    document.getElementById(
-      "adminResultsTableHead"
-    );
-
-
-  if (!tbody || !thead) return;
-
-
-  tbody.innerHTML =
-    `<tr>
-      <td colspan="10">
-        Bu'aa fe'aa jira...
-      </td>
-    </tr>`;
-
-
-  const [
-    studentsResponse,
-    examsResponse,
-    resultsResponse
-  ] = await Promise.all([
-
-    supabaseClient
+  const studentsResult =
+    await db
       .from("students")
       .select("*")
-      .order("created_at", {
+      .order("name", {
         ascending: true
-      }),
+      });
 
-    supabaseClient
+
+  const examsResult =
+    await db
       .from("exams")
       .select("*")
       .order("created_at", {
         ascending: true
-      }),
+      });
 
-    supabaseClient
+
+  const resultsResult =
+    await db
       .from("results")
-      .select("*")
-  ]);
+      .select("*");
 
 
   if (
-    studentsResponse.error ||
-    examsResponse.error ||
-    resultsResponse.error
+    studentsResult.error ||
+    examsResult.error ||
+    resultsResult.error
   ) {
 
-    const error =
-      studentsResponse.error ||
-      examsResponse.error ||
-      resultsResponse.error;
-
-
-    tbody.innerHTML = `
+    table.querySelector(
+      "tbody"
+    ).innerHTML = `
       <tr>
-        <td colspan="10">
-          ${escapeHTML(
-            error.message
-          )}
+        <td>
+          ❌ Qabxii fe'uu hin dandeenye.
         </td>
       </tr>
     `;
@@ -1949,37 +1553,32 @@ async function loadAdminResults() {
 
 
   const students =
-    studentsResponse.data || [];
+    studentsResult.data || [];
+
 
   const exams =
-    examsResponse.data || [];
+    examsResult.data || [];
+
 
   const results =
-    resultsResponse.data || [];
+    resultsResult.data || [];
 
 
-  /*
-    Dynamic exam columns
-  */
+  table.querySelector(
+    "thead"
+  ).innerHTML = `
 
-  thead.innerHTML = `
     <tr>
 
       <th>#</th>
 
       <th>Barataa</th>
 
-      <th>Student ID</th>
-
-      ${exams.map(
-        exam => `
-          <th>
-            ${escapeHTML(
-              exam.title
-            )}
-          </th>
-        `
-      ).join("")}
+      ${exams.map(exam => `
+        <th>
+          ${escapeHtml(exam.title)}
+        </th>
+      `).join("")}
 
       <th>Total</th>
 
@@ -1988,701 +1587,306 @@ async function loadAdminResults() {
       <th>Rank</th>
 
     </tr>
+
   `;
 
 
-  if (
-    students.length === 0
-  ) {
+  const rows =
+    students.map(student => {
 
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="${6 + exams.length}">
-          Barataan hin jiru.
-        </td>
-      </tr>
-    `;
+      let total = 0;
 
-    return;
-  }
+      let count = 0;
+
+      let averageTotal = 0;
+
+      const examValues = {};
 
 
-  /*
-    Calculate student statistics
-  */
+      exams.forEach(exam => {
 
-  const studentStats =
-    students.map(
-      student => {
-
-        const studentResults =
-          results.filter(
-            result =>
-              String(
-                result.student_id
-              ) ===
-              String(
-                student.id
-              )
+        const result =
+          results.find(r =>
+            r.student_id === student.id &&
+            r.exam_id === exam.id
           );
 
 
-        let totalScore = 0;
-        let totalPossible = 0;
-        let percentageSum = 0;
+        if (result) {
 
+          examValues[exam.id] =
+            `${result.score}/${result.total}`;
 
-        studentResults.forEach(
-          result => {
+          total +=
+            Number(result.score || 0);
 
-            totalScore +=
-              Number(
-                result.score || 0
-              );
-
-            totalPossible +=
-              Number(
-                result.total || 0
-              );
-
-            percentageSum +=
-              Number(
-                result.percentage || 0
-              );
-          }
-        );
-
-
-        const completed =
-          studentResults.length;
-
-
-        const average =
-          completed > 0
-            ? Number(
-                (
-                  percentageSum /
-                  completed
-                ).toFixed(1)
-              )
-            : 0;
-
-
-        return {
-          student,
-          studentResults,
-          totalScore,
-          totalPossible,
-          average
-        };
-      }
-    );
-
-
-  /*
-    Rank:
-    higher average first.
-    Students with no result remain without rank.
-  */
-
-  const ranked =
-    studentStats
-      .filter(
-        item =>
-          item.studentResults.length > 0
-      )
-      .sort(
-        (a, b) =>
-          b.average -
-          a.average
-      );
-
-
-  let previousAverage = null;
-  let currentRank = 0;
-
-
-  ranked.forEach(
-    (item, index) => {
-
-      if (
-        previousAverage === null ||
-        item.average !== previousAverage
-      ) {
-
-        currentRank =
-          index + 1;
-      }
-
-
-      item.rank =
-        currentRank;
-
-
-      previousAverage =
-        item.average;
-    }
-  );
-
-
-  const rankMap =
-    new Map();
-
-
-  ranked.forEach(
-    item => {
-
-      rankMap.set(
-        String(
-          item.student.id
-        ),
-        item.rank
-      );
-
-    }
-  );
-
-
-  /*
-    Build table
-  */
-
-  tbody.innerHTML =
-    studentStats.map(
-      (item, index) => {
-
-        const {
-          student,
-          studentResults,
-          totalScore,
-          average
-        } = item;
-
-
-        const resultMap =
-          new Map();
-
-
-        studentResults.forEach(
-          result => {
-
-            resultMap.set(
-              String(
-                result.exam_id
-              ),
-              result
+          averageTotal +=
+            Number(
+              result.percentage || 0
             );
 
-          }
-        );
+          count++;
+
+        } else {
+
+          examValues[exam.id] = "—";
+        }
+
+      });
 
 
-        const examCells =
-          exams.map(
-            exam => {
-
-              const result =
-                resultMap.get(
-                  String(exam.id)
-                );
-
-
-              if (!result) {
-
-                return `
-                  <td>
-                    —
-                  </td>
-                `;
-              }
-
-
-              return `
-                <td>
-                  <b>
-                    ${escapeHTML(
-                      result.score
-                    )}/${escapeHTML(
-                      result.total
-                    )}
-                  </b>
-                  <br>
-                  <small>
-                    ${escapeHTML(
-                      result.percentage || 0
-                    )}%
-                  </small>
-                </td>
-              `;
-            }
-          ).join("");
-
-
-        const rank =
-          rankMap.get(
-            String(
-              student.id
+      const average =
+        count
+          ? Math.round(
+              averageTotal / count
             )
-          );
+          : 0;
 
 
-        return `
-          <tr>
+      return {
+        student,
+        examValues,
+        total,
+        average,
+        count
+      };
 
-            <td>
-              ${index + 1}
-            </td>
-
-            <td>
-              <b>
-                ${escapeHTML(
-                  student.name
-                )}
-              </b>
-            </td>
-
-            <td>
-              ${escapeHTML(
-                student.student_code || "-"
-              )}
-            </td>
-
-            ${examCells}
-
-            <td>
-              <b>
-                ${totalScore}
-              </b>
-            </td>
-
-            <td>
-              <b>
-                ${
-                  studentResults.length > 0
-                    ? average + "%"
-                    : "—"
-                }
-              </b>
-            </td>
-
-            <td>
-              <b>
-                ${
-                  rank
-                    ? "#" + rank
-                    : "—"
-                }
-              </b>
-            </td>
-
-          </tr>
-        `;
-      }
-    ).join("");
-}
-
-
-/* =========================================================
-   OLD RESULT LIST SUPPORT
-========================================================= */
-
-async function loadOldAdminResults() {
-
-  const box =
-    document.getElementById(
-      "adminResultsList"
-    );
-
-  if (!box) return;
-
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("results")
-    .select(`
-      *,
-      students(name, student_code),
-      exams(title)
-    `)
-    .order("created_at", {
-      ascending: false
     });
 
 
-  if (error) {
-
-    box.innerHTML =
-      "<p>" +
-      escapeHTML(
-        error.message
-      ) +
-      "</p>";
-
-    return;
-  }
-
-
-  if (
-    !data ||
-    data.length === 0
-  ) {
-
-    box.innerHTML =
-      "<p>Bu'aan hin jiru.</p>";
-
-    return;
-  }
-
-
-  box.innerHTML =
-    data.map(
-      result => `
-        <div class="admin-list-item">
-
-          <b>
-            ${escapeHTML(
-              result.students?.name ||
-              "Barataa"
-            )}
-          </b>
-
-          <small>
-            ${escapeHTML(
-              result.exams?.title ||
-              "Qormaata"
-            )}
-
-            <br>
-
-            ${result.score}/${result.total}
-            (${result.percentage || 0}%)
-          </small>
-
-          <button
-            onclick="deleteResult(${result.id})"
-            style="
-              padding:8px 12px;
-              border:0;
-              border-radius:9px;
-              background:#dc2626;
-              color:white;
-              cursor:pointer;
-            "
-          >
-            🗑️ Haqi
-          </button>
-
-        </div>
-      `
-    ).join("");
-}
-
-
-/* =========================================================
-   DELETE RESULT
-========================================================= */
-
-async function deleteResult(id) {
-
-  if (!isAdminLoggedIn()) {
-    alert(
-      "⛔ Admin qofa."
-    );
-    return;
-  }
-
-
-  const confirmation =
-    confirm(
-      "⚠️ Qabxii kana haquu akka barbaaddu mirkaneeffattaa?"
+  const ranked =
+    [...rows].sort((a, b) =>
+      b.average - a.average ||
+      b.total - a.total
     );
 
 
-  if (!confirmation) return;
+  ranked.forEach((row, index) => {
+
+    if (row.count === 0) {
+
+      row.rank = "—";
+
+    } else {
+
+      row.rank = index + 1;
+
+    }
+
+  });
 
 
-  const {
-    error
-  } = await supabaseClient
-    .from("results")
-    .delete()
-    .eq(
-      "id",
-      id
-    );
-
-
-  if (error) {
-
-    alert(
-      "Qabxii haquun hin danda'amne:\n" +
-      error.message
-    );
-
-    return;
-  }
-
-
-  alert(
-    "🗑️ Qabxiin haqameera."
+  rows.sort((a, b) =>
+    a.student.name.localeCompare(
+      b.student.name
+    )
   );
 
 
-  await loadAdminResults();
+  table.querySelector(
+    "tbody"
+  ).innerHTML = rows.map(
+    (row, index) => `
+
+      <tr>
+
+        <td>
+          ${index + 1}
+        </td>
+
+        <td>
+          <strong>
+            ${escapeHtml(row.student.name)}
+          </strong>
+
+          <br>
+
+          <small>
+            ${escapeHtml(
+              row.student.student_code
+            )}
+          </small>
+        </td>
+
+        ${exams.map(exam => `
+
+          <td>
+            ${row.examValues[exam.id]}
+          </td>
+
+        `).join("")}
+
+        <td>
+          <strong>
+            ${row.total}
+          </strong>
+        </td>
+
+        <td>
+          <strong>
+            ${row.average}%
+          </strong>
+        </td>
+
+        <td>
+          ${
+            row.rank === "—"
+              ? "—"
+              : "#" + row.rank
+          }
+        </td>
+
+      </tr>
+
+    `
+  ).join("");
 }
 
 
-/* =========================================================
-   CREATE LESSON
-========================================================= */
-
 async function createLesson() {
 
-  if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    return;
-  }
-
-
   const title =
-    document.getElementById(
-      "lessonTitleInput"
-    ).value.trim();
-
-
-  const description =
-    document.getElementById(
-      "lessonDescriptionInput"
-    ).value.trim();
+    document
+      .getElementById(
+        "lessonTitleInput"
+      )
+      .value
+      .trim();
 
 
   const content =
-    document.getElementById(
-      "lessonContentInput"
-    ).value.trim();
+    document
+      .getElementById(
+        "lessonContentInput"
+      )
+      .value
+      .trim();
 
 
-  const message =
-    document.getElementById(
-      "lessonCreateMessage"
+  if (!title || !content) {
+
+    alert(
+      "Mata-duree fi qabiyyee guuti."
     );
-
-
-  if (
-    !title ||
-    !content
-  ) {
-
-    message.textContent =
-      "Mata duree fi qabiyyee guuti.";
-
-    message.style.color =
-      "#dc2626";
 
     return;
   }
 
 
-  const {
-    error
-  } = await supabaseClient
-    .from("lessons")
-    .insert([
-      {
-        title,
-        description,
-        content
-      }
-    ]);
+  const { error } =
+    await db
+      .from("lessons")
+      .insert([
+        {
+          title,
+          content
+        }
+      ]);
 
 
   if (error) {
 
-    message.textContent =
-      "Dogoggora: " +
-      error.message;
-
-    message.style.color =
-      "#dc2626";
+    alert(error.message);
 
     return;
   }
-
-
-  message.textContent =
-    "✅ Barnoonni uumameera.";
-
-  message.style.color =
-    "#16a34a";
 
 
   document.getElementById(
     "lessonTitleInput"
   ).value = "";
 
-  document.getElementById(
-    "lessonDescriptionInput"
-  ).value = "";
 
   document.getElementById(
     "lessonContentInput"
   ).value = "";
 
 
+  alert("✅ Barnoonni dabalamе.");
+
   await loadAdminLessons();
+
+  await loadStudentHome();
 }
 
 
-/* =========================================================
-   ADMIN LESSONS
-========================================================= */
-
 async function loadAdminLessons() {
 
-  if (!isAdminLoggedIn()) return;
-
-
-  const box =
+  const container =
     document.getElementById(
       "adminLessonsList"
     );
 
 
-  box.innerHTML =
-    "<p>Barnoota fe'aa jira...</p>";
-
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("lessons")
-    .select("*")
-    .order("created_at", {
-      ascending: false
-    });
+  const { data, error } =
+    await db
+      .from("lessons")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
 
   if (error) {
 
-    box.innerHTML =
-      "<p>" +
-      escapeHTML(
-        error.message
-      ) +
-      "</p>";
+    container.innerHTML =
+      `<p>❌ ${escapeHtml(error.message)}</p>`;
 
     return;
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  container.innerHTML =
+    (data || []).map(lesson => `
 
-    box.innerHTML =
-      "<p>Barnoonni hin jiru.</p>";
+      <div class="card">
 
-    return;
-  }
+        <h3>
+          📚 ${escapeHtml(lesson.title)}
+        </h3>
 
+        <p>
+          ${escapeHtml(
+            truncate(
+              lesson.content || "",
+              200
+            )
+          )}
+        </p>
 
-  box.innerHTML =
-    data.map(
-      lesson => `
-        <div class="admin-list-item">
+        <button
+          class="secondary-btn"
+          onclick="editLesson('${lesson.id}')"
+        >
+          ✏️ Sirreessi
+        </button>
 
-          <b>
-            ${escapeHTML(
-              lesson.title
-            )}
-          </b>
+        <button
+          class="danger-btn"
+          onclick="deleteLesson('${lesson.id}')"
+        >
+          🗑️ Haqi
+        </button>
 
-          <small>
-            ${escapeHTML(
-              lesson.description || ""
-            )}
-          </small>
+      </div>
 
-          <div
-            style="
-              display:flex;
-              gap:8px;
-              margin-top:10px;
-              flex-wrap:wrap;
-            "
-          >
-
-            <button
-              onclick="editLesson(${lesson.id})"
-              style="
-                padding:9px 14px;
-                border:0;
-                border-radius:10px;
-                background:#2563eb;
-                color:white;
-                cursor:pointer;
-              "
-            >
-              ✏️ Sirreessi
-            </button>
-
-
-            <button
-              onclick="deleteLesson(${lesson.id})"
-              style="
-                padding:9px 14px;
-                border:0;
-                border-radius:10px;
-                background:#dc2626;
-                color:white;
-                cursor:pointer;
-              "
-            >
-              🗑️ Haqi
-            </button>
-
-          </div>
-
-        </div>
-      `
-    ).join("");
+    `).join("");
 }
 
 
-/* =========================================================
-   EDIT LESSON
-========================================================= */
-
 async function editLesson(id) {
 
-  if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    return;
-  }
+  const { data, error } =
+    await db
+      .from("lessons")
+      .select("*")
+      .eq("id", id)
+      .single();
 
 
-  const {
-    data: lesson,
-    error
-  } = await supabaseClient
-    .from("lessons")
-    .select("*")
-    .eq("id", id)
-    .single();
+  if (error) {
 
-
-  if (
-    error ||
-    !lesson
-  ) {
-
-    alert(
-      "Barnoota argachuun hin danda'amne."
-    );
+    alert(error.message);
 
     return;
   }
@@ -2690,213 +1894,129 @@ async function editLesson(id) {
 
   const title =
     prompt(
-      "Mata duree barnootaa:",
-      lesson.title || ""
+      "Mata-duree haaraa:",
+      data.title
     );
 
 
   if (title === null) return;
 
 
-  const description =
-    prompt(
-      "Ibsa gabaabaa:",
-      lesson.description || ""
-    );
-
-
-  if (description === null) return;
-
-
   const content =
     prompt(
-      "Qabiyyee barnootaa:",
-      lesson.content || ""
+      "Qabiyyee haaraa:",
+      data.content
     );
 
 
   if (content === null) return;
 
 
-  if (
-    !title.trim() ||
-    !content.trim()
-  ) {
-
-    alert(
-      "Mata duree fi qabiyyee guutuu qabu."
-    );
-
-    return;
-  }
-
-
-  const {
-    error: updateError
-  } = await supabaseClient
-    .from("lessons")
-    .update({
-      title:
-        title.trim(),
-
-      description:
-        description.trim(),
-
-      content:
-        content.trim()
-    })
-    .eq(
-      "id",
-      id
-    );
+  const { error: updateError } =
+    await db
+      .from("lessons")
+      .update({
+        title: title.trim(),
+        content: content.trim()
+      })
+      .eq("id", id);
 
 
   if (updateError) {
 
-    alert(
-      "Barnoota sirreessuun hin danda'amne:\n" +
-      updateError.message
-    );
+    alert(updateError.message);
 
     return;
   }
 
 
-  alert(
-    "✅ Barnoonni haaromfameera."
-  );
-
+  alert("✅ Barnoonni sirreeffame.");
 
   await loadAdminLessons();
+
   await loadStudentHome();
 }
 
 
-/* =========================================================
-   DELETE LESSON
-========================================================= */
-
 async function deleteLesson(id) {
 
-  if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    return;
-  }
+  if (
+    !confirm(
+      "Barnoota kana haquu barbaaddaa?"
+    )
+  ) return;
 
 
-  const confirmation =
-    confirm(
-      "⚠️ Barnoota kana haquu akka barbaaddu mirkaneeffattaa?"
-    );
-
-
-  if (!confirmation) return;
-
-
-  const {
-    error
-  } = await supabaseClient
-    .from("lessons")
-    .delete()
-    .eq(
-      "id",
-      id
-    );
+  const { error } =
+    await db
+      .from("lessons")
+      .delete()
+      .eq("id", id);
 
 
   if (error) {
 
-    alert(
-      "Barnoota haquun hin danda'amne:\n" +
-      error.message
-    );
+    alert(error.message);
 
     return;
   }
 
 
-  alert(
-    "🗑️ Barnoonni haqameera."
-  );
-
+  alert("✅ Barnoonni haqame.");
 
   await loadAdminLessons();
+
   await loadStudentHome();
 }
 
 
-/* =========================================================
-   CREATE EXAM
-========================================================= */
-
 async function createExam() {
 
-  if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    return;
-  }
-
-
   const title =
-    document.getElementById(
-      "examTitleInput"
-    ).value.trim();
+    document
+      .getElementById(
+        "examTitleInput"
+      )
+      .value
+      .trim();
 
 
   const description =
-    document.getElementById(
-      "examDescriptionInput"
-    ).value.trim();
-
-
-  const message =
-    document.getElementById(
-      "examCreateMessage"
-    );
+    document
+      .getElementById(
+        "examDescriptionInput"
+      )
+      .value
+      .trim();
 
 
   if (!title) {
 
-    message.textContent =
-      "Maqaa qormaataa galchi.";
-
-    message.style.color =
-      "#dc2626";
+    alert(
+      "Mata-duree qormaataa galchi."
+    );
 
     return;
   }
 
 
-  const {
-    error
-  } = await supabaseClient
-    .from("exams")
-    .insert([
-      {
-        title,
-        description
-      }
-    ]);
+  const { error } =
+    await db
+      .from("exams")
+      .insert([
+        {
+          title,
+          description
+        }
+      ]);
 
 
   if (error) {
 
-    message.textContent =
-      "Dogoggora: " +
-      error.message;
-
-    message.style.color =
-      "#dc2626";
+    alert(error.message);
 
     return;
   }
-
-
-  message.textContent =
-    "✅ Qormaanni uumameera.";
-
-  message.style.color =
-    "#16a34a";
 
 
   document.getElementById(
@@ -2909,159 +2029,88 @@ async function createExam() {
   ).value = "";
 
 
+  alert("✅ Qormaanni dabalamе.");
+
   await loadAdminExams();
+
   await loadQuestionExamSelect();
 }
 
 
-/* =========================================================
-   ADMIN EXAMS
-========================================================= */
-
 async function loadAdminExams() {
 
-  if (!isAdminLoggedIn()) return;
-
-
-  const box =
+  const container =
     document.getElementById(
       "adminExamsList"
     );
 
 
-  box.innerHTML =
-    "<p>Qormaata fe'aa jira...</p>";
-
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("exams")
-    .select("*")
-    .order("created_at", {
-      ascending: false
-    });
+  const { data, error } =
+    await db
+      .from("exams")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
 
   if (error) {
 
-    box.innerHTML =
-      "<p>" +
-      escapeHTML(
-        error.message
-      ) +
-      "</p>";
+    container.innerHTML =
+      `<p>❌ ${escapeHtml(error.message)}</p>`;
 
     return;
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  container.innerHTML =
+    (data || []).map(exam => `
 
-    box.innerHTML =
-      "<p>Qormaanni hin jiru.</p>";
+      <div class="card">
 
-    return;
-  }
+        <h3>
+          📝 ${escapeHtml(exam.title)}
+        </h3>
 
+        <p>
+          ${escapeHtml(
+            exam.description || ""
+          )}
+        </p>
 
-  box.innerHTML =
-    data.map(
-      exam => `
-        <div class="admin-list-item">
+        <button
+          class="secondary-btn"
+          onclick="editExam('${exam.id}')"
+        >
+          ✏️ Sirreessi
+        </button>
 
-          <b>
-            ${escapeHTML(
-              exam.title
-            )}
-          </b>
+        <button
+          class="danger-btn"
+          onclick="deleteExam('${exam.id}')"
+        >
+          🗑️ Haqi
+        </button>
 
-          <small>
-            ${escapeHTML(
-              exam.description || ""
-            )}
-          </small>
+      </div>
 
-          <div
-            style="
-              display:flex;
-              gap:8px;
-              margin-top:10px;
-              flex-wrap:wrap;
-            "
-          >
-
-            <button
-              onclick="editExam(${exam.id})"
-              style="
-                padding:9px 14px;
-                border:0;
-                border-radius:10px;
-                background:#2563eb;
-                color:white;
-                cursor:pointer;
-              "
-            >
-              ✏️ Sirreessi
-            </button>
-
-
-            <button
-              onclick="deleteExam(${exam.id})"
-              style="
-                padding:9px 14px;
-                border:0;
-                border-radius:10px;
-                background:#dc2626;
-                color:white;
-                cursor:pointer;
-              "
-            >
-              🗑️ Haqi
-            </button>
-
-          </div>
-
-        </div>
-      `
-    ).join("");
+    `).join("");
 }
 
 
-/* =========================================================
-   EDIT EXAM
-========================================================= */
-
 async function editExam(id) {
 
-  if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    return;
-  }
+  const { data, error } =
+    await db
+      .from("exams")
+      .select("*")
+      .eq("id", id)
+      .single();
 
 
-  const {
-    data: exam,
-    error
-  } = await supabaseClient
-    .from("exams")
-    .select("*")
-    .eq("id", id)
-    .single();
+  if (error) {
 
-
-  if (
-    error ||
-    !exam
-  ) {
-
-    alert(
-      "Qormaata argachuun hin danda'amne."
-    );
+    alert(error.message);
 
     return;
   }
@@ -3069,8 +2118,8 @@ async function editExam(id) {
 
   const title =
     prompt(
-      "Maqaa qormaataa:",
-      exam.title || ""
+      "Mata-duree haaraa:",
+      data.title
     );
 
 
@@ -3079,172 +2128,111 @@ async function editExam(id) {
 
   const description =
     prompt(
-      "Ibsa qormaataa:",
-      exam.description || ""
+      "Ibsa haaraa:",
+      data.description || ""
     );
 
 
   if (description === null) return;
 
 
-  if (!title.trim()) {
-
-    alert(
-      "Maqaa qormaataa galchi."
-    );
-
-    return;
-  }
-
-
-  const {
-    error: updateError
-  } = await supabaseClient
-    .from("exams")
-    .update({
-      title:
-        title.trim(),
-
-      description:
-        description.trim()
-    })
-    .eq(
-      "id",
-      id
-    );
+  const { error: updateError } =
+    await db
+      .from("exams")
+      .update({
+        title: title.trim(),
+        description: description.trim()
+      })
+      .eq("id", id);
 
 
   if (updateError) {
 
-    alert(
-      "Qormaata sirreessuun hin danda'amne:\n" +
-      updateError.message
-    );
+    alert(updateError.message);
 
     return;
   }
 
 
-  alert(
-    "✅ Qormaanni haaromfameera."
-  );
-
+  alert("✅ Qormaanni sirreeffame.");
 
   await loadAdminExams();
+
   await loadQuestionExamSelect();
-  await loadExams();
+
+  await loadAdminResults();
 }
 
-
-/* =========================================================
-   DELETE EXAM + RESULTS + QUESTIONS
-========================================================= */
 
 async function deleteExam(id) {
 
-  if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    return;
-  }
+  if (
+    !confirm(
+      "Qormaata kana haquu barbaaddaa?\n\nQabxii fi gaaffileen isaa ni haqamu."
+    )
+  ) return;
 
 
-  const confirmation =
-    confirm(
-      "⚠️ Qormaata kana haquu barbaaddaa?\n\n" +
-      "Qabxiiwwan barattootaa fi gaaffiiwwan isaa hundi ni haqamu."
-    );
+  const results =
+    await db
+      .from("results")
+      .delete()
+      .eq("exam_id", id);
 
 
-  if (!confirmation) return;
+  if (results.error) {
 
-
-  const {
-    error: resultsDeleteError
-  } = await supabaseClient
-    .from("results")
-    .delete()
-    .eq(
-      "exam_id",
-      id
-    );
-
-
-  if (resultsDeleteError) {
-
-    alert(
-      "Qabxiiwwan haquun hin danda'amne:\n" +
-      resultsDeleteError.message
-    );
+    alert(results.error.message);
 
     return;
   }
 
 
-  const {
-    error: questionDeleteError
-  } = await supabaseClient
-    .from("questions")
-    .delete()
-    .eq(
-      "exam_id",
-      id
-    );
+  const questions =
+    await db
+      .from("questions")
+      .delete()
+      .eq("exam_id", id);
 
 
-  if (questionDeleteError) {
+  if (questions.error) {
 
-    alert(
-      "Gaaffiiwwan haquun hin danda'amne:\n" +
-      questionDeleteError.message
-    );
+    alert(questions.error.message);
 
     return;
   }
 
 
-  const {
-    error: examDeleteError
-  } = await supabaseClient
-    .from("exams")
-    .delete()
-    .eq(
-      "id",
-      id
-    );
+  const exam =
+    await db
+      .from("exams")
+      .delete()
+      .eq("id", id);
 
 
-  if (examDeleteError) {
+  if (exam.error) {
 
-    alert(
-      "Qormaata haquun hin danda'amne:\n" +
-      examDeleteError.message
-    );
+    alert(exam.error.message);
 
     return;
   }
 
 
-  alert(
-    "✅ Qormaanni, gaaffiiwwan isaa fi qabxiiwwan isaa haqamaniiru."
-  );
-
+  alert("✅ Qormaanni haqame.");
 
   await loadAdminExams();
+
   await loadQuestionExamSelect();
+
   await loadAdminQuestions();
+
   await loadAdminResults();
+
   await loadExams();
 }
 
 
-/* =========================================================
-   QUESTION EXAM SELECT
-========================================================= */
-
 async function loadQuestionExamSelect() {
-
-  if (!isAdminLoggedIn()) return;
-
 
   const select =
     document.getElementById(
@@ -3252,60 +2240,35 @@ async function loadQuestionExamSelect() {
     );
 
 
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("exams")
-    .select("*")
-    .order("created_at", {
-      ascending: false
-    });
+  const { data, error } =
+    await db
+      .from("exams")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
 
   if (error) return;
 
 
   select.innerHTML =
-    '<option value="">Qormaata filadhu</option>';
+    `<option value="">Qormaata filadhu</option>`;
 
 
-  (data || []).forEach(
-    exam => {
+  (data || []).forEach(exam => {
 
-      const option =
-        document.createElement(
-          "option"
-        );
+    select.innerHTML += `
+      <option value="${exam.id}">
+        ${escapeHtml(exam.title)}
+      </option>
+    `;
 
-
-      option.value =
-        exam.id;
-
-
-      option.textContent =
-        exam.title;
-
-
-      select.appendChild(
-        option
-      );
-    }
-  );
+  });
 }
 
 
-/* =========================================================
-   CREATE QUESTION
-========================================================= */
-
 async function createQuestion() {
-
-  if (!isAdminLoggedIn()) {
-    alert("⛔ Admin qofa.");
-    return;
-  }
-
 
   const examId =
     document.getElementById(
@@ -3314,33 +2277,48 @@ async function createQuestion() {
 
 
   const question =
-    document.getElementById(
-      "questionInput"
-    ).value.trim();
+    document
+      .getElementById(
+        "questionTextInput"
+      )
+      .value
+      .trim();
 
 
-  const optionA =
-    document.getElementById(
-      "optionAInput"
-    ).value.trim();
+  const a =
+    document
+      .getElementById(
+        "optionAInput"
+      )
+      .value
+      .trim();
 
 
-  const optionB =
-    document.getElementById(
-      "optionBInput"
-    ).value.trim();
+  const b =
+    document
+      .getElementById(
+        "optionBInput"
+      )
+      .value
+      .trim();
 
 
-  const optionC =
-    document.getElementById(
-      "optionCInput"
-    ).value.trim();
+  const c =
+    document
+      .getElementById(
+        "optionCInput"
+      )
+      .value
+      .trim();
 
 
-  const optionD =
-    document.getElementById(
-      "optionDInput"
-    ).value.trim();
+  const d =
+    document
+      .getElementById(
+        "optionDInput"
+      )
+      .value
+      .trim();
 
 
   const correct =
@@ -3349,345 +2327,216 @@ async function createQuestion() {
     ).value;
 
 
-  const message =
-    document.getElementById(
-      "questionCreateMessage"
-    );
-
-
   if (
     !examId ||
     !question ||
-    !optionA ||
-    !optionB ||
-    !optionC ||
-    !optionD ||
+    !a ||
+    !b ||
+    !c ||
+    !d ||
     !correct
   ) {
 
-    message.textContent =
-      "Mee odeeffannoo gaaffii hunda guuti.";
-
-    message.style.color =
-      "#dc2626";
+    alert(
+      "Odeeffannoo gaaffii hunda guuti."
+    );
 
     return;
   }
 
 
-  const {
-    error
-  } = await supabaseClient
-    .from("questions")
-    .insert([
-      {
-        exam_id:
-          Number(examId),
-
-        question:
+  const { error } =
+    await db
+      .from("questions")
+      .insert([
+        {
+          exam_id: examId,
           question,
-
-        option_a:
-          optionA,
-
-        option_b:
-          optionB,
-
-        option_c:
-          optionC,
-
-        option_d:
-          optionD,
-
-        correct_answer:
-          correct
-      }
-    ]);
+          option_a: a,
+          option_b: b,
+          option_c: c,
+          option_d: d,
+          correct_answer: correct
+        }
+      ]);
 
 
   if (error) {
 
-    message.textContent =
-      "Dogoggora: " +
-      error.message;
-
-    message.style.color =
-      "#dc2626";
+    alert(error.message);
 
     return;
   }
 
 
-  message.textContent =
-    "✅ Gaaffiin dabalameera.";
-
-  message.style.color =
-    "#16a34a";
-
-
   document.getElementById(
-    "questionInput"
+    "questionTextInput"
   ).value = "";
+
 
   document.getElementById(
     "optionAInput"
   ).value = "";
 
+
   document.getElementById(
     "optionBInput"
   ).value = "";
+
 
   document.getElementById(
     "optionCInput"
   ).value = "";
 
+
   document.getElementById(
     "optionDInput"
   ).value = "";
+
 
   document.getElementById(
     "correctAnswerInput"
   ).value = "";
 
 
+  alert("✅ Gaaffiin dabalamе.");
+
   await loadAdminQuestions();
 }
 
 
-/* =========================================================
-   ADMIN QUESTIONS
-========================================================= */
-
 async function loadAdminQuestions() {
 
-  if (!isAdminLoggedIn()) return;
-
-
-  const box =
+  const container =
     document.getElementById(
       "adminQuestionsList"
     );
 
 
-  box.innerHTML =
-    "<p>Gaaffiiwwan fe'aa jira...</p>";
-
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("questions")
-    .select(`
-      *,
-      exams(title)
-    `)
-    .order("id", {
-      ascending: false
-    });
+  const { data, error } =
+    await db
+      .from("questions")
+      .select(`
+        *,
+        exams (
+          title
+        )
+      `)
+      .order("created_at", {
+        ascending: false
+      });
 
 
   if (error) {
 
-    box.innerHTML =
-      "<p>" +
-      escapeHTML(
-        error.message
-      ) +
-      "</p>";
+    container.innerHTML =
+      `<p>❌ ${escapeHtml(error.message)}</p>`;
 
     return;
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  container.innerHTML =
+    (data || []).map(
+      (question, index) => `
 
-    box.innerHTML =
-      "<p>Gaaffiin hin jiru.</p>";
+      <div class="card">
 
-    return;
-  }
-
-
-  box.innerHTML =
-    data.map(
-      (q, index) => `
-        <div class="admin-list-item">
-
-          <b>
+        <p>
+          <strong>
             ${index + 1}.
-            ${escapeHTML(
-              q.question
+            ${escapeHtml(
+              question.question ||
+              ""
             )}
-          </b>
+          </strong>
+        </p>
 
-          <small>
+        <p>
+          📝 Qormaata:
+          ${escapeHtml(
+            question.exams?.title ||
+            "-"
+          )}
+        </p>
 
-            Qormaata:
-            ${escapeHTML(
-              q.exams?.title || ""
+        <p>
+          A. ${escapeHtml(
+            question.option_a || ""
+          )}
+        </p>
+
+        <p>
+          B. ${escapeHtml(
+            question.option_b || ""
+          )}
+        </p>
+
+        <p>
+          C. ${escapeHtml(
+            question.option_c || ""
+          )}
+        </p>
+
+        <p>
+          D. ${escapeHtml(
+            question.option_d || ""
+          )}
+        </p>
+
+        <p>
+          ✅ Deebii:
+          <strong>
+            ${escapeHtml(
+              question.correct_answer ||
+              ""
             )}
+          </strong>
+        </p>
 
-            <br><br>
+        <button
+          class="danger-btn"
+          onclick="deleteQuestion('${question.id}')"
+        >
+          🗑️ Haqi
+        </button>
 
-            A)
-            ${escapeHTML(
-              q.option_a
-            )}
+      </div>
 
-            <br>
-
-            B)
-            ${escapeHTML(
-              q.option_b
-            )}
-
-            <br>
-
-            C)
-            ${escapeHTML(
-              q.option_c
-            )}
-
-            <br>
-
-            D)
-            ${escapeHTML(
-              q.option_d
-            )}
-
-            <br><br>
-
-            Deebii sirrii:
-            <b>
-              ${escapeHTML(
-                q.correct_answer
-              )}
-            </b>
-
-          </small>
-
-        </div>
-      `
+    `
     ).join("");
 }
 
 
-/* =========================================================
-   ADMIN PANELS
-========================================================= */
+async function deleteQuestion(id) {
 
-function hideAdminPanels() {
-
-  [
-    "adminStudentsPanel",
-    "adminResultsPanel",
-    "adminLessonsPanel",
-    "adminExamsPanel"
-  ].forEach(id => {
-
-    const panel =
-      document.getElementById(id);
-
-    if (panel) {
-      panel.style.display =
-        "none";
-    }
-
-  });
-}
+  if (
+    !confirm(
+      "Gaaffii kana haquu barbaaddaa?"
+    )
+  ) return;
 
 
-async function openAdminPanel(id) {
+  const { error } =
+    await db
+      .from("questions")
+      .delete()
+      .eq("id", id);
 
-  if (!isAdminLoggedIn()) {
 
-    alert(
-      "⛔ Admin qofa."
-    );
+  if (error) {
 
-    showPage(
-      "rolePage"
-    );
+    alert(error.message);
 
     return;
   }
 
 
-  hideAdminPanels();
+  alert("✅ Gaaffiin haqame.");
 
-
-  const panel =
-    document.getElementById(id);
-
-
-  if (!panel) return;
-
-
-  panel.style.display =
-    "block";
-
-
-  if (
-    id ===
-    "adminStudentsPanel"
-  ) {
-
-    await loadAdminStudents();
-  }
-
-
-  if (
-    id ===
-    "adminResultsPanel"
-  ) {
-
-    await loadAdminResults();
-  }
-
-
-  if (
-    id ===
-    "adminLessonsPanel"
-  ) {
-
-    await loadAdminLessons();
-  }
-
-
-  if (
-    id ===
-    "adminExamsPanel"
-  ) {
-
-    await loadAdminExams();
-
-    await loadQuestionExamSelect();
-
-    await loadAdminQuestions();
-  }
-
-
-  setTimeout(
-    () => {
-
-      panel.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-
-    },
-    50
-  );
+  await loadAdminQuestions();
 }
 
-
-/* =========================================================
-   LOGOUT
-========================================================= */
 
 function studentLogout() {
 
@@ -3695,38 +2544,15 @@ function studentLogout() {
     "student_id"
   );
 
-
   currentStudent = null;
 
+  currentExam = null;
 
-  document.getElementById(
-    "nameInput"
-  ).value = "";
+  currentQuestions = [];
 
+  currentAnswers = [];
 
-  const idInput =
-    document.getElementById(
-      "studentIdInput"
-    );
-
-  if (idInput) {
-    idInput.value = "";
-  }
-
-
-  const codeInput =
-    document.getElementById(
-      "activationCodeInput"
-    );
-
-  if (codeInput) {
-    codeInput.value = "";
-  }
-
-
-  showPage(
-    "rolePage"
-  );
+  showPage("rolePage");
 }
 
 
@@ -3736,698 +2562,82 @@ function adminLogout() {
     "admin_logged"
   );
 
-
-  hideAdminPanels();
-
-
-  showPage(
-    "rolePage"
-  );
+  showPage("rolePage");
 }
 
 
-/* =========================================================
-   NAVIGATION
-========================================================= */
+function escapeHtml(value) {
 
-function setNav(activeId) {
-
-  document
-    .querySelectorAll(".nav-item")
-    .forEach(item => {
-
-      item.classList.remove(
-        "active"
-      );
-
-    });
-
-
-  const active =
-    document.getElementById(
-      activeId
-    );
-
-
-  if (active) {
-    active.classList.add(
-      "active"
-    );
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return "";
   }
+
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 
-/* =========================================================
-   START APP
-========================================================= */
+function truncate(text, length) {
+
+  if (!text) return "";
+
+  return text.length <= length
+    ? text
+    : text.substring(0, length) + "...";
+}
+
+
+function formatText(text) {
+
+  return escapeHtml(text)
+    .replace(/\n/g, "<br>");
+}
+
 
 document.addEventListener(
   "DOMContentLoaded",
   async () => {
 
-    /* ROLE */
+    hideAdminPanels();
 
-    document
-      .getElementById(
-        "studentRoleButton"
-      )
-      .addEventListener(
-        "click",
-        openStudentLogin
-      );
 
-
-    document
-      .getElementById(
-        "adminRoleButton"
-      )
-      .addEventListener(
-        "click",
-        openAdminLogin
-      );
-
-
-    /* STUDENT AUTH MODE */
-
-    document
-      .getElementById(
-        "newStudentModeButton"
-      )
-      .addEventListener(
-        "click",
-        () =>
-          setStudentAuthMode(
-            "new"
-          )
-      );
-
-
-    document
-      .getElementById(
-        "existingStudentModeButton"
-      )
-      .addEventListener(
-        "click",
-        () =>
-          setStudentAuthMode(
-            "existing"
-          )
-      );
-
-
-    /* BACK */
-
-    document
-      .getElementById(
-        "studentBackButton"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          showPage(
-            "rolePage"
-          );
-
-        }
-      );
-
-
-    document
-      .getElementById(
-        "adminBackButton"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          showPage(
-            "rolePage"
-          );
-
-        }
-      );
-
-
-    /* STUDENT */
-
-    document
-      .getElementById(
-        "studentRegisterButton"
-      )
-      .addEventListener(
-        "click",
-        registerStudent
-      );
-
-
-    document
-      .getElementById(
-        "studentLoginButton"
-      )
-      .addEventListener(
-        "click",
-        studentLogin
-      );
-
-
-    /* ADMIN */
-
-    document
-      .getElementById(
-        "adminLoginButton"
-      )
-      .addEventListener(
-        "click",
-        adminLogin
-      );
-
-
-    /* QUICK EXAM */
-
-    document
-      .getElementById(
-        "quickExamButton"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navExams"
-          );
-
-          await loadExams();
-
-          showPage(
-            "examListPage"
-          );
-
-        }
-      );
-
-
-    /* HOME */
-
-    document
-      .getElementById(
-        "navHome"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navHome"
-          );
-
-          await loadStudentHome();
-
-          showPage(
-            "homePage"
-          );
-
-        }
-      );
-
-
-    /* EXAMS */
-
-    document
-      .getElementById(
-        "navExams"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navExams"
-          );
-
-          await loadExams();
-
-          showPage(
-            "examListPage"
-          );
-
-        }
-      );
-
-
-    /* SCORE */
-
-    document
-      .getElementById(
-        "navScore"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navScore"
-          );
-
-          await showLatestStudentScore();
-
-        }
-      );
-
-
-    /* PROFILE */
-
-    document
-      .getElementById(
-        "navProfile"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          setNav(
-            "navProfile"
-          );
-
-          loadProfile();
-
-          showPage(
-            "profilePage"
-          );
-
-        }
-      );
-
-
-    /* LESSON BACK */
-
-    document
-      .getElementById(
-        "lessonBackButton"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          showPage(
-            "homePage"
-          );
-
-        }
-      );
-
-
-    /* EXAM LIST BACK */
-
-    document
-      .getElementById(
-        "examListBackButton"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          setNav(
-            "navHome"
-          );
-
-          showPage(
-            "homePage"
-          );
-
-        }
-      );
-
-
-    /* EXAM BACK */
-
-    document
-      .getElementById(
-        "examBackButton"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          await loadExams();
-
-          showPage(
-            "examListPage"
-          );
-
-        }
-      );
-
-
-    /* SCORE HOME */
-
-    document
-      .getElementById(
-        "scoreHomeButton"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navHome"
-          );
-
-          await loadStudentHome();
-
-          showPage(
-            "homePage"
-          );
-
-        }
-      );
-
-
-    /* PROFILE BACK */
-
-    document
-      .getElementById(
-        "profileBackButton"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          setNav(
-            "navHome"
-          );
-
-          showPage(
-            "homePage"
-          );
-
-        }
-      );
-
-
-    /* SAVE PROFILE */
-
-    document
-      .getElementById(
-        "profileSaveButton"
-      )
-      .addEventListener(
-        "click",
-        saveProfile
-      );
-
-
-    /* STUDENT LOGOUT */
-
-    document
-      .getElementById(
-        "studentLogoutButton"
-      )
-      .addEventListener(
-        "click",
-        studentLogout
-      );
-
-
-    /* PROFILE NAV HOME */
-
-    document
-      .getElementById(
-        "profileNavHome"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navHome"
-          );
-
-          await loadStudentHome();
-
-          showPage(
-            "homePage"
-          );
-
-        }
-      );
-
-
-    /* PROFILE NAV EXAMS */
-
-    document
-      .getElementById(
-        "profileNavExams"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navExams"
-          );
-
-          await loadExams();
-
-          showPage(
-            "examListPage"
-          );
-
-        }
-      );
-
-
-    /* PROFILE NAV SCORE */
-
-    document
-      .getElementById(
-        "profileNavScore"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-
-          setNav(
-            "navScore"
-          );
-
-          await showLatestStudentScore();
-
-        }
-      );
-
-
-    /* PROFILE NAV PROFILE */
-
-    document
-      .getElementById(
-        "profileNavProfile"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          setNav(
-            "navProfile"
-          );
-
-          loadProfile();
-
-          showPage(
-            "profilePage"
-          );
-
-        }
-      );
-
-
-    /* NEXT QUESTION */
-
-    document
-      .getElementById(
-        "nextQuestionButton"
-      )
-      .addEventListener(
-        "click",
-        nextQuestion
-      );
-
-
-    /* =====================================================
-       ADMIN BUTTONS
-    ===================================================== */
-
-    document
-      .getElementById(
-        "adminLogoutButton"
-      )
-      .addEventListener(
-        "click",
-        adminLogout
-      );
-
-
-    document
-      .getElementById(
-        "adminStudentsButton"
-      )
-      .addEventListener(
-        "click",
-        () =>
-          openAdminPanel(
-            "adminStudentsPanel"
-          )
-      );
-
-
-    document
-      .getElementById(
-        "adminResultsButton"
-      )
-      .addEventListener(
-        "click",
-        () =>
-          openAdminPanel(
-            "adminResultsPanel"
-          )
-      );
-
-
-    document
-      .getElementById(
-        "adminLessonsButton"
-      )
-      .addEventListener(
-        "click",
-        () =>
-          openAdminPanel(
-            "adminLessonsPanel"
-          )
-      );
-
-
-    document
-      .getElementById(
-        "adminExamsButton"
-      )
-      .addEventListener(
-        "click",
-        () =>
-          openAdminPanel(
-            "adminExamsPanel"
-          )
-      );
-
-
-    /* CLOSE PANELS */
-
-    document
-      .getElementById(
-        "closeStudentsPanel"
-      )
-      .addEventListener(
-        "click",
-        hideAdminPanels
-      );
-
-
-    document
-      .getElementById(
-        "closeResultsPanel"
-      )
-      .addEventListener(
-        "click",
-        hideAdminPanels
-      );
-
-
-    document
-      .getElementById(
-        "closeLessonsPanel"
-      )
-      .addEventListener(
-        "click",
-        hideAdminPanels
-      );
-
-
-    document
-      .getElementById(
-        "closeExamsPanel"
-      )
-      .addEventListener(
-        "click",
-        hideAdminPanels
-      );
-
-
-    /* ADMIN CREATE */
-
-    document
-      .getElementById(
-        "createLessonButton"
-      )
-      .addEventListener(
-        "click",
-        createLesson
-      );
-
-
-    document
-      .getElementById(
-        "createExamButton"
-      )
-      .addEventListener(
-        "click",
-        createExam
-      );
-
-
-    document
-      .getElementById(
-        "createQuestionButton"
-      )
-      .addEventListener(
-        "click",
-        createQuestion
-      );
-
-
-    /* =====================================================
-       RESTORE SESSION
-    ===================================================== */
-
-    await restoreStudent();
-
-
-    const adminLogged =
+    if (
       localStorage.getItem(
         "admin_logged"
-      );
-
-
-    if (currentStudent) {
-
-      await loadStudentHome();
-
-      showPage(
-        "homePage"
-      );
-
-    } else if (
-      adminLogged === "true"
+      ) === "true"
     ) {
 
-      showPage(
-        "adminPage"
+      showPage("adminPage");
+
+      await openAdminPanel(
+        "students"
       );
 
-    } else {
-
-      showPage(
-        "rolePage"
-      );
+      return;
     }
 
+
+    if (
+      localStorage.getItem(
+        "student_id"
+      )
+    ) {
+
+      await restoreStudent();
+
+      if (currentStudent) return;
+
+    }
+
+
+    showPage("rolePage");
   }
 );
