@@ -2232,3 +2232,1489 @@ async function loadAdminLessons() {
 
     `).join("");
 }
+/* =========================================================
+   ADMIN - EXAMS
+========================================================= */
+
+async function loadAdminExams() {
+  if (!requireAdmin()) return;
+
+  const container = document.getElementById("adminExamsList");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("exams")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">📝 Qormaanni hin jiru.</div>`;
+    await populateExamSelects([]);
+    return;
+  }
+
+  const exams = data.map(normalizeExam);
+  const counts = {};
+
+  const { data: questionRows } = await db
+    .from("questions")
+    .select("id,exam_id");
+
+  (questionRows || []).forEach((q) => {
+    counts[q.exam_id] =
+      (counts[q.exam_id] || 0) + 1;
+  });
+
+  container.innerHTML = exams.map((exam) => `
+    <div class="admin-list-item exam-admin-item">
+
+      <div class="item-main">
+
+        <h3>
+          ${escapeHtml(exam.title)}
+          ${exam.isFinal ? " 🏆" : ""}
+        </h3>
+
+        <p>
+          ${escapeHtml(
+            exam.description || ""
+          )}
+        </p>
+
+        <div class="exam-meta">
+
+          <span>
+            ❓ Gaaffii:
+            ${counts[exam.id] || 0}
+          </span>
+
+          <span>
+            🔢 Attempt:
+            ${exam.attemptLimit}
+          </span>
+
+          <span>
+            ⏱️ ${exam.duration} min
+          </span>
+
+        </div>
+
+        <span class="status ${
+          exam.status === "active"
+            ? "active"
+            : "blocked"
+        }">
+          ● ${
+            exam.status === "active"
+              ? "Active"
+              : "Disabled"
+          }
+        </span>
+
+      </div>
+
+      <div class="admin-actions">
+
+        <button
+          type="button"
+          class="small-btn"
+          onclick="toggleExamStatus(${exam.id})"
+        >
+          ${
+            exam.status === "active"
+              ? "⏸️ Cufi"
+              : "▶️ Bani"
+          }
+        </button>
+
+        <button
+          type="button"
+          class="small-btn"
+          onclick="editExam(${exam.id})"
+        >
+          ✏️ Sirreessi
+        </button>
+
+        <button
+          type="button"
+          class="danger-small-btn"
+          onclick="deleteExam(${exam.id})"
+        >
+          🗑️ Haqi
+        </button>
+
+      </div>
+
+    </div>
+  `).join("");
+
+  await populateExamSelects(exams);
+  await loadAdminQuestions();
+}
+
+
+async function populateExamSelects(exams = null) {
+  let list = exams;
+
+  if (!list) {
+    const { data } = await db
+      .from("exams")
+      .select("id,title")
+      .order("created_at", {
+        ascending: false
+      });
+
+    list = data || [];
+  }
+
+  [
+    "questionExamSelect",
+    "aiQuestionExamSelect"
+  ].forEach((id) => {
+
+    const select =
+      document.getElementById(id);
+
+    if (!select) return;
+
+    const current =
+      select.value;
+
+    select.innerHTML = `
+      <option value="">
+        Qormaata filadhu
+      </option>
+
+      ${list.map((exam) => `
+        <option value="${exam.id}">
+          ${escapeHtml(exam.title)}
+        </option>
+      `).join("")}
+    `;
+
+    if (
+      list.some(
+        (exam) =>
+          String(exam.id) ===
+          String(current)
+      )
+    ) {
+      select.value = current;
+    }
+
+  });
+}
+
+
+async function createExam() {
+  if (!requireAdmin()) return;
+
+  const title =
+    document
+      .getElementById(
+        "examTitleInput"
+      )
+      ?.value.trim() || "";
+
+  const description =
+    document
+      .getElementById(
+        "examDescriptionInput"
+      )
+      ?.value.trim() || "";
+
+  const questionLimit =
+    Number(
+      document.getElementById(
+        "examQuestionLimitInput"
+      )?.value || 0
+    );
+
+  const attemptLimit =
+    Number(
+      document.getElementById(
+        "examAttemptLimitInput"
+      )?.value || 1
+    );
+
+  const isFinal =
+    document.getElementById(
+      "examFinalInput"
+    )?.value === "true";
+
+  const duration =
+    Number(
+      document.getElementById(
+        "examDurationInput"
+      )?.value || 30
+    );
+
+  const startDate =
+    document.getElementById(
+      "examStartDateInput"
+    )?.value || null;
+
+  const endDate =
+    document.getElementById(
+      "examEndDateInput"
+    )?.value || null;
+
+  const startTime =
+    document.getElementById(
+      "examStartTimeInput"
+    )?.value || null;
+
+  const endTime =
+    document.getElementById(
+      "examEndTimeInput"
+    )?.value || null;
+
+  if (!title) {
+    alert(
+      "Mata-duree qormaataa galchi."
+    );
+    return;
+  }
+
+  if (
+    startDate &&
+    endDate &&
+    startDate > endDate
+  ) {
+    alert(
+      "Guyyaan jalqabaa guyyaa xumuraa caaluu hin qabu."
+    );
+    return;
+  }
+
+  const { error } =
+    await db
+      .from("exams")
+      .insert({
+        title,
+        description,
+        question_limit:
+          questionLimit,
+        attempt_limit:
+          attemptLimit,
+        is_final:
+          isFinal,
+        duration_minutes:
+          duration,
+        start_date:
+          startDate,
+        end_date:
+          endDate,
+        start_time:
+          startTime,
+        end_time:
+          endTime,
+        status: "active"
+      });
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+    return;
+  }
+
+  [
+    "examTitleInput",
+    "examDescriptionInput",
+    "examStartDateInput",
+    "examEndDateInput",
+    "examStartTimeInput",
+    "examEndTimeInput"
+  ].forEach((id) => {
+
+    const el =
+      document.getElementById(id);
+
+    if (el) {
+      el.value = "";
+    }
+
+  });
+
+  await loadAdminExams();
+
+  alert(
+    "Qormaanni uumameera. Amma gaaffii itti dabali."
+  );
+}
+
+
+async function toggleExamStatus(examId) {
+  if (!requireAdmin()) return;
+
+  const {
+    data: exam,
+    error: findError
+  } = await db
+    .from("exams")
+    .select("id,status")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (
+    findError ||
+    !exam
+  ) {
+    return;
+  }
+
+  const { error } =
+    await db
+      .from("exams")
+      .update({
+        status:
+          exam.status === "active"
+            ? "disabled"
+            : "active"
+      })
+      .eq(
+        "id",
+        examId
+      );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+    return;
+  }
+
+  await loadAdminExams();
+}
+
+
+async function editExam(examId) {
+  if (!requireAdmin()) return;
+
+  const {
+    data: exam,
+    error
+  } = await db
+    .from("exams")
+    .select("*")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (
+    error ||
+    !exam
+  ) {
+    return;
+  }
+
+  const title =
+    prompt(
+      "Mata-duree:",
+      exam.title
+    );
+
+  if (title === null) return;
+
+  const description =
+    prompt(
+      "Ibsa:",
+      exam.description || ""
+    );
+
+  if (
+    description === null
+  ) {
+    return;
+  }
+
+  const {
+    error: updateError
+  } = await db
+    .from("exams")
+    .update({
+      title:
+        title.trim() ||
+        exam.title,
+
+      description:
+        description.trim()
+    })
+    .eq(
+      "id",
+      examId
+    );
+
+  if (updateError) {
+    alert(
+      getErrorMessage(
+        updateError
+      )
+    );
+    return;
+  }
+
+  await loadAdminExams();
+}
+
+
+async function deleteExam(examId) {
+  if (!requireAdmin()) return;
+
+  const { data: exam } =
+    await db
+      .from("exams")
+      .select("id,title")
+      .eq("id", examId)
+      .maybeSingle();
+
+  if (!exam) return;
+
+  if (
+    !confirm(
+      `Qormaata "${exam.title}" fi gaaffilee isaa haquuf mirkaneessi.`
+    )
+  ) {
+    return;
+  }
+
+  await db
+    .from("results")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  await db
+    .from("exam_attempts")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  await db
+    .from("questions")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  const { error } =
+    await db
+      .from("exams")
+      .delete()
+      .eq(
+        "id",
+        examId
+      );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+    return;
+  }
+
+  await loadAdminExams();
+  await loadAdminResults();
+}
+
+
+/* =========================================================
+   ADMIN - MANUAL QUESTIONS
+========================================================= */
+
+async function createQuestion() {
+  if (!requireAdmin()) return;
+
+  const examId =
+    document
+      .getElementById(
+        "questionExamSelect"
+      )
+      ?.value || "";
+
+  const question =
+    document
+      .getElementById(
+        "questionTextInput"
+      )
+      ?.value.trim() || "";
+
+  const optionA =
+    document
+      .getElementById(
+        "optionAInput"
+      )
+      ?.value.trim() || "";
+
+  const optionB =
+    document
+      .getElementById(
+        "optionBInput"
+      )
+      ?.value.trim() || "";
+
+  const optionC =
+    document
+      .getElementById(
+        "optionCInput"
+      )
+      ?.value.trim() || "";
+
+  const optionD =
+    document
+      .getElementById(
+        "optionDInput"
+      )
+      ?.value.trim() || "";
+
+  const correctAnswer =
+    document
+      .getElementById(
+        "correctAnswerInput"
+      )
+      ?.value || "";
+
+  if (
+    !examId ||
+    !question ||
+    !optionA ||
+    !optionB ||
+    !optionC ||
+    !optionD ||
+    !correctAnswer
+  ) {
+    alert(
+      "Qormaata, gaaffii, A-D fi deebii sirrii hunda guuti."
+    );
+    return;
+  }
+
+  const { error } =
+    await db
+      .from("questions")
+      .insert({
+        exam_id:
+          examId,
+
+        question,
+
+        option_a:
+          optionA,
+
+        option_b:
+          optionB,
+
+        option_c:
+          optionC,
+
+        option_d:
+          optionD,
+
+        correct_answer:
+          correctAnswer,
+
+        source_type:
+          "admin",
+
+        source_text:
+          null
+      });
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+    return;
+  }
+
+  [
+    "questionTextInput",
+    "optionAInput",
+    "optionBInput",
+    "optionCInput",
+    "optionDInput"
+  ].forEach((id) => {
+
+    const el =
+      document.getElementById(id);
+
+    if (el) {
+      el.value = "";
+    }
+
+  });
+
+  const correct =
+    document.getElementById(
+      "correctAnswerInput"
+    );
+
+  if (correct) {
+    correct.value = "";
+  }
+
+  await loadAdminQuestions();
+  await loadAdminExams();
+
+  alert(
+    "Gaaffiin dabalameera."
+  );
+}
+
+
+async function loadAdminQuestions() {
+  if (!requireAdmin()) return;
+
+  const container =
+    document.getElementById(
+      "adminQuestionsList"
+    );
+
+  if (!container) return;
+
+  const {
+    data,
+    error
+  } = await db
+    .from("questions")
+    .select("*, exams(title)")
+    .order("id", {
+      ascending: false
+    });
+
+  if (error) {
+
+    container.innerHTML =
+      `<div class="empty-state">
+        ❌ Gaaffilee fe'uu hin dandeenye.
+      </div>`;
+
+    console.error(error);
+
+    return;
+  }
+
+  if (!data?.length) {
+
+    container.innerHTML =
+      `<div class="empty-state">
+        ❓ Gaaffiin hin jiru.
+      </div>`;
+
+    return;
+  }
+
+  container.innerHTML =
+    data.map(
+      (row, index) => {
+
+        const question =
+          normalizeQuestion(
+            row
+          );
+
+        return `
+          <div class="question-admin-item">
+
+            <div class="question-number">
+              ${index + 1}
+            </div>
+
+            <div class="item-main">
+
+              <small>
+                ${escapeHtml(
+                  row.exams?.title ||
+                  "Qormaata"
+                )}
+              </small>
+
+              <h3>
+                ${escapeHtml(
+                  question.text
+                )}
+              </h3>
+
+              <div class="options-preview">
+
+                <span>
+                  A.
+                  ${escapeHtml(
+                    question.optionA
+                  )}
+                </span>
+
+                <span>
+                  B.
+                  ${escapeHtml(
+                    question.optionB
+                  )}
+                </span>
+
+                <span>
+                  C.
+                  ${escapeHtml(
+                    question.optionC
+                  )}
+                </span>
+
+                <span>
+                  D.
+                  ${escapeHtml(
+                    question.optionD
+                  )}
+                </span>
+
+              </div>
+
+              <p class="correct-answer">
+                Deebii sirrii:
+                ${escapeHtml(
+                  question.correctAnswer
+                )}
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              class="danger-small-btn"
+              onclick="deleteQuestion(${question.id})"
+            >
+              🗑️
+            </button>
+
+          </div>
+        `;
+      }
+    ).join("");
+}
+
+
+async function deleteQuestion(
+  questionId
+) {
+  if (!requireAdmin()) return;
+
+  if (
+    !confirm(
+      "Gaaffii kana haquuf mirkaneessi."
+    )
+  ) {
+    return;
+  }
+
+  const { error } =
+    await db
+      .from("questions")
+      .delete()
+      .eq(
+        "id",
+        questionId
+      );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+    return;
+  }
+
+  await loadAdminQuestions();
+  await loadAdminExams();
+}
+
+
+/* =========================================================
+   AI QUESTION GENERATOR
+========================================================= */
+
+function changeAIQuestionSource() {
+  const type =
+    document
+      .getElementById(
+        "aiQuestionSourceType"
+      )
+      ?.value || "topic";
+
+  const map = {
+    topic:
+      "aiTopicSource",
+
+    text:
+      "aiTextSource",
+
+    pdf:
+      "aiPdfSource",
+
+    image:
+      "aiImageSource"
+  };
+
+  Object.values(map)
+    .forEach((id) => {
+
+      const el =
+        document.getElementById(
+          id
+        );
+
+      if (el) {
+        el.style.display =
+          "none";
+      }
+
+    });
+
+  const selected =
+    document.getElementById(
+      map[type]
+    );
+
+  if (selected) {
+    selected.style.display =
+      "block";
+  }
+}
+
+
+function fileToBase64(file) {
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+      reader.onload = () => {
+
+        const result =
+          String(
+            reader.result || ""
+          );
+
+        const comma =
+          result.indexOf(",");
+
+        resolve(
+          comma >= 0
+            ? result.slice(
+                comma + 1
+              )
+            : result
+        );
+      };
+
+      reader.onerror =
+        reject;
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+async function generateAIQuestions() {
+  if (!requireAdmin()) return;
+
+  const examId =
+    document
+      .getElementById(
+        "aiQuestionExamSelect"
+      )
+      ?.value || "";
+
+  const sourceType =
+    document
+      .getElementById(
+        "aiQuestionSourceType"
+      )
+      ?.value || "topic";
+
+  const count =
+    Number(
+      document
+        .getElementById(
+          "aiQuestionCount"
+        )
+        ?.value || 5
+    );
+
+  const button =
+    document.getElementById(
+      "generateAIQuestionsButton"
+    );
+
+  if (!examId) {
+    showAIMessage(
+      "❌ Qormaata filadhu.",
+      "error"
+    );
+    return;
+  }
+
+  if (
+    ![
+      5,
+      10,
+      20,
+      30,
+      50,
+      75,
+      100
+    ].includes(count)
+  ) {
+    showAIMessage(
+      "❌ Lakkoofsa gaaffii sirrii filadhu.",
+      "error"
+    );
+    return;
+  }
+
+  if (button) {
+    button.disabled =
+      true;
+
+    button.textContent =
+      "⏳ AI qopheessaa jira...";
+  }
+
+  try {
+
+    const body = {
+      exam_id:
+        Number(examId),
+
+      source_type:
+        sourceType,
+
+      count
+    };
+
+    if (
+      sourceType ===
+      "topic"
+    ) {
+
+      const topic =
+        document
+          .getElementById(
+            "aiTopicInput"
+          )
+          ?.value.trim() || "";
+
+      if (!topic) {
+        throw new Error(
+          "Mata-duree galchi."
+        );
+      }
+
+      body.topic =
+        topic;
+    }
+
+    if (
+      sourceType ===
+      "text"
+    ) {
+
+      const sourceText =
+        document
+          .getElementById(
+            "aiTextInput"
+          )
+          ?.value.trim() || "";
+
+      if (!sourceText) {
+        throw new Error(
+          "Barreeffama galchi."
+        );
+      }
+
+      body.source_text =
+        sourceText;
+    }
+
+    if (
+      sourceType ===
+      "pdf"
+    ) {
+
+      const file =
+        document
+          .getElementById(
+            "aiPdfInput"
+          )
+          ?.files?.[0];
+
+      if (!file) {
+        throw new Error(
+          "PDF filadhu."
+        );
+      }
+
+      if (
+        file.size >
+        50 * 1024 * 1024
+      ) {
+        throw new Error(
+          "PDF'n 50 MB ol ta'uu hin qabu."
+        );
+      }
+
+      body.file_name =
+        file.name;
+
+      body.file_mime_type =
+        file.type ||
+        "application/pdf";
+
+      body.file_base64 =
+        await fileToBase64(
+          file
+        );
+    }
+
+    if (
+      sourceType ===
+      "image"
+    ) {
+
+      const file =
+        document
+          .getElementById(
+            "aiImageInput"
+          )
+          ?.files?.[0];
+
+      if (!file) {
+        throw new Error(
+          "Suuraa filadhu."
+        );
+      }
+
+      if (
+        file.size >
+        15 * 1024 * 1024
+      ) {
+        throw new Error(
+          "Suuraan 15 MB ol ta'uu hin qabu."
+        );
+      }
+
+      body.file_name =
+        file.name;
+
+      body.file_mime_type =
+        file.type ||
+        "image/jpeg";
+
+      body.file_base64 =
+        await fileToBase64(
+          file
+        );
+    }
+
+    showAIMessage(
+      "⏳ Gaaffilee AI irraa qopheessaa jira...",
+      "info"
+    );
+
+    const response =
+      await fetch(
+        AI_FUNCTION_URL,
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            apikey:
+              SUPABASE_ANON_KEY
+          },
+
+          body:
+            JSON.stringify(
+              body
+            )
+        }
+      );
+
+    let result = null;
+
+    try {
+      result =
+        await response.json();
+    } catch (_) {
+      result = null;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        result?.error ||
+        result?.message ||
+        `AI server error: ${response.status}`
+      );
+    }
+
+    const inserted =
+      Number(
+        result?.count ||
+        result?.questions?.length ||
+        0
+      );
+
+    if (!inserted) {
+      throw new Error(
+        "AI gaaffii tokko illee hin galchine."
+      );
+    }
+
+    showAIMessage(
+      `<div class="success-box">
+        ✅ ${inserted}
+        gaaffii AI irraa
+        qormaata keessa galchame.
+      </div>`,
+      "success"
+    );
+
+    await loadAdminQuestions();
+    await loadAdminExams();
+
+  } catch (error) {
+
+    console.error(
+      "AI ERROR:",
+      error
+    );
+
+    showAIMessage(
+      `❌ ${escapeHtml(
+        getErrorMessage(
+          error
+        )
+      )}`,
+      "error"
+    );
+
+  } finally {
+
+    if (button) {
+      button.disabled =
+        false;
+
+      button.textContent =
+        "🤖 Gaaffii AI Uumi";
+    }
+
+  }
+}
+
+
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
+async function googleLogin() {
+  try {
+
+    const {
+      error
+    } =
+      await db.auth
+        .signInWithOAuth({
+          provider:
+            "google",
+
+          options: {
+            redirectTo:
+              window.location.origin +
+              window.location.pathname
+          }
+        });
+
+    if (error) {
+
+      console.error(
+        "GOOGLE LOGIN ERROR:",
+        error
+      );
+
+      alert(
+        "Google Login irratti dogoggorri uumame: " +
+        getErrorMessage(
+          error
+        )
+      );
+    }
+
+  } catch (error) {
+
+    console.error(
+      "GOOGLE LOGIN ERROR:",
+      error
+    );
+
+    alert(
+      "Google Login hin milkoofne: " +
+      getErrorMessage(
+        error
+      )
+    );
+  }
+}
+
+
+async function handleAuthSession(
+  session
+) {
+  if (!session?.user) return;
+
+  console.log(
+    "Google user authenticated:",
+    session.user.email ||
+      session.user.id
+  );
+
+  showPostLoginRoles();
+}
+
+
+/* =========================================================
+   TELEGRAM LOGIN
+========================================================= */
+
+async function telegramLogin() {
+
+  alert(
+    "Telegram Login ammallee qindaa'aa jira. Google Loginiin erga seentee booda Barataa ykn Admin filachuu dandeessa."
+  );
+}
+
+
+/* =========================================================
+   REFRESH ALL ADMIN LISTS
+========================================================= */
+
+async function refreshAllAdminLists() {
+  await loadAdminStudents();
+  await loadAdminResults();
+  await loadAdminLessons();
+  await loadAdminExams();
+  await loadAdminQuestions();
+}
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+function initializeAuthListener() {
+
+  if (
+    authListenerReady
+  ) {
+    return;
+  }
+
+  authListenerReady =
+    true;
+
+  db.auth.onAuthStateChange(
+    async (
+      _event,
+      session
+    ) => {
+
+      await handleAuthSession(
+        session
+      );
+
+    }
+  );
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+async function initializeApp() {
+
+  initializeAuthListener();
+
+  changeAIQuestionSource();
+
+  const student =
+    await restoreStudent();
+
+  if (student) {
+
+    showPage(
+      "studentHomePage"
+    );
+
+    await loadStudentHome();
+
+    return;
+  }
+
+  const admin =
+    await restoreAdmin();
+
+  if (admin) {
+
+    showPage(
+      "adminPage"
+    );
+
+    await initializeAdmin();
+
+    return;
+  }
+
+  showPublicLoginPage();
+}
+
+
+/* =========================================================
+   EXPORT FUNCTIONS
+========================================================= */
+
+window.showPage =
+  showPage;
+
+window.openStudentLogin =
+  openStudentLogin;
+
+window.openAdminLogin =
+  openAdminLogin;
+
+window.setupPostLoginRoleNav =
+  setupPostLoginRoleNav;
+
+window.showPublicLoginPage =
+  showPublicLoginPage;
+
+window.showPostLoginRoles =
+  showPostLoginRoles;
+
+window.studentRegister =
+  studentRegister;
+
+window.studentLogin =
+  studentLogin;
+
+window.loadStudentHome =
+  loadStudentHome;
+
+window.loadExams =
+  loadExams;
+
+window.startExam =
+  startExam;
+
+window.selectAnswer =
+  selectAnswer;
+
+window.nextQuestion =
+  nextQuestion;
+
+window.requestSubmitExam =
+  requestSubmitExam;
+
+window.confirmSubmitExam =
+  confirmSubmitExam;
+
+window.showScore =
+  showScore;
+
+window.loadProfile =
+  loadProfile;
+
+window.saveProfile =
+  saveProfile;
+
+window.studentLogout =
+  studentLogout;
+
+window.openLesson =
+  openLesson;
+
+window.adminLogin =
+  adminLogin;
+
+window.adminLogout =
+  adminLogout;
+
+window.openAdminPanel =
+  openAdminPanel;
+
+window.toggleStudentStatus =
+  toggleStudentStatus;
+
+window.deleteStudent =
+  deleteStudent;
+
+window.createLesson =
+  createLesson;
+
+window.editLesson =
+  editLesson;
+
+window.deleteLesson =
+  deleteLesson;
+
+window.createExam =
+  createExam;
+
+window.toggleExamStatus =
+  toggleExamStatus;
+
+window.editExam =
+  editExam;
+
+window.deleteExam =
+  deleteExam;
+
+window.createQuestion =
+  createQuestion;
+
+window.deleteQuestion =
+  deleteQuestion;
+
+window.changeAIQuestionSource =
+  changeAIQuestionSource;
+
+window.generateAIQuestions =
+  generateAIQuestions;
+
+window.googleLogin =
+  googleLogin;
+
+window.telegramLogin =
+  telegramLogin;
+
+
+/* =========================================================
+   START APP
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  initializeApp
+);
