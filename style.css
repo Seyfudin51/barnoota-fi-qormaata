@@ -858,3 +858,8 @@ button {
     min-height: 100vh;
   }
 }
+/* DHOKSA: Barataa fi Admin fuula jalqabaa */
+#rolePage [onclick*="openStudentLogin"],
+#rolePage [onclick*="openAdminLogin"] {
+  display: none !important;
+}
