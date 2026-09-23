@@ -801,3 +801,60 @@ button {
 [style*="display: none"] {
   display: none !important;
 }
+/* =========================================================
+   PAGE VISIBILITY FIX
+   Fuula tokko qofa yeroo tokko akka mul'atu
+========================================================= */
+
+.page {
+  display: none !important;
+}
+
+.page.active {
+  display: block !important;
+}
+
+/* Fuula jalqabaa */
+#rolePage {
+  min-height: 100vh;
+}
+
+#rolePage.active {
+  display: flex !important;
+  flex-direction: column;
+}
+
+/* Fuula qormaataa */
+#examPage.active {
+  display: block !important;
+}
+
+/* Admin Dashboard */
+#adminDashboardPage.active {
+  display: block !important;
+}
+
+/* Admin panels — yeroo jalqabaatti tokko qofa */
+.admin-panel {
+  display: none !important;
+}
+
+.admin-panel.active {
+  display: block !important;
+}
+
+/* Admin dashboard yeroo banamu */
+#studentsPanel.active,
+#resultsPanel.active,
+#lessonsPanel.active,
+#examsPanel.active {
+  display: block !important;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .page.active {
+    width: 100%;
+    min-height: 100vh;
+  }
+}
