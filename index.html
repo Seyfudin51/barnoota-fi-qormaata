@@ -41,7 +41,7 @@
 <body>
 
   <!-- =====================================================
-       1. FUULA JALQABAA — LOGIN QOFA
+       1. FUULA JALQABAA — LOGIN
   ====================================================== -->
 
   <section id="rolePage" class="page active">
@@ -49,50 +49,159 @@
     <div class="container">
 
       <div class="hero">
+
         <h1>🎓 Akkaadaamii Oromiyaa</h1>
-        <p>Barnoota fi Qormaata</p>
+
+        <p>
+          Barnoota fi Qormaata
+        </p>
+
       </div>
+
 
       <div class="card">
 
-        <h2>🔐 Seensa Akkaadaamii</h2>
+        <h2>
+          🔐 Seensa Akkaadaamii
+        </h2>
 
         <p>
           Akkaadaamii seenuuf karaa barbaadde filadhu.
         </p>
 
-        <!-- GOOGLE -->
+
+        <!-- =================================================
+             GOOGLE LOGIN
+        ================================================== -->
+
         <button
+          id="googleLoginButton"
           type="button"
           class="primary-btn"
           onclick="googleLogin()"
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+          "
         >
-          🔵 Log in with Google
+
+          <!-- GOOGLE LOGO -->
+
+          <svg
+            width="23"
+            height="23"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+
+            <path
+              fill="#FFC107"
+              d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c10 0 19.1-7.2 19.1-20 0-1.2-.1-2.4-.3-3.5z"
+            />
+
+            <path
+              fill="#FF3D00"
+              d="M6.3 14.7l6.6 4.8C14.7 16.1 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"
+            />
+
+            <path
+              fill="#4CAF50"
+              d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.1 26.9 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.4 39.6 16.2 44 24 44z"
+            />
+
+            <path
+              fill="#1976D2"
+              d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.1-3.6 5.5-6.8 6.8l.1.1 6.2 5.2C34.4 40.7 44 34.5 44 24c0-1.2-.1-2.4-.4-3.5z"
+            />
+
+          </svg>
+
+          <span>
+            Log in with Google
+          </span>
+
         </button>
 
-        <!-- TELEGRAM -->
+
+        <!-- =================================================
+             TELEGRAM LOGIN
+        ================================================== -->
+
         <button
+          id="telegramLoginButton"
           type="button"
           class="secondary-btn"
           onclick="telegramLogin()"
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+          "
         >
-          🔷 Log in with Telegram
+
+          <!-- TELEGRAM LOGO -->
+
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 240 240"
+            aria-hidden="true"
+          >
+
+            <circle
+              cx="120"
+              cy="120"
+              r="120"
+              fill="#229ED9"
+            />
+
+            <path
+              fill="#fff"
+              d="M183.5 70.2L162.4 178c-1.6 7.6-5.9 9.5-12 5.9l-33.1-24.4-16 15.4c-1.8 1.8-3.3 3.3-6.8 3.3l2.4-33.7 61.3-55.4c2.7-2.4-.6-3.8-4.2-1.4l-75.8 47.7-32.7-10.2c-7.1-2.2-7.2-7.1 1.5-10.5L173.7 57c6.1-2.2 11.5 1.4 9.8 13.2z"
+            />
+
+          </svg>
+
+          <span>
+            Log in with Telegram
+          </span>
+
         </button>
+
 
         <hr>
 
+
+        <!-- =================================================
+             BARATAA
+             FUULA JALQABAA IRRAA DHOKSAME
+        ================================================== -->
+
         <button
+          id="initialStudentButton"
           type="button"
           class="primary-btn"
           onclick="openStudentLogin()"
+          style="display:none;"
         >
           👨‍🎓 Barataa
         </button>
 
+
+        <!-- =================================================
+             ADMIN
+             FUULA JALQABAA IRRAA DHOKSAME
+        ================================================== -->
+
         <button
+          id="initialAdminButton"
           type="button"
           class="secondary-btn"
           onclick="openAdminLogin()"
+          style="display:none;"
         >
           🔐 Admin
         </button>
@@ -104,11 +213,15 @@
   </section>
 
 
+
   <!-- =====================================================
        2. BARATAA LOGIN / GALMEE
   ====================================================== -->
 
-  <section id="studentLoginPage" class="page">
+  <section
+    id="studentLoginPage"
+    class="page"
+  >
 
     <div class="container">
 
@@ -122,24 +235,32 @@
           ← Duubatti
         </button>
 
-        <h2>👨‍🎓 Seensa Barataa</h2>
+
+        <h2>
+          👨‍🎓 Seensa Barataa
+        </h2>
+
 
         <p>
           Barataa haaraa yoo taate maqaa kee galmeessi.
-          Erga adminiin si hayyamee booda Student ID fi Activation Code
-          kee fayyadamuun seeni.
+          Erga adminiin si hayyamee booda Student ID fi
+          Activation Code kee fayyadamuun seeni.
         </p>
+
 
         <div class="notice">
 
-          <strong>Barataa haaraa?</strong>
+          <strong>
+            Barataa haaraa?
+          </strong>
 
           <p>
-            Maqaa kee galchi. Galmee booda Student ID fi Activation Code
-            argatta.
+            Maqaa kee galchi. Galmee booda Student ID fi
+            Activation Code argatta.
           </p>
 
         </div>
+
 
         <input
           id="nameInput"
@@ -147,6 +268,7 @@
           placeholder="Maqaa guutuu kee galchi"
           autocomplete="name"
         >
+
 
         <button
           type="button"
@@ -156,9 +278,14 @@
           📝 Galmaa'i
         </button>
 
+
         <hr>
 
-        <h3>Barataa duraan galmaa'e</h3>
+
+        <h3>
+          Barataa duraan galmaa'e
+        </h3>
+
 
         <input
           id="studentIdInput"
@@ -167,12 +294,14 @@
           autocomplete="username"
         >
 
+
         <input
           id="activationCodeInput"
           type="text"
           placeholder="Activation Code"
           autocomplete="one-time-code"
         >
+
 
         <button
           type="button"
@@ -181,6 +310,7 @@
         >
           🔑 Seeni
         </button>
+
 
         <div
           id="studentLoginMessage"
@@ -195,39 +325,59 @@
   </section>
 
 
+
   <!-- =====================================================
        3. BARATAA HOME
   ====================================================== -->
 
-  <section id="studentHomePage" class="page">
+  <section
+    id="studentHomePage"
+    class="page"
+  >
 
     <div class="container">
 
       <div class="top-header">
 
         <div>
-          <h2>🎓 Akkaadaamii</h2>
+
+          <h2>
+            🎓 Akkaadaamii
+          </h2>
+
           <p id="studentWelcomeName"></p>
+
         </div>
 
       </div>
 
+
       <div class="card">
 
-        <h3>👋 Baga nagaan dhuftan!</h3>
+        <h3>
+          👋 Baga nagaan dhuftan!
+        </h3>
 
         <p id="studentHomeMessage"></p>
 
       </div>
 
-      <h3>📚 Barnoota</h3>
+
+      <h3>
+        📚 Barnoota
+      </h3>
+
 
       <div
         id="studentLessons"
         class="grid"
       ></div>
 
-      <h3>📝 Qormaata</h3>
+
+      <h3>
+        📝 Qormaata
+      </h3>
+
 
       <button
         type="button"
@@ -238,6 +388,7 @@
         📝 Qormaata Ilaali
       </button>
 
+
       <!-- STUDENT NAVIGATION -->
 
       <div class="bottom-nav">
@@ -247,31 +398,42 @@
           onclick="showPage('studentHomePage'); loadStudentHome();"
         >
           🏠
-          <span>Home</span>
+          <span>
+            Home
+          </span>
         </button>
+
 
         <button
           type="button"
           onclick="showPage('examListPage'); loadExams();"
         >
           📝
-          <span>Qormaata</span>
+          <span>
+            Qormaata
+          </span>
         </button>
+
 
         <button
           type="button"
           onclick="showPage('scorePage'); showScore();"
         >
           📊
-          <span>Qabxii</span>
+          <span>
+            Qabxii
+          </span>
         </button>
+
 
         <button
           type="button"
           onclick="showPage('profilePage'); loadProfile();"
         >
           👤
-          <span>Profile</span>
+          <span>
+            Profile
+          </span>
         </button>
 
       </div>
@@ -281,11 +443,15 @@
   </section>
 
 
+
   <!-- =====================================================
        4. BARNOOTA DETAIL
   ====================================================== -->
 
-  <section id="lessonDetailPage" class="page">
+  <section
+    id="lessonDetailPage"
+    class="page"
+  >
 
     <div class="container">
 
@@ -296,6 +462,7 @@
       >
         ← Duubatti
       </button>
+
 
       <div class="card">
 
@@ -310,11 +477,15 @@
   </section>
 
 
+
   <!-- =====================================================
        5. QORMAATA LIST
   ====================================================== -->
 
-  <section id="examListPage" class="page">
+  <section
+    id="examListPage"
+    class="page"
+  >
 
     <div class="container">
 
@@ -326,7 +497,11 @@
         ← Duubatti
       </button>
 
-      <h2>📝 Qormaata</h2>
+
+      <h2>
+        📝 Qormaata
+      </h2>
+
 
       <div
         id="studentExams"
@@ -338,11 +513,15 @@
   </section>
 
 
+
   <!-- =====================================================
        6. QORMAATA
   ====================================================== -->
 
-  <section id="examPage" class="page">
+  <section
+    id="examPage"
+    class="page"
+  >
 
     <div class="container">
 
@@ -350,24 +529,35 @@
 
         <h2 id="examTitle"></h2>
 
+
         <div
           id="examTimer"
           class="notice"
         >
+
           ⏱️ Yeroo:
+
           <strong id="examTimerValue">
             --:--
           </strong>
+
         </div>
 
+
         <div class="question-progress">
+
           Gaaffii
+
           <span id="questionNumber"></span>
+
         </div>
+
 
         <h3 id="questionText"></h3>
 
+
         <div id="answersContainer"></div>
+
 
         <button
           type="button"
@@ -378,6 +568,7 @@
         >
           Itti Aanuu →
         </button>
+
 
         <button
           type="button"
@@ -396,22 +587,33 @@
   </section>
 
 
+
   <!-- =====================================================
        7. SUBMIT CONFIRMATION
   ====================================================== -->
 
-  <section id="submitConfirmPage" class="page">
+  <section
+    id="submitConfirmPage"
+    class="page"
+  >
 
     <div class="container">
 
       <div class="card">
 
-        <h2>⚠️ Qormaata Submit</h2>
+        <h2>
+          ⚠️ Qormaata Submit
+        </h2>
+
 
         <p id="submitWarningMessage">
+
           Gaaffii hunda xumurteettaa?
+
           Qormaata submit gochuu barbaaddaa?
+
         </p>
+
 
         <button
           type="button"
@@ -420,6 +622,7 @@
         >
           Eyyee
         </button>
+
 
         <button
           type="button"
@@ -436,11 +639,15 @@
   </section>
 
 
+
   <!-- =====================================================
        8. QABXII
   ====================================================== -->
 
-  <section id="scorePage" class="page">
+  <section
+    id="scorePage"
+    class="page"
+  >
 
     <div class="container">
 
@@ -452,9 +659,13 @@
         ← Duubatti
       </button>
 
+
       <div class="card">
 
-        <h2>📊 Qabxii Koo</h2>
+        <h2>
+          📊 Qabxii Koo
+        </h2>
+
 
         <div id="studentScore"></div>
 
@@ -465,11 +676,15 @@
   </section>
 
 
+
   <!-- =====================================================
        9. PROFILE
   ====================================================== -->
 
-  <section id="profilePage" class="page">
+  <section
+    id="profilePage"
+    class="page"
+  >
 
     <div class="container">
 
@@ -481,19 +696,25 @@
         ← Duubatti
       </button>
 
+
       <div class="card">
 
-        <h2>👤 Profile Koo</h2>
+        <h2>
+          👤 Profile Koo
+        </h2>
+
 
         <label for="profileNameInput">
           Maqaa
         </label>
+
 
         <input
           id="profileNameInput"
           type="text"
           autocomplete="name"
         >
+
 
         <button
           type="button"
@@ -503,31 +724,45 @@
           💾 Maqaa Olkaa'i
         </button>
 
+
         <hr>
 
+
         <p>
-          <strong>Student ID:</strong>
+          <strong>
+            Student ID:
+          </strong>
         </p>
+
 
         <div
           id="profileCode"
           class="code-box"
         ></div>
 
+
         <p>
-          <strong>Activation Code:</strong>
+          <strong>
+            Activation Code:
+          </strong>
         </p>
+
 
         <div
           id="profileActivationCode"
           class="code-box"
         ></div>
 
+
         <p>
-          <strong>Status:</strong>
+          <strong>
+            Status:
+          </strong>
         </p>
 
+
         <div id="profileStatus"></div>
+
 
         <button
           type="button"
@@ -544,11 +779,15 @@
   </section>
 
 
+
   <!-- =====================================================
        10. ADMIN LOGIN
   ====================================================== -->
 
-  <section id="adminLoginPage" class="page">
+  <section
+    id="adminLoginPage"
+    class="page"
+  >
 
     <div class="container">
 
@@ -562,11 +801,16 @@
           ← Duubatti
         </button>
 
-        <h2>🔐 Admin Login</h2>
+
+        <h2>
+          🔐 Admin Login
+        </h2>
+
 
         <p>
           Admin qofaaf.
         </p>
+
 
         <input
           id="adminUsername"
@@ -575,12 +819,14 @@
           autocomplete="username"
         >
 
+
         <input
           id="adminPassword"
           type="password"
           placeholder="Password"
           autocomplete="current-password"
         >
+
 
         <button
           type="button"
@@ -589,6 +835,7 @@
         >
           Seeni
         </button>
+
 
         <div
           id="adminLoginMessage"
@@ -603,20 +850,32 @@
   </section>
 
 
+
   <!-- =====================================================
        11. ADMIN DASHBOARD
   ====================================================== -->
 
-  <section id="adminDashboardPage" class="page">
+  <section
+    id="adminDashboardPage"
+    class="page"
+  >
 
     <div class="container">
 
       <div class="top-header">
 
         <div>
-          <h2>⚙️ Admin Dashboard</h2>
-          <p>Akkaadaamii Oromiyaa</p>
+
+          <h2>
+            ⚙️ Admin Dashboard
+          </h2>
+
+          <p>
+            Akkaadaamii Oromiyaa
+          </p>
+
         </div>
+
 
         <button
           type="button"
@@ -642,6 +901,7 @@
           Barattoota
         </button>
 
+
         <button
           type="button"
           onclick="openAdminPanel('results')"
@@ -651,6 +911,7 @@
           Qabxii
         </button>
 
+
         <button
           type="button"
           onclick="openAdminPanel('lessons')"
@@ -659,6 +920,7 @@
           <br>
           Barnoota
         </button>
+
 
         <button
           type="button"
@@ -672,6 +934,7 @@
       </div>
 
 
+
       <!-- =================================================
            STUDENTS
       ================================================== -->
@@ -683,13 +946,17 @@
 
         <div class="card">
 
-          <h2>👨‍🎓 Barattoota</h2>
+          <h2>
+            👨‍🎓 Barattoota
+          </h2>
+
 
           <div id="adminStudentsList"></div>
 
         </div>
 
       </div>
+
 
 
       <!-- =================================================
@@ -703,7 +970,10 @@
 
         <div class="card">
 
-          <h2>📊 Gabatee Qabxii</h2>
+          <h2>
+            📊 Gabatee Qabxii
+          </h2>
+
 
           <div class="table-wrapper">
 
@@ -722,6 +992,7 @@
       </div>
 
 
+
       <!-- =================================================
            LESSONS
       ================================================== -->
@@ -733,7 +1004,10 @@
 
         <div class="card">
 
-          <h2>📚 Barnoota Haaraa</h2>
+          <h2>
+            📚 Barnoota Haaraa
+          </h2>
+
 
           <input
             id="lessonTitleInput"
@@ -741,11 +1015,13 @@
             placeholder="Mata-duree barnootaa"
           >
 
+
           <textarea
             id="lessonContentInput"
             rows="8"
             placeholder="Qabiyyee barnootaa..."
           ></textarea>
+
 
           <button
             type="button"
@@ -760,13 +1036,17 @@
 
         <div class="card">
 
-          <h2>📚 Barnoota Jiran</h2>
+          <h2>
+            📚 Barnoota Jiran
+          </h2>
+
 
           <div id="adminLessonsList"></div>
 
         </div>
 
       </div>
+
 
 
       <!-- =================================================
@@ -779,11 +1059,16 @@
       >
 
 
-        <!-- EXAM CREATION -->
+        <!-- =================================================
+             EXAM CREATION
+        ================================================== -->
 
         <div class="card exam-create-header">
 
-          <h2>📝 Qormaata Uumuu</h2>
+          <h2>
+            📝 Qormaata Uumuu
+          </h2>
+
 
           <p>
             Qormaata kee karaa AI ykn harkaan qopheessi.
@@ -793,7 +1078,9 @@
           <div class="exam-create-options">
 
 
-            <!-- ================= AI ================= -->
+            <!-- =================================================
+                 AI
+            ================================================= -->
 
             <details
               class="exam-create-option ai-option"
@@ -805,17 +1092,20 @@
                   🤖
                 </span>
 
+
                 <span class="option-content">
 
                   <strong>
                     AI'n Qormaata Uumi
                   </strong>
 
+
                   <small>
                     PDF • Suuraa • Barruu • Mata-duree
                   </small>
 
                 </span>
+
 
                 <span class="option-arrow">
                   →
@@ -828,8 +1118,11 @@
 
 
                 <label for="aiQuestionExamSelect">
+
                   📝 Qormaata gaaffiin itti galuu
+
                 </label>
+
 
                 <select
                   id="aiQuestionExamSelect"
@@ -842,9 +1135,13 @@
                 </select>
 
 
+
                 <label for="aiQuestionSourceType">
+
                   📚 Madda gaaffii
+
                 </label>
+
 
                 <select
                   id="aiQuestionSourceType"
@@ -855,19 +1152,23 @@
                     🎯 Mata-duree
                   </option>
 
+
                   <option value="text">
                     📝 Barreeffama
                   </option>
 
+
                   <option value="pdf">
                     📄 PDF
                   </option>
+
 
                   <option value="image">
                     🖼️ Suuraa
                   </option>
 
                 </select>
+
 
 
                 <!-- TOPIC -->
@@ -881,6 +1182,7 @@
                   >
 
                 </div>
+
 
 
                 <!-- TEXT -->
@@ -899,6 +1201,7 @@
                 </div>
 
 
+
                 <!-- PDF -->
 
                 <div
@@ -912,11 +1215,13 @@
                     accept=".pdf,application/pdf"
                   >
 
+
                   <small>
                     PDF barnootaa filadhu.
                   </small>
 
                 </div>
+
 
 
                 <!-- IMAGE -->
@@ -932,6 +1237,7 @@
                     accept="image/*"
                   >
 
+
                   <small>
                     Suuraa barnootaa filadhu.
                   </small>
@@ -939,21 +1245,52 @@
                 </div>
 
 
+
                 <label for="aiQuestionCount">
+
                   🔢 Gaaffii meeqa uumuu?
+
                 </label>
+
 
                 <select id="aiQuestionCount">
 
-                  <option value="5">5</option>
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                  <option value="50">50</option>
-                  <option value="75">75</option>
-                  <option value="100">100</option>
+                  <option value="5">
+                    5
+                  </option>
+
+
+                  <option value="10">
+                    10
+                  </option>
+
+
+                  <option value="20">
+                    20
+                  </option>
+
+
+                  <option value="30">
+                    30
+                  </option>
+
+
+                  <option value="50">
+                    50
+                  </option>
+
+
+                  <option value="75">
+                    75
+                  </option>
+
+
+                  <option value="100">
+                    100
+                  </option>
 
                 </select>
+
 
 
                 <button
@@ -977,7 +1314,10 @@
             </details>
 
 
-            <!-- ================= ADMIN ================= -->
+
+            <!-- =================================================
+                 ADMIN MANUAL EXAM
+            ================================================== -->
 
             <details
               class="exam-create-option admin-option"
@@ -989,17 +1329,20 @@
                   👨‍💼
                 </span>
 
+
                 <span class="option-content">
 
                   <strong>
                     Adminiin Qormaata Uumi
                   </strong>
 
+
                   <small>
                     Qormaata fi gaaffii ofii keetiin qopheessi
                   </small>
 
                 </span>
+
 
                 <span class="option-arrow">
                   →
@@ -1016,11 +1359,13 @@
                 </h3>
 
 
+
                 <input
                   id="examTitleInput"
                   type="text"
                   placeholder="Mata-duree qormaataa"
                 >
+
 
 
                 <textarea
@@ -1030,43 +1375,57 @@
                 ></textarea>
 
 
+
                 <label for="examQuestionLimitInput">
+
                   🔢 Gaaffii meeqa?
+
                 </label>
 
-                <select id="examQuestionLimitInput">
+
+                <select
+                  id="examQuestionLimitInput"
+                >
 
                   <option value="5">
                     5 Gaaffii
                   </option>
 
+
                   <option value="10">
                     10 Gaaffii
                   </option>
+
 
                   <option value="20">
                     20 Gaaffii
                   </option>
 
+
                   <option value="30">
                     30 Gaaffii
                   </option>
+
 
                   <option value="40">
                     40 Gaaffii
                   </option>
 
+
                   <option value="50">
                     50 Gaaffii
                   </option>
+
 
                   <option value="75">
                     75 Gaaffii
                   </option>
 
+
                   <option value="100">
                     100 Gaaffii
                   </option>
+
 
                   <option value="0">
                     Gaaffii hunda
@@ -1075,31 +1434,42 @@
                 </select>
 
 
+
                 <label for="examAttemptLimitInput">
+
                   🔢 Yeroo meeqa qorachuu danda'a?
+
                 </label>
 
-                <select id="examAttemptLimitInput">
+
+                <select
+                  id="examAttemptLimitInput"
+                >
 
                   <option value="1">
                     Yeroo 1
                   </option>
 
+
                   <option value="2">
                     Yeroo 2
                   </option>
+
 
                   <option value="3">
                     Yeroo 3
                   </option>
 
+
                   <option value="4">
                     Yeroo 4
                   </option>
 
+
                   <option value="5">
                     Yeroo 5
                   </option>
+
 
                   <option value="10">
                     Yeroo 10
@@ -1108,15 +1478,22 @@
                 </select>
 
 
+
                 <label for="examFinalInput">
+
                   🏆 Gosa Qormaataa
+
                 </label>
 
-                <select id="examFinalInput">
+
+                <select
+                  id="examFinalInput"
+                >
 
                   <option value="false">
                     Qormaata Idilee
                   </option>
+
 
                   <option value="true">
                     🏆 Qormaata Guddaa / Final
@@ -1125,35 +1502,47 @@
                 </select>
 
 
+
                 <label for="examDurationInput">
+
                   ⏱️ Yeroo qormaataa
+
                 </label>
 
-                <select id="examDurationInput">
+
+                <select
+                  id="examDurationInput"
+                >
 
                   <option value="10">
                     10 daqiiqaa
                   </option>
 
+
                   <option value="20">
                     20 daqiiqaa
                   </option>
+
 
                   <option value="30">
                     30 daqiiqaa
                   </option>
 
+
                   <option value="45">
                     45 daqiiqaa
                   </option>
+
 
                   <option value="60">
                     60 daqiiqaa
                   </option>
 
+
                   <option value="90">
                     90 daqiiqaa
                   </option>
+
 
                   <option value="120">
                     120 daqiiqaa
@@ -1162,9 +1551,13 @@
                 </select>
 
 
+
                 <label for="examStartDateInput">
+
                   📅 Guyyaa jalqabaa
+
                 </label>
+
 
                 <input
                   id="examStartDateInput"
@@ -1172,9 +1565,13 @@
                 >
 
 
+
                 <label for="examEndDateInput">
+
                   📅 Guyyaa xumuraa
+
                 </label>
+
 
                 <input
                   id="examEndDateInput"
@@ -1182,9 +1579,13 @@
                 >
 
 
+
                 <label for="examStartTimeInput">
+
                   🕐 Sa'aatii jalqabaa
+
                 </label>
+
 
                 <input
                   id="examStartTimeInput"
@@ -1192,14 +1593,19 @@
                 >
 
 
+
                 <label for="examEndTimeInput">
+
                   🕐 Sa'aatii xumuraa
+
                 </label>
+
 
                 <input
                   id="examEndTimeInput"
                   type="time"
                 >
+
 
 
                 <button
@@ -1219,7 +1625,10 @@
         </div>
 
 
-        <!-- EXISTING EXAMS -->
+
+        <!-- =================================================
+             EXISTING EXAMS
+        ================================================== -->
 
         <div class="card">
 
@@ -1227,22 +1636,28 @@
             📋 Qormaata Jiran
           </h2>
 
+
           <p>
             Qormaata uumame as irraa ilaali fi bulchi.
           </p>
+
 
           <div id="adminExamsList"></div>
 
         </div>
 
 
-        <!-- MANUAL QUESTIONS -->
+
+        <!-- =================================================
+             MANUAL QUESTIONS
+        ================================================== -->
 
         <div class="card question-manager-card">
 
           <h2>
             ❓ Gaaffii Harkaan Qopheessuu
           </h2>
+
 
           <p>
             Qormaata filadhuutii gaaffii A, B, C, D fi deebii sirrii galchi.
@@ -1273,17 +1688,20 @@
               placeholder="A"
             >
 
+
             <input
               id="optionBInput"
               type="text"
               placeholder="B"
             >
 
+
             <input
               id="optionCInput"
               type="text"
               placeholder="C"
             >
+
 
             <input
               id="optionDInput"
@@ -1300,17 +1718,21 @@
               Deebii sirrii filadhu
             </option>
 
+
             <option value="A">
               A
             </option>
+
 
             <option value="B">
               B
             </option>
 
+
             <option value="C">
               C
             </option>
+
 
             <option value="D">
               D
@@ -1330,13 +1752,17 @@
         </div>
 
 
-        <!-- QUESTIONS LIST -->
+
+        <!-- =================================================
+             QUESTIONS LIST
+        ================================================== -->
 
         <div class="card">
 
           <h2>
             ❓ Gaaffilee Jiran
           </h2>
+
 
           <div id="adminQuestionsList"></div>
 
@@ -1349,11 +1775,15 @@
   </section>
 
 
+
   <!-- =====================================================
        SCRIPTS
   ====================================================== -->
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
 
   <script src="app.js"></script>
 
