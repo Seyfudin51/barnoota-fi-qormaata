@@ -1,2780 +1,2251 @@
 /* =========================================================
-   AKKAADAAMII OROMIYAA
-   app.js - Complete Version
+   AKKAADAAMII OROMIYAA - app.js
+   Supabase version
    ========================================================= */
 
 "use strict";
 
 /* =========================================================
-   1. STORAGE KEYS
-   ========================================================= */
+   SUPABASE
+========================================================= */
 
-const STORAGE = {
-    students: "ao_students",
-    lessons: "ao_lessons",
-    exams: "ao_exams",
-    questions: "ao_questions",
-    results: "ao_results",
-    currentStudent: "ao_current_student",
-    currentAdmin: "ao_current_admin",
-    currentExam: "ao_current_exam"
-};
+const SUPABASE_URL = "https://xhkkaevhcqvkwabcsljm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_8nBE4n2bQ1jRnEr_83FrdA_vSqqIpSz";
+const AI_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/generate-ai-questions`;
 
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 /* =========================================================
-   2. GLOBAL VARIABLES
-   ========================================================= */
-
-let currentExam = null;
-let currentQuestions = [];
-let currentQuestionIndex = 0;
-let examAnswers = {};
-let examTimer = null;
-let examSecondsLeft = 0;
+   APP STATE
+========================================================= */
 
 let currentStudent = null;
 let currentAdmin = null;
-
-
-/* =========================================================
-   3. BASIC HELPERS
-   ========================================================= */
-
-function getData(key, fallback = []) {
-    try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : fallback;
-    } catch (error) {
-        console.error("Storage error:", error);
-        return fallback;
-    }
-}
-
-function saveData(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
-}
-
-function generateId(prefix = "ID") {
-    return (
-        prefix +
-        Date.now().toString(36).toUpperCase() +
-        Math.random().toString(36).substring(2, 7).toUpperCase()
-    );
-}
-
-function escapeHTML(value) {
-    if (value === null || value === undefined) return "";
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function showMessage(elementId, message, type = "info") {
-    const el = document.getElementById(elementId);
-
-    if (!el) return;
-
-    el.textContent = message;
-    el.className = `message ${type}`;
-    el.style.display = "block";
-}
-
-function hideMessage(elementId) {
-    const el = document.getElementById(elementId);
-
-    if (el) {
-        el.style.display = "none";
-    }
-}
-
-function formatDate(date) {
-    if (!date) return "-";
-
-    const d = new Date(date);
-
-    if (isNaN(d.getTime())) return date;
-
-    return d.toLocaleDateString("om-ET", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-    });
-}
-
+let currentExam = null;
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentAnswers = {};
+let currentAttempt = null;
+let examTimer = null;
+let examSecondsLeft = 0;
+let pendingSubmit = false;
+let authListenerReady = false;
 
 /* =========================================================
-   4. DEMO DATA
-   ========================================================= */
+   HELPERS
+========================================================= */
 
-function initializeAppData() {
-
-    if (!localStorage.getItem(STORAGE.students)) {
-        saveData(STORAGE.students, []);
-    }
-
-    if (!localStorage.getItem(STORAGE.lessons)) {
-
-        saveData(STORAGE.lessons, [
-            {
-                id: generateId("LES"),
-                title: "Seensa Artificial Intelligence",
-                content:
-                    "Artificial Intelligence jechuun teeknooloojii kompiitaraan hojii sammuu namaa fakkaatu akka raawwatu gochuudha. AI keessatti machine learning, neural network, computer vision fi natural language processing fa'i ni argamu.",
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: generateId("LES"),
-                title: "Python Bu'uuraa",
-                content:
-                    "Python afaan programming salphaa fi beekamaa dha. Variables, conditions, loops, functions fi libraries fayyadamuun application garaagaraa ijaaruun ni danda'ama.",
-                createdAt: new Date().toISOString()
-            }
-        ]);
-    }
-
-    if (!localStorage.getItem(STORAGE.exams)) {
-        saveData(STORAGE.exams, [
-            {
-                id: generateId("EX"),
-                title: "Qormaata AI Bu'uuraa",
-                description: "Qormaata Artificial Intelligence bu'uuraa.",
-                questionLimit: 5,
-                attemptLimit: 3,
-                finalExam: false,
-                duration: 10,
-                startDate: "",
-                endDate: "",
-                startTime: "",
-                endTime: "",
-                createdAt: new Date().toISOString()
-            }
-        ]);
-    }
-
-    if (!localStorage.getItem(STORAGE.questions)) {
-
-        const exams = getData(STORAGE.exams);
-
-        if (exams.length > 0) {
-
-            saveData(STORAGE.questions, [
-                {
-                    id: generateId("Q"),
-                    examId: exams[0].id,
-                    question:
-                        "AI jechuun maal jechuudha?",
-                    options: [
-                        "Artificial Intelligence",
-                        "Automatic Internet",
-                        "Advanced Input",
-                        "Application Interface"
-                    ],
-                    correctAnswer: 0
-                },
-                {
-                    id: generateId("Q"),
-                    examId: exams[0].id,
-                    question:
-                        "Python maalif beekama?",
-                    options: [
-                        "Afaan programming",
-                        "Operating system",
-                        "Browser",
-                        "Database qofa"
-                    ],
-                    correctAnswer: 0
-                },
-                {
-                    id: generateId("Q"),
-                    examId: exams[0].id,
-                    question:
-                        "Machine Learning maal irratti xiyyeeffata?",
-                    options: [
-                        "Data irraa barachuu",
-                        "Suuraa maxxansuu qofa",
-                        "Internet cufuu",
-                        "Keyboard qofa"
-                    ],
-                    correctAnswer: 0
-                },
-                {
-                    id: generateId("Q"),
-                    examId: exams[0].id,
-                    question:
-                        "CNN baay'inaan maal irratti fayyada?",
-                    options: [
-                        "Computer Vision",
-                        "Email qofa",
-                        "Audio qofa",
-                        "Database qofa"
-                    ],
-                    correctAnswer: 0
-                },
-                {
-                    id: generateId("Q"),
-                    examId: exams[0].id,
-                    question:
-                        "Neural Network maal fakkaata?",
-                    options: [
-                        "Sirna neurons fakkaatu",
-                        "Printer",
-                        "Keyboard",
-                        "File manager"
-                    ],
-                    correctAnswer: 0
-                }
-            ]);
-        }
-    }
-
-    if (!localStorage.getItem(STORAGE.results)) {
-        saveData(STORAGE.results, []);
-    }
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
+function truncate(value, length = 120) {
+  const text = String(value ?? "");
+  return text.length > length ? text.slice(0, length) + "..." : text;
+}
+
+function formatText(value) {
+  return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
+function getErrorMessage(error) {
+  return (
+    error?.message ||
+    error?.error_description ||
+    error?.details ||
+    "Dogoggorri hin beekamne."
+  );
+}
+
+function showStudentMessage(message, type = "info") {
+  const el = document.getElementById("studentLoginMessage");
+  if (!el) return;
+  el.textContent = message;
+  el.className = `message ${type}`.trim();
+}
+
+function showAdminMessage(message, type = "info") {
+  const el = document.getElementById("adminLoginMessage");
+  if (!el) return;
+  el.textContent = message;
+  el.className = `message ${type}`.trim();
+}
+
+function showAIMessage(message, type = "info") {
+  const el = document.getElementById("aiQuestionMessage");
+  if (!el) return;
+  el.innerHTML = message;
+  el.className = `message ${type}`.trim();
+}
+
+function generateStudentCode() {
+  const chars = "0123456789";
+  let result = "ST-";
+  for (let i = 0; i < 6; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
+function generateActivationCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "";
+  for (let i = 0; i < 8; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
+function normalizeQuestion(row) {
+  return {
+    ...row,
+    id: row.id,
+    examId: row.exam_id ?? row.examId,
+    text: row.question ?? row.question_text ?? row.text ?? "",
+    optionA: row.option_a ?? row.optionA ?? "",
+    optionB: row.option_b ?? row.optionB ?? "",
+    optionC: row.option_c ?? row.optionC ?? "",
+    optionD: row.option_d ?? row.optionD ?? "",
+    correctAnswer: String(
+      row.correct_answer ?? row.correctAnswer ?? ""
+    ).toUpperCase().charAt(0)
+  };
+}
+
+function normalizeExam(row) {
+  return {
+    ...row,
+    questionLimit: Number(row.question_limit ?? row.questionLimit ?? 0),
+    attemptLimit: Number(row.attempt_limit ?? row.attemptLimit ?? 1),
+    isFinal: Boolean(row.is_final ?? row.isFinal ?? false),
+    duration: Number(row.duration_minutes ?? row.duration ?? 30),
+    startDate: row.start_date ?? row.startDate ?? "",
+    endDate: row.end_date ?? row.endDate ?? "",
+    startTime: row.start_time ?? row.startTime ?? "",
+    endTime: row.end_time ?? row.endTime ?? ""
+  };
+}
 
 /* =========================================================
-   5. PAGE NAVIGATION
-   ========================================================= */
+   PAGE NAVIGATION
+========================================================= */
 
 function showPage(pageId) {
+  document.querySelectorAll(".page").forEach((page) => {
+    page.classList.remove("active");
+  });
 
-    document.querySelectorAll(".page").forEach(page => {
-        page.classList.remove("active");
-        page.style.display = "none";
-    });
-
-    const page = document.getElementById(pageId);
-
-    if (!page) {
-        console.warn("Page not found:", pageId);
-        return;
-    }
-
+  const page = document.getElementById(pageId);
+  if (page) {
     page.classList.add("active");
-    page.style.display = "block";
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-
-    updateNavigation(pageId);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 }
 
-window.showPage = showPage;
-
-
-function updateNavigation(pageId) {
-
-    document.querySelectorAll(".bottom-nav button").forEach(btn => {
-        btn.classList.remove("active");
-    });
-
-    if (pageId === "studentHomePage") {
-        const btn = document.querySelector(
-            '.bottom-nav button[onclick*="studentHomePage"]'
-        );
-        if (btn) btn.classList.add("active");
-    }
-
-    if (pageId === "examListPage") {
-        const btn = document.querySelector(
-            '.bottom-nav button[onclick*="examListPage"]'
-        );
-        if (btn) btn.classList.add("active");
-    }
-
-    if (pageId === "scorePage") {
-        const btn = document.querySelector(
-            '.bottom-nav button[onclick*="scorePage"]'
-        );
-        if (btn) btn.classList.add("active");
-    }
-
-    if (pageId === "profilePage") {
-        const btn = document.querySelector(
-            '.bottom-nav button[onclick*="profilePage"]'
-        );
-        if (btn) btn.classList.add("active");
-    }
+function openStudentLogin() {
+  showPage("studentLoginPage");
+  const input = document.getElementById("nameInput");
+  if (input) setTimeout(() => input.focus(), 100);
 }
 
+function openAdminLogin() {
+  showPage("adminLoginPage");
+  const input = document.getElementById("adminUsername");
+  if (input) setTimeout(() => input.focus(), 100);
+}
 
 /* =========================================================
-   6. ROLE SELECTION
-   ========================================================= */
+   STUDENT REGISTRATION / LOGIN
+========================================================= */
 
-function selectRole(role) {
+async function studentRegister() {
+  const name = document.getElementById("nameInput")?.value.trim() || "";
 
-    if (role === "student") {
-        showPage("studentLoginPage");
-        return;
+  if (name.length < 2) {
+    showStudentMessage("Maqaa kee guutuu sirriitti galchi.", "error");
+    return;
+  }
+
+  try {
+    const { data: existing, error: existingError } = await db
+      .from("students")
+      .select("id,student_id,activation_code,name,status")
+      .ilike("name", name)
+      .maybeSingle();
+
+    if (existingError && existingError.code !== "PGRST116") {
+      throw existingError;
     }
 
-    if (role === "admin") {
-        showPage("adminLoginPage");
-        return;
-    }
-}
-
-window.selectRole = selectRole;
-
-
-/* =========================================================
-   7. STUDENT REGISTRATION
-   ========================================================= */
-
-function studentRegister() {
-
-    const nameInput = document.getElementById("nameInput");
-    const name = nameInput ? nameInput.value.trim() : "";
-
-    if (!name) {
-        showMessage(
-            "studentLoginMessage",
-            "Maqaa kee galchi.",
-            "error"
-        );
-        return;
+    if (existing) {
+      showStudentMessage(
+        `Maqaan kun duraan galmaa'eera. Student ID: ${existing.student_id}`,
+        "error"
+      );
+      return;
     }
 
-    let students = getData(STORAGE.students);
+    let studentId = generateStudentCode();
+    let activationCode = generateActivationCode();
 
-    const studentId =
-        "AO-" +
-        Math.floor(100000 + Math.random() * 900000);
+    for (let i = 0; i < 10; i++) {
+      const { data: duplicate } = await db
+        .from("students")
+        .select("id")
+        .or(`student_id.eq.${studentId},activation_code.eq.${activationCode}`)
+        .limit(1);
 
-    const activationCode =
-        Math.random().toString(36)
-            .substring(2, 8)
-            .toUpperCase();
+      if (!duplicate?.length) break;
 
-    const student = {
-        id: generateId("ST"),
-        name: name,
-        studentId: studentId,
-        activationCode: activationCode,
-        status: "active",
-        createdAt: new Date().toISOString()
-    };
-
-    students.push(student);
-
-    saveData(STORAGE.students, students);
-
-    const studentIdInput =
-        document.getElementById("studentIdInput");
-
-    const activationInput =
-        document.getElementById("activationCodeInput");
-
-    if (studentIdInput) {
-        studentIdInput.value = studentId;
+      studentId = generateStudentCode();
+      activationCode = generateActivationCode();
     }
 
-    if (activationInput) {
-        activationInput.value = activationCode;
-    }
+    const { data: student, error } = await db
+      .from("students")
+      .insert({
+        student_id: studentId,
+        activation_code: activationCode,
+        name,
+        status: "pending"
+      })
+      .select()
+      .single();
 
-    showMessage(
-        "studentLoginMessage",
-        `Galmeen milkaa'eera! Student ID: ${studentId} | Activation Code: ${activationCode}`,
-        "success"
+    if (error) throw error;
+
+    alert(
+      `Galmeen milkaa'e!\n\nMaqaa: ${student.name}\nStudent ID: ${student.student_id}\nActivation Code: ${student.activation_code}\n\nAdminiin erga si mirkaneessee booda seenuu dandeessa.`
     );
+
+    document.getElementById("nameInput").value = "";
+    showStudentMessage("Galmeen kee milkaa'eera. Admin eegi.", "success");
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+    showStudentMessage(getErrorMessage(error), "error");
+  }
 }
 
-window.studentRegister = studentRegister;
+async function studentLogin() {
+  const studentId =
+    document.getElementById("studentIdInput")?.value.trim() || "";
+  const activationCode =
+    document.getElementById("activationCodeInput")?.value.trim() || "";
 
-
-/* =========================================================
-   8. STUDENT LOGIN
-   ========================================================= */
-
-function studentLogin() {
-
-    const name =
-        document.getElementById("nameInput")?.value.trim();
-
-    const studentId =
-        document.getElementById("studentIdInput")?.value.trim();
-
-    const activationCode =
-        document.getElementById("activationCodeInput")?.value.trim();
-
-    if (!name || !studentId || !activationCode) {
-
-        showMessage(
-            "studentLoginMessage",
-            "Maqaa, Student ID fi Activation Code guuti.",
-            "error"
-        );
-
-        return;
-    }
-
-    const students = getData(STORAGE.students);
-
-    const student = students.find(s =>
-        s.name.toLowerCase() === name.toLowerCase() &&
-        s.studentId.toLowerCase() === studentId.toLowerCase() &&
-        s.activationCode.toLowerCase() === activationCode.toLowerCase()
+  if (!studentId || !activationCode) {
+    showStudentMessage(
+      "Student ID fi Activation Code lamaan isaanii galchi.",
+      "error"
     );
+    return;
+  }
+
+  try {
+    const { data: student, error } = await db
+      .from("students")
+      .select("*")
+      .eq("student_id", studentId)
+      .eq("activation_code", activationCode)
+      .maybeSingle();
+
+    if (error) throw error;
 
     if (!student) {
-
-        showMessage(
-            "studentLoginMessage",
-            "Odeeffannoon ati galchite sirrii miti.",
-            "error"
-        );
-
-        return;
+      showStudentMessage(
+        "Student ID ykn Activation Code sirrii miti.",
+        "error"
+      );
+      return;
     }
 
     if (student.status !== "active") {
-
-        showMessage(
-            "studentLoginMessage",
-            "Account kee adminiin cufameera.",
-            "error"
-        );
-
-        return;
+      showStudentMessage(
+        student.status === "pending"
+          ? "Account kee ammallee adminiin hin mirkanoofne."
+          : "Account kee adminiin cufameera.",
+        "error"
+      );
+      return;
     }
 
     currentStudent = student;
+    localStorage.setItem("ao_student_id", student.id);
 
-    localStorage.setItem(
-        STORAGE.currentStudent,
-        JSON.stringify(student)
-    );
-
-    loadStudentHome();
+    document.getElementById("studentIdInput").value = "";
+    document.getElementById("activationCodeInput").value = "";
 
     showPage("studentHomePage");
+    await loadStudentHome();
+  } catch (error) {
+    console.error("STUDENT LOGIN ERROR:", error);
+    showStudentMessage(getErrorMessage(error), "error");
+  }
 }
 
-window.studentLogin = studentLogin;
+async function restoreStudent() {
+  const id = localStorage.getItem("ao_student_id");
+  if (!id) return null;
 
+  try {
+    const { data, error } = await db
+      .from("students")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
 
-/* =========================================================
-   9. LOAD CURRENT STUDENT
-   ========================================================= */
+    if (error) throw error;
 
-function loadCurrentStudent() {
-
-    try {
-
-        const data =
-            localStorage.getItem(STORAGE.currentStudent);
-
-        if (data) {
-            currentStudent = JSON.parse(data);
-        }
-
-    } catch (error) {
-        currentStudent = null;
+    if (!data || data.status !== "active") {
+      localStorage.removeItem("ao_student_id");
+      currentStudent = null;
+      return null;
     }
+
+    currentStudent = data;
+    return data;
+  } catch (error) {
+    console.error("RESTORE STUDENT ERROR:", error);
+    return null;
+  }
 }
 
-
-/* =========================================================
-   10. STUDENT HOME
-   ========================================================= */
-
-function loadStudentHome() {
-
-    if (!currentStudent) return;
-
-    const welcome =
-        document.getElementById("studentWelcomeName");
-
-    if (welcome) {
-        welcome.textContent =
-            `Baga nagaan dhuftan, ${currentStudent.name}`;
-    }
-
-    const message =
-        document.getElementById("studentHomeMessage");
-
-    if (message) {
-        message.textContent =
-            "Barnoota fi qormaata kee as irraa hordofi.";
-    }
-
-    loadStudentLessons();
+function requireStudent() {
+  if (!currentStudent) {
+    showPage("studentLoginPage");
+    return null;
+  }
+  return currentStudent;
 }
 
-window.loadStudentHome = loadStudentHome;
-
-
 /* =========================================================
-   11. STUDENT LESSONS
-   ========================================================= */
+   STUDENT HOME / LESSONS
+========================================================= */
 
-function loadStudentLessons() {
+async function loadStudentHome() {
+  const student = requireStudent();
+  if (!student) return;
 
-    const container =
-        document.getElementById("studentLessons");
+  const nameEl = document.getElementById("studentWelcomeName");
+  const messageEl = document.getElementById("studentHomeMessage");
 
-    if (!container) return;
+  if (nameEl) nameEl.textContent = student.name;
+  if (messageEl) {
+    messageEl.textContent =
+      "Barnoota dubbisi, qormaata fudhadhu, qabxii kees ilaali.";
+  }
 
-    const lessons = getData(STORAGE.lessons);
-
-    if (!lessons.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Barnoonni amma hin jiru.
-            </div>`;
-
-        return;
-    }
-
-    container.innerHTML = lessons.map(lesson => {
-
-        return `
-            <div class="lesson-card">
-                <h3>${escapeHTML(lesson.title)}</h3>
-
-                <p>
-                    ${escapeHTML(
-                        lesson.content.substring(0, 150)
-                    )}${lesson.content.length > 150 ? "..." : ""}
-                </p>
-
-                <button
-                    onclick="openLesson('${lesson.id}')">
-                    Baradhu
-                </button>
-            </div>
-        `;
-
-    }).join("");
+  await loadStudentLessons();
 }
 
-window.loadStudentLessons = loadStudentLessons;
+async function loadStudentLessons() {
+  const container = document.getElementById("studentLessons");
+  if (!container) return;
 
+  const { data, error } = await db
+    .from("lessons")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-/* =========================================================
-   12. OPEN LESSON
-   ========================================================= */
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>`;
+    console.error(error);
+    return;
+  }
 
-function openLesson(lessonId) {
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">📚 Ammaaf barnoonni hin fe'amne.</div>`;
+    return;
+  }
 
-    const lessons = getData(STORAGE.lessons);
-
-    const lesson =
-        lessons.find(l => l.id === lessonId);
-
-    if (!lesson) return;
-
-    const title =
-        document.getElementById("lessonDetailTitle");
-
-    const content =
-        document.getElementById("lessonDetailContent");
-
-    if (title) {
-        title.textContent = lesson.title;
-    }
-
-    if (content) {
-        content.innerHTML =
-            escapeHTML(lesson.content)
-                .replace(/\n/g, "<br>");
-    }
-
-    showPage("lessonDetailPage");
+  container.innerHTML = data.map((lesson) => `
+    <article class="item-card">
+      <div class="item-icon">📚</div>
+      <div class="item-main">
+        <h4>${escapeHtml(lesson.title)}</h4>
+        <p>${escapeHtml(truncate(lesson.content, 120))}</p>
+        <button type="button" class="small-btn" onclick="openLesson('${lesson.id}')">
+          Baradhu →
+        </button>
+      </div>
+    </article>
+  `).join("");
 }
 
-window.openLesson = openLesson;
+async function openLesson(lessonId) {
+  const { data, error } = await db
+    .from("lessons")
+    .select("*")
+    .eq("id", lessonId)
+    .maybeSingle();
 
+  if (error || !data) return;
 
-/* =========================================================
-   13. STUDENT EXAM LIST
-   ========================================================= */
+  const title = document.getElementById("lessonDetailTitle");
+  const content = document.getElementById("lessonDetailContent");
 
-function loadExams() {
+  if (title) title.textContent = data.title;
+  if (content) {
+    content.innerHTML = `<div class="lesson-content">${formatText(data.content)}</div>`;
+  }
 
-    const container =
-        document.getElementById("studentExams");
-
-    if (!container) return;
-
-    const exams = getData(STORAGE.exams);
-
-    if (!exams.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Qormaanni amma hin jiru.
-            </div>`;
-
-        return;
-    }
-
-    const now = new Date();
-
-    container.innerHTML = exams.map(exam => {
-
-        let status = "Available";
-        let disabled = "";
-
-        if (exam.startDate) {
-
-            const start =
-                new Date(
-                    `${exam.startDate}T${exam.startTime || "00:00"}`
-                );
-
-            if (now < start) {
-                status = "Hin jalqabne";
-                disabled = "disabled";
-            }
-        }
-
-        if (exam.endDate) {
-
-            const end =
-                new Date(
-                    `${exam.endDate}T${exam.endTime || "23:59"}`
-                );
-
-            if (now > end) {
-                status = "Yeroon darbeera";
-                disabled = "disabled";
-            }
-        }
-
-        return `
-            <div class="exam-card">
-
-                <h3>
-                    ${escapeHTML(exam.title)}
-                </h3>
-
-                <p>
-                    ${escapeHTML(exam.description || "")}
-                </p>
-
-                <div class="exam-info">
-                    <span>
-                        Gaaffii: ${exam.questionLimit || "Hunda"}
-                    </span>
-
-                    <span>
-                        Yeroo: ${exam.duration} daqiiqa
-                    </span>
-
-                    <span>
-                        ${status}
-                    </span>
-                </div>
-
-                <button
-                    ${disabled}
-                    onclick="startExam('${exam.id}')">
-                    Qormaata Jalqabi
-                </button>
-
-            </div>
-        `;
-
-    }).join("");
+  showPage("lessonDetailPage");
 }
 
-window.loadExams = loadExams;
+/* =========================================================
+   STUDENT EXAMS
+========================================================= */
 
+function getExamWindowStatus(exam) {
+  const now = new Date();
+
+  if (exam.startDate) {
+    const start = new Date(`${exam.startDate}T${exam.startTime || "00:00"}`);
+    if (!Number.isNaN(start.getTime()) && now < start) {
+      return { available: false, reason: "not_started", date: start };
+    }
+  }
+
+  if (exam.endDate) {
+    const end = new Date(`${exam.endDate}T${exam.endTime || "23:59:59"}`);
+    if (!Number.isNaN(end.getTime()) && now > end) {
+      return { available: false, reason: "ended", date: end };
+    }
+  }
+
+  if (exam.status === "disabled") {
+    return { available: false, reason: "disabled" };
+  }
+
+  return { available: true, reason: "available" };
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("om-ET");
+}
+
+async function getCompletedAttempts(examId, studentId) {
+  const { data, error } = await db
+    .from("exam_attempts")
+    .select("*")
+    .eq("exam_id", examId)
+    .eq("student_id", studentId)
+    .eq("completed", true)
+    .order("attempt_number", { ascending: false });
+
+  if (error) {
+    console.error("ATTEMPTS ERROR:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function loadExams() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const container = document.getElementById("studentExams");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("exams")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
+    console.error(error);
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">📝 Ammaaf qormaanni hin jiru.</div>`;
+    return;
+  }
+
+  const exams = data.map(normalizeExam);
+  const cards = [];
+
+  for (const exam of exams) {
+    const attempts = await getCompletedAttempts(exam.id, student.id);
+    const limit = Number(exam.attemptLimit || 1);
+    const window = getExamWindowStatus(exam);
+    let action = "";
+
+    if (!window.available) {
+      const text =
+        window.reason === "not_started"
+          ? `⏳ Hin jalqabne: ${formatDateTime(window.date)}`
+          : window.reason === "ended"
+          ? "⛔ Yeroon qormaataa darbeera."
+          : "⛔ Qormaanni cufameera.";
+      action = `<span class="status blocked">${escapeHtml(text)}</span>`;
+    } else if (attempts.length >= limit) {
+      action = `<span class="status blocked">Attempt xumurame</span>`;
+    } else {
+      action = `
+        <button type="button" class="small-btn" onclick="startExam(${exam.id})">
+          Qormaata Jalqabi →
+        </button>
+      `;
+    }
+
+    cards.push(`
+      <article class="exam-card">
+        <div class="exam-badge">${exam.isFinal ? "🏆 FINAL" : "📝 EXAM"}</div>
+        <h3>${escapeHtml(exam.title)}</h3>
+        <p>${escapeHtml(exam.description || "")}</p>
+        <div class="exam-meta">
+          <span>❓ ${exam.questionLimit > 0 ? exam.questionLimit : "Hunda"}</span>
+          <span>⏱️ ${exam.duration} daqiiqaa</span>
+          <span>🔢 ${attempts.length}/${limit}</span>
+        </div>
+        <div class="exam-action">${action}</div>
+      </article>
+    `);
+  }
+
+  container.innerHTML = cards.join("");
+}
 
 /* =========================================================
-   14. START EXAM
-   ========================================================= */
+   START EXAM / QUESTIONS
+========================================================= */
 
-function startExam(examId) {
+async function startExam(examId) {
+  const student = requireStudent();
+  if (!student) return;
 
-    if (!currentStudent) {
-        showPage("studentLoginPage");
-        return;
-    }
+  const { data: examRow, error: examError } = await db
+    .from("exams")
+    .select("*")
+    .eq("id", examId)
+    .maybeSingle();
 
-    const exams = getData(STORAGE.exams);
+  if (examError || !examRow) {
+    alert("Qormaanni hin argamne.");
+    return;
+  }
 
-    const exam =
-        exams.find(e => e.id === examId);
+  const exam = normalizeExam(examRow);
+  const window = getExamWindowStatus(exam);
 
-    if (!exam) {
-        alert("Qormaanni hin argamne.");
-        return;
-    }
-
-    const questions =
-        getData(STORAGE.questions)
-            .filter(q => q.examId === examId);
-
-    if (!questions.length) {
-        alert("Qormaata kana keessatti gaaffiin hin jiru.");
-        return;
-    }
-
-    const results =
-        getData(STORAGE.results)
-            .filter(r =>
-                r.studentId === currentStudent.id &&
-                r.examId === examId
-            );
-
-    if (
-        exam.attemptLimit &&
-        results.length >= Number(exam.attemptLimit)
-    ) {
-
-        alert(
-            "Ati yeroo qormaata kanaaf hayyamame fixxeetta."
-        );
-
-        return;
-    }
-
-    currentExam = exam;
-
-    let shuffled =
-        [...questions].sort(() => Math.random() - 0.5);
-
-    if (
-        exam.questionLimit &&
-        Number(exam.questionLimit) > 0 &&
-        shuffled.length > Number(exam.questionLimit)
-    ) {
-        shuffled =
-            shuffled.slice(
-                0,
-                Number(exam.questionLimit)
-            );
-    }
-
-    currentQuestions = shuffled;
-    currentQuestionIndex = 0;
-    examAnswers = {};
-
-    localStorage.setItem(
-        STORAGE.currentExam,
-        JSON.stringify(exam)
+  if (!window.available) {
+    alert(
+      window.reason === "not_started"
+        ? "Qormaanni yeroo isaa hin geenye."
+        : window.reason === "ended"
+        ? "Yeroon qormaataa darbeera."
+        : "Qormaanni cufameera."
     );
+    return;
+  }
 
-    const title =
-        document.getElementById("examTitle");
+  const completedAttempts = await getCompletedAttempts(exam.id, student.id);
+  const attemptLimit = Number(exam.attemptLimit || 1);
 
-    if (title) {
-        title.textContent = exam.title;
-    }
+  if (completedAttempts.length >= attemptLimit) {
+    alert("Attempt kee xumurameera.");
+    return;
+  }
 
-    examSecondsLeft =
-        Number(exam.duration || 10) * 60;
+  const { data: questionRows, error: questionError } = await db
+    .from("questions")
+    .select("*")
+    .eq("exam_id", exam.id);
 
-    startExamTimer();
+  if (questionError) {
+    alert(getErrorMessage(questionError));
+    return;
+  }
 
-    showPage("examPage");
+  let questions = (questionRows || []).map(normalizeQuestion);
 
-    renderCurrentQuestion();
+  if (!questions.length) {
+    alert("Qormaata kana keessatti gaaffiin hin jiru.");
+    return;
+  }
+
+  questions = questions.sort(() => Math.random() - 0.5);
+
+  if (exam.questionLimit > 0) {
+    questions = questions.slice(0, exam.questionLimit);
+  }
+
+  const attemptNumber = completedAttempts.length + 1;
+
+  const { data: attempt, error: attemptError } = await db
+    .from("exam_attempts")
+    .insert({
+      student_id: student.id,
+      exam_id: exam.id,
+      attempt_number: attemptNumber,
+      score: 0,
+      total: questions.length,
+      percentage: 0,
+      completed: false
+    })
+    .select()
+    .single();
+
+  if (attemptError) {
+    console.error(attemptError);
+    alert("Qormaata jalqabuun hin danda'amne: " + getErrorMessage(attemptError));
+    return;
+  }
+
+  currentExam = exam;
+  currentQuestions = questions;
+  currentQuestionIndex = 0;
+  currentAnswers = {};
+  currentAttempt = attempt;
+  pendingSubmit = false;
+
+  const title = document.getElementById("examTitle");
+  if (title) title.textContent = exam.title;
+
+  examSecondsLeft = Math.max(1, exam.duration * 60);
+  startExamTimer();
+  renderCurrentQuestion();
+  showPage("examPage");
 }
-
-window.startExam = startExam;
-
-
-/* =========================================================
-   15. EXAM TIMER
-   ========================================================= */
-
-function startExamTimer() {
-
-    stopExamTimer();
-
-    updateTimerDisplay();
-
-    examTimer = setInterval(() => {
-
-        examSecondsLeft--;
-
-        updateTimerDisplay();
-
-        if (examSecondsLeft <= 0) {
-
-            stopExamTimer();
-
-            alert(
-                "Yeroon qormaataa xumurameera. Deebiin kee ni galmaa'a."
-            );
-
-            finishExam();
-
-        }
-
-    }, 1000);
-}
-
-
-function stopExamTimer() {
-
-    if (examTimer) {
-        clearInterval(examTimer);
-        examTimer = null;
-    }
-}
-
-
-function updateTimerDisplay() {
-
-    const timer =
-        document.getElementById("examTimerValue");
-
-    if (!timer) return;
-
-    const minutes =
-        Math.floor(examSecondsLeft / 60);
-
-    const seconds =
-        examSecondsLeft % 60;
-
-    timer.textContent =
-        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-
-/* =========================================================
-   16. RENDER QUESTION
-   ========================================================= */
 
 function renderCurrentQuestion() {
+  if (!currentExam || !currentQuestions.length) return;
 
-    if (!currentQuestions.length) return;
+  const question = currentQuestions[currentQuestionIndex];
+  const total = currentQuestions.length;
+  const number = document.getElementById("questionNumber");
+  const text = document.getElementById("questionText");
+  const container = document.getElementById("answersContainer");
 
-    const question =
-        currentQuestions[currentQuestionIndex];
+  if (number) number.textContent = ` ${currentQuestionIndex + 1}/${total}`;
+  if (text) text.textContent = question.text;
+  if (!container) return;
 
-    const number =
-        document.getElementById("questionNumber");
+  const selected = currentAnswers[question.id];
+  const options = [
+    ["A", question.optionA],
+    ["B", question.optionB],
+    ["C", question.optionC],
+    ["D", question.optionD]
+  ];
 
-    const text =
-        document.getElementById("questionText");
+  container.innerHTML = options.map(([letter, value]) => `
+    <label class="answer-option">
+      <input
+        type="radio"
+        name="currentAnswer"
+        value="${letter}"
+        ${selected === letter ? "checked" : ""}
+        onchange="selectAnswer('${letter}')"
+      >
+      <span><strong>${letter}.</strong> ${escapeHtml(value)}</span>
+    </label>
+  `).join("");
 
-    const answers =
-        document.getElementById("answersContainer");
+  const nextButton = document.getElementById("nextQuestionButton");
+  const submitButton = document.getElementById("submitExamButton");
+  const answered = Boolean(currentAnswers[question.id]);
 
-    if (number) {
-        number.textContent =
-            `Gaaffii ${currentQuestionIndex + 1} / ${currentQuestions.length}`;
-    }
+  if (nextButton) {
+    nextButton.disabled = !answered;
+    nextButton.style.display = currentQuestionIndex === total - 1 ? "none" : "block";
+  }
 
-    if (text) {
-        text.textContent =
-            question.question;
-    }
-
-    if (answers) {
-
-        answers.innerHTML =
-            question.options.map((option, index) => {
-
-                const selected =
-                    examAnswers[question.id] === index;
-
-                return `
-                    <button
-                        class="answer-option ${selected ? "selected" : ""}"
-                        onclick="selectAnswer(${index})">
-
-                        <span class="answer-letter">
-                            ${String.fromCharCode(65 + index)}
-                        </span>
-
-                        <span>
-                            ${escapeHTML(option)}
-                        </span>
-
-                    </button>
-                `;
-
-            }).join("");
-    }
-
-    const nextButton =
-        document.getElementById("nextQuestionButton");
-
-    const submitButton =
-        document.getElementById("submitExamButton");
-
-    if (nextButton) {
-
-        nextButton.style.display =
-            currentQuestionIndex <
-            currentQuestions.length - 1
-                ? "block"
-                : "none";
-    }
-
-    if (submitButton) {
-
-        submitButton.style.display =
-            currentQuestionIndex ===
-            currentQuestions.length - 1
-                ? "block"
-                : "none";
-    }
+  if (submitButton) {
+    submitButton.disabled = !answered;
+    submitButton.style.display = currentQuestionIndex === total - 1 ? "block" : "none";
+  }
 }
 
+function selectAnswer(letter) {
+  const question = currentQuestions[currentQuestionIndex];
+  if (!question) return;
 
-/* =========================================================
-   17. SELECT ANSWER
-   ========================================================= */
+  currentAnswers[question.id] = letter;
 
-function selectAnswer(index) {
+  const nextButton = document.getElementById("nextQuestionButton");
+  const submitButton = document.getElementById("submitExamButton");
 
-    const question =
-        currentQuestions[currentQuestionIndex];
-
-    if (!question) return;
-
-    examAnswers[question.id] = index;
-
-    renderCurrentQuestion();
+  if (nextButton) nextButton.disabled = false;
+  if (submitButton) submitButton.disabled = false;
 }
-
-window.selectAnswer = selectAnswer;
-
-
-/* =========================================================
-   18. NEXT QUESTION
-   ========================================================= */
 
 function nextQuestion() {
-
-    if (
-        currentQuestionIndex <
-        currentQuestions.length - 1
-    ) {
-
-        currentQuestionIndex++;
-
-        renderCurrentQuestion();
-
-    }
+  if (currentQuestionIndex >= currentQuestions.length - 1) return;
+  currentQuestionIndex++;
+  renderCurrentQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
-
-window.nextQuestion = nextQuestion;
-
-
-/* =========================================================
-   19. REQUEST SUBMIT
-   ========================================================= */
 
 function requestSubmitExam() {
+  if (!currentExam) return;
 
-    const unanswered =
-        currentQuestions.filter(
-            q => examAnswers[q.id] === undefined
-        ).length;
+  const unanswered = currentQuestions.filter(
+    (question) => !currentAnswers[question.id]
+  ).length;
 
-    const warning =
-        document.getElementById("submitWarningMessage");
+  const message = document.getElementById("submitWarningMessage");
+  if (message) {
+    message.textContent =
+      unanswered > 0
+        ? `Gaaffii ${unanswered} hin deebifne. Qormaata submit gochuu barbaaddaa?`
+        : "Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?";
+  }
 
-    if (warning) {
-
-        warning.textContent =
-            unanswered > 0
-                ? `Gaaffii ${unanswered} deebii hin qabne qabda. Dhugumaan xumuruuf barbaaddaa?`
-                : "Qormaata xumuruuf mirkaneessi.";
-
-        warning.style.display = "block";
-    }
-
-    const confirmation =
-        document.getElementById("submitConfirmation");
-
-    if (confirmation) {
-        confirmation.style.display = "block";
-    }
+  pendingSubmit = true;
+  showPage("submitConfirmPage");
 }
 
-window.requestSubmitExam = requestSubmitExam;
+function confirmSubmitExam(confirmSubmit) {
+  if (!confirmSubmit) {
+    pendingSubmit = false;
+    showPage("examPage");
+    return;
+  }
 
-
-/* =========================================================
-   20. CONFIRM SUBMIT
-   ========================================================= */
-
-function confirmSubmitExam(confirm) {
-
-    const confirmation =
-        document.getElementById("submitConfirmation");
-
-    if (!confirm) {
-
-        if (confirmation) {
-            confirmation.style.display = "none";
-        }
-
-        return;
-    }
-
-    if (confirmation) {
-        confirmation.style.display = "none";
-    }
-
-    finishExam();
+  if (!pendingSubmit || !currentExam) return;
+  finishExam();
 }
 
-window.confirmSubmitExam = confirmSubmitExam;
-
-
 /* =========================================================
-   21. FINISH EXAM
-   ========================================================= */
+   FINISH EXAM
+========================================================= */
 
-function finishExam() {
+async function finishExam() {
+  const student = requireStudent();
+  if (!student || !currentExam || !currentAttempt) return;
 
-    stopExamTimer();
+  stopExamTimer();
 
-    if (!currentStudent || !currentExam) return;
+  let correct = 0;
+  currentQuestions.forEach((question) => {
+    if (currentAnswers[question.id] === question.correctAnswer) {
+      correct++;
+    }
+  });
 
-    let correct = 0;
+  const total = currentQuestions.length;
+  const percentage = total ? Math.round((correct / total) * 100) : 0;
 
-    currentQuestions.forEach(question => {
+  try {
+    const { error: attemptError } = await db
+      .from("exam_attempts")
+      .update({
+        score: correct,
+        total,
+        percentage,
+        completed: true,
+        submitted_at: new Date().toISOString()
+      })
+      .eq("id", currentAttempt.id);
 
-        if (
-            Number(examAnswers[question.id]) ===
-            Number(question.correctAnswer)
-        ) {
-            correct++;
-        }
+    if (attemptError) throw attemptError;
 
-    });
-
-    const total = currentQuestions.length;
-
-    const percentage =
-        total > 0
-            ? Math.round((correct / total) * 100)
-            : 0;
-
-    const result = {
-
-        id: generateId("RES"),
-
-        studentId: currentStudent.id,
-
-        studentName: currentStudent.name,
-
-        studentCode: currentStudent.studentId,
-
-        examId: currentExam.id,
-
-        examTitle: currentExam.title,
-
-        correct: correct,
-
-        total: total,
-
-        score: percentage,
-
-        answers: examAnswers,
-
-        date: new Date().toISOString()
-
+    const resultPayload = {
+      student_id: student.id,
+      exam_id: currentExam.id,
+      exam_title: currentExam.title,
+      correct,
+      total,
+      percentage,
+      answers: currentAnswers,
+      submitted_at: new Date().toISOString()
     };
 
-    const results =
-        getData(STORAGE.results);
+    const { data: oldResult } = await db
+      .from("results")
+      .select("id")
+      .eq("student_id", student.id)
+      .eq("exam_id", currentExam.id)
+      .maybeSingle();
 
-    results.push(result);
+    if (oldResult?.id) {
+      const { error } = await db
+        .from("results")
+        .update(resultPayload)
+        .eq("id", oldResult.id);
+      if (error) throw error;
+    } else {
+      const { error } = await db
+        .from("results")
+        .insert(resultPayload);
+      if (error) throw error;
+    }
 
-    saveData(
-        STORAGE.results,
-        results
+    alert(
+      `Qormaanni xumurameera!\n\nQabxii: ${correct}/${total}\nDhibbeentaa: ${percentage}%`
     );
-
-    showStudentScore();
 
     currentExam = null;
     currentQuestions = [];
-    examAnswers = {};
+    currentQuestionIndex = 0;
+    currentAnswers = {};
+    currentAttempt = null;
+    pendingSubmit = false;
 
     showPage("scorePage");
+    await showScore();
+  } catch (error) {
+    console.error("FINISH EXAM ERROR:", error);
+    alert("Qormaata submit gochuun hin milkoofne: " + getErrorMessage(error));
+  }
 }
 
-window.finishExam = finishExam;
-
-
 /* =========================================================
-   22. STUDENT SCORE
-   ========================================================= */
+   TIMER
+========================================================= */
 
-function showStudentScore() {
+function startExamTimer() {
+  stopExamTimer();
+  updateExamTimer();
 
-    if (!currentStudent) return;
+  examTimer = setInterval(() => {
+    examSecondsLeft--;
+    updateExamTimer();
 
-    const container =
-        document.getElementById("studentScore");
-
-    if (!container) return;
-
-    const results =
-        getData(STORAGE.results)
-            .filter(
-                r => r.studentId === currentStudent.id
-            )
-            .sort(
-                (a, b) =>
-                    new Date(b.date) -
-                    new Date(a.date)
-            );
-
-    if (!results.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Qabxiin kee amma hin jiru.
-            </div>`;
-
-        return;
+    if (examSecondsLeft <= 0) {
+      stopExamTimer();
+      alert("Yeroon qormaataa xumurameera. Qormaanni kee submit ta'a.");
+      finishExam();
     }
-
-    container.innerHTML = results.map(result => {
-
-        return `
-            <div class="score-card">
-
-                <h3>
-                    ${escapeHTML(result.examTitle)}
-                </h3>
-
-                <div class="score-number">
-                    ${result.score}%
-                </div>
-
-                <p>
-                    Sirrii:
-                    ${result.correct}/${result.total}
-                </p>
-
-                <small>
-                    ${formatDate(result.date)}
-                </small>
-
-            </div>
-        `;
-
-    }).join("");
+  }, 1000);
 }
 
-window.showStudentScore = showStudentScore;
-
-
-/* =========================================================
-   23. STUDENT PROFILE
-   ========================================================= */
-
-function loadStudentProfile() {
-
-    if (!currentStudent) return;
-
-    const nameInput =
-        document.getElementById("profileNameInput");
-
-    const code =
-        document.getElementById("profileCode");
-
-    const activation =
-        document.getElementById("profileActivationCode");
-
-    const status =
-        document.getElementById("profileStatus");
-
-    if (nameInput) {
-        nameInput.value =
-            currentStudent.name || "";
-    }
-
-    if (code) {
-        code.textContent =
-            currentStudent.studentId || "-";
-    }
-
-    if (activation) {
-        activation.textContent =
-            currentStudent.activationCode || "-";
-    }
-
-    if (status) {
-        status.textContent =
-            currentStudent.status || "active";
-    }
+function updateExamTimer() {
+  const el = document.getElementById("examTimerValue");
+  if (el) {
+    const minutes = Math.floor(Math.max(0, examSecondsLeft) / 60);
+    const seconds = Math.max(0, examSecondsLeft) % 60;
+    el.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
 }
 
-window.loadStudentProfile = loadStudentProfile;
-
-
-/* =========================================================
-   24. SAVE PROFILE
-   ========================================================= */
-
-function saveProfile() {
-
-    if (!currentStudent) return;
-
-    const nameInput =
-        document.getElementById("profileNameInput");
-
-    const newName =
-        nameInput?.value.trim();
-
-    if (!newName) {
-        alert("Maqaa galchi.");
-        return;
-    }
-
-    let students =
-        getData(STORAGE.students);
-
-    const index =
-        students.findIndex(
-            s => s.id === currentStudent.id
-        );
-
-    if (index === -1) return;
-
-    students[index].name = newName;
-
-    currentStudent =
-        students[index];
-
-    saveData(
-        STORAGE.students,
-        students
-    );
-
-    localStorage.setItem(
-        STORAGE.currentStudent,
-        JSON.stringify(currentStudent)
-    );
-
-    loadStudentHome();
-    loadStudentProfile();
-
-    alert("Maqaan kee sirnaan haaromfameera.");
+function stopExamTimer() {
+  if (examTimer) {
+    clearInterval(examTimer);
+    examTimer = null;
+  }
 }
 
-window.saveProfile = saveProfile;
-
-
 /* =========================================================
-   25. STUDENT LOGOUT
-   ========================================================= */
+   SCORE / PROFILE
+========================================================= */
+
+async function showScore() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const container = document.getElementById("studentScore");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("results")
+    .select("*")
+    .eq("student_id", student.id)
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>`;
+    console.error(error);
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
+    return;
+  }
+
+  container.innerHTML = data.map((result) => `
+    <div class="result-card">
+      <div>
+        <h3>${escapeHtml(result.exam_title || "Qormaata")}</h3>
+        <p>${formatDateTime(result.submitted_at)}</p>
+      </div>
+      <div class="result-score">
+        <strong>${Number(result.percentage || 0)}%</strong>
+        <span>${Number(result.correct || 0)}/${Number(result.total || 0)}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function loadProfile() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const nameInput = document.getElementById("profileNameInput");
+  const code = document.getElementById("profileCode");
+  const activation = document.getElementById("profileActivationCode");
+  const status = document.getElementById("profileStatus");
+
+  if (nameInput) nameInput.value = student.name || "";
+  if (code) code.textContent = student.student_id || "";
+  if (activation) activation.textContent = student.activation_code || "";
+  if (status) {
+    status.innerHTML = student.status === "active"
+      ? '<span class="status active">● Active</span>'
+      : '<span class="status blocked">● Cufame</span>';
+  }
+}
+
+async function saveProfile() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const name = document.getElementById("profileNameInput")?.value.trim() || "";
+
+  if (name.length < 2) {
+    alert("Maqaa sirrii galchi.");
+    return;
+  }
+
+  const { data, error } = await db
+    .from("students")
+    .update({ name })
+    .eq("id", student.id)
+    .select()
+    .single();
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  currentStudent = data;
+  await loadProfile();
+  await loadStudentHome();
+  alert("Maqaan kee olkaa'ameera.");
+}
 
 function studentLogout() {
-
-    stopExamTimer();
-
-    currentStudent = null;
-    currentExam = null;
-    currentQuestions = [];
-    examAnswers = {};
-
-    localStorage.removeItem(
-        STORAGE.currentStudent
-    );
-
-    localStorage.removeItem(
-        STORAGE.currentExam
-    );
-
-    showPage("rolePage");
+  localStorage.removeItem("ao_student_id");
+  currentStudent = null;
+  stopExamTimer();
+  currentExam = null;
+  currentQuestions = [];
+  currentAnswers = {};
+  currentAttempt = null;
+  showPage("rolePage");
 }
 
-window.studentLogout = studentLogout;
-
-
 /* =========================================================
-   26. ADMIN LOGIN
-   ========================================================= */
+   ADMIN LOGIN
+========================================================= */
 
-/*
-   DEMO ADMIN ACCOUNTS
+async function adminLogin() {
+  const username = document.getElementById("adminUsername")?.value.trim() || "";
+  const password = document.getElementById("adminPassword")?.value || "";
 
-   admin  / admin123
-   admin2 / admin456
+  if (!username || !password) {
+    showAdminMessage("Username fi Password galchi.", "error");
+    return;
+  }
 
-   For a real deployed app, do NOT rely on frontend
-   username/password authentication.
-*/
+  try {
+    const { data, error } = await db
+      .from("admins")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .maybeSingle();
 
-const ADMIN_ACCOUNTS = [
-    {
-        username: "admin",
-        password: "admin123",
-        name: "Main Admin"
-    },
-    {
-        username: "admin2",
-        password: "admin456",
-        name: "Second Admin"
-    }
-];
+    if (error) throw error;
 
-
-function adminLogin() {
-
-    const username =
-        document.getElementById("adminUsername")
-            ?.value.trim();
-
-    const password =
-        document.getElementById("adminPassword")
-            ?.value;
-
-    if (!username || !password) {
-
-        showMessage(
-            "adminLoginMessage",
-            "Username fi Password guuti.",
-            "error"
-        );
-
-        return;
+    if (!data) {
+      showAdminMessage("Username ykn Password sirrii miti.", "error");
+      return;
     }
 
-    const admin =
-        ADMIN_ACCOUNTS.find(
-            a =>
-                a.username === username &&
-                a.password === password
-        );
+    currentAdmin = data;
+    localStorage.setItem("ao_admin_id", String(data.id));
 
-    if (!admin) {
-
-        showMessage(
-            "adminLoginMessage",
-            "Username ykn Password sirrii miti.",
-            "error"
-        );
-
-        return;
-    }
-
-    currentAdmin = admin;
-
-    localStorage.setItem(
-        STORAGE.currentAdmin,
-        JSON.stringify(admin)
-    );
-
-    showAdminDashboard();
+    showPage("adminPage");
+    await initializeAdmin();
+  } catch (error) {
+    console.error("ADMIN LOGIN ERROR:", error);
+    showAdminMessage(getErrorMessage(error), "error");
+  }
 }
-
-window.adminLogin = adminLogin;
-
-
-/* =========================================================
-   27. ADMIN DASHBOARD
-   ========================================================= */
-
-function showAdminDashboard() {
-
-    showPage("adminDashboardPage");
-
-    openAdminPanel("students");
-
-    loadAdminStudents();
-    loadAdminResults();
-    loadAdminLessons();
-    loadAdminExams();
-    updateExamSelects();
-}
-
-window.showAdminDashboard = showAdminDashboard;
-
-
-/* =========================================================
-   28. ADMIN PANEL
-   ========================================================= */
-
-function openAdminPanel(panel) {
-
-    const panels =
-        document.querySelectorAll(".admin-panel");
-
-    panels.forEach(p => {
-        p.style.display = "none";
-    });
-
-    const target =
-        document.getElementById(
-            `admin${capitalize(panel)}Panel`
-        );
-
-    if (target) {
-        target.style.display = "block";
-    }
-
-    if (panel === "students") {
-        loadAdminStudents();
-    }
-
-    if (panel === "results") {
-        loadAdminResults();
-    }
-
-    if (panel === "lessons") {
-        loadAdminLessons();
-    }
-
-    if (panel === "exams") {
-        loadAdminExams();
-        updateExamSelects();
-    }
-}
-
-window.openAdminPanel = openAdminPanel;
-
-
-function capitalize(text) {
-
-    if (!text) return "";
-
-    return text.charAt(0).toUpperCase() +
-        text.slice(1);
-}
-
-
-/* =========================================================
-   29. ADMIN STUDENTS
-   ========================================================= */
-
-function loadAdminStudents() {
-
-    const container =
-        document.getElementById("adminStudentsList");
-
-    if (!container) return;
-
-    const students =
-        getData(STORAGE.students);
-
-    if (!students.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Barataan galmaa'e hin jiru.
-            </div>`;
-
-        return;
-    }
-
-    container.innerHTML = students.map(student => {
-
-        return `
-            <div class="admin-student-card">
-
-                <div>
-                    <strong>
-                        ${escapeHTML(student.name)}
-                    </strong>
-
-                    <p>
-                        ID:
-                        ${escapeHTML(student.studentId)}
-                    </p>
-
-                    <p>
-                        Code:
-                        ${escapeHTML(student.activationCode)}
-                    </p>
-
-                    <p>
-                        Status:
-                        ${escapeHTML(student.status)}
-                    </p>
-                </div>
-
-                <div>
-
-                    <button
-                        onclick="toggleStudentStatus('${student.id}')">
-                        ${student.status === "active"
-                            ? "Cufi"
-                            : "Bani"}
-                    </button>
-
-                    <button
-                        class="danger"
-                        onclick="deleteStudent('${student.id}')">
-                        Haqi
-                    </button>
-
-                </div>
-
-            </div>
-        `;
-
-    }).join("");
-}
-
-window.loadAdminStudents = loadAdminStudents;
-
-
-/* =========================================================
-   30. TOGGLE STUDENT STATUS
-   ========================================================= */
-
-function toggleStudentStatus(studentId) {
-
-    const students =
-        getData(STORAGE.students);
-
-    const student =
-        students.find(s => s.id === studentId);
-
-    if (!student) return;
-
-    student.status =
-        student.status === "active"
-            ? "blocked"
-            : "active";
-
-    saveData(
-        STORAGE.students,
-        students
-    );
-
-    loadAdminStudents();
-}
-
-window.toggleStudentStatus = toggleStudentStatus;
-
-
-/* =========================================================
-   31. DELETE STUDENT
-   ========================================================= */
-
-function deleteStudent(studentId) {
-
-    if (
-        !confirm(
-            "Barataa kana haquu akka barbaaddu mirkaneessi."
-        )
-    ) return;
-
-    let students =
-        getData(STORAGE.students);
-
-    students =
-        students.filter(
-            s => s.id !== studentId
-        );
-
-    saveData(
-        STORAGE.students,
-        students
-    );
-
-    loadAdminStudents();
-}
-
-window.deleteStudent = deleteStudent;
-
-
-/* =========================================================
-   32. ADMIN RESULTS
-   ========================================================= */
-
-function loadAdminResults() {
-
-    const container =
-        document.getElementById("adminResultsTable");
-
-    if (!container) return;
-
-    const results =
-        getData(STORAGE.results)
-            .sort(
-                (a, b) =>
-                    new Date(b.date) -
-                    new Date(a.date)
-            );
-
-    if (!results.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Qabxiin barattootaa hin jiru.
-            </div>`;
-
-        return;
-    }
-
-    container.innerHTML = `
-        <div class="table-wrapper">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>Barataa</th>
-                        <th>Qormaata</th>
-                        <th>Qabxii</th>
-                        <th>Sirrii</th>
-                        <th>Guyyaa</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    ${results.map(result => `
-
-                        <tr>
-
-                            <td>
-                                ${escapeHTML(result.studentName)}
-                            </td>
-
-                            <td>
-                                ${escapeHTML(result.examTitle)}
-                            </td>
-
-                            <td>
-                                <strong>
-                                    ${result.score}%
-                                </strong>
-                            </td>
-
-                            <td>
-                                ${result.correct}/${result.total}
-                            </td>
-
-                            <td>
-                                ${formatDate(result.date)}
-                            </td>
-
-                        </tr>
-
-                    `).join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
-    `;
-}
-
-window.loadAdminResults = loadAdminResults;
-
-
-/* =========================================================
-   33. CREATE LESSON
-   ========================================================= */
-
-function createLesson() {
-
-    const title =
-        document.getElementById("lessonTitleInput")
-            ?.value.trim();
-
-    const content =
-        document.getElementById("lessonContentInput")
-            ?.value.trim();
-
-    if (!title || !content) {
-
-        alert(
-            "Mata-duree fi qabiyyee guuti."
-        );
-
-        return;
-    }
-
-    const lessons =
-        getData(STORAGE.lessons);
-
-    lessons.push({
-
-        id: generateId("LES"),
-
-        title: title,
-
-        content: content,
-
-        createdAt:
-            new Date().toISOString()
-
-    });
-
-    saveData(
-        STORAGE.lessons,
-        lessons
-    );
-
-    const titleInput =
-        document.getElementById("lessonTitleInput");
-
-    const contentInput =
-        document.getElementById("lessonContentInput");
-
-    if (titleInput) titleInput.value = "";
-    if (contentInput) contentInput.value = "";
-
-    loadAdminLessons();
-    loadStudentLessons();
-
-    alert("Barnoonni milkaa'inaan uumameera.");
-}
-
-window.createLesson = createLesson;
-
-
-/* =========================================================
-   34. ADMIN LESSONS
-   ========================================================= */
-
-function loadAdminLessons() {
-
-    const container =
-        document.getElementById("adminLessonsList");
-
-    if (!container) return;
-
-    const lessons =
-        getData(STORAGE.lessons);
-
-    if (!lessons.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Barnoonni hin jiru.
-            </div>`;
-
-        return;
-    }
-
-    container.innerHTML =
-        lessons.map(lesson => `
-
-            <div class="admin-content-card">
-
-                <div>
-
-                    <h3>
-                        ${escapeHTML(lesson.title)}
-                    </h3>
-
-                    <p>
-                        ${escapeHTML(
-                            lesson.content.substring(0, 180)
-                        )}...
-                    </p>
-
-                </div>
-
-                <button
-                    class="danger"
-                    onclick="deleteLesson('${lesson.id}')">
-                    Haqi
-                </button>
-
-            </div>
-
-        `).join("");
-}
-
-window.loadAdminLessons = loadAdminLessons;
-
-
-/* =========================================================
-   35. DELETE LESSON
-   ========================================================= */
-
-function deleteLesson(lessonId) {
-
-    if (!confirm("Barnoota kana haquu?")) return;
-
-    let lessons =
-        getData(STORAGE.lessons);
-
-    lessons =
-        lessons.filter(
-            lesson => lesson.id !== lessonId
-        );
-
-    saveData(
-        STORAGE.lessons,
-        lessons
-    );
-
-    loadAdminLessons();
-    loadStudentLessons();
-}
-
-window.deleteLesson = deleteLesson;
-
-
-/* =========================================================
-   36. CREATE EXAM
-   ========================================================= */
-
-function createExam() {
-
-    const title =
-        document.getElementById("examTitleInput")
-            ?.value.trim();
-
-    const description =
-        document.getElementById("examDescriptionInput")
-            ?.value.trim();
-
-    const questionLimit =
-        Number(
-            document.getElementById(
-                "examQuestionLimitInput"
-            )?.value || 0
-        );
-
-    const attemptLimit =
-        Number(
-            document.getElementById(
-                "examAttemptLimitInput"
-            )?.value || 1
-        );
-
-    const finalExam =
-        document.getElementById(
-            "examFinalInput"
-        )?.value === "true";
-
-    const duration =
-        Number(
-            document.getElementById(
-                "examDurationInput"
-            )?.value || 30
-        );
-
-    const startDate =
-        document.getElementById(
-            "examStartDateInput"
-        )?.value || "";
-
-    const endDate =
-        document.getElementById(
-            "examEndDateInput"
-        )?.value || "";
-
-    const startTime =
-        document.getElementById(
-            "examStartTimeInput"
-        )?.value || "";
-
-    const endTime =
-        document.getElementById(
-            "examEndTimeInput"
-        )?.value || "";
-
-    if (!title) {
-        alert("Mata-duree qormaataa galchi.");
-        return;
-    }
-
-    const exams =
-        getData(STORAGE.exams);
-
-    exams.push({
-
-        id: generateId("EX"),
-
-        title: title,
-
-        description: description,
-
-        questionLimit: questionLimit,
-
-        attemptLimit: attemptLimit,
-
-        finalExam: finalExam,
-
-        duration: duration,
-
-        startDate: startDate,
-
-        endDate: endDate,
-
-        startTime: startTime,
-
-        endTime: endTime,
-
-        createdAt:
-            new Date().toISOString()
-
-    });
-
-    saveData(
-        STORAGE.exams,
-        exams
-    );
-
-    clearExamForm();
-
-    loadAdminExams();
-    updateExamSelects();
-
-    alert("Qormaanni uumameera.");
-}
-
-window.createExam = createExam;
-
-
-/* =========================================================
-   37. CLEAR EXAM FORM
-   ========================================================= */
-
-function clearExamForm() {
-
-    const ids = [
-        "examTitleInput",
-        "examDescriptionInput",
-        "examStartDateInput",
-        "examEndDateInput",
-        "examStartTimeInput",
-        "examEndTimeInput"
-    ];
-
-    ids.forEach(id => {
-
-        const el =
-            document.getElementById(id);
-
-        if (el) el.value = "";
-
-    });
-}
-
-
-/* =========================================================
-   38. ADMIN EXAMS
-   ========================================================= */
-
-function loadAdminExams() {
-
-    const container =
-        document.getElementById("adminExamsList");
-
-    if (!container) return;
-
-    const exams =
-        getData(STORAGE.exams);
-
-    if (!exams.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Qormaanni hin jiru.
-            </div>`;
-
-        return;
-    }
-
-    container.innerHTML =
-        exams.map(exam => {
-
-            const count =
-                getData(STORAGE.questions)
-                    .filter(
-                        q => q.examId === exam.id
-                    ).length;
-
-            return `
-
-                <div class="admin-content-card">
-
-                    <div>
-
-                        <h3>
-                            ${escapeHTML(exam.title)}
-                        </h3>
-
-                        <p>
-                            ${escapeHTML(
-                                exam.description || ""
-                            )}
-                        </p>
-
-                        <small>
-                            Gaaffii:
-                            ${count}
-                        </small>
-
-                    </div>
-
-                    <button
-                        class="danger"
-                        onclick="deleteExam('${exam.id}')">
-                        Haqi
-                    </button>
-
-                </div>
-
-            `;
-
-        }).join("");
-}
-
-window.loadAdminExams = loadAdminExams;
-
-
-/* =========================================================
-   39. DELETE EXAM
-   ========================================================= */
-
-function deleteExam(examId) {
-
-    if (!confirm("Qormaata kana haquu?")) return;
-
-    let exams =
-        getData(STORAGE.exams);
-
-    exams =
-        exams.filter(
-            exam => exam.id !== examId
-        );
-
-    saveData(
-        STORAGE.exams,
-        exams
-    );
-
-    let questions =
-        getData(STORAGE.questions);
-
-    questions =
-        questions.filter(
-            question =>
-                question.examId !== examId
-        );
-
-    saveData(
-        STORAGE.questions,
-        questions
-    );
-
-    loadAdminExams();
-    updateExamSelects();
-}
-
-window.deleteExam = deleteExam;
-
-
-/* =========================================================
-   40. UPDATE EXAM SELECTS
-   ========================================================= */
-
-function updateExamSelects() {
-
-    const exams =
-        getData(STORAGE.exams);
-
-    const selectIds = [
-        "aiQuestionExamSelect",
-        "questionExamSelect"
-    ];
-
-    selectIds.forEach(id => {
-
-        const select =
-            document.getElementById(id);
-
-        if (!select) return;
-
-        select.innerHTML =
-            `<option value="">
-                -- Qormaata filadhu --
-            </option>`;
-
-        exams.forEach(exam => {
-
-            const option =
-                document.createElement("option");
-
-            option.value = exam.id;
-            option.textContent = exam.title;
-
-            select.appendChild(option);
-
-        });
-
-    });
-
-    loadAdminQuestions();
-}
-
-
-/* =========================================================
-   41. CREATE MANUAL QUESTION
-   ========================================================= */
-
-function createQuestion() {
-
-    const examId =
-        document.getElementById(
-            "questionExamSelect"
-        )?.value;
-
-    const question =
-        document.getElementById(
-            "questionTextInput"
-        )?.value.trim();
-
-    const optionA =
-        document.getElementById(
-            "optionAInput"
-        )?.value.trim();
-
-    const optionB =
-        document.getElementById(
-            "optionBInput"
-        )?.value.trim();
-
-    const optionC =
-        document.getElementById(
-            "optionCInput"
-        )?.value.trim();
-
-    const optionD =
-        document.getElementById(
-            "optionDInput"
-        )?.value.trim();
-
-    const correct =
-        Number(
-            document.getElementById(
-                "correctAnswerInput"
-            )?.value
-        );
-
-    if (
-        !examId ||
-        !question ||
-        !optionA ||
-        !optionB ||
-        !optionC ||
-        !optionD
-    ) {
-
-        alert(
-            "Qormaata fi gaaffii fi filannoowwan guutuu guuti."
-        );
-
-        return;
-    }
-
-    const questions =
-        getData(STORAGE.questions);
-
-    questions.push({
-
-        id: generateId("Q"),
-
-        examId: examId,
-
-        question: question,
-
-        options: [
-            optionA,
-            optionB,
-            optionC,
-            optionD
-        ],
-
-        correctAnswer: correct
-
-    });
-
-    saveData(
-        STORAGE.questions,
-        questions
-    );
-
-    [
-        "questionTextInput",
-        "optionAInput",
-        "optionBInput",
-        "optionCInput",
-        "optionDInput"
-    ].forEach(id => {
-
-        const el =
-            document.getElementById(id);
-
-        if (el) el.value = "";
-
-    });
-
-    loadAdminQuestions();
-    loadAdminExams();
-
-    alert("Gaaffiin uumameera.");
-}
-
-window.createQuestion = createQuestion;
-
-
-/* =========================================================
-   42. ADMIN QUESTIONS
-   ========================================================= */
-
-function loadAdminQuestions() {
-
-    const container =
-        document.getElementById(
-            "adminQuestionsList"
-        );
-
-    if (!container) return;
-
-    const questions =
-        getData(STORAGE.questions);
-
-    const exams =
-        getData(STORAGE.exams);
-
-    if (!questions.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Gaaffiin hin jiru.
-            </div>`;
-
-        return;
-    }
-
-    container.innerHTML =
-        questions.map(q => {
-
-            const exam =
-                exams.find(
-                    e => e.id === q.examId
-                );
-
-            return `
-
-                <div class="admin-question-card">
-
-                    <div>
-
-                        <strong>
-                            ${escapeHTML(q.question)}
-                        </strong>
-
-                        <p>
-                            Qormaata:
-                            ${escapeHTML(
-                                exam?.title || "Unknown"
-                            )}
-                        </p>
-
-                        <ol type="A">
-
-                            ${q.options.map(
-                                (option, index) => `
-
-                                    <li>
-                                        ${escapeHTML(option)}
-                                        ${
-                                            index ===
-                                            Number(q.correctAnswer)
-                                                ? " ✓"
-                                                : ""
-                                        }
-                                    </li>
-
-                                `
-                            ).join("")}
-
-                        </ol>
-
-                    </div>
-
-                    <button
-                        class="danger"
-                        onclick="deleteQuestion('${q.id}')">
-                        Haqi
-                    </button>
-
-                </div>
-
-            `;
-
-        }).join("");
-}
-
-window.loadAdminQuestions = loadAdminQuestions;
-
-
-/* =========================================================
-   43. DELETE QUESTION
-   ========================================================= */
-
-function deleteQuestion(questionId) {
-
-    if (!confirm("Gaaffii kana haquu?")) return;
-
-    let questions =
-        getData(STORAGE.questions);
-
-    questions =
-        questions.filter(
-            q => q.id !== questionId
-        );
-
-    saveData(
-        STORAGE.questions,
-        questions
-    );
-
-    loadAdminQuestions();
-    loadAdminExams();
-}
-
-window.deleteQuestion = deleteQuestion;
-
-
-/* =========================================================
-   44. AI QUESTION SOURCE
-   ========================================================= */
-
-function changeAIQuestionSource() {
-
-    const source =
-        document.getElementById(
-            "aiQuestionSourceType"
-        )?.value;
-
-    const sections = {
-        topic: "aiTopicSource",
-        text: "aiTextSource",
-        pdf: "aiPdfSource",
-        image: "aiImageSource"
-    };
-
-    Object.values(sections).forEach(id => {
-
-        const el =
-            document.getElementById(id);
-
-        if (el) {
-            el.style.display = "none";
-        }
-
-    });
-
-    if (sections[source]) {
-
-        const selected =
-            document.getElementById(
-                sections[source]
-            );
-
-        if (selected) {
-            selected.style.display = "block";
-        }
-    }
-}
-
-window.changeAIQuestionSource =
-    changeAIQuestionSource;
-
-
-/* =========================================================
-   45. LOCAL AI QUESTION GENERATOR
-   ========================================================= */
-
-/*
-   Hubachiisa:
-
-   Kun "local/demo generator" dha.
-   API key AI dhugaa frontend keessatti kaa'uun
-   nageenyaaf sirrii miti.
-
-   Yeroo backend/serverless AI qabaattu,
-   generateAIQuestions() gara API keetti
-   jijjiiruu dandeessa.
-*/
-
-function generateAIQuestions() {
-
-    const examId =
-        document.getElementById(
-            "aiQuestionExamSelect"
-        )?.value;
-
-    const source =
-        document.getElementById(
-            "aiQuestionSourceType"
-        )?.value || "topic";
-
-    const count =
-        Number(
-            document.getElementById(
-                "aiQuestionCount"
-            )?.value || 5
-        );
-
-    if (!examId) {
-
-        showMessage(
-            "aiQuestionMessage",
-            "Dura qormaata filadhu.",
-            "error"
-        );
-
-        return;
-    }
-
-    let topic = "";
-
-    if (source === "topic") {
-
-        topic =
-            document.getElementById(
-                "aiTopicInput"
-            )?.value.trim();
-
-    } else if (source === "text") {
-
-        topic =
-            document.getElementById(
-                "aiTextInput"
-            )?.value.trim();
-
-    } else if (source === "pdf") {
-
-        const file =
-            document.getElementById(
-                "aiPdfInput"
-            )?.files?.[0];
-
-        topic =
-            file ? file.name : "";
-
-    } else if (source === "image") {
-
-        const file =
-            document.getElementById(
-                "aiImageInput"
-            )?.files?.[0];
-
-        topic =
-            file ? file.name : "";
-    }
-
-    if (!topic) {
-
-        showMessage(
-            "aiQuestionMessage",
-            "Madda ykn topic galchi.",
-            "error"
-        );
-
-        return;
-    }
-
-    const questions =
-        getData(STORAGE.questions);
-
-    const generated =
-        createDemoAIQuestions(
-            examId,
-            topic,
-            count
-        );
-
-    generated.forEach(q => {
-        questions.push(q);
-    });
-
-    saveData(
-        STORAGE.questions,
-        questions
-    );
-
-    loadAdminQuestions();
-    loadAdminExams();
-
-    showMessage(
-        "aiQuestionMessage",
-        `${generated.length} gaaffii uumameera.`,
-        "success"
-    );
-}
-
-window.generateAIQuestions =
-    generateAIQuestions;
-
-
-/* =========================================================
-   46. DEMO AI QUESTIONS
-   ========================================================= */
-
-function createDemoAIQuestions(
-    examId,
-    topic,
-    count
-) {
-
-    const templates = [
-
-        {
-            q: `${topic} jechuun maal jechuudha?`,
-            options: [
-                `${topic} ilaalchisee ibsa sirrii`,
-                "Waan internet waliin qofa wal qabatu",
-                "Meeshaa elektirooniksii qofa",
-                "Maqaa software tokko qofa"
-            ]
-        },
-
-        {
-            q: `${topic} keessatti wanti ijoo ta'e kam?`,
-            options: [
-                "Barachuu fi hubachuu",
-                "Computer cufuu",
-                "Internet balleessuu",
-                "Faayila haqaa qofa"
-            ]
-        },
-
-        {
-            q: `Faayidaan ${topic} keessaa tokko kam?`,
-            options: [
-                "Rakkoo tokko furuuf gargaaruu",
-                "Computer balleessuu",
-                "Data hunda haqaa",
-                "Internet cufuu"
-            ]
-        },
-
-        {
-            q: `${topic} barachuuf maal barbaachisa?`,
-            options: [
-                "Hubannoo fi shaakala",
-                "Password qofa",
-                "Mobile qofa",
-                "Printer qofa"
-            ]
-        },
-
-        {
-            q: `${topic} yeroo barattu maal gochuun gaarii dha?`,
-            options: [
-                "Shaakala fi qorannoo",
-                "Barnoota dhiisuu",
-                "Data haqaa",
-                "Application cufuu"
-            ]
-        }
-    ];
-
-    const generated = [];
-
-    for (let i = 0; i < count; i++) {
-
-        const template =
-            templates[
-                i % templates.length
-            ];
-
-        generated.push({
-
-            id: generateId("Q"),
-
-            examId: examId,
-
-            question:
-                `${i + 1}. ${template.q}`,
-
-            options:
-                [...template.options],
-
-            correctAnswer: 0
-
-        });
-    }
-
-    return generated;
-}
-
-
-/* =========================================================
-   47. ADMIN LOGOUT
-   ========================================================= */
 
 function adminLogout() {
+  localStorage.removeItem("ao_admin_id");
+  currentAdmin = null;
+  showPage("rolePage");
+}
 
-    currentAdmin = null;
+async function restoreAdmin() {
+  const id = localStorage.getItem("ao_admin_id");
+  if (!id) return null;
 
-    localStorage.removeItem(
-        STORAGE.currentAdmin
+  try {
+    const { data, error } = await db
+      .from("admins")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      localStorage.removeItem("ao_admin_id");
+      return null;
+    }
+
+    currentAdmin = data;
+    return data;
+  } catch (error) {
+    console.error("RESTORE ADMIN ERROR:", error);
+    return null;
+  }
+}
+
+function requireAdmin() {
+  if (!currentAdmin) {
+    showPage("adminLoginPage");
+    return null;
+  }
+  return currentAdmin;
+}
+
+async function initializeAdmin() {
+  if (!requireAdmin()) return;
+  await openAdminPanel("students");
+  await refreshAllAdminLists();
+}
+
+async function openAdminPanel(panel) {
+  if (!requireAdmin()) return;
+
+  const panels = {
+    students: "adminStudentsPanel",
+    results: "adminResultsPanel",
+    lessons: "adminLessonsPanel",
+    exams: "adminExamsPanel"
+  };
+
+  Object.values(panels).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+
+  const selected = document.getElementById(panels[panel]);
+  if (selected) selected.style.display = "block";
+
+  if (panel === "students") await loadAdminStudents();
+  if (panel === "results") await loadAdminResults();
+  if (panel === "lessons") await loadAdminLessons();
+  if (panel === "exams") await loadAdminExams();
+}
+
+/* =========================================================
+   ADMIN - STUDENTS
+========================================================= */
+
+async function loadAdminStudents() {
+  if (!requireAdmin()) return;
+
+  const container = document.getElementById("adminStudentsList");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("students")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Barattoota fe'uu hin dandeenye.</div>`;
+    console.error(error);
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">👨‍🎓 Barataan hin galmoofne.</div>`;
+    return;
+  }
+
+  container.innerHTML = data.map((student) => `
+    <div class="admin-list-item">
+      <div class="item-main">
+        <h3>${escapeHtml(student.name)}</h3>
+        <p>
+          ID: <strong>${escapeHtml(student.student_id)}</strong><br>
+          Code: <strong>${escapeHtml(student.activation_code)}</strong><br>
+          Galmaa'e: ${formatDateTime(student.created_at)}
+        </p>
+        <span class="status ${student.status === "active" ? "active" : "blocked"}">
+          ● ${student.status === "active" ? "Active" : student.status === "pending" ? "Pending" : "Cufame"}
+        </span>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="small-btn" onclick="toggleStudentStatus('${student.id}')">
+          ${student.status === "active" ? "🔒 Cufi" : "🔓 Bani"}
+        </button>
+        <button type="button" class="danger-small-btn" onclick="deleteStudent('${student.id}')">
+          🗑️ Haqi
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function toggleStudentStatus(studentId) {
+  if (!requireAdmin()) return;
+
+  const { data: student, error: findError } = await db
+    .from("students")
+    .select("id,status")
+    .eq("id", studentId)
+    .maybeSingle();
+
+  if (findError || !student) return;
+
+  const newStatus = student.status === "active" ? "blocked" : "active";
+
+  const { error } = await db
+    .from("students")
+    .update({ status: newStatus })
+    .eq("id", studentId);
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  await loadAdminStudents();
+}
+
+async function deleteStudent(studentId) {
+  if (!requireAdmin()) return;
+
+  if (!confirm("Barataa kana haquuf mirkaneessi.")) return;
+
+  await db.from("results").delete().eq("student_id", studentId);
+  await db.from("exam_attempts").delete().eq("student_id", studentId);
+
+  const { error } = await db
+    .from("students")
+    .delete()
+    .eq("id", studentId);
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  await loadAdminStudents();
+  await loadAdminResults();
+}
+
+/* =========================================================
+   ADMIN - RESULTS
+========================================================= */
+
+async function loadAdminResults() {
+  if (!requireAdmin()) return;
+
+  const table = document.getElementById("adminResultsTable");
+  if (!table) return;
+
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+
+  const { data, error } = await db
+    .from("results")
+    .select("*, students(name,student_id), exams(title)")
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5">❌ Qabxii fe'uu hin dandeenye.</td></tr>`;
+    return;
+  }
+
+  if (thead) {
+    thead.innerHTML = `
+      <tr>
+        <th>Barataa</th>
+        <th>Qormaata</th>
+        <th>Qabxii</th>
+        <th>%</th>
+        <th>Guyyaa</th>
+      </tr>
+    `;
+  }
+
+  if (!data?.length) {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="empty-cell">Hanga ammaatti bu'aan qormaataa hin jiru.</td></tr>`;
+    return;
+  }
+
+  if (tbody) {
+    tbody.innerHTML = data.map((result) => `
+      <tr>
+        <td>${escapeHtml(result.students?.name || "Barataa")}</td>
+        <td>${escapeHtml(result.exams?.title || result.exam_title || "Qormaata")}</td>
+        <td>${Number(result.correct || 0)}/${Number(result.total || 0)}</td>
+        <td><strong>${Number(result.percentage || 0)}%</strong></td>
+        <td>${formatDateTime(result.submitted_at)}</td>
+      </tr>
+    `).join("");
+  }
+}
+
+/* =========================================================
+   ADMIN - LESSONS
+========================================================= */
+
+async function loadAdminLessons() {
+  if (!requireAdmin()) return;
+
+  const container = document.getElementById("adminLessonsList");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("lessons")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>`;
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">📚 Barnoonni hin jiru.</div>`;
+    return;
+  }
+
+  container.innerHTML = data.map((lesson) => `
+    <div class="admin-list-item">
+      <div class="item-main">
+        <h3>${escapeHtml(lesson.title)}</h3>
+        <p>${escapeHtml(truncate(lesson.content, 180))}</p>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="small-btn" onclick="editLesson('${lesson.id}')">✏️ Sirreessi</button>
+        <button type="button" class="danger-small-btn" onclick="deleteLesson('${lesson.id}')">🗑️ Haqi</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function createLesson() {
+  if (!requireAdmin()) return;
+
+  const title = document.getElementById("lessonTitleInput")?.value.trim() || "";
+  const content = document.getElementById("lessonContentInput")?.value.trim() || "";
+
+  if (!title || !content) {
+    alert("Mata-duree fi qabiyyee barnootaa lamaan galchi.");
+    return;
+  }
+
+  const { error } = await db.from("lessons").insert({ title, content });
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  document.getElementById("lessonTitleInput").value = "";
+  document.getElementById("lessonContentInput").value = "";
+
+  await loadAdminLessons();
+  await loadStudentLessons();
+  alert("Barnoonni dabalameera.");
+}
+
+async function editLesson(lessonId) {
+  if (!requireAdmin()) return;
+
+  const { data: lesson, error } = await db
+    .from("lessons")
+    .select("*")
+    .eq("id", lessonId)
+    .maybeSingle();
+
+  if (error || !lesson) return;
+
+  const title = prompt("Mata-duree haaraa:", lesson.title);
+  if (title === null) return;
+
+  const content = prompt("Qabiyyee haaraa:", lesson.content);
+  if (content === null) return;
+
+  const { error: updateError } = await db
+    .from("lessons")
+    .update({
+      title: title.trim() || lesson.title,
+      content: content.trim() || lesson.content
+    })
+    .eq("id", lessonId);
+
+  if (updateError) {
+    alert(getErrorMessage(updateError));
+    return;
+  }
+
+  await loadAdminLessons();
+  await loadStudentLessons();
+}
+
+async function deleteLesson(lessonId) {
+  if (!requireAdmin()) return;
+  if (!confirm("Barnoota kana haquuf mirkaneessi.")) return;
+
+  const { error } = await db.from("lessons").delete().eq("id", lessonId);
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  await loadAdminLessons();
+  await loadStudentLessons();
+}
+
+/* =========================================================
+   ADMIN - EXAMS
+========================================================= */
+
+async function loadAdminExams() {
+  if (!requireAdmin()) return;
+
+  const container = document.getElementById("adminExamsList");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("exams")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">📝 Qormaanni hin jiru.</div>`;
+    await populateExamSelects([]);
+    return;
+  }
+
+  const exams = data.map(normalizeExam);
+  const counts = {};
+
+  const { data: questionRows } = await db
+    .from("questions")
+    .select("id,exam_id");
+
+  (questionRows || []).forEach((q) => {
+    counts[q.exam_id] = (counts[q.exam_id] || 0) + 1;
+  });
+
+  container.innerHTML = exams.map((exam) => `
+    <div class="admin-list-item exam-admin-item">
+      <div class="item-main">
+        <h3>${escapeHtml(exam.title)}${exam.isFinal ? " 🏆" : ""}</h3>
+        <p>${escapeHtml(exam.description || "")}</p>
+        <div class="exam-meta">
+          <span>❓ Gaaffii: ${counts[exam.id] || 0}</span>
+          <span>🔢 Attempt: ${exam.attemptLimit}</span>
+          <span>⏱️ ${exam.duration} min</span>
+        </div>
+        <span class="status ${exam.status === "active" ? "active" : "blocked"}">
+          ● ${exam.status === "active" ? "Active" : "Disabled"}
+        </span>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="small-btn" onclick="toggleExamStatus(${exam.id})">
+          ${exam.status === "active" ? "⏸️ Cufi" : "▶️ Bani"}
+        </button>
+        <button type="button" class="small-btn" onclick="editExam(${exam.id})">✏️ Sirreessi</button>
+        <button type="button" class="danger-small-btn" onclick="deleteExam(${exam.id})">🗑️ Haqi</button>
+      </div>
+    </div>
+  `).join("");
+
+  await populateExamSelects(exams);
+  await loadAdminQuestions();
+}
+
+async function populateExamSelects(exams = null) {
+  let list = exams;
+
+  if (!list) {
+    const { data } = await db
+      .from("exams")
+      .select("id,title")
+      .order("created_at", { ascending: false });
+    list = data || [];
+  }
+
+  ["questionExamSelect", "aiQuestionExamSelect"].forEach((id) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+
+    const current = select.value;
+    select.innerHTML = `
+      <option value="">Qormaata filadhu</option>
+      ${list.map((exam) => `<option value="${exam.id}">${escapeHtml(exam.title)}</option>`).join("")}
+    `;
+
+    if (list.some((exam) => String(exam.id) === String(current))) {
+      select.value = current;
+    }
+  });
+}
+
+async function createExam() {
+  if (!requireAdmin()) return;
+
+  const title = document.getElementById("examTitleInput")?.value.trim() || "";
+  const description = document.getElementById("examDescriptionInput")?.value.trim() || "";
+  const questionLimit = Number(document.getElementById("examQuestionLimitInput")?.value || 0);
+  const attemptLimit = Number(document.getElementById("examAttemptLimitInput")?.value || 1);
+  const isFinal = document.getElementById("examFinalInput")?.value === "true";
+  const duration = Number(document.getElementById("examDurationInput")?.value || 30);
+  const startDate = document.getElementById("examStartDateInput")?.value || null;
+  const endDate = document.getElementById("examEndDateInput")?.value || null;
+  const startTime = document.getElementById("examStartTimeInput")?.value || null;
+  const endTime = document.getElementById("examEndTimeInput")?.value || null;
+
+  if (!title) {
+    alert("Mata-duree qormaataa galchi.");
+    return;
+  }
+
+  if (startDate && endDate && startDate > endDate) {
+    alert("Guyyaan jalqabaa guyyaa xumuraa caaluu hin qabu.");
+    return;
+  }
+
+  const { error } = await db.from("exams").insert({
+    title,
+    description,
+    question_limit: questionLimit,
+    attempt_limit: attemptLimit,
+    is_final: isFinal,
+    duration_minutes: duration,
+    start_date: startDate,
+    end_date: endDate,
+    start_time: startTime,
+    end_time: endTime,
+    status: "active"
+  });
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  [
+    "examTitleInput",
+    "examDescriptionInput",
+    "examStartDateInput",
+    "examEndDateInput",
+    "examStartTimeInput",
+    "examEndTimeInput"
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+
+  await loadAdminExams();
+  alert("Qormaanni uumameera. Amma gaaffii itti dabali.");
+}
+
+async function toggleExamStatus(examId) {
+  if (!requireAdmin()) return;
+
+  const { data: exam, error: findError } = await db
+    .from("exams")
+    .select("id,status")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (findError || !exam) return;
+
+  const { error } = await db
+    .from("exams")
+    .update({ status: exam.status === "active" ? "disabled" : "active" })
+    .eq("id", examId);
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  await loadAdminExams();
+}
+
+async function editExam(examId) {
+  if (!requireAdmin()) return;
+
+  const { data: exam, error } = await db
+    .from("exams")
+    .select("*")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (error || !exam) return;
+
+  const title = prompt("Mata-duree:", exam.title);
+  if (title === null) return;
+
+  const description = prompt("Ibsa:", exam.description || "");
+  if (description === null) return;
+
+  const { error: updateError } = await db
+    .from("exams")
+    .update({
+      title: title.trim() || exam.title,
+      description: description.trim()
+    })
+    .eq("id", examId);
+
+  if (updateError) {
+    alert(getErrorMessage(updateError));
+    return;
+  }
+
+  await loadAdminExams();
+}
+
+async function deleteExam(examId) {
+  if (!requireAdmin()) return;
+
+  const { data: exam } = await db
+    .from("exams")
+    .select("id,title")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (!exam) return;
+
+  if (!confirm(`Qormaata "${exam.title}" fi gaaffilee isaa haquuf mirkaneessi.`)) {
+    return;
+  }
+
+  await db.from("results").delete().eq("exam_id", examId);
+  await db.from("exam_attempts").delete().eq("exam_id", examId);
+  await db.from("questions").delete().eq("exam_id", examId);
+
+  const { error } = await db.from("exams").delete().eq("id", examId);
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  await loadAdminExams();
+  await loadAdminResults();
+}
+
+/* =========================================================
+   ADMIN - MANUAL QUESTIONS
+========================================================= */
+
+async function createQuestion() {
+  if (!requireAdmin()) return;
+
+  const examId = document.getElementById("questionExamSelect")?.value || "";
+  const question = document.getElementById("questionTextInput")?.value.trim() || "";
+  const optionA = document.getElementById("optionAInput")?.value.trim() || "";
+  const optionB = document.getElementById("optionBInput")?.value.trim() || "";
+  const optionC = document.getElementById("optionCInput")?.value.trim() || "";
+  const optionD = document.getElementById("optionDInput")?.value.trim() || "";
+  const correctAnswer = document.getElementById("correctAnswerInput")?.value || "";
+
+  if (!examId || !question || !optionA || !optionB || !optionC || !optionD || !correctAnswer) {
+    alert("Qormaata, gaaffii, A-D fi deebii sirrii hunda guuti.");
+    return;
+  }
+
+  const { error } = await db.from("questions").insert({
+    exam_id: examId,
+    question,
+    option_a: optionA,
+    option_b: optionB,
+    option_c: optionC,
+    option_d: optionD,
+    correct_answer: correctAnswer,
+    source_type: "admin",
+    source_text: null
+  });
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  [
+    "questionTextInput",
+    "optionAInput",
+    "optionBInput",
+    "optionCInput",
+    "optionDInput"
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+
+  document.getElementById("correctAnswerInput").value = "";
+
+  await loadAdminQuestions();
+  await loadAdminExams();
+
+  alert("Gaaffiin dabalameera.");
+}
+
+async function loadAdminQuestions() {
+  if (!requireAdmin()) return;
+
+  const container = document.getElementById("adminQuestionsList");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("questions")
+    .select("*, exams(title)")
+    .order("id", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<div class="empty-state">❌ Gaaffilee fe'uu hin dandeenye.</div>`;
+    console.error(error);
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state">❓ Gaaffiin hin jiru.</div>`;
+    return;
+  }
+
+  container.innerHTML = data.map((row, index) => {
+    const question = normalizeQuestion(row);
+
+    return `
+      <div class="question-admin-item">
+        <div class="question-number">${index + 1}</div>
+
+        <div class="item-main">
+          <small>${escapeHtml(row.exams?.title || "Qormaata")}</small>
+
+          <h3>
+            ${escapeHtml(question.text)}
+          </h3>
+
+          <div class="options-preview">
+            <span>A. ${escapeHtml(question.optionA)}</span>
+            <span>B. ${escapeHtml(question.optionB)}</span>
+            <span>C. ${escapeHtml(question.optionC)}</span>
+            <span>D. ${escapeHtml(question.optionD)}</span>
+          </div>
+
+          <p class="correct-answer">
+            Deebii sirrii: ${escapeHtml(question.correctAnswer)}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="danger-small-btn"
+          onclick="deleteQuestion(${question.id})"
+        >
+          🗑️
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+async function deleteQuestion(questionId) {
+  if (!requireAdmin()) return;
+
+  if (!confirm("Gaaffii kana haquuf mirkaneessi.")) return;
+
+  const { error } = await db
+    .from("questions")
+    .delete()
+    .eq("id", questionId);
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  await loadAdminQuestions();
+  await loadAdminExams();
+}
+
+/* =========================================================
+   AI QUESTION GENERATOR
+   Supports:
+   - Topic
+   - Text
+   - PDF
+   - Image
+
+   Edge Function:
+   generate-ai-questions
+
+   Edge Function generates + inserts questions.
+========================================================= */
+
+function changeAIQuestionSource() {
+  const type =
+    document.getElementById("aiQuestionSourceType")?.value || "topic";
+
+  const map = {
+    topic: "aiTopicSource",
+    text: "aiTextSource",
+    pdf: "aiPdfSource",
+    image: "aiImageSource"
+  };
+
+  Object.values(map).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = "none";
+    }
+  });
+
+  const selected = document.getElementById(map[type]);
+
+  if (selected) {
+    selected.style.display = "block";
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const comma = result.indexOf(",");
+
+      resolve(
+        comma >= 0
+          ? result.slice(comma + 1)
+          : result
+      );
+    };
+
+    reader.onerror = reject;
+
+    reader.readAsDataURL(file);
+  });
+}
+
+async function generateAIQuestions() {
+  if (!requireAdmin()) return;
+
+  const examId =
+    document.getElementById("aiQuestionExamSelect")?.value || "";
+
+  const sourceType =
+    document.getElementById("aiQuestionSourceType")?.value || "topic";
+
+  const count =
+    Number(
+      document.getElementById("aiQuestionCount")?.value || 5
     );
 
-    showPage("rolePage");
-}
+  const button =
+    document.getElementById("generateAIQuestionsButton");
 
-window.adminLogout = adminLogout;
+  if (!examId) {
+    showAIMessage(
+      "❌ Qormaata filadhu.",
+      "error"
+    );
+    return;
+  }
 
+  if (![5, 10, 20, 30, 50, 75, 100].includes(count)) {
+    showAIMessage(
+      "❌ Lakkoofsa gaaffii sirrii filadhu.",
+      "error"
+    );
+    return;
+  }
 
-/* =========================================================
-   48. ADMIN INITIALIZATION
-   ========================================================= */
+  if (button) {
+    button.disabled = true;
+    button.textContent = "⏳ AI qopheessaa jira...";
+  }
 
-function loadCurrentAdmin() {
+  try {
+    const body = {
+      exam_id: Number(examId),
+      source_type: sourceType,
+      count
+    };
+
+    /* =========================
+       TOPIC
+    ========================= */
+
+    if (sourceType === "topic") {
+      const topic =
+        document.getElementById("aiTopicInput")?.value.trim() || "";
+
+      if (!topic) {
+        throw new Error("Mata-duree galchi.");
+      }
+
+      body.topic = topic;
+    }
+
+    /* =========================
+       TEXT
+    ========================= */
+
+    if (sourceType === "text") {
+      const sourceText =
+        document.getElementById("aiTextInput")?.value.trim() || "";
+
+      if (!sourceText) {
+        throw new Error("Barreeffama galchi.");
+      }
+
+      body.source_text = sourceText;
+    }
+
+    /* =========================
+       PDF
+    ========================= */
+
+    if (sourceType === "pdf") {
+      const file =
+        document.getElementById("aiPdfInput")?.files?.[0];
+
+      if (!file) {
+        throw new Error("PDF filadhu.");
+      }
+
+      if (file.size > 50 * 1024 * 1024) {
+        throw new Error(
+          "PDF'n 50 MB ol ta'uu hin qabu."
+        );
+      }
+
+      body.file_name = file.name;
+      body.file_mime_type =
+        file.type || "application/pdf";
+
+      body.file_base64 =
+        await fileToBase64(file);
+    }
+
+    /* =========================
+       IMAGE
+    ========================= */
+
+    if (sourceType === "image") {
+      const file =
+        document.getElementById("aiImageInput")?.files?.[0];
+
+      if (!file) {
+        throw new Error("Suuraa filadhu.");
+      }
+
+      if (file.size > 15 * 1024 * 1024) {
+        throw new Error(
+          "Suuraan 15 MB ol ta'uu hin qabu."
+        );
+      }
+
+      body.file_name = file.name;
+
+      body.file_mime_type =
+        file.type || "image/jpeg";
+
+      body.file_base64 =
+        await fileToBase64(file);
+    }
+
+    showAIMessage(
+      "⏳ Gaaffilee AI irraa qopheessaa jira...",
+      "info"
+    );
+
+    const response = await fetch(
+      AI_FUNCTION_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY
+        },
+
+        body: JSON.stringify(body)
+      }
+    );
+
+    let result = null;
 
     try {
+      result = await response.json();
+    } catch (_) {
+      result = null;
+    }
 
-        const data =
-            localStorage.getItem(
-                STORAGE.currentAdmin
-            );
+    if (!response.ok) {
+      throw new Error(
+        result?.error ||
+        result?.message ||
+        `AI server error: ${response.status}`
+      );
+    }
 
-        if (data) {
-            currentAdmin = JSON.parse(data);
+    const inserted =
+      Number(
+        result?.count ||
+        result?.questions?.length ||
+        0
+      );
+
+    if (!inserted) {
+      throw new Error(
+        "AI gaaffii tokko illee hin galchine."
+      );
+    }
+
+    showAIMessage(
+      `
+      <div class="success-box">
+        ✅ ${inserted}
+        gaaffii AI irraa qormaata keessa galchame.
+      </div>
+      `,
+      "success"
+    );
+
+    await loadAdminQuestions();
+    await loadAdminExams();
+
+  } catch (error) {
+
+    console.error(
+      "AI ERROR:",
+      error
+    );
+
+    showAIMessage(
+      `❌ ${escapeHtml(
+        getErrorMessage(error)
+      )}`,
+      "error"
+    );
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent =
+        "🤖 Gaaffii AI Uumi";
+    }
+  }
+}
+
+/* =========================================================
+   GOOGLE LOGIN
+   Supabase Google Provider
+========================================================= */
+
+async function googleLogin() {
+  try {
+
+    const { error } =
+      await db.auth.signInWithOAuth({
+        provider: "google",
+
+        options: {
+          redirectTo:
+            window.location.origin +
+            window.location.pathname
         }
+      });
 
-    } catch (error) {
-        currentAdmin = null;
+    if (error) {
+      console.error(
+        "GOOGLE LOGIN ERROR:",
+        error
+      );
+
+      alert(
+        "Google Login irratti dogoggorri uumame: " +
+        getErrorMessage(error)
+      );
     }
+
+  } catch (error) {
+
+    console.error(
+      "GOOGLE LOGIN ERROR:",
+      error
+    );
+
+    alert(
+      "Google Login hin milkoofne: " +
+      getErrorMessage(error)
+    );
+  }
 }
+
+/*
+  Google Auth callback.
+
+  Student table schema kee keessatti
+  email column hin mirkanoofne.
+
+  Kanaaf user Google irraa dhufe gara
+  Student IDtti ofumaan hin jijjiirru.
+
+  Google provider qofa asitti qophaa'eera.
+*/
+
+async function handleAuthSession(session) {
+
+  if (!session?.user) {
+    return;
+  }
+
+  console.log(
+    "Google user authenticated:",
+    session.user.email ||
+    session.user.id
+  );
+}
+
+/* =========================================================
+   TELEGRAM LOGIN
+========================================================= */
+
+async function telegramLogin() {
+
+  alert(
+    "Telegram Login qindeessaa jirra. " +
+    "Google Login amma qophaa'eera."
+  );
+}
+
+/* =========================================================
+   REFRESH ADMIN LISTS
+========================================================= */
+
+async function refreshAllAdminLists() {
+
+  await loadAdminStudents();
+
+  await loadAdminResults();
+
+  await loadAdminLessons();
+
+  await loadAdminExams();
+
+  await loadAdminQuestions();
+}
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+function initializeAuthListener() {
+
+  if (authListenerReady) {
+    return;
+  }
+
+  authListenerReady = true;
+
+  db.auth.onAuthStateChange(
+    async (_event, session) => {
+
+      await handleAuthSession(
+        session
+      );
+
+    }
+  );
+}
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+async function initializeApp() {
+
+  initializeAuthListener();
+
+  changeAIQuestionSource();
+
+  const student =
+    await restoreStudent();
+
+  if (student) {
+
+    showPage(
+      "studentHomePage"
+    );
+
+    await loadStudentHome();
+
+    return;
+  }
+
+  const admin =
+    await restoreAdmin();
+
+  if (admin) {
+
+    showPage(
+      "adminPage"
+    );
+
+    await initializeAdmin();
+
+    return;
+  }
+
+  showPage(
+    "rolePage"
+  );
+}
+
+/* =========================================================
+   INLINE HTML FUNCTIONS
+========================================================= */
+
+window.showPage =
+  showPage;
+
+window.openStudentLogin =
+  openStudentLogin;
+
+window.openAdminLogin =
+  openAdminLogin;
+
+window.studentRegister =
+  studentRegister;
+
+window.studentLogin =
+  studentLogin;
+
+window.loadStudentHome =
+  loadStudentHome;
+
+window.loadExams =
+  loadExams;
+
+window.startExam =
+  startExam;
+
+window.selectAnswer =
+  selectAnswer;
+
+window.nextQuestion =
+  nextQuestion;
+
+window.requestSubmitExam =
+  requestSubmitExam;
+
+window.confirmSubmitExam =
+  confirmSubmitExam;
+
+window.showScore =
+  showScore;
+
+window.loadProfile =
+  loadProfile;
+
+window.saveProfile =
+  saveProfile;
+
+window.studentLogout =
+  studentLogout;
+
+window.openLesson =
+  openLesson;
+
+
+/* ADMIN */
+
+window.adminLogin =
+  adminLogin;
+
+window.adminLogout =
+  adminLogout;
+
+window.openAdminPanel =
+  openAdminPanel;
+
+window.toggleStudentStatus =
+  toggleStudentStatus;
+
+window.deleteStudent =
+  deleteStudent;
+
+window.createLesson =
+  createLesson;
+
+window.editLesson =
+  editLesson;
+
+window.deleteLesson =
+  deleteLesson;
+
+window.createExam =
+  createExam;
+
+window.toggleExamStatus =
+  toggleExamStatus;
+
+window.editExam =
+  editExam;
+
+window.deleteExam =
+  deleteExam;
+
+window.createQuestion =
+  createQuestion;
+
+window.deleteQuestion =
+  deleteQuestion;
+
+window.changeAIQuestionSource =
+  changeAIQuestionSource;
+
+window.generateAIQuestions =
+  generateAIQuestions;
+
+window.googleLogin =
+  googleLogin;
+
+window.telegramLogin =
+  telegramLogin;
 
 
 /* =========================================================
-   49. PAGE EVENT HELPERS
-   ========================================================= */
-
-function setupPageEvents() {
-
-    const studentHome =
-        document.getElementById(
-            "studentHomePage"
-        );
-
-    if (studentHome) {
-        loadStudentHome();
-    }
-
-    const profilePage =
-        document.getElementById(
-            "profilePage"
-        );
-
-    if (profilePage) {
-        loadStudentProfile();
-    }
-
-    const examList =
-        document.getElementById(
-            "examListPage"
-        );
-
-    if (examList) {
-        loadExams();
-    }
-}
-
-
-/* =========================================================
-   50. STARTUP
-   ========================================================= */
+   START
+========================================================= */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        initializeAppData();
-
-        loadCurrentStudent();
-
-        loadCurrentAdmin();
-
-        setupPageEvents();
-
-        /*
-           Initial page
-        */
-
-        showPage("rolePage");
-
-        /*
-           Prepare AI source section
-        */
-
-        changeAIQuestionSource();
-
-        /*
-           If student is already logged in,
-           update student information.
-        */
-
-        if (currentStudent) {
-            loadStudentHome();
-            loadStudentProfile();
-        }
-
-    }
+  "DOMContentLoaded",
+  initializeApp
 );
-
-
-/* =========================================================
-   51. DEBUG / DEVELOPMENT
-   ========================================================= */
-
-window.AkkaadaamiiOromiyaa = {
-
-    getStudents: () =>
-        getData(STORAGE.students),
-
-    getLessons: () =>
-        getData(STORAGE.lessons),
-
-    getExams: () =>
-        getData(STORAGE.exams),
-
-    getQuestions: () =>
-        getData(STORAGE.questions),
-
-    getResults: () =>
-        getData(STORAGE.results),
-
-    clearAllData: function () {
-
-        if (
-            confirm(
-                "Datawwan app hunda haquu barbaaddaa?"
-            )
-        ) {
-
-            Object.values(STORAGE).forEach(key => {
-                localStorage.removeItem(key);
-            });
-
-            location.reload();
-        }
-    }
-
-};
-
-
-/* =========================================================
-   END OF APP.JS
-   ========================================================= */
