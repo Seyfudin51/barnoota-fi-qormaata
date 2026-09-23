@@ -4,7 +4,11 @@
    ========================================================= */
 
 "use strict";
+window.addEventListener("error", function (event) {
+  console.error("APP ERROR:", event.error || event.message);
+});
 
+console.log("Akkaadaamii Oromiyaa app.js loaded");
 /* =========================================================
    SUPABASE
 ========================================================= */
