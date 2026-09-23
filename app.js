@@ -621,3 +621,758 @@ async function getCompletedAttempts(
 
   return data || [];
 }
+async function loadExams() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const container = document.getElementById("studentExams");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("exams")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `
+      <div class="empty-state">
+        ❌ Qormaata fe'uu hin dandeenye.
+      </div>
+    `;
+    console.error(error);
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        📝 Ammaaf qormaanni hin jiru.
+      </div>
+    `;
+    return;
+  }
+
+  const exams = data.map(normalizeExam);
+  const cards = [];
+
+  for (const exam of exams) {
+    const attempts = await getCompletedAttempts(
+      exam.id,
+      student.id
+    );
+
+    const limit = Number(exam.attemptLimit || 1);
+    const window = getExamWindowStatus(exam);
+
+    let action = "";
+
+    if (!window.available) {
+      const text =
+        window.reason === "not_started"
+          ? `⏳ Hin jalqabne: ${formatDateTime(window.date)}`
+          : window.reason === "ended"
+          ? "⛔ Yeroon qormaataa darbeera."
+          : "⛔ Qormaanni cufameera.";
+
+      action = `
+        <span class="status blocked">
+          ${escapeHtml(text)}
+        </span>
+      `;
+    } else if (attempts.length >= limit) {
+      action = `
+        <span class="status blocked">
+          Attempt xumurame
+        </span>
+      `;
+    } else {
+      action = `
+        <button
+          type="button"
+          class="small-btn"
+          onclick="startExam(${exam.id})"
+        >
+          Qormaata Jalqabi →
+        </button>
+      `;
+    }
+
+    cards.push(`
+      <article class="exam-card">
+
+        <div class="exam-badge">
+          ${exam.isFinal ? "🏆 FINAL" : "📝 EXAM"}
+        </div>
+
+        <h3>
+          ${escapeHtml(exam.title)}
+        </h3>
+
+        <p>
+          ${escapeHtml(exam.description || "")}
+        </p>
+
+        <div class="exam-meta">
+          <span>
+            ❓ ${exam.questionLimit > 0
+              ? exam.questionLimit
+              : "Hunda"}
+          </span>
+
+          <span>
+            ⏱️ ${exam.duration} daqiiqaa
+          </span>
+
+          <span>
+            🔢 ${attempts.length}/${limit}
+          </span>
+        </div>
+
+        <div class="exam-action">
+          ${action}
+        </div>
+
+      </article>
+    `);
+  }
+
+  container.innerHTML = cards.join("");
+}
+
+
+/* =========================================================
+   START EXAM / QUESTIONS
+========================================================= */
+
+async function startExam(examId) {
+  const student = requireStudent();
+
+  if (!student) return;
+
+  const { data: examRow, error: examError } = await db
+    .from("exams")
+    .select("*")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (examError || !examRow) {
+    alert("Qormaanni hin argamne.");
+    return;
+  }
+
+  const exam = normalizeExam(examRow);
+
+  const window = getExamWindowStatus(exam);
+
+  if (!window.available) {
+    alert(
+      window.reason === "not_started"
+        ? "Qormaanni yeroo isaa hin geenye."
+        : window.reason === "ended"
+        ? "Yeroon qormaataa darbeera."
+        : "Qormaanni cufameera."
+    );
+
+    return;
+  }
+
+  const completedAttempts =
+    await getCompletedAttempts(
+      exam.id,
+      student.id
+    );
+
+  const attemptLimit =
+    Number(exam.attemptLimit || 1);
+
+  if (completedAttempts.length >= attemptLimit) {
+    alert("Attempt kee xumurameera.");
+    return;
+  }
+
+  const {
+    data: questionRows,
+    error: questionError
+  } = await db
+    .from("questions")
+    .select("*")
+    .eq("exam_id", exam.id);
+
+  if (questionError) {
+    alert(getErrorMessage(questionError));
+    return;
+  }
+
+  let questions =
+    (questionRows || []).map(
+      normalizeQuestion
+    );
+
+  if (!questions.length) {
+    alert(
+      "Qormaata kana keessatti gaaffiin hin jiru."
+    );
+    return;
+  }
+
+  questions =
+    questions.sort(
+      () => Math.random() - 0.5
+    );
+
+  if (exam.questionLimit > 0) {
+    questions =
+      questions.slice(
+        0,
+        exam.questionLimit
+      );
+  }
+
+  const attemptNumber =
+    completedAttempts.length + 1;
+
+  const {
+    data: attempt,
+    error: attemptError
+  } = await db
+    .from("exam_attempts")
+    .insert({
+      student_id: student.id,
+      exam_id: exam.id,
+      attempt_number: attemptNumber,
+      score: 0,
+      total: questions.length,
+      percentage: 0,
+      completed: false
+    })
+    .select()
+    .single();
+
+  if (attemptError) {
+    console.error(attemptError);
+
+    alert(
+      "Qormaata jalqabuun hin danda'amne: " +
+      getErrorMessage(attemptError)
+    );
+
+    return;
+  }
+
+  currentExam = exam;
+  currentQuestions = questions;
+  currentQuestionIndex = 0;
+  currentAnswers = {};
+  currentAttempt = attempt;
+  pendingSubmit = false;
+
+  const title =
+    document.getElementById("examTitle");
+
+  if (title) {
+    title.textContent = exam.title;
+  }
+
+  examSecondsLeft =
+    Math.max(
+      1,
+      exam.duration * 60
+    );
+
+  startExamTimer();
+
+  renderCurrentQuestion();
+
+  showPage("examPage");
+}
+
+
+/* =========================================================
+   RENDER CURRENT QUESTION
+========================================================= */
+
+function renderCurrentQuestion() {
+  if (
+    !currentExam ||
+    !currentQuestions.length
+  ) {
+    return;
+  }
+
+  const question =
+    currentQuestions[
+      currentQuestionIndex
+    ];
+
+  const total =
+    currentQuestions.length;
+
+  const number =
+    document.getElementById(
+      "questionNumber"
+    );
+
+  const text =
+    document.getElementById(
+      "questionText"
+    );
+
+  const container =
+    document.getElementById(
+      "answersContainer"
+    );
+
+  if (number) {
+    number.textContent =
+      ` ${currentQuestionIndex + 1}/${total}`;
+  }
+
+  if (text) {
+    text.textContent =
+      question.text;
+  }
+
+  if (!container) return;
+
+  const selected =
+    currentAnswers[question.id];
+
+  const options = [
+    ["A", question.optionA],
+    ["B", question.optionB],
+    ["C", question.optionC],
+    ["D", question.optionD]
+  ];
+
+  container.innerHTML =
+    options
+      .map(
+        ([letter, value]) => `
+          <label class="answer-option">
+
+            <input
+              type="radio"
+              name="currentAnswer"
+              value="${letter}"
+              ${
+                selected === letter
+                  ? "checked"
+                  : ""
+              }
+              onchange="selectAnswer('${letter}')"
+            >
+
+            <span>
+              <strong>
+                ${letter}.
+              </strong>
+
+              ${escapeHtml(value)}
+            </span>
+
+          </label>
+        `
+      )
+      .join("");
+
+  const nextButton =
+    document.getElementById(
+      "nextQuestionButton"
+    );
+
+  const submitButton =
+    document.getElementById(
+      "submitExamButton"
+    );
+
+  const answered =
+    Boolean(
+      currentAnswers[
+        question.id
+      ]
+    );
+
+  if (nextButton) {
+    nextButton.disabled =
+      !answered;
+
+    nextButton.style.display =
+      currentQuestionIndex ===
+      total - 1
+        ? "none"
+        : "block";
+  }
+
+  if (submitButton) {
+    submitButton.disabled =
+      !answered;
+
+    submitButton.style.display =
+      currentQuestionIndex ===
+      total - 1
+        ? "block"
+        : "none";
+  }
+}
+
+
+/* =========================================================
+   SELECT ANSWER
+========================================================= */
+
+function selectAnswer(letter) {
+  const question =
+    currentQuestions[
+      currentQuestionIndex
+    ];
+
+  if (!question) return;
+
+  currentAnswers[
+    question.id
+  ] = letter;
+
+  const nextButton =
+    document.getElementById(
+      "nextQuestionButton"
+    );
+
+  const submitButton =
+    document.getElementById(
+      "submitExamButton"
+    );
+
+  if (nextButton) {
+    nextButton.disabled = false;
+  }
+
+  if (submitButton) {
+    submitButton.disabled = false;
+  }
+}
+
+
+/* =========================================================
+   NEXT QUESTION
+========================================================= */
+
+function nextQuestion() {
+  if (
+    currentQuestionIndex >=
+    currentQuestions.length - 1
+  ) {
+    return;
+  }
+
+  currentQuestionIndex++;
+
+  renderCurrentQuestion();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+/* =========================================================
+   SUBMIT CONFIRMATION
+========================================================= */
+
+function requestSubmitExam() {
+  if (!currentExam) return;
+
+  const unanswered =
+    currentQuestions.filter(
+      (question) =>
+        !currentAnswers[
+          question.id
+        ]
+    ).length;
+
+  const message =
+    document.getElementById(
+      "submitWarningMessage"
+    );
+
+  if (message) {
+    message.textContent =
+      unanswered > 0
+        ? `Gaaffii ${unanswered} hin deebifne. Qormaata submit gochuu barbaaddaa?`
+        : "Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?";
+  }
+
+  pendingSubmit = true;
+
+  showPage(
+    "submitConfirmPage"
+  );
+}
+
+
+function confirmSubmitExam(
+  confirmSubmit
+) {
+  if (!confirmSubmit) {
+    pendingSubmit = false;
+
+    showPage("examPage");
+
+    return;
+  }
+
+  if (
+    !pendingSubmit ||
+    !currentExam
+  ) {
+    return;
+  }
+
+  finishExam();
+}
+
+
+/* =========================================================
+   FINISH EXAM
+========================================================= */
+
+async function finishExam() {
+  const student =
+    requireStudent();
+
+  if (
+    !student ||
+    !currentExam ||
+    !currentAttempt
+  ) {
+    return;
+  }
+
+  stopExamTimer();
+
+  let correct = 0;
+
+  currentQuestions.forEach(
+    (question) => {
+      if (
+        currentAnswers[
+          question.id
+        ] ===
+        question.correctAnswer
+      ) {
+        correct++;
+      }
+    }
+  );
+
+  const total =
+    currentQuestions.length;
+
+  const percentage =
+    total
+      ? Math.round(
+          (correct / total) *
+            100
+        )
+      : 0;
+
+  try {
+
+    const {
+      error: attemptError
+    } = await db
+      .from("exam_attempts")
+      .update({
+        score: correct,
+        total,
+        percentage,
+        completed: true,
+        submitted_at:
+          new Date().toISOString()
+      })
+      .eq(
+        "id",
+        currentAttempt.id
+      );
+
+    if (attemptError) {
+      throw attemptError;
+    }
+
+    const resultPayload = {
+      student_id: student.id,
+      exam_id: currentExam.id,
+      exam_title:
+        currentExam.title,
+      correct,
+      total,
+      percentage,
+      answers: currentAnswers,
+      submitted_at:
+        new Date().toISOString()
+    };
+
+    const {
+      data: oldResult
+    } = await db
+      .from("results")
+      .select("id")
+      .eq(
+        "student_id",
+        student.id
+      )
+      .eq(
+        "exam_id",
+        currentExam.id
+      )
+      .maybeSingle();
+
+    if (oldResult?.id) {
+
+      const { error } =
+        await db
+          .from("results")
+          .update(
+            resultPayload
+          )
+          .eq(
+            "id",
+            oldResult.id
+          );
+
+      if (error) {
+        throw error;
+      }
+
+    } else {
+
+      const { error } =
+        await db
+          .from("results")
+          .insert(
+            resultPayload
+          );
+
+      if (error) {
+        throw error;
+      }
+    }
+
+    alert(
+      `Qormaanni xumurameera!\n\nQabxii: ${correct}/${total}\nDhibbeentaa: ${percentage}%`
+    );
+
+    currentExam = null;
+    currentQuestions = [];
+    currentQuestionIndex = 0;
+    currentAnswers = {};
+    currentAttempt = null;
+    pendingSubmit = false;
+
+    showPage("scorePage");
+
+    await showScore();
+
+  } catch (error) {
+
+    console.error(
+      "FINISH EXAM ERROR:",
+      error
+    );
+
+    alert(
+      "Qormaata submit gochuun hin milkoofne: " +
+      getErrorMessage(error)
+    );
+  }
+}
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function startExamTimer() {
+  stopExamTimer();
+
+  updateExamTimer();
+
+  examTimer =
+    setInterval(() => {
+
+      examSecondsLeft--;
+
+      updateExamTimer();
+
+      if (
+        examSecondsLeft <= 0
+      ) {
+
+        stopExamTimer();
+
+        alert(
+          "Yeroon qormaataa xumurameera. Qormaanni kee submit ta'a."
+        );
+
+        finishExam();
+      }
+
+    }, 1000);
+}
+
+
+function updateExamTimer() {
+  const el =
+    document.getElementById(
+      "examTimerValue"
+    );
+
+  if (el) {
+
+    const minutes =
+      Math.floor(
+        Math.max(
+          0,
+          examSecondsLeft
+        ) / 60
+      );
+
+    const seconds =
+      Math.max(
+        0,
+        examSecondsLeft
+      ) % 60;
+
+    el.textContent =
+      `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+}
+
+
+function stopExamTimer() {
+  if (examTimer) {
+    clearInterval(
+      examTimer
+    );
+
+    examTimer = null;
+  }
+}
+
+
+/* =========================================================
+   SCORE / PROFILE
+========================================================= */
+
+async function showScore() {
+  const student =
+    requireStudent();
+
+  if (!student) return;
+
+  const container =
+    document.getElementById(
+      "studentScore"
+    );
+
+  if (!container) return;
