@@ -1376,3 +1376,859 @@ async function showScore() {
     );
 
   if (!container) return;
+/* =========================================================
+   KUTAA 3 — SCORE, PROFILE FI ADMIN
+========================================================= */
+
+async function showScore() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const container = document.getElementById("studentScore");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("results")
+    .select("*")
+    .eq("student_id", student.id)
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `
+      <div class="empty-state">
+        ❌ Qabxii fe'uu hin dandeenye.
+      </div>
+    `;
+    console.error(error);
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        📊 Ammaaf qormaata tokko illee hin xumurre.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = data.map((result) => `
+    <div class="result-card">
+
+      <div>
+        <h3>
+          ${escapeHtml(
+            result.exam_title || "Qormaata"
+          )}
+        </h3>
+
+        <p>
+          ${formatDateTime(
+            result.submitted_at
+          )}
+        </p>
+      </div>
+
+      <div class="result-score">
+        <strong>
+          ${Number(
+            result.percentage || 0
+          )}%
+        </strong>
+
+        <span>
+          ${Number(
+            result.correct || 0
+          )}/${Number(
+            result.total || 0
+          )}
+        </span>
+      </div>
+
+    </div>
+  `).join("");
+}
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+async function loadProfile() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const nameInput =
+    document.getElementById(
+      "profileNameInput"
+    );
+
+  const code =
+    document.getElementById(
+      "profileCode"
+    );
+
+  const activation =
+    document.getElementById(
+      "profileActivationCode"
+    );
+
+  const status =
+    document.getElementById(
+      "profileStatus"
+    );
+
+  if (nameInput) {
+    nameInput.value =
+      student.name || "";
+  }
+
+  if (code) {
+    code.textContent =
+      student.student_id || "";
+  }
+
+  if (activation) {
+    activation.textContent =
+      student.activation_code || "";
+  }
+
+  if (status) {
+    status.innerHTML =
+      student.status === "active"
+        ? '<span class="status active">● Active</span>'
+        : '<span class="status blocked">● Cufame</span>';
+  }
+}
+
+
+async function saveProfile() {
+  const student = requireStudent();
+  if (!student) return;
+
+  const name =
+    document
+      .getElementById(
+        "profileNameInput"
+      )
+      ?.value.trim() || "";
+
+  if (name.length < 2) {
+    alert(
+      "Maqaa sirrii galchi."
+    );
+    return;
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("students")
+    .update({
+      name
+    })
+    .eq("id", student.id)
+    .select()
+    .single();
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+    return;
+  }
+
+  currentStudent = data;
+
+  await loadProfile();
+  await loadStudentHome();
+
+  alert(
+    "Maqaan kee olkaa'ameera."
+  );
+}
+
+
+function studentLogout() {
+  localStorage.removeItem(
+    "ao_student_id"
+  );
+
+  currentStudent = null;
+
+  stopExamTimer();
+
+  currentExam = null;
+  currentQuestions = [];
+  currentAnswers = {};
+  currentAttempt = null;
+
+  showPublicLoginPage();
+}
+
+
+/* =========================================================
+   ADMIN LOGIN
+========================================================= */
+
+async function adminLogin() {
+  const username =
+    document
+      .getElementById(
+        "adminUsername"
+      )
+      ?.value.trim() || "";
+
+  const password =
+    document
+      .getElementById(
+        "adminPassword"
+      )
+      ?.value || "";
+
+  if (!username || !password) {
+    showAdminMessage(
+      "Username fi Password galchi.",
+      "error"
+    );
+    return;
+  }
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db
+      .from("admins")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      showAdminMessage(
+        "Username ykn Password sirrii miti.",
+        "error"
+      );
+      return;
+    }
+
+    currentAdmin = data;
+
+    localStorage.setItem(
+      "ao_admin_id",
+      String(data.id)
+    );
+
+    showPage(
+      "adminDashboardPage"
+    );
+
+    await initializeAdmin();
+
+  } catch (error) {
+
+    console.error(
+      "ADMIN LOGIN ERROR:",
+      error
+    );
+
+    showAdminMessage(
+      getErrorMessage(error),
+      "error"
+    );
+  }
+}
+
+
+function adminLogout() {
+  localStorage.removeItem(
+    "ao_admin_id"
+  );
+
+  currentAdmin = null;
+
+  showPublicLoginPage();
+}
+
+
+async function restoreAdmin() {
+  const id =
+    localStorage.getItem(
+      "ao_admin_id"
+    );
+
+  if (!id) return null;
+
+  try {
+
+    const {
+      data,
+      error
+    } = await db
+      .from("admins")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      localStorage.removeItem(
+        "ao_admin_id"
+      );
+
+      return null;
+    }
+
+    currentAdmin = data;
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      "RESTORE ADMIN ERROR:",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+function requireAdmin() {
+  if (!currentAdmin) {
+    showPage(
+      "adminLoginPage"
+    );
+
+    return null;
+  }
+
+  return currentAdmin;
+}
+
+
+/* =========================================================
+   ADMIN INITIALIZE
+========================================================= */
+
+async function initializeAdmin() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  await openAdminPanel(
+    "students"
+  );
+
+  await refreshAllAdminLists();
+}
+
+
+async function openAdminPanel(panel) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const panels = {
+    students:
+      "adminStudentsPanel",
+
+    results:
+      "adminResultsPanel",
+
+    lessons:
+      "adminLessonsPanel",
+
+    exams:
+      "adminExamsPanel"
+  };
+
+  Object.values(
+    panels
+  ).forEach((id) => {
+
+    const el =
+      document.getElementById(id);
+
+    if (el) {
+      el.style.display =
+        "none";
+    }
+  });
+
+  const selected =
+    document.getElementById(
+      panels[panel]
+    );
+
+  if (selected) {
+    selected.style.display =
+      "block";
+  }
+
+  if (panel === "students") {
+    await loadAdminStudents();
+  }
+
+  if (panel === "results") {
+    await loadAdminResults();
+  }
+
+  if (panel === "lessons") {
+    await loadAdminLessons();
+  }
+
+  if (panel === "exams") {
+    await loadAdminExams();
+  }
+}
+
+
+/* =========================================================
+   ADMIN — STUDENTS
+========================================================= */
+
+async function loadAdminStudents() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const container =
+    document.getElementById(
+      "adminStudentsList"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("students")
+    .select("*")
+    .order("created_at", {
+      ascending: false
+    });
+
+  if (error) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        ❌ Barattoota fe'uu hin dandeenye.
+      </div>
+    `;
+
+    console.error(error);
+
+    return;
+  }
+
+  if (!data?.length) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        👨‍🎓 Barataan hin galmoofne.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    data.map((student) => `
+
+      <div class="admin-list-item">
+
+        <div class="item-main">
+
+          <h3>
+            ${escapeHtml(
+              student.name
+            )}
+          </h3>
+
+          <p>
+
+            ID:
+            <strong>
+              ${escapeHtml(
+                student.student_id
+              )}
+            </strong>
+
+            <br>
+
+            Code:
+            <strong>
+              ${escapeHtml(
+                student.activation_code
+              )}
+            </strong>
+
+            <br>
+
+            Galmaa'e:
+            ${formatDateTime(
+              student.created_at
+            )}
+
+          </p>
+
+          <span
+            class="status ${
+              student.status === "active"
+                ? "active"
+                : "blocked"
+            }"
+          >
+            ● ${
+              student.status === "active"
+                ? "Active"
+                : student.status === "pending"
+                ? "Pending"
+                : "Cufame"
+            }
+          </span>
+
+        </div>
+
+        <div class="admin-actions">
+
+          <button
+            type="button"
+            class="small-btn"
+            onclick="toggleStudentStatus('${student.id}')"
+          >
+            ${
+              student.status === "active"
+                ? "🔒 Cufi"
+                : "🔓 Bani"
+            }
+          </button>
+
+          <button
+            type="button"
+            class="danger-small-btn"
+            onclick="deleteStudent('${student.id}')"
+          >
+            🗑️ Haqi
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+}
+
+
+async function toggleStudentStatus(
+  studentId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const {
+    data: student,
+    error: findError
+  } = await db
+    .from("students")
+    .select("id,status")
+    .eq("id", studentId)
+    .maybeSingle();
+
+  if (
+    findError ||
+    !student
+  ) {
+    return;
+  }
+
+  const newStatus =
+    student.status === "active"
+      ? "blocked"
+      : "active";
+
+  const {
+    error
+  } = await db
+    .from("students")
+    .update({
+      status: newStatus
+    })
+    .eq(
+      "id",
+      studentId
+    );
+
+  if (error) {
+
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  await loadAdminStudents();
+}
+
+
+async function deleteStudent(
+  studentId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const confirmDelete =
+    confirm(
+      "Barataa kana haquu barbaaddaa?"
+    );
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  const {
+    error
+  } = await db
+    .from("students")
+    .delete()
+    .eq(
+      "id",
+      studentId
+    );
+
+  if (error) {
+
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  await loadAdminStudents();
+}
+
+
+/* =========================================================
+   ADMIN — RESULTS
+========================================================= */
+
+async function loadAdminResults() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const container =
+    document.getElementById(
+      "adminResultsList"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("results")
+    .select("*")
+    .order("submitted_at", {
+      ascending: false
+    });
+
+  if (error) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        ❌ Qabxiiwwan fe'uu hin dandeenye.
+      </div>
+    `;
+
+    console.error(error);
+
+    return;
+  }
+
+  if (!data?.length) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        📊 Hanga ammaatti bu'aan hin jiru.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    data.map((result) => `
+
+      <div class="admin-list-item">
+
+        <div class="item-main">
+
+          <h3>
+            ${escapeHtml(
+              result.exam_title ||
+              "Qormaata"
+            )}
+          </h3>
+
+          <p>
+            Student ID:
+            <strong>
+              ${escapeHtml(
+                result.student_id
+              )}
+            </strong>
+
+            <br>
+
+            Qabxii:
+            <strong>
+              ${Number(
+                result.correct || 0
+              )}/${Number(
+                result.total || 0
+              )}
+            </strong>
+
+            <br>
+
+            Dhibbeentaa:
+            <strong>
+              ${Number(
+                result.percentage || 0
+              )}%
+            </strong>
+
+            <br>
+
+            ${formatDateTime(
+              result.submitted_at
+            )}
+          </p>
+
+        </div>
+
+        <div class="result-score">
+          ${Number(
+            result.percentage || 0
+          )}%
+        </div>
+
+      </div>
+
+    `).join("");
+}
+
+
+/* =========================================================
+   ADMIN — LESSONS
+========================================================= */
+
+async function loadAdminLessons() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const container =
+    document.getElementById(
+      "adminLessonsList"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("lessons")
+    .select("*")
+    .order("created_at", {
+      ascending: false
+    });
+
+  if (error) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        ❌ Barnoota fe'uu hin dandeenye.
+      </div>
+    `;
+
+    return;
+  }
+
+  if (!data?.length) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+        📚 Barnoonni hin jiru.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    data.map((lesson) => `
+
+      <div class="admin-list-item">
+
+        <div class="item-main">
+
+          <h3>
+            ${escapeHtml(
+              lesson.title
+            )}
+          </h3>
+
+          <p>
+            ${escapeHtml(
+              truncate(
+                lesson.content,
+                180
+              )
+            )}
+          </p>
+
+        </div>
+
+        <div class="admin-actions">
+
+          <button
+            type="button"
+            class="danger-small-btn"
+            onclick="deleteLesson('${lesson.id}')"
+          >
+            🗑️ Haqi
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+}
