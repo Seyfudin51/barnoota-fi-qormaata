@@ -1,8 +1,12 @@
+/* =========================================================
+   AKKAADAAMII OROMIYAA - app.js
+   FULL VERSION
+========================================================= */
+
 "use strict";
 
 /* =========================================================
-   AKKAADAAMII OROMIYAA
-   APP.JS - FULL VERSION
+   SUPABASE
 ========================================================= */
 
 const SUPABASE_URL =
@@ -16,26 +20,6 @@ const AI_FUNCTION_URL =
 
 let db = null;
 
-let currentStudent = null;
-let currentAdmin = null;
-
-let currentExam = null;
-let currentQuestions = [];
-let currentQuestionIndex = 0;
-let currentAnswers = {};
-let currentAttempt = null;
-
-let examTimer = null;
-let examSecondsLeft = 0;
-let pendingSubmit = false;
-
-let authListenerReady = false;
-
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
 function initSupabase() {
   if (db) return db;
 
@@ -47,11 +31,9 @@ function initSupabase() {
       SUPABASE_URL,
       SUPABASE_ANON_KEY
     );
-
-    return db;
   }
 
-  return null;
+  return db;
 }
 
 function requireDb() {
@@ -59,13 +41,28 @@ function requireDb() {
 
   if (!client) {
     throw new Error(
-      "Supabase hin fe'amne. Mee fuula kana haaromsi."
+      "Supabase hin fe'amne. Fuula haaromsiitii irra deebi'i."
     );
   }
 
   return client;
 }
 
+/* =========================================================
+   APP STATE
+========================================================= */
+
+let currentStudent = null;
+let currentAdmin = null;
+let currentExam = null;
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentAnswers = {};
+let currentAttempt = null;
+let examTimer = null;
+let examSecondsLeft = 0;
+let pendingSubmit = false;
+let authListenerReady = false;
 
 /* =========================================================
    HELPERS
@@ -80,15 +77,15 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-function formatText(value) {
-  return escapeHtml(value).replace(/\n/g, "<br>");
-}
-
 function truncate(value, length = 120) {
   const text = String(value ?? "");
   return text.length > length
     ? text.slice(0, length) + "..."
     : text;
+}
+
+function formatText(value) {
+  return escapeHtml(value).replace(/\n/g, "<br>");
 }
 
 function getErrorMessage(error) {
@@ -98,6 +95,18 @@ function getErrorMessage(error) {
     error?.details ||
     "Dogoggorri hin beekamne."
   );
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString("om-ET");
 }
 
 function showStudentMessage(message, type = "info") {
@@ -128,10 +137,14 @@ function showAIMessage(message, type = "info") {
 }
 
 function generateStudentCode() {
+  const chars = "0123456789";
+
   let result = "ST-";
 
   for (let i = 0; i < 6; i++) {
-    result += Math.floor(Math.random() * 10);
+    result += chars[
+      Math.floor(Math.random() * chars.length)
+    ];
   }
 
   return result;
@@ -155,39 +168,29 @@ function generateActivationCode() {
 function normalizeQuestion(row) {
   return {
     ...row,
-
     id: row.id,
-
-    examId:
-      row.exam_id ??
-      row.examId,
-
+    examId: row.exam_id ?? row.examId,
     text:
       row.question ??
       row.question_text ??
       row.text ??
       "",
-
     optionA:
       row.option_a ??
       row.optionA ??
       "",
-
     optionB:
       row.option_b ??
       row.optionB ??
       "",
-
     optionC:
       row.option_c ??
       row.optionC ??
       "",
-
     optionD:
       row.option_d ??
       row.optionD ??
       "",
-
     correctAnswer: String(
       row.correct_answer ??
       row.correctAnswer ??
@@ -248,19 +251,6 @@ function normalizeExam(row) {
   };
 }
 
-function formatDateTime(value) {
-  if (!value) return "";
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return date.toLocaleString("om-ET");
-}
-
-
 /* =========================================================
    PAGE NAVIGATION
 ========================================================= */
@@ -285,6 +275,10 @@ function showPage(pageId) {
 }
 
 function openStudentLogin() {
+  document
+    .getElementById("postLoginRoleNav")
+    ?.remove();
+
   showPage("studentLoginPage");
 
   const input =
@@ -296,6 +290,10 @@ function openStudentLogin() {
 }
 
 function openAdminLogin() {
+  document
+    .getElementById("postLoginRoleNav")
+    ?.remove();
+
   showPage("adminLoginPage");
 
   const input =
@@ -306,14 +304,75 @@ function openAdminLogin() {
   }
 }
 
+function setupPostLoginRoleNav(
+  authenticated = false
+) {
+  const rolePage =
+    document.getElementById("rolePage");
+
+  if (!rolePage) return;
+
+  const oldNav =
+    document.getElementById(
+      "postLoginRoleNav"
+    );
+
+  if (oldNav) oldNav.remove();
+
+  rolePage
+    .querySelectorAll(
+      '[onclick*="openStudentLogin"], [onclick*="openAdminLogin"]'
+    )
+    .forEach((el) => {
+      el.style.display = "none";
+    });
+
+  if (!authenticated) return;
+
+  const nav =
+    document.createElement("div");
+
+  nav.id = "postLoginRoleNav";
+  nav.className = "bottom-nav";
+
+  nav.innerHTML = `
+    <button
+      type="button"
+      class="nav-item"
+      onclick="openStudentLogin()"
+    >
+      <span>👨‍🎓</span>
+      <small>Barataa</small>
+    </button>
+
+    <button
+      type="button"
+      class="nav-item"
+      onclick="openAdminLogin()"
+    >
+      <span>⚙️</span>
+      <small>Admin</small>
+    </button>
+  `;
+
+  document.body.appendChild(nav);
+}
+
+function showPublicLoginPage() {
+  setupPostLoginRoleNav(false);
+  showPage("rolePage");
+}
+
+function showPostLoginRoles() {
+  setupPostLoginRoleNav(true);
+  showPage("rolePage");
+}
 
 /* =========================================================
    STUDENT REGISTRATION
 ========================================================= */
 
 async function studentRegister() {
-  const dbClient = requireDb();
-
   const name =
     document
       .getElementById("nameInput")
@@ -329,10 +388,12 @@ async function studentRegister() {
   }
 
   try {
+    const client = requireDb();
+
     const {
       data: existing,
       error: existingError
-    } = await dbClient
+    } = await client
       .from("students")
       .select(
         "id,student_id,activation_code,name,status"
@@ -355,13 +416,15 @@ async function studentRegister() {
       return;
     }
 
-    let studentId = generateStudentCode();
+    let studentId =
+      generateStudentCode();
+
     let activationCode =
       generateActivationCode();
 
     for (let i = 0; i < 10; i++) {
       const { data: duplicate } =
-        await dbClient
+        await client
           .from("students")
           .select("id")
           .or(
@@ -371,7 +434,9 @@ async function studentRegister() {
 
       if (!duplicate?.length) break;
 
-      studentId = generateStudentCode();
+      studentId =
+        generateStudentCode();
+
       activationCode =
         generateActivationCode();
     }
@@ -379,7 +444,7 @@ async function studentRegister() {
     const {
       data: student,
       error
-    } = await dbClient
+    } = await client
       .from("students")
       .insert({
         student_id: studentId,
@@ -400,17 +465,25 @@ async function studentRegister() {
       `Adminiin erga si mirkaneessee booda seenuu dandeessa.`
     );
 
-    const input =
-      document.getElementById("nameInput");
+    const nameInput =
+      document.getElementById(
+        "nameInput"
+      );
 
-    if (input) input.value = "";
+    if (nameInput) {
+      nameInput.value = "";
+    }
 
     showStudentMessage(
       "Galmeen kee milkaa'eera. Admin eegi.",
       "success"
     );
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "REGISTER ERROR:",
+      error
+    );
 
     showStudentMessage(
       getErrorMessage(error),
@@ -419,14 +492,11 @@ async function studentRegister() {
   }
 }
 
-
 /* =========================================================
    STUDENT LOGIN
 ========================================================= */
 
 async function studentLogin() {
-  const dbClient = requireDb();
-
   const studentId =
     document
       .getElementById("studentIdInput")
@@ -435,27 +505,34 @@ async function studentLogin() {
 
   const activationCode =
     document
-      .getElementById("activationCodeInput")
+      .getElementById(
+        "activationCodeInput"
+      )
       ?.value
       .trim() || "";
 
   if (!studentId || !activationCode) {
     showStudentMessage(
-      "Student ID fi Activation Code lamaan galchi.",
+      "Student ID fi Activation Code lamaan isaanii galchi.",
       "error"
     );
     return;
   }
 
   try {
+    const client = requireDb();
+
     const {
       data: student,
       error
-    } = await dbClient
+    } = await client
       .from("students")
       .select("*")
       .eq("student_id", studentId)
-      .eq("activation_code", activationCode)
+      .eq(
+        "activation_code",
+        activationCode
+      )
       .maybeSingle();
 
     if (error) throw error;
@@ -485,19 +562,33 @@ async function studentLogin() {
       student.id
     );
 
-    document.getElementById(
-      "studentIdInput"
-    ).value = "";
+    const studentIdInput =
+      document.getElementById(
+        "studentIdInput"
+      );
 
-    document.getElementById(
-      "activationCodeInput"
-    ).value = "";
+    const activationInput =
+      document.getElementById(
+        "activationCodeInput"
+      );
+
+    if (studentIdInput) {
+      studentIdInput.value = "";
+    }
+
+    if (activationInput) {
+      activationInput.value = "";
+    }
 
     showPage("studentHomePage");
 
     await loadStudentHome();
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "STUDENT LOGIN ERROR:",
+      error
+    );
 
     showStudentMessage(
       getErrorMessage(error),
@@ -508,15 +599,19 @@ async function studentLogin() {
 
 async function restoreStudent() {
   const id =
-    localStorage.getItem("ao_student_id");
+    localStorage.getItem(
+      "ao_student_id"
+    );
 
   if (!id) return null;
 
   try {
+    const client = requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("students")
       .select("*")
       .eq("id", id)
@@ -524,7 +619,10 @@ async function restoreStudent() {
 
     if (error) throw error;
 
-    if (!data || data.status !== "active") {
+    if (
+      !data ||
+      data.status !== "active"
+    ) {
       localStorage.removeItem(
         "ao_student_id"
       );
@@ -537,8 +635,13 @@ async function restoreStudent() {
     currentStudent = data;
 
     return data;
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "RESTORE STUDENT ERROR:",
+      error
+    );
+
     return null;
   }
 }
@@ -552,32 +655,33 @@ function requireStudent() {
   return currentStudent;
 }
 
-
 /* =========================================================
    STUDENT HOME
 ========================================================= */
 
 async function loadStudentHome() {
-  const student = requireStudent();
+  const student =
+    requireStudent();
 
   if (!student) return;
 
-  const name =
+  const nameEl =
     document.getElementById(
       "studentWelcomeName"
     );
 
-  if (name) {
-    name.textContent = student.name;
-  }
-
-  const message =
+  const messageEl =
     document.getElementById(
       "studentHomeMessage"
     );
 
-  if (message) {
-    message.textContent =
+  if (nameEl) {
+    nameEl.textContent =
+      student.name;
+  }
+
+  if (messageEl) {
+    messageEl.textContent =
       "Barnoota dubbisi, qormaata fudhadhu, qabxii kees ilaali.";
   }
 
@@ -593,21 +697,27 @@ async function loadStudentLessons() {
   if (!container) return;
 
   try {
+    const client = requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("lessons")
       .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        { ascending: false }
+      );
 
     if (error) throw error;
 
     if (!data?.length) {
       container.innerHTML =
-        `<div class="empty-state">📚 Ammaaf barnoonni hin fe'amne.</div>`;
+        `<div class="empty-state">
+          📚 Ammaaf barnoonni hin fe'amne.
+        </div>`;
+
       return;
     }
 
@@ -615,47 +725,58 @@ async function loadStudentLessons() {
       data
         .map(
           (lesson) => `
-          <article class="item-card">
-            <div class="item-icon">📚</div>
+        <article class="item-card">
+          <div class="item-icon">📚</div>
 
-            <div class="item-main">
-              <h4>${escapeHtml(lesson.title)}</h4>
+          <div class="item-main">
+            <h4>
+              ${escapeHtml(
+                lesson.title
+              )}
+            </h4>
 
-              <p>
-                ${escapeHtml(
-                  truncate(
-                    lesson.content,
-                    120
-                  )
-                )}
-              </p>
+            <p>
+              ${escapeHtml(
+                truncate(
+                  lesson.content,
+                  120
+                )
+              )}
+            </p>
 
-              <button
-                type="button"
-                class="small-btn"
-                onclick="openLesson('${lesson.id}')"
-              >
-                Baradhu →
-              </button>
-            </div>
-          </article>
-        `
+            <button
+              type="button"
+              class="small-btn"
+              onclick="openLesson('${lesson.id}')"
+            >
+              Baradhu →
+            </button>
+          </div>
+        </article>
+      `
         )
         .join("");
+
   } catch (error) {
     console.error(error);
 
     container.innerHTML =
-      `<div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>`;
+      `<div class="empty-state">
+        ❌ Barnoota fe'uu hin dandeenye.
+      </div>`;
   }
 }
 
-async function openLesson(lessonId) {
+async function openLesson(
+  lessonId
+) {
   try {
+    const client = requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("lessons")
       .select("*")
       .eq("id", lessonId)
@@ -674,40 +795,53 @@ async function openLesson(lessonId) {
       );
 
     if (title) {
-      title.textContent = data.title;
+      title.textContent =
+        data.title;
     }
 
     if (content) {
       content.innerHTML =
-        `<div class="lesson-content">${formatText(
-          data.content
-        )}</div>`;
+        `<div class="lesson-content">
+          ${formatText(
+            data.content
+          )}
+        </div>`;
     }
 
-    showPage("lessonDetailPage");
+    showPage(
+      "lessonDetailPage"
+    );
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "OPEN LESSON ERROR:",
+      error
+    );
   }
 }
-
 
 /* =========================================================
    EXAM WINDOW
 ========================================================= */
 
-function getExamWindowStatus(exam) {
+function getExamWindowStatus(
+  exam
+) {
   const now = new Date();
 
   if (exam.startDate) {
     const start =
       new Date(
         `${exam.startDate}T${
-          exam.startTime || "00:00"
+          exam.startTime ||
+          "00:00"
         }`
       );
 
     if (
-      !Number.isNaN(start.getTime()) &&
+      !Number.isNaN(
+        start.getTime()
+      ) &&
       now < start
     ) {
       return {
@@ -722,12 +856,15 @@ function getExamWindowStatus(exam) {
     const end =
       new Date(
         `${exam.endDate}T${
-          exam.endTime || "23:59:59"
+          exam.endTime ||
+          "23:59:59"
         }`
       );
 
     if (
-      !Number.isNaN(end.getTime()) &&
+      !Number.isNaN(
+        end.getTime()
+      ) &&
       now > end
     ) {
       return {
@@ -738,7 +875,10 @@ function getExamWindowStatus(exam) {
     }
   }
 
-  if (exam.status === "disabled") {
+  if (
+    exam.status ===
+    "disabled"
+  ) {
     return {
       available: false,
       reason: "disabled"
@@ -751,7 +891,6 @@ function getExamWindowStatus(exam) {
   };
 }
 
-
 /* =========================================================
    ATTEMPTS
 ========================================================= */
@@ -761,38 +900,56 @@ async function getCompletedAttempts(
   studentId
 ) {
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("exam_attempts")
       .select("*")
-      .eq("exam_id", examId)
-      .eq("student_id", studentId)
-      .eq("completed", true)
-      .order("attempt_number", {
-        ascending: false
-      });
+      .eq(
+        "exam_id",
+        examId
+      )
+      .eq(
+        "student_id",
+        studentId
+      )
+      .eq(
+        "completed",
+        true
+      )
+      .order(
+        "attempt_number",
+        { ascending: false }
+      );
 
     if (error) {
-      console.error(error);
+      console.error(
+        "ATTEMPTS ERROR:",
+        error
+      );
+
       return [];
     }
 
     return data || [];
+
   } catch (error) {
     console.error(error);
     return [];
   }
 }
 
-
 /* =========================================================
    LOAD EXAMS
 ========================================================= */
 
 async function loadExams() {
-  const student = requireStudent();
+  const student =
+    requireStudent();
 
   if (!student) return;
 
@@ -804,30 +961,41 @@ async function loadExams() {
   if (!container) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("exams")
       .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        { ascending: false }
+      );
 
     if (error) throw error;
 
     if (!data?.length) {
       container.innerHTML =
-        `<div class="empty-state">📝 Ammaaf qormaanni hin jiru.</div>`;
+        `<div class="empty-state">
+          📝 Ammaaf qormaanni hin jiru.
+        </div>`;
+
       return;
     }
 
     const exams =
-      data.map(normalizeExam);
+      data.map(
+        normalizeExam
+      );
 
-    let html = "";
+    const cards = [];
 
-    for (const exam of exams) {
+    for (
+      const exam of exams
+    ) {
       const attempts =
         await getCompletedAttempts(
           exam.id,
@@ -836,44 +1004,41 @@ async function loadExams() {
 
       const limit =
         Number(
-          exam.attemptLimit || 1
+          exam.attemptLimit ||
+          1
         );
 
       const window =
-        getExamWindowStatus(exam);
+        getExamWindowStatus(
+          exam
+        );
 
       let action = "";
 
       if (!window.available) {
-        let text = "";
-
-        if (
+        const text =
           window.reason ===
           "not_started"
-        ) {
-          text =
-            `⏳ Hin jalqabne: ${formatDateTime(
-              window.date
-            )}`;
-        } else if (
-          window.reason === "ended"
-        ) {
-          text =
-            "⛔ Yeroon qormaataa darbeera.";
-        } else {
-          text =
-            "⛔ Qormaanni cufameera.";
-        }
+            ? `⏳ Hin jalqabne: ${formatDateTime(window.date)}`
+            : window.reason ===
+              "ended"
+            ? "⛔ Yeroon qormaataa darbeera."
+            : "⛔ Qormaanni cufameera.";
 
         action =
-          `<span class="status blocked">${escapeHtml(
-            text
-          )}</span>`;
+          `<span class="status blocked">
+            ${escapeHtml(text)}
+          </span>`;
+
       } else if (
-        attempts.length >= limit
+        attempts.length >=
+        limit
       ) {
         action =
-          `<span class="status blocked">Attempt xumurame</span>`;
+          `<span class="status blocked">
+            Attempt xumurame
+          </span>`;
+
       } else {
         action = `
           <button
@@ -886,7 +1051,7 @@ async function loadExams() {
         `;
       }
 
-      html += `
+      cards.push(`
         <article class="exam-card">
 
           <div class="exam-badge">
@@ -898,20 +1063,23 @@ async function loadExams() {
           </div>
 
           <h3>
-            ${escapeHtml(exam.title)}
+            ${escapeHtml(
+              exam.title
+            )}
           </h3>
 
           <p>
             ${escapeHtml(
-              exam.description || ""
+              exam.description ||
+              ""
             )}
           </p>
 
           <div class="exam-meta">
-
             <span>
               ❓ ${
-                exam.questionLimit > 0
+                exam.questionLimit >
+                0
                   ? exam.questionLimit
                   : "Hunda"
               }
@@ -924,7 +1092,6 @@ async function loadExams() {
             <span>
               🔢 ${attempts.length}/${limit}
             </span>
-
           </div>
 
           <div class="exam-action">
@@ -932,55 +1099,78 @@ async function loadExams() {
           </div>
 
         </article>
-      `;
+      `);
     }
 
-    container.innerHTML = html;
+    container.innerHTML =
+      cards.join("");
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "LOAD EXAMS ERROR:",
+      error
+    );
 
     container.innerHTML =
-      `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
+      `<div class="empty-state">
+        ❌ Qormaata fe'uu hin dandeenye.
+      </div>`;
   }
 }
-
 
 /* =========================================================
    START EXAM
 ========================================================= */
 
-async function startExam(examId) {
-  const student = requireStudent();
+async function startExam(
+  examId
+) {
+  const student =
+    requireStudent();
 
   if (!student) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data: examRow,
       error: examError
-    } = await requireDb()
+    } = await client
       .from("exams")
       .select("*")
       .eq("id", examId)
       .maybeSingle();
 
-    if (examError || !examRow) {
-      alert("Qormaanni hin argamne.");
+    if (
+      examError ||
+      !examRow
+    ) {
+      alert(
+        "Qormaanni hin argamne."
+      );
+
       return;
     }
 
     const exam =
-      normalizeExam(examRow);
+      normalizeExam(
+        examRow
+      );
 
     const window =
-      getExamWindowStatus(exam);
+      getExamWindowStatus(
+        exam
+      );
 
     if (!window.available) {
       alert(
         window.reason ===
           "not_started"
           ? "Qormaanni yeroo isaa hin geenye."
-          : window.reason === "ended"
+          : window.reason ===
+            "ended"
           ? "Yeroon qormaataa darbeera."
           : "Qormaanni cufameera."
       );
@@ -988,7 +1178,7 @@ async function startExam(examId) {
       return;
     }
 
-    const attempts =
+    const completedAttempts =
       await getCompletedAttempts(
         exam.id,
         student.id
@@ -996,25 +1186,31 @@ async function startExam(examId) {
 
     const attemptLimit =
       Number(
-        exam.attemptLimit || 1
+        exam.attemptLimit ||
+        1
       );
 
     if (
-      attempts.length >= attemptLimit
+      completedAttempts.length >=
+      attemptLimit
     ) {
       alert(
         "Attempt kee xumurameera."
       );
+
       return;
     }
 
     const {
       data: questionRows,
       error: questionError
-    } = await requireDb()
+    } = await client
       .from("questions")
       .select("*")
-      .eq("exam_id", exam.id);
+      .eq(
+        "exam_id",
+        exam.id
+      );
 
     if (questionError) {
       alert(
@@ -1022,26 +1218,35 @@ async function startExam(examId) {
           questionError
         )
       );
+
       return;
     }
 
     let questions =
       (questionRows || [])
-        .map(normalizeQuestion);
+        .map(
+          normalizeQuestion
+        );
 
     if (!questions.length) {
       alert(
         "Qormaata kana keessatti gaaffiin hin jiru."
       );
+
       return;
     }
 
     questions =
       questions.sort(
-        () => Math.random() - 0.5
+        () =>
+          Math.random() -
+          0.5
       );
 
-    if (exam.questionLimit > 0) {
+    if (
+      exam.questionLimit >
+      0
+    ) {
       questions =
         questions.slice(
           0,
@@ -1050,41 +1255,58 @@ async function startExam(examId) {
     }
 
     const attemptNumber =
-      attempts.length + 1;
+      completedAttempts.length +
+      1;
 
     const {
       data: attempt,
       error: attemptError
-    } = await requireDb()
+    } = await client
       .from("exam_attempts")
       .insert({
-        student_id: student.id,
-        exam_id: exam.id,
+        student_id:
+          student.id,
+
+        exam_id:
+          exam.id,
+
         attempt_number:
           attemptNumber,
+
         score: 0,
-        total: questions.length,
+
+        total:
+          questions.length,
+
         percentage: 0,
-        completed: false
+
+        completed:
+          false
       })
       .select()
       .single();
 
     if (attemptError) {
-      alert(
-        getErrorMessage(
-          attemptError
-        )
-      );
-      return;
+      throw attemptError;
     }
 
-    currentExam = exam;
-    currentQuestions = questions;
-    currentQuestionIndex = 0;
-    currentAnswers = {};
-    currentAttempt = attempt;
-    pendingSubmit = false;
+    currentExam =
+      exam;
+
+    currentQuestions =
+      questions;
+
+    currentQuestionIndex =
+      0;
+
+    currentAnswers =
+      {};
+
+    currentAttempt =
+      attempt;
+
+    pendingSubmit =
+      false;
 
     const title =
       document.getElementById(
@@ -1102,20 +1324,26 @@ async function startExam(examId) {
         exam.duration * 60
       );
 
-    renderCurrentQuestion();
     startExamTimer();
 
-    showPage("examPage");
+    renderCurrentQuestion();
+
+    showPage(
+      "examPage"
+    );
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "START EXAM ERROR:",
+      error
+    );
 
     alert(
-      "Qormaata jalqabuun hin milkoofne: " +
+      "Qormaata jalqabuun hin danda'amne:\n" +
       getErrorMessage(error)
     );
   }
 }
-
 
 /* =========================================================
    RENDER QUESTION
@@ -1154,7 +1382,7 @@ function renderCurrentQuestion() {
 
   if (number) {
     number.textContent =
-      ` ${currentQuestionIndex + 1}/${total}`;
+      `${currentQuestionIndex + 1}/${total}`;
   }
 
   if (text) {
@@ -1187,7 +1415,8 @@ function renderCurrentQuestion() {
             name="currentAnswer"
             value="${letter}"
             ${
-              selected === letter
+              selected ===
+              letter
                 ? "checked"
                 : ""
             }
@@ -1195,8 +1424,13 @@ function renderCurrentQuestion() {
           >
 
           <span>
-            <strong>${letter}.</strong>
-            ${escapeHtml(value)}
+            <strong>
+              ${letter}.
+            </strong>
+
+            ${escapeHtml(
+              value
+            )}
           </span>
 
         </label>
@@ -1244,7 +1478,13 @@ function renderCurrentQuestion() {
   }
 }
 
-function selectAnswer(letter) {
+/* =========================================================
+   SELECT ANSWER
+========================================================= */
+
+function selectAnswer(
+  letter
+) {
   const question =
     currentQuestions[
       currentQuestionIndex
@@ -1267,13 +1507,19 @@ function selectAnswer(letter) {
     );
 
   if (nextButton) {
-    nextButton.disabled = false;
+    nextButton.disabled =
+      false;
   }
 
   if (submitButton) {
-    submitButton.disabled = false;
+    submitButton.disabled =
+      false;
   }
 }
+
+/* =========================================================
+   NEXT QUESTION
+========================================================= */
 
 function nextQuestion() {
   if (
@@ -1292,7 +1538,6 @@ function nextQuestion() {
     behavior: "smooth"
   });
 }
-
 
 /* =========================================================
    SUBMIT CONFIRMATION
@@ -1318,10 +1563,11 @@ function requestSubmitExam() {
     message.textContent =
       unanswered > 0
         ? `Gaaffii ${unanswered} hin deebifne. Qormaata submit gochuu barbaaddaa?`
-        : "⚠️ Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?";
+        : "Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?";
   }
 
-  pendingSubmit = true;
+  pendingSubmit =
+    true;
 
   showPage(
     "submitConfirmPage"
@@ -1332,9 +1578,12 @@ function confirmSubmitExam(
   confirmSubmit
 ) {
   if (!confirmSubmit) {
-    pendingSubmit = false;
+    pendingSubmit =
+      false;
 
-    showPage("examPage");
+    showPage(
+      "examPage"
+    );
 
     return;
   }
@@ -1348,7 +1597,6 @@ function confirmSubmitExam(
 
   finishExam();
 }
-
 
 /* =========================================================
    FINISH EXAM
@@ -1387,20 +1635,25 @@ async function finishExam() {
     currentQuestions.length;
 
   const percentage =
-    total > 0
+    total
       ? Math.round(
-          (correct / total) * 100
+          (correct /
+            total) *
+            100
         )
       : 0;
 
   try {
-    const dbClient =
+    const client =
       requireDb();
 
     const {
-      error: attemptError
-    } = await dbClient
-      .from("exam_attempts")
+      error:
+        attemptError
+    } = await client
+      .from(
+        "exam_attempts"
+      )
       .update({
         score: correct,
         total,
@@ -1443,7 +1696,7 @@ async function finishExam() {
 
     const {
       data: oldResult
-    } = await dbClient
+    } = await client
       .from("results")
       .select("id")
       .eq(
@@ -1459,7 +1712,7 @@ async function finishExam() {
     if (oldResult?.id) {
       const {
         error
-      } = await dbClient
+      } = await client
         .from("results")
         .update(
           resultPayload
@@ -1475,7 +1728,7 @@ async function finishExam() {
     } else {
       const {
         error
-      } = await dbClient
+      } = await client
         .from("results")
         .insert(
           resultPayload
@@ -1487,29 +1740,47 @@ async function finishExam() {
     }
 
     alert(
-      `Qormaanni xumurameera!\n\nQabxii: ${correct}/${total}\nDhibbeentaa: ${percentage}%`
+      `Qormaanni xumurameera!\n\n` +
+      `Qabxii: ${correct}/${total}\n` +
+      `Dhibbeentaa: ${percentage}%`
     );
 
-    currentExam = null;
-    currentQuestions = [];
-    currentQuestionIndex = 0;
-    currentAnswers = {};
-    currentAttempt = null;
-    pendingSubmit = false;
+    currentExam =
+      null;
 
-    showPage("scorePage");
+    currentQuestions =
+      [];
+
+    currentQuestionIndex =
+      0;
+
+    currentAnswers =
+      {};
+
+    currentAttempt =
+      null;
+
+    pendingSubmit =
+      false;
+
+    showPage(
+      "scorePage"
+    );
 
     await showScore();
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "FINISH EXAM ERROR:",
+      error
+    );
 
     alert(
-      "Qormaata submit gochuun hin milkoofne: " +
+      "Qormaata submit gochuun hin milkoofne:\n" +
       getErrorMessage(error)
     );
   }
 }
-
 
 /* =========================================================
    TIMER
@@ -1527,7 +1798,8 @@ function startExamTimer() {
       updateExamTimer();
 
       if (
-        examSecondsLeft <= 0
+        examSecondsLeft <=
+        0
       ) {
         stopExamTimer();
 
@@ -1563,10 +1835,14 @@ function updateExamTimer() {
     ) % 60;
 
   el.textContent =
-    `${String(minutes).padStart(
+    `${String(
+      minutes
+    ).padStart(
       2,
       "0"
-    )}:${String(seconds).padStart(
+    )}:${String(
+      seconds
+    ).padStart(
       2,
       "0"
     )}`;
@@ -1578,10 +1854,10 @@ function stopExamTimer() {
       examTimer
     );
 
-    examTimer = null;
+    examTimer =
+      null;
   }
 }
-
 
 /* =========================================================
    SCORE
@@ -1601,10 +1877,13 @@ async function showScore() {
   if (!container) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("results")
       .select("*")
       .eq(
@@ -1622,7 +1901,10 @@ async function showScore() {
 
     if (!data?.length) {
       container.innerHTML =
-        `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
+        `<div class="empty-state">
+          📊 Ammaaf qormaata tokko illee hin xumurre.
+        </div>`;
+
       return;
     }
 
@@ -1630,56 +1912,59 @@ async function showScore() {
       data
         .map(
           (result) => `
-          <div class="result-card">
+        <div class="result-card">
 
-            <div>
-              <h3>
-                ${escapeHtml(
-                  result.exam_title ||
-                  "Qormaata"
-                )}
-              </h3>
+          <div>
+            <h3>
+              ${escapeHtml(
+                result.exam_title ||
+                "Qormaata"
+              )}
+            </h3>
 
-              <p>
-                ${formatDateTime(
-                  result.submitted_at
-                )}
-              </p>
-            </div>
-
-            <div class="result-score">
-
-              <strong>
-                ${Number(
-                  result.percentage ||
-                  0
-                )}%
-              </strong>
-
-              <span>
-                ${Number(
-                  result.correct ||
-                  0
-                )}/${Number(
-                  result.total ||
-                  0
-                )}
-              </span>
-
-            </div>
-
+            <p>
+              ${formatDateTime(
+                result.submitted_at
+              )}
+            </p>
           </div>
-        `
+
+          <div class="result-score">
+            <strong>
+              ${Number(
+                result.percentage ||
+                0
+              )}%
+            </strong>
+
+            <span>
+              ${Number(
+                result.correct ||
+                0
+              )}/${Number(
+                result.total ||
+                0
+              )}
+            </span>
+          </div>
+
+        </div>
+      `
         )
         .join("");
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "SHOW SCORE ERROR:",
+      error
+    );
 
     container.innerHTML =
-      `<div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>`;
+      `<div class="empty-state">
+        ❌ Qabxii fe'uu hin dandeenye.
+      </div>`;
   }
 }
-
 
 /* =========================================================
    PROFILE
@@ -1718,19 +2003,22 @@ async function loadProfile() {
 
   if (code) {
     code.textContent =
-      student.student_id || "";
+      student.student_id ||
+      "";
   }
 
   if (activation) {
     activation.textContent =
-      student.activation_code || "";
+      student.activation_code ||
+      "";
   }
 
   if (status) {
     status.innerHTML =
-      student.status === "active"
-        ? `<span class="status active">● Active</span>`
-        : `<span class="status blocked">● Cufame</span>`;
+      student.status ===
+      "active"
+        ? '<span class="status active">● Active</span>'
+        : '<span class="status blocked">● Cufame</span>';
   }
 }
 
@@ -1752,18 +2040,20 @@ async function saveProfile() {
     alert(
       "Maqaa sirrii galchi."
     );
+
     return;
   }
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("students")
-      .update({
-        name
-      })
+      .update({ name })
       .eq(
         "id",
         student.id
@@ -1773,7 +2063,8 @@ async function saveProfile() {
 
     if (error) throw error;
 
-    currentStudent = data;
+    currentStudent =
+      data;
 
     await loadProfile();
     await loadStudentHome();
@@ -1781,6 +2072,7 @@ async function saveProfile() {
     alert(
       "Maqaan kee olkaa'ameera."
     );
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -1793,18 +2085,25 @@ function studentLogout() {
     "ao_student_id"
   );
 
-  currentStudent = null;
+  currentStudent =
+    null;
 
   stopExamTimer();
 
-  currentExam = null;
-  currentQuestions = [];
-  currentAnswers = {};
-  currentAttempt = null;
+  currentExam =
+    null;
 
-  showPage("rolePage");
+  currentQuestions =
+    [];
+
+  currentAnswers =
+    {};
+
+  currentAttempt =
+    null;
+
+  showPublicLoginPage();
 }
-
 
 /* =========================================================
    ADMIN LOGIN
@@ -1835,10 +2134,13 @@ async function adminLogin() {
   }
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("admins")
       .select("*")
       .eq(
@@ -1862,7 +2164,8 @@ async function adminLogin() {
       return;
     }
 
-    currentAdmin = data;
+    currentAdmin =
+      data;
 
     localStorage.setItem(
       "ao_admin_id",
@@ -1874,8 +2177,12 @@ async function adminLogin() {
     );
 
     await initializeAdmin();
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "ADMIN LOGIN ERROR:",
+      error
+    );
 
     showAdminMessage(
       getErrorMessage(error),
@@ -1889,9 +2196,10 @@ function adminLogout() {
     "ao_admin_id"
   );
 
-  currentAdmin = null;
+  currentAdmin =
+    null;
 
-  showPage("rolePage");
+  showPublicLoginPage();
 }
 
 async function restoreAdmin() {
@@ -1903,10 +2211,13 @@ async function restoreAdmin() {
   if (!id) return null;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("admins")
       .select("*")
       .eq("id", id)
@@ -1922,11 +2233,16 @@ async function restoreAdmin() {
       return null;
     }
 
-    currentAdmin = data;
+    currentAdmin =
+      data;
 
     return data;
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "RESTORE ADMIN ERROR:",
+      error
+    );
 
     return null;
   }
@@ -1944,11 +2260,6 @@ function requireAdmin() {
   return currentAdmin;
 }
 
-
-/* =========================================================
-   ADMIN INITIALIZE
-========================================================= */
-
 async function initializeAdmin() {
   if (!requireAdmin()) return;
 
@@ -1958,6 +2269,10 @@ async function initializeAdmin() {
 
   await refreshAllAdminLists();
 }
+
+/* =========================================================
+   ADMIN PANELS
+========================================================= */
 
 async function openAdminPanel(
   panel
@@ -1987,10 +2302,6 @@ async function openAdminPanel(
       );
 
     if (el) {
-      el.classList.remove(
-        "active"
-      );
-
       el.style.display =
         "none";
     }
@@ -2002,31 +2313,38 @@ async function openAdminPanel(
     );
 
   if (selected) {
-    selected.classList.add(
-      "active"
-    );
-
     selected.style.display =
       "block";
   }
 
-  if (panel === "students") {
+  if (
+    panel ===
+    "students"
+  ) {
     await loadAdminStudents();
   }
 
-  if (panel === "results") {
+  if (
+    panel ===
+    "results"
+  ) {
     await loadAdminResults();
   }
 
-  if (panel === "lessons") {
+  if (
+    panel ===
+    "lessons"
+  ) {
     await loadAdminLessons();
   }
 
-  if (panel === "exams") {
+  if (
+    panel ===
+    "exams"
+  ) {
     await loadAdminExams();
   }
 }
-
 
 /* =========================================================
    ADMIN STUDENTS
@@ -2043,10 +2361,13 @@ async function loadAdminStudents() {
   if (!container) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("students")
       .select("*")
       .order(
@@ -2060,7 +2381,10 @@ async function loadAdminStudents() {
 
     if (!data?.length) {
       container.innerHTML =
-        `<div class="empty-state">👨‍🎓 Barataan hin galmoofne.</div>`;
+        `<div class="empty-state">
+          👨‍🎓 Barataan hin galmoofne.
+        </div>`;
+
       return;
     }
 
@@ -2068,95 +2392,97 @@ async function loadAdminStudents() {
       data
         .map(
           (student) => `
-          <div class="admin-list-item">
+        <div class="admin-list-item">
 
-            <div class="item-main">
+          <div class="item-main">
 
-              <h3>
+            <h3>
+              ${escapeHtml(
+                student.name
+              )}
+            </h3>
+
+            <p>
+              ID:
+              <strong>
                 ${escapeHtml(
-                  student.name
+                  student.student_id
                 )}
-              </h3>
+              </strong>
+              <br>
 
-              <p>
-                ID:
-                <strong>
-                  ${escapeHtml(
-                    student.student_id
-                  )}
-                </strong>
-                <br>
-
-                Code:
-                <strong>
-                  ${escapeHtml(
-                    student.activation_code
-                  )}
-                </strong>
-                <br>
-
-                Galmaa'e:
-                ${formatDateTime(
-                  student.created_at
+              Code:
+              <strong>
+                ${escapeHtml(
+                  student.activation_code
                 )}
-              </p>
+              </strong>
+              <br>
 
-              <span class="status ${
+              Galmaa'e:
+              ${formatDateTime(
+                student.created_at
+              )}
+            </p>
+
+            <span
+              class="status ${
                 student.status ===
                 "active"
                   ? "active"
                   : "blocked"
-              }">
-
-                ●
-                ${
-                  student.status ===
-                  "active"
-                    ? "Active"
-                    : student.status ===
-                      "pending"
-                    ? "Pending"
-                    : "Cufame"
-                }
-
-              </span>
-
-            </div>
-
-            <div class="admin-actions">
-
-              <button
-                type="button"
-                class="small-btn"
-                onclick="toggleStudentStatus('${student.id}')"
-              >
-                ${
-                  student.status ===
-                  "active"
-                    ? "🔒 Cufi"
-                    : "🔓 Bani"
-                }
-              </button>
-
-              <button
-                type="button"
-                class="danger-small-btn"
-                onclick="deleteStudent('${student.id}')"
-              >
-                🗑️ Haqi
-              </button>
-
-            </div>
+              }"
+            >
+              ● ${
+                student.status ===
+                "active"
+                  ? "Active"
+                  : student.status ===
+                    "pending"
+                  ? "Pending"
+                  : "Cufame"
+              }
+            </span>
 
           </div>
-        `
+
+          <div class="admin-actions">
+
+            <button
+              type="button"
+              class="small-btn"
+              onclick="toggleStudentStatus('${student.id}')"
+            >
+              ${
+                student.status ===
+                "active"
+                  ? "🔒 Cufi"
+                  : "🔓 Bani"
+              }
+            </button>
+
+            <button
+              type="button"
+              class="danger-small-btn"
+              onclick="deleteStudent('${student.id}')"
+            >
+              🗑️ Haqi
+            </button>
+
+          </div>
+
+        </div>
+      `
         )
         .join("");
+
   } catch (error) {
     console.error(error);
 
     container.innerHTML =
-      `<div class="empty-state">❌ Barattoota fe'uu hin dandeenye.</div>`;
+      `<div class="empty-state">
+        ❌ Barattoota fe'uu hin dandeenye.
+      </div>`;
   }
 }
 
@@ -2166,19 +2492,30 @@ async function toggleStudentStatus(
   if (!requireAdmin()) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data: student,
-      error
-    } = await requireDb()
+      error:
+        findError
+    } = await client
       .from("students")
-      .select("id,status")
+      .select(
+        "id,status"
+      )
       .eq(
         "id",
         studentId
       )
       .maybeSingle();
 
-    if (error || !student) return;
+    if (
+      findError ||
+      !student
+    ) {
+      return;
+    }
 
     const newStatus =
       student.status ===
@@ -2187,22 +2524,30 @@ async function toggleStudentStatus(
         : "active";
 
     const {
-      error: updateError
-    } = await requireDb()
+      error
+    } = await client
       .from("students")
       .update({
-        status: newStatus
+        status:
+          newStatus
       })
       .eq(
         "id",
         studentId
       );
 
-    if (updateError) {
-      throw updateError;
+    if (error) {
+      alert(
+        getErrorMessage(
+          error
+        )
+      );
+
+      return;
     }
 
     await loadAdminStudents();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -2224,10 +2569,10 @@ async function deleteStudent(
   }
 
   try {
-    const dbClient =
+    const client =
       requireDb();
 
-    await dbClient
+    await client
       .from("results")
       .delete()
       .eq(
@@ -2235,7 +2580,7 @@ async function deleteStudent(
         studentId
       );
 
-    await dbClient
+    await client
       .from("exam_attempts")
       .delete()
       .eq(
@@ -2245,7 +2590,7 @@ async function deleteStudent(
 
     const {
       error
-    } = await dbClient
+    } = await client
       .from("students")
       .delete()
       .eq(
@@ -2253,17 +2598,25 @@ async function deleteStudent(
         studentId
       );
 
-    if (error) throw error;
+    if (error) {
+      alert(
+        getErrorMessage(
+          error
+        )
+      );
+
+      return;
+    }
 
     await loadAdminStudents();
     await loadAdminResults();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
     );
   }
 }
-
 
 /* =========================================================
    ADMIN RESULTS
@@ -2290,10 +2643,13 @@ async function loadAdminResults() {
     );
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("results")
       .select(
         "*, students(name,student_id), exams(title)"
@@ -2322,7 +2678,14 @@ async function loadAdminResults() {
     if (!data?.length) {
       if (tbody) {
         tbody.innerHTML =
-          `<tr><td colspan="5">Bu'aan qormaataa hin jiru.</td></tr>`;
+          `<tr>
+            <td
+              colspan="5"
+              class="empty-cell"
+            >
+              Hanga ammaatti bu'aan qormaataa hin jiru.
+            </td>
+          </tr>`;
       }
 
       return;
@@ -2333,65 +2696,68 @@ async function loadAdminResults() {
         data
           .map(
             (result) => `
-            <tr>
+          <tr>
 
-              <td>
-                ${escapeHtml(
-                  result.students
-                    ?.name ||
-                  "Barataa"
-                )}
-              </td>
+            <td>
+              ${escapeHtml(
+                result.students?.name ||
+                "Barataa"
+              )}
+            </td>
 
-              <td>
-                ${escapeHtml(
-                  result.exams
-                    ?.title ||
-                  result.exam_title ||
-                  "Qormaata"
-                )}
-              </td>
+            <td>
+              ${escapeHtml(
+                result.exams?.title ||
+                result.exam_title ||
+                "Qormaata"
+              )}
+            </td>
 
-              <td>
+            <td>
+              ${Number(
+                result.correct ||
+                0
+              )}/
+              ${Number(
+                result.total ||
+                0
+              )}
+            </td>
+
+            <td>
+              <strong>
                 ${Number(
-                  result.correct ||
+                  result.percentage ||
                   0
-                )}/${Number(
-                  result.total ||
-                  0
-                )}
-              </td>
+                )}%
+              </strong>
+            </td>
 
-              <td>
-                <strong>
-                  ${Number(
-                    result.percentage ||
-                    0
-                  )}%
-                </strong>
-              </td>
+            <td>
+              ${formatDateTime(
+                result.submitted_at
+              )}
+            </td>
 
-              <td>
-                ${formatDateTime(
-                  result.submitted_at
-                )}
-              </td>
-
-            </tr>
-          `
+          </tr>
+        `
           )
           .join("");
     }
+
   } catch (error) {
     console.error(error);
 
     if (tbody) {
       tbody.innerHTML =
-        `<tr><td colspan="5">❌ Qabxii fe'uu hin dandeenye.</td></tr>`;
+        `<tr>
+          <td colspan="5">
+            ❌ Qabxii fe'uu hin dandeenye.
+          </td>
+        </tr>`;
     }
   }
 }
-
 
 /* =========================================================
    ADMIN LESSONS
@@ -2408,10 +2774,13 @@ async function loadAdminLessons() {
   if (!container) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("lessons")
       .select("*")
       .order(
@@ -2425,7 +2794,10 @@ async function loadAdminLessons() {
 
     if (!data?.length) {
       container.innerHTML =
-        `<div class="empty-state">📚 Barnoonni hin jiru.</div>`;
+        `<div class="empty-state">
+          📚 Barnoonni hin jiru.
+        </div>`;
+
       return;
     }
 
@@ -2433,56 +2805,57 @@ async function loadAdminLessons() {
       data
         .map(
           (lesson) => `
-          <div class="admin-list-item">
+        <div class="admin-list-item">
 
-            <div class="item-main">
+          <div class="item-main">
 
-              <h3>
-                ${escapeHtml(
-                  lesson.title
-                )}
-              </h3>
+            <h3>
+              ${escapeHtml(
+                lesson.title
+              )}
+            </h3>
 
-              <p>
-                ${escapeHtml(
-                  truncate(
-                    lesson.content,
-                    180
-                  )
-                )}
-              </p>
-
-            </div>
-
-            <div class="admin-actions">
-
-              <button
-                type="button"
-                class="small-btn"
-                onclick="editLesson('${lesson.id}')"
-              >
-                ✏️ Sirreessi
-              </button>
-
-              <button
-                type="button"
-                class="danger-small-btn"
-                onclick="deleteLesson('${lesson.id}')"
-              >
-                🗑️ Haqi
-              </button>
-
-            </div>
+            <p>
+              ${escapeHtml(
+                truncate(
+                  lesson.content,
+                  180
+                )
+              )}
+            </p>
 
           </div>
-        `
+
+          <div class="admin-actions">
+
+            <button
+              type="button"
+              class="small-btn"
+              onclick="editLesson('${lesson.id}')"
+            >
+              ✏️ Sirreessi
+            </button>
+
+            <button
+              type="button"
+              class="danger-small-btn"
+              onclick="deleteLesson('${lesson.id}')"
+            >
+              🗑️ Haqi
+            </button>
+
+          </div>
+
+        </div>
+      `
         )
         .join("");
-  } catch (error) {
-    console.error(error);
 
+  } catch (error) {
     container.innerHTML =
-      `<div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>`;
+      `<div class="empty-state">
+        ❌ Barnoota fe'uu hin dandeenye.
+      </div>`;
   }
 }
 
@@ -2514,9 +2887,12 @@ async function createLesson() {
   }
 
   try {
+    const client =
+      requireDb();
+
     const {
       error
-    } = await requireDb()
+    } = await client
       .from("lessons")
       .insert({
         title,
@@ -2525,13 +2901,23 @@ async function createLesson() {
 
     if (error) throw error;
 
-    document.getElementById(
-      "lessonTitleInput"
-    ).value = "";
+    const titleInput =
+      document.getElementById(
+        "lessonTitleInput"
+      );
 
-    document.getElementById(
-      "lessonContentInput"
-    ).value = "";
+    const contentInput =
+      document.getElementById(
+        "lessonContentInput"
+      );
+
+    if (titleInput) {
+      titleInput.value = "";
+    }
+
+    if (contentInput) {
+      contentInput.value = "";
+    }
 
     await loadAdminLessons();
     await loadStudentLessons();
@@ -2539,6 +2925,7 @@ async function createLesson() {
     alert(
       "Barnoonni dabalameera."
     );
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -2552,10 +2939,13 @@ async function editLesson(
   if (!requireAdmin()) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data: lesson,
       error
-    } = await requireDb()
+    } = await client
       .from("lessons")
       .select("*")
       .eq(
@@ -2564,7 +2954,12 @@ async function editLesson(
       )
       .maybeSingle();
 
-    if (error || !lesson) return;
+    if (
+      error ||
+      !lesson
+    ) {
+      return;
+    }
 
     const title =
       prompt(
@@ -2572,7 +2967,9 @@ async function editLesson(
         lesson.title
       );
 
-    if (title === null) return;
+    if (title === null) {
+      return;
+    }
 
     const content =
       prompt(
@@ -2580,11 +2977,14 @@ async function editLesson(
         lesson.content
       );
 
-    if (content === null) return;
+    if (content === null) {
+      return;
+    }
 
     const {
-      error: updateError
-    } = await requireDb()
+      error:
+        updateError
+    } = await client
       .from("lessons")
       .update({
         title:
@@ -2606,6 +3006,7 @@ async function editLesson(
 
     await loadAdminLessons();
     await loadStudentLessons();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -2627,9 +3028,12 @@ async function deleteLesson(
   }
 
   try {
+    const client =
+      requireDb();
+
     const {
       error
-    } = await requireDb()
+    } = await client
       .from("lessons")
       .delete()
       .eq(
@@ -2641,13 +3045,13 @@ async function deleteLesson(
 
     await loadAdminLessons();
     await loadStudentLessons();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
     );
   }
 }
-
 
 /* =========================================================
    ADMIN EXAMS
@@ -2664,10 +3068,13 @@ async function loadAdminExams() {
   if (!container) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("exams")
       .select("*")
       .order(
@@ -2681,25 +3088,31 @@ async function loadAdminExams() {
 
     if (!data?.length) {
       container.innerHTML =
-        `<div class="empty-state">📝 Qormaanni hin jiru.</div>`;
+        `<div class="empty-state">
+          📝 Qormaanni hin jiru.
+        </div>`;
 
-      await populateExamSelects([]);
+      await populateExamSelects(
+        []
+      );
 
       return;
     }
 
     const exams =
-      data.map(normalizeExam);
+      data.map(
+        normalizeExam
+      );
+
+    const counts = {};
 
     const {
       data: questionRows
-    } = await requireDb()
+    } = await client
       .from("questions")
       .select(
         "id,exam_id"
       );
-
-    const counts = {};
 
     (questionRows || [])
       .forEach((q) => {
@@ -2712,102 +3125,107 @@ async function loadAdminExams() {
       exams
         .map(
           (exam) => `
-          <div class="admin-list-item">
+        <div class="admin-list-item">
 
-            <div class="item-main">
+          <div class="item-main">
 
-              <h3>
-                ${escapeHtml(
-                  exam.title
-                )}
+            <h3>
+              ${escapeHtml(
+                exam.title
+              )}
+              ${
+                exam.isFinal
+                  ? " 🏆"
+                  : ""
+              }
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                exam.description ||
+                ""
+              )}
+            </p>
+
+            <div class="exam-meta">
+
+              <span>
+                ❓ Gaaffii:
                 ${
-                  exam.isFinal
-                    ? " 🏆"
-                    : ""
+                  counts[
+                    exam.id
+                  ] || 0
                 }
-              </h3>
+              </span>
 
-              <p>
-                ${escapeHtml(
-                  exam.description ||
-                  ""
-                )}
-              </p>
-
-              <div class="exam-meta">
-
-                <span>
-                  ❓ Gaaffii:
-                  ${counts[exam.id] || 0}
-                </span>
-
-                <span>
-                  🔢 Attempt:
-                  ${exam.attemptLimit}
-                </span>
-
-                <span>
-                  ⏱️
-                  ${exam.duration}
-                  min
-                </span>
-
-              </div>
-
-              <span class="status ${
-                exam.status ===
-                "active"
-                  ? "active"
-                  : "blocked"
-              }">
-
-                ●
+              <span>
+                🔢 Attempt:
                 ${
-                  exam.status ===
-                  "active"
-                    ? "Active"
-                    : "Disabled"
+                  exam.attemptLimit
                 }
+              </span>
 
+              <span>
+                ⏱️
+                ${exam.duration}
+                min
               </span>
 
             </div>
 
-            <div class="admin-actions">
-
-              <button
-                type="button"
-                class="small-btn"
-                onclick="toggleExamStatus(${exam.id})"
-              >
-                ${
-                  exam.status ===
-                  "active"
-                    ? "⏸️ Cufi"
-                    : "▶️ Bani"
-                }
-              </button>
-
-              <button
-                type="button"
-                class="small-btn"
-                onclick="editExam(${exam.id})"
-              >
-                ✏️ Sirreessi
-              </button>
-
-              <button
-                type="button"
-                class="danger-small-btn"
-                onclick="deleteExam(${exam.id})"
-              >
-                🗑️ Haqi
-              </button>
-
-            </div>
+            <span
+              class="status ${
+                exam.status ===
+                "active"
+                  ? "active"
+                  : "blocked"
+              }"
+            >
+              ● ${
+                exam.status ===
+                "active"
+                  ? "Active"
+                  : "Disabled"
+              }
+            </span>
 
           </div>
-        `
+
+          <div class="admin-actions">
+
+            <button
+              type="button"
+              class="small-btn"
+              onclick="toggleExamStatus(${exam.id})"
+            >
+              ${
+                exam.status ===
+                "active"
+                  ? "⏸️ Cufi"
+                  : "▶️ Bani"
+              }
+            </button>
+
+            <button
+              type="button"
+              class="small-btn"
+              onclick="editExam(${exam.id})"
+            >
+              ✏️ Sirreessi
+            </button>
+
+            <button
+              type="button"
+              class="danger-small-btn"
+              onclick="deleteExam(${exam.id})"
+            >
+              🗑️ Haqi
+            </button>
+
+          </div>
+
+        </div>
+      `
         )
         .join("");
 
@@ -2816,11 +3234,14 @@ async function loadAdminExams() {
     );
 
     await loadAdminQuestions();
+
   } catch (error) {
     console.error(error);
 
     container.innerHTML =
-      `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
+      `<div class="empty-state">
+        ❌ Qormaata fe'uu hin dandeenye.
+      </div>`;
   }
 }
 
@@ -2829,74 +3250,82 @@ async function populateExamSelects(
 ) {
   let list = exams;
 
-  if (!list) {
-    const {
-      data
-    } = await requireDb()
-      .from("exams")
-      .select(
-        "id,title"
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
+  try {
+    if (!list) {
+      const client =
+        requireDb();
 
-    list = data || [];
-  }
-
-  [
-    "questionExamSelect",
-    "aiQuestionExamSelect"
-  ].forEach((id) => {
-    const select =
-      document.getElementById(
-        id
-      );
-
-    if (!select) return;
-
-    const current =
-      select.value;
-
-    select.innerHTML = `
-      <option value="">
-        Qormaata filadhu
-      </option>
-
-      ${list
-        .map(
-          (exam) =>
-            `<option value="${exam.id}">
-              ${escapeHtml(
-                exam.title
-              )}
-            </option>`
+      const {
+        data
+      } = await client
+        .from("exams")
+        .select(
+          "id,title"
         )
-        .join("")}
-    `;
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
 
-    if (
-      list.some(
-        (exam) =>
-          String(
-            exam.id
-          ) ===
-          String(current)
-      )
-    ) {
-      select.value =
-        current;
+      list = data || [];
     }
-  });
+
+    [
+      "questionExamSelect",
+      "aiQuestionExamSelect"
+    ].forEach((id) => {
+      const select =
+        document.getElementById(
+          id
+        );
+
+      if (!select) return;
+
+      const current =
+        select.value;
+
+      select.innerHTML = `
+        <option value="">
+          Qormaata filadhu
+        </option>
+
+        ${list
+          .map(
+            (exam) =>
+              `<option value="${exam.id}">
+                ${escapeHtml(
+                  exam.title
+                )}
+              </option>`
+          )
+          .join("")}
+      `;
+
+      if (
+        list.some(
+          (exam) =>
+            String(
+              exam.id
+            ) ===
+            String(
+              current
+            )
+        )
+      ) {
+        select.value =
+          current;
+      }
+    });
+
+  } catch (error) {
+    console.error(
+      "POPULATE EXAMS ERROR:",
+      error
+    );
+  }
 }
-
-
-/* =========================================================
-   CREATE EXAM
-========================================================= */
 
 async function createExam() {
   if (!requireAdmin()) return;
@@ -2919,77 +3348,63 @@ async function createExam() {
 
   const questionLimit =
     Number(
-      document
-        .getElementById(
-          "examQuestionLimitInput"
-        )
-        ?.value || 0
+      document.getElementById(
+        "examQuestionLimitInput"
+      )?.value || 0
     );
 
   const attemptLimit =
     Number(
-      document
-        .getElementById(
-          "examAttemptLimitInput"
-        )
-        ?.value || 1
+      document.getElementById(
+        "examAttemptLimitInput"
+      )?.value || 1
     );
 
   const isFinal =
-    document
-      .getElementById(
-        "examFinalInput"
-      )
-      ?.value === "true";
+    document.getElementById(
+      "examFinalInput"
+    )?.value === "true";
 
   const duration =
     Number(
-      document
-        .getElementById(
-          "examDurationInput"
-        )
-        ?.value || 30
+      document.getElementById(
+        "examDurationInput"
+      )?.value || 30
     );
 
   const startDate =
-    document
-      .getElementById(
-        "examStartDateInput"
-      )
-      ?.value || null;
+    document.getElementById(
+      "examStartDateInput"
+    )?.value || null;
 
   const endDate =
-    document
-      .getElementById(
-        "examEndDateInput"
-      )
-      ?.value || null;
+    document.getElementById(
+      "examEndDateInput"
+    )?.value || null;
 
   const startTime =
-    document
-      .getElementById(
-        "examStartTimeInput"
-      )
-      ?.value || null;
+    document.getElementById(
+      "examStartTimeInput"
+    )?.value || null;
 
   const endTime =
-    document
-      .getElementById(
-        "examEndTimeInput"
-      )
-      ?.value || null;
+    document.getElementById(
+      "examEndTimeInput"
+    )?.value || null;
 
   if (!title) {
     alert(
       "Mata-duree qormaataa galchi."
     );
+
     return;
   }
 
   if (
     startDate &&
     endDate &&
-    startDate > endDate
+    startDate >
+      endDate
   ) {
     alert(
       "Guyyaan jalqabaa guyyaa xumuraa caaluu hin qabu."
@@ -2999,9 +3414,12 @@ async function createExam() {
   }
 
   try {
+    const client =
+      requireDb();
+
     const {
       error
-    } = await requireDb()
+    } = await client
       .from("exams")
       .insert({
         title,
@@ -3051,6 +3469,7 @@ async function createExam() {
     alert(
       "Qormaanni uumameera. Amma gaaffii itti dabali."
     );
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -3064,10 +3483,14 @@ async function toggleExamStatus(
   if (!requireAdmin()) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data: exam,
-      error
-    } = await requireDb()
+      error:
+        findError
+    } = await client
       .from("exams")
       .select(
         "id,status"
@@ -3078,11 +3501,16 @@ async function toggleExamStatus(
       )
       .maybeSingle();
 
-    if (error || !exam) return;
+    if (
+      findError ||
+      !exam
+    ) {
+      return;
+    }
 
     const {
-      error: updateError
-    } = await requireDb()
+      error
+    } = await client
       .from("exams")
       .update({
         status:
@@ -3096,11 +3524,10 @@ async function toggleExamStatus(
         examId
       );
 
-    if (updateError) {
-      throw updateError;
-    }
+    if (error) throw error;
 
     await loadAdminExams();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -3114,10 +3541,13 @@ async function editExam(
   if (!requireAdmin()) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data: exam,
       error
-    } = await requireDb()
+    } = await client
       .from("exams")
       .select("*")
       .eq(
@@ -3126,7 +3556,12 @@ async function editExam(
       )
       .maybeSingle();
 
-    if (error || !exam) return;
+    if (
+      error ||
+      !exam
+    ) {
+      return;
+    }
 
     const title =
       prompt(
@@ -3134,7 +3569,9 @@ async function editExam(
         exam.title
       );
 
-    if (title === null) return;
+    if (title === null) {
+      return;
+    }
 
     const description =
       prompt(
@@ -3144,14 +3581,16 @@ async function editExam(
       );
 
     if (
-      description === null
+      description ===
+      null
     ) {
       return;
     }
 
     const {
-      error: updateError
-    } = await requireDb()
+      error:
+        updateError
+    } = await client
       .from("exams")
       .update({
         title:
@@ -3171,6 +3610,7 @@ async function editExam(
     }
 
     await loadAdminExams();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -3184,9 +3624,12 @@ async function deleteExam(
   if (!requireAdmin()) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data: exam
-    } = await requireDb()
+    } = await client
       .from("exams")
       .select(
         "id,title"
@@ -3207,10 +3650,7 @@ async function deleteExam(
       return;
     }
 
-    const dbClient =
-      requireDb();
-
-    await dbClient
+    await client
       .from("results")
       .delete()
       .eq(
@@ -3218,15 +3658,17 @@ async function deleteExam(
         examId
       );
 
-    await dbClient
-      .from("exam_attempts")
+    await client
+      .from(
+        "exam_attempts"
+      )
       .delete()
       .eq(
         "exam_id",
         examId
       );
 
-    await dbClient
+    await client
       .from("questions")
       .delete()
       .eq(
@@ -3236,7 +3678,7 @@ async function deleteExam(
 
     const {
       error
-    } = await dbClient
+    } = await client
       .from("exams")
       .delete()
       .eq(
@@ -3248,13 +3690,13 @@ async function deleteExam(
 
     await loadAdminExams();
     await loadAdminResults();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
     );
   }
 }
-
 
 /* =========================================================
    MANUAL QUESTIONS
@@ -3264,11 +3706,9 @@ async function createQuestion() {
   if (!requireAdmin()) return;
 
   const examId =
-    document
-      .getElementById(
-        "questionExamSelect"
-      )
-      ?.value || "";
+    document.getElementById(
+      "questionExamSelect"
+    )?.value || "";
 
   const question =
     document
@@ -3311,11 +3751,9 @@ async function createQuestion() {
       .trim() || "";
 
   const correctAnswer =
-    document
-      .getElementById(
-        "correctAnswerInput"
-      )
-      ?.value || "";
+    document.getElementById(
+      "correctAnswerInput"
+    )?.value || "";
 
   if (
     !examId ||
@@ -3334,9 +3772,12 @@ async function createQuestion() {
   }
 
   try {
+    const client =
+      requireDb();
+
     const {
       error
-    } = await requireDb()
+    } = await client
       .from("questions")
       .insert({
         exam_id:
@@ -3400,6 +3841,7 @@ async function createQuestion() {
     alert(
       "Gaaffiin dabalameera."
     );
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -3418,10 +3860,13 @@ async function loadAdminQuestions() {
   if (!container) return;
 
   try {
+    const client =
+      requireDb();
+
     const {
       data,
       error
-    } = await requireDb()
+    } = await client
       .from("questions")
       .select(
         "*, exams(title)"
@@ -3437,7 +3882,10 @@ async function loadAdminQuestions() {
 
     if (!data?.length) {
       container.innerHTML =
-        `<div class="empty-state">❓ Gaaffiin hin jiru.</div>`;
+        `<div class="empty-state">
+          ❓ Gaaffiin hin jiru.
+        </div>`;
+
       return;
     }
 
@@ -3445,7 +3893,7 @@ async function loadAdminQuestions() {
       data
         .map(
           (row, index) => {
-            const q =
+            const question =
               normalizeQuestion(
                 row
               );
@@ -3461,15 +3909,14 @@ async function loadAdminQuestions() {
 
                   <small>
                     ${escapeHtml(
-                      row.exams
-                        ?.title ||
+                      row.exams?.title ||
                       "Qormaata"
                     )}
                   </small>
 
                   <h3>
                     ${escapeHtml(
-                      q.text
+                      question.text
                     )}
                   </h3>
 
@@ -3478,28 +3925,28 @@ async function loadAdminQuestions() {
                     <span>
                       A.
                       ${escapeHtml(
-                        q.optionA
+                        question.optionA
                       )}
                     </span>
 
                     <span>
                       B.
                       ${escapeHtml(
-                        q.optionB
+                        question.optionB
                       )}
                     </span>
 
                     <span>
                       C.
                       ${escapeHtml(
-                        q.optionC
+                        question.optionC
                       )}
                     </span>
 
                     <span>
                       D.
                       ${escapeHtml(
-                        q.optionD
+                        question.optionD
                       )}
                     </span>
 
@@ -3508,7 +3955,7 @@ async function loadAdminQuestions() {
                   <p class="correct-answer">
                     Deebii sirrii:
                     ${escapeHtml(
-                      q.correctAnswer
+                      question.correctAnswer
                     )}
                   </p>
 
@@ -3517,7 +3964,7 @@ async function loadAdminQuestions() {
                 <button
                   type="button"
                   class="danger-small-btn"
-                  onclick="deleteQuestion(${q.id})"
+                  onclick="deleteQuestion(${question.id})"
                 >
                   🗑️
                 </button>
@@ -3527,11 +3974,14 @@ async function loadAdminQuestions() {
           }
         )
         .join("");
+
   } catch (error) {
     console.error(error);
 
     container.innerHTML =
-      `<div class="empty-state">❌ Gaaffilee fe'uu hin dandeenye.</div>`;
+      `<div class="empty-state">
+        ❌ Gaaffilee fe'uu hin dandeenye.
+      </div>`;
   }
 }
 
@@ -3549,9 +3999,12 @@ async function deleteQuestion(
   }
 
   try {
+    const client =
+      requireDb();
+
     const {
       error
-    } = await requireDb()
+    } = await client
       .from("questions")
       .delete()
       .eq(
@@ -3563,6 +4016,7 @@ async function deleteQuestion(
 
     await loadAdminQuestions();
     await loadAdminExams();
+
   } catch (error) {
     alert(
       getErrorMessage(error)
@@ -3570,18 +4024,16 @@ async function deleteQuestion(
   }
 }
 
-
 /* =========================================================
    AI QUESTION SOURCE
 ========================================================= */
 
 function changeAIQuestionSource() {
   const type =
-    document
-      .getElementById(
-        "aiQuestionSourceType"
-      )
-      ?.value || "topic";
+    document.getElementById(
+      "aiQuestionSourceType"
+    )?.value ||
+    "topic";
 
   const map = {
     topic:
@@ -3626,7 +4078,10 @@ function fileToBase64(
   file
 ) {
   return new Promise(
-    (resolve, reject) => {
+    (
+      resolve,
+      reject
+    ) => {
       const reader =
         new FileReader();
 
@@ -3662,7 +4117,6 @@ function fileToBase64(
   );
 }
 
-
 /* =========================================================
    AI QUESTION GENERATOR
 ========================================================= */
@@ -3671,26 +4125,21 @@ async function generateAIQuestions() {
   if (!requireAdmin()) return;
 
   const examId =
-    document
-      .getElementById(
-        "aiQuestionExamSelect"
-      )
-      ?.value || "";
+    document.getElementById(
+      "aiQuestionExamSelect"
+    )?.value || "";
 
   const sourceType =
-    document
-      .getElementById(
-        "aiQuestionSourceType"
-      )
-      ?.value || "topic";
+    document.getElementById(
+      "aiQuestionSourceType"
+    )?.value ||
+    "topic";
 
   const count =
     Number(
-      document
-        .getElementById(
-          "aiQuestionCount"
-        )
-        ?.value || 5
+      document.getElementById(
+        "aiQuestionCount"
+      )?.value || 5
     );
 
   const button =
@@ -3727,7 +4176,8 @@ async function generateAIQuestions() {
   }
 
   if (button) {
-    button.disabled = true;
+    button.disabled =
+      true;
 
     button.textContent =
       "⏳ AI qopheessaa jira...";
@@ -3893,29 +4343,31 @@ async function generateAIQuestions() {
         }
       );
 
-    let result = null;
+    let result =
+      null;
 
     try {
       result =
         await response.json();
     } catch (_) {
-      result = null;
+      result =
+        null;
     }
 
     if (!response.ok) {
       throw new Error(
         result?.error ||
-          result?.message ||
-          `AI server error: ${response.status}`
+        result?.message ||
+        `AI server error: ${response.status}`
       );
     }
 
     const inserted =
       Number(
         result?.count ||
-          result?.questions
-            ?.length ||
-          0
+        result?.questions
+          ?.length ||
+        0
       );
 
     if (!inserted) {
@@ -3925,12 +4377,16 @@ async function generateAIQuestions() {
     }
 
     showAIMessage(
-      `<div class="success-box">✅ ${inserted} gaaffii AI irraa qormaata keessa galchame.</div>`,
+      `<div class="success-box">
+        ✅ ${inserted}
+        gaaffii AI irraa qormaata keessa galchame.
+      </div>`,
       "success"
     );
 
     await loadAdminQuestions();
     await loadAdminExams();
+
   } catch (error) {
     console.error(
       "AI ERROR:",
@@ -3939,10 +4395,13 @@ async function generateAIQuestions() {
 
     showAIMessage(
       `❌ ${escapeHtml(
-        getErrorMessage(error)
+        getErrorMessage(
+          error
+        )
       )}`,
       "error"
     );
+
   } finally {
     if (button) {
       button.disabled =
@@ -3954,24 +4413,73 @@ async function generateAIQuestions() {
   }
 }
 
-
 /* =========================================================
    GOOGLE LOGIN
+   DHUGAA - SUPABASE GOOGLE OAUTH
 ========================================================= */
 
 async function googleLogin() {
+  const button =
+    document.getElementById(
+      "googleLoginButton"
+    );
+
+  if (button) {
+    button.disabled =
+      true;
+
+    button.dataset.originalText =
+      button.innerHTML;
+
+    button.innerHTML = `
+      <span
+        style="
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          gap:10px;
+        "
+      >
+
+        <span
+          style="
+            width:18px;
+            height:18px;
+            border:2px solid rgba(255,255,255,.35);
+            border-top-color:#fff;
+            border-radius:50%;
+            display:inline-block;
+            animation:googleLoginSpin .8s linear infinite;
+          "
+        ></span>
+
+        <span>
+          Google Login...
+        </span>
+
+      </span>
+    `;
+  }
+
   try {
     const client =
-      initSupabase();
+      requireDb();
 
-    if (!client) {
-      alert(
-        "Supabase ammallee hin fe'amne. Mee app sana haaromsiitii irra deebi'ii tuqi."
-      );
-      return;
-    }
+    const redirectTo =
+      window.location.origin +
+      window.location.pathname;
+
+    console.log(
+      "GOOGLE LOGIN START"
+    );
+
+    console.log(
+      "Redirect:",
+      redirectTo
+    );
 
     const {
+      data,
       error
     } =
       await client.auth
@@ -3980,27 +4488,27 @@ async function googleLogin() {
             "google",
 
           options: {
-            redirectTo:
-              window.location
-                .origin +
-              window.location
-                .pathname
+            redirectTo,
+
+            queryParams: {
+              access_type:
+                "offline",
+
+              prompt:
+                "select_account"
+            }
           }
         });
 
-    if (error) {
-      console.error(
-        "GOOGLE LOGIN ERROR:",
-        error
-      );
+    console.log(
+      "GOOGLE OAUTH RESPONSE:",
+      data
+    );
 
-      alert(
-        "Google Login irratti dogoggorri uumame: " +
-        getErrorMessage(
-          error
-        )
-      );
+    if (error) {
+      throw error;
     }
+
   } catch (error) {
     console.error(
       "GOOGLE LOGIN ERROR:",
@@ -4008,80 +4516,61 @@ async function googleLogin() {
     );
 
     alert(
-      "Google Login hin milkoofne: " +
+      "Google Login hin milkoofne.\n\n" +
       getErrorMessage(
         error
       )
     );
+
+    if (button) {
+      button.disabled =
+        false;
+
+      if (
+        button.dataset
+          .originalText
+      ) {
+        button.innerHTML =
+          button.dataset
+            .originalText;
+      }
+    }
   }
 }
 
-
 /* =========================================================
-   GOOGLE AUTH SESSION
+   GOOGLE SESSION
 ========================================================= */
 
 async function handleAuthSession(
   session
 ) {
-  if (!session?.user) {
+  if (
+    !session ||
+    !session.user
+  ) {
     return;
   }
 
   console.log(
-    "Google user authenticated:",
+    "GOOGLE USER AUTHENTICATED:",
     session.user.email ||
       session.user.id
   );
 
-  showPage("rolePage");
+  showPostLoginRoles();
 }
 
-
 /* =========================================================
-   TELEGRAM LOGIN
+   TELEGRAM
+   DESIGN/BUTTON ONLY - AUTHENTICATION NOT CONNECTED
 ========================================================= */
 
 async function telegramLogin() {
-  try {
-    if (
-      window.Telegram &&
-      window.Telegram.WebApp
-    ) {
-      const user =
-        window.Telegram.WebApp
-          .initDataUnsafe
-          ?.user;
-
-      if (user) {
-        alert(
-          `Telegram Login milkaa'eera!\n\nMaqaa: ${
-            user.first_name ||
-            ""
-          }`
-        );
-
-        showPage(
-          "studentLoginPage"
-        );
-
-        return;
-      }
-    }
-
-    alert(
-      "Telegram Login button hojjeta. Garuu Telegram authentication guutuu xumuruuf Telegram Bot/Login Widget qindeessuun barbaachisa."
-    );
-  } catch (error) {
-    console.error(error);
-
-    alert(
-      "Telegram Login irratti dogoggorri uumame: " +
-      getErrorMessage(error)
-    );
-  }
+  alert(
+    "Telegram Login ammallee qindaa'aa jira. Google Loginiin erga seentee booda Barataa ykn Admin filachuu dandeessa."
+  );
 }
-
 
 /* =========================================================
    REFRESH ADMIN
@@ -4095,7 +4584,6 @@ async function refreshAllAdminLists() {
   await loadAdminQuestions();
 }
 
-
 /* =========================================================
    AUTH LISTENER
 ========================================================= */
@@ -4105,25 +4593,30 @@ function initializeAuthListener() {
     return;
   }
 
-  authListenerReady =
-    true;
-
   const client =
     initSupabase();
 
   if (!client) {
     console.error(
-      "Supabase hin fe'amne."
+      "Supabase client hin argamne."
     );
 
     return;
   }
 
+  authListenerReady =
+    true;
+
   client.auth.onAuthStateChange(
     async (
-      _event,
+      event,
       session
     ) => {
+      console.log(
+        "AUTH EVENT:",
+        event
+      );
+
       await handleAuthSession(
         session
       );
@@ -4131,50 +4624,103 @@ function initializeAuthListener() {
   );
 }
 
-
 /* =========================================================
-   INITIALIZE APP
+   INITIALIZATION
 ========================================================= */
 
 async function initializeApp() {
-  initSupabase();
+  try {
+    initSupabase();
 
-  initializeAuthListener();
+    initializeAuthListener();
 
-  changeAIQuestionSource();
+    changeAIQuestionSource();
 
-  const student =
-    await restoreStudent();
+    const client =
+      requireDb();
 
-  if (student) {
-    showPage(
-      "studentHomePage"
+    const {
+      data: {
+        session
+      }
+    } =
+      await client.auth.getSession();
+
+    if (
+      session?.user
+    ) {
+      await handleAuthSession(
+        session
+      );
+
+      return;
+    }
+
+    const student =
+      await restoreStudent();
+
+    if (student) {
+      showPage(
+        "studentHomePage"
+      );
+
+      await loadStudentHome();
+
+      return;
+    }
+
+    const admin =
+      await restoreAdmin();
+
+    if (admin) {
+      showPage(
+        "adminDashboardPage"
+      );
+
+      await initializeAdmin();
+
+      return;
+    }
+
+    showPublicLoginPage();
+
+  } catch (error) {
+    console.error(
+      "INITIALIZATION ERROR:",
+      error
     );
 
-    await loadStudentHome();
-
-    return;
+    showPublicLoginPage();
   }
-
-  const admin =
-    await restoreAdmin();
-
-  if (admin) {
-    showPage(
-      "adminDashboardPage"
-    );
-
-    await initializeAdmin();
-
-    return;
-  }
-
-  showPage("rolePage");
 }
 
+/* =========================================================
+   GOOGLE LOADING ANIMATION
+========================================================= */
+
+const googleLoadingStyle =
+  document.createElement(
+    "style"
+  );
+
+googleLoadingStyle.textContent = `
+@keyframes googleLoginSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+`;
+
+document.head.appendChild(
+  googleLoadingStyle
+);
 
 /* =========================================================
-   MAKE FUNCTIONS AVAILABLE TO HTML
+   WINDOW EXPORTS
 ========================================================= */
 
 window.showPage =
@@ -4185,6 +4731,15 @@ window.openStudentLogin =
 
 window.openAdminLogin =
   openAdminLogin;
+
+window.setupPostLoginRoleNav =
+  setupPostLoginRoleNav;
+
+window.showPublicLoginPage =
+  showPublicLoginPage;
+
+window.showPostLoginRoles =
+  showPostLoginRoles;
 
 window.studentRegister =
   studentRegister;
@@ -4228,9 +4783,6 @@ window.studentLogout =
 window.openLesson =
   openLesson;
 
-
-/* ADMIN */
-
 window.adminLogin =
   adminLogin;
 
@@ -4273,17 +4825,11 @@ window.createQuestion =
 window.deleteQuestion =
   deleteQuestion;
 
-window.loadAdminQuestions =
-  loadAdminQuestions;
-
 window.changeAIQuestionSource =
   changeAIQuestionSource;
 
 window.generateAIQuestions =
   generateAIQuestions;
-
-
-/* LOGIN */
 
 window.googleLogin =
   googleLogin;
@@ -4291,19 +4837,11 @@ window.googleLogin =
 window.telegramLogin =
   telegramLogin;
 
-
 /* =========================================================
-   START
+   START APP
 ========================================================= */
 
-if (
-  document.readyState ===
-  "loading"
-) {
-  document.addEventListener(
-    "DOMContentLoaded",
-    initializeApp
-  );
-} else {
-  initializeApp();
-}
+document.addEventListener(
+  "DOMContentLoaded",
+  initializeApp
+);
