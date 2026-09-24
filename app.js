@@ -1476,3 +1476,290 @@ async function adminLogin() {
       ?.value || "";
 
   if (!username || !password)
+async function populateExamSelects(exams = null) {
+  let list = exams;
+
+  if (!list) {
+    const { data } = await db
+      .from("exams")
+      .select("id,title")
+      .order("created_at", { ascending: false });
+
+    list = data || [];
+  }
+
+  ["questionExamSelect", "aiQuestionExamSelect"].forEach((id) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+
+    const current = select.value;
+
+    select.innerHTML = `
+      <option value="">Qormaata filadhu</option>
+      ${list
+        .map(
+          (exam) =>
+            `<option value="${exam.id}">${escapeHtml(exam.title)}</option>`
+        )
+        .join("")}
+    `;
+
+    if (list.some((exam) => String(exam.id) === String(current))) {
+      select.value = current;
+    }
+  });
+}
+
+async function createExam() {
+  return createUnifiedExam();
+}
+
+/* =========================================================
+   ADMIN - MANUAL QUESTIONS
+   Old single-question function kept for compatibility.
+========================================================= */
+
+async function createQuestion() {
+  if (!requireAdmin()) return;
+
+  alert(
+    "Gaaffilee hunda Qormaata Haaraa Uumi keessatti bakka tokkootti copy/paste godhi."
+  );
+}
+
+async function loadAdminQuestions() {
+  if (!requireAdmin()) return;
+
+  const container = document.getElementById("adminQuestionsList");
+  if (!container) return;
+
+  const { data, error } = await db
+    .from("questions")
+    .select("*, exams(title)")
+    .order("id", { ascending: false });
+
+  if (error) {
+    container.innerHTML =
+      `<div class="empty-state">❌ Gaaffilee fe'uu hin dandeenye.</div>`;
+    console.error(error);
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML =
+      `<div class="empty-state">❓ Gaaffiin hin jiru.</div>`;
+    return;
+  }
+
+  container.innerHTML = data
+    .map((row, index) => {
+      const question = normalizeQuestion(row);
+
+      return `
+        <div class="question-admin-item">
+          <div class="question-number">${index + 1}</div>
+
+          <div class="item-main">
+            <small>
+              ${escapeHtml(row.exams?.title || "Qormaata")}
+            </small>
+
+            <h3>
+              ${escapeHtml(question.text)}
+            </h3>
+
+            <div class="options-preview">
+              <span>
+                A. ${escapeHtml(question.optionA)}
+              </span>
+
+              <span>
+                B. ${escapeHtml(question.optionB)}
+              </span>
+
+              <span>
+                C. ${escapeHtml(question.optionC)}
+              </span>
+
+              <span>
+                D. ${escapeHtml(question.optionD)}
+              </span>
+            </div>
+
+            <p class="correct-answer">
+              Deebii sirrii:
+              ${escapeHtml(question.correctAnswer)}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="danger-small-btn"
+            onclick="deleteQuestion(${question.id})"
+          >
+            🗑️
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+async function deleteQuestion(questionId) {
+  if (!requireAdmin()) return;
+
+  if (!confirm("Gaaffii kana haquuf mirkaneessi.")) {
+    return;
+  }
+
+  const { error } = await db
+    .from("questions")
+    .delete()
+    .eq("id", questionId);
+
+  if (error) {
+    alert(getErrorMessage(error));
+    return;
+  }
+
+  await loadAdminQuestions();
+  await loadAdminExams();
+}
+
+/* =========================================================
+   ADMIN - DELETE WHOLE EXAM
+   Qormaata + gaaffilee + attempts + results ni haqa.
+========================================================= */
+
+async function deleteExam(examId) {
+  if (!requireAdmin()) return;
+
+  const { data: exam, error: examError } = await db
+    .from("exams")
+    .select("id,title")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (examError) {
+    console.error(examError);
+    alert(getErrorMessage(examError));
+    return;
+  }
+
+  if (!exam) {
+    alert("Qormaanni kun hin argamne.");
+    return;
+  }
+
+  const confirmed = confirm(
+    `Qormaata "${exam.title}" fi wantoota isaa hunda haquuf mirkaneessi.\n\n` +
+    `• Maqaa qormaataa\n` +
+    `• Gaaffilee\n` +
+    `• Bu'aawwan\n` +
+    `• Attemptwwan\n\n` +
+    `Haqamuu isaa mirkaneessaa?`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  /*
+    Answer details yoo table'n jiraate,
+    dura haqna. Yoo table'n hin jirre error isaa
+    hojii delete qormaataa hin dhaabu.
+  */
+  try {
+    await db
+      .from("exam_attempt_answers")
+      .delete()
+      .in(
+        "attempt_id",
+        (
+          await db
+            .from("exam_attempts")
+            .select("id")
+            .eq("exam_id", examId)
+        ).data?.map((row) => row.id) || []
+      );
+  } catch (error) {
+    console.warn(
+      "exam_attempt_answers delete skipped:",
+      error
+    );
+  }
+
+  /*
+    Results haqna.
+  */
+  const { error: resultsError } = await db
+    .from("results")
+    .delete()
+    .eq("exam_id", examId);
+
+  if (resultsError) {
+    console.warn(
+      "Results delete warning:",
+      resultsError
+    );
+  }
+
+  /*
+    Exam attempts haqna.
+  */
+  const { error: attemptsError } = await db
+    .from("exam_attempts")
+    .delete()
+    .eq("exam_id", examId);
+
+  if (attemptsError) {
+    console.warn(
+      "Attempts delete warning:",
+      attemptsError
+    );
+  }
+
+  /*
+    Questions haqna.
+  */
+  const { error: questionsError } = await db
+    .from("questions")
+    .delete()
+    .eq("exam_id", examId);
+
+  if (questionsError) {
+    alert(
+      "Gaaffilee qormaataa haquun hin danda'amne: " +
+        getErrorMessage(questionsError)
+    );
+    return;
+  }
+
+  /*
+    Dhuma irratti exam mataa isaa haqna.
+  */
+  const { error: deleteExamError } = await db
+    .from("exams")
+    .delete()
+    .eq("id", examId);
+
+  if (deleteExamError) {
+    alert(
+      "Qormaata mataa isaa haquun hin danda'amne: " +
+        getErrorMessage(deleteExamError)
+    );
+    return;
+  }
+
+  alert(
+    `✅ Qormaata "${exam.title}" fi wantoonni isaa hundi haqamaniiru.`
+  );
+
+  await loadAdminExams();
+  await loadAdminResults();
+  await populateExamSelects();
+}
+
+/* =========================================================
+   END OF PART 3
+========================================================= */
