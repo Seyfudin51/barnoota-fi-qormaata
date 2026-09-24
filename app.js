@@ -5057,7 +5057,9 @@ async function googleLogin() {
     }
   }
 }
-
+queryParams: {
+  prompt: "select_account"
+}
 /* =========================================================
    GOOGLE STUDENT
 ========================================================= */
