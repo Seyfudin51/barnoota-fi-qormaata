@@ -11,7 +11,12 @@
 
 const SUPABASE_URL = "https://xhkkaevhcqvkwabcsljm.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_8nBE4n2bQ1jRnEr_83FrdA_vSqqIpSz";
-const AI_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/generate-ai-questions`;
+const AI_FUNCTION_URL = ${SUPABASE_URL}/functions/v1/generate-ai-questions;
+
+const ADMIN_GOOGLE_EMAILS = [
+  "suufiyaanjeeylaanofficial@gmail.com",
+  "seyfudin67@gmail.com"
+].map((email) => email.toLowerCase());
 
 const db = window.supabase.createClient(
   SUPABASE_URL,
@@ -69,38 +74,42 @@ function showStudentMessage(message, type = "info") {
   const el = document.getElementById("studentLoginMessage");
   if (!el) return;
   el.textContent = message;
-  el.className = `message ${type}`.trim();
+  el.className = message ${type}.trim();
 }
 
 function showAdminMessage(message, type = "info") {
   const el = document.getElementById("adminLoginMessage");
   if (!el) return;
   el.textContent = message;
-  el.className = `message ${type}`.trim();
+  el.className = message ${type}.trim();
 }
 
 function showAIMessage(message, type = "info") {
   const el = document.getElementById("aiQuestionMessage");
   if (!el) return;
   el.innerHTML = message;
-  el.className = `message ${type}`.trim();
+  el.className = message ${type}.trim();
 }
 
 function generateStudentCode() {
   const chars = "0123456789";
   let result = "ST-";
+
   for (let i = 0; i < 6; i++) {
     result += chars[Math.floor(Math.random() * chars.length)];
   }
+
   return result;
 }
 
 function generateActivationCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let result = "";
+
   for (let i = 0; i < 8; i++) {
     result += chars[Math.floor(Math.random() * chars.length)];
   }
+
   return result;
 }
 
@@ -116,17 +125,27 @@ function normalizeQuestion(row) {
     optionD: row.option_d ?? row.optionD ?? "",
     correctAnswer: String(
       row.correct_answer ?? row.correctAnswer ?? ""
-    ).toUpperCase().charAt(0)
+    )
+      .toUpperCase()
+      .charAt(0)
   };
 }
 
 function normalizeExam(row) {
   return {
     ...row,
-    questionLimit: Number(row.question_limit ?? row.questionLimit ?? 0),
-    attemptLimit: Number(row.attempt_limit ?? row.attemptLimit ?? 1),
-    isFinal: Boolean(row.is_final ?? row.isFinal ?? false),
-    duration: Number(row.duration_minutes ?? row.duration ?? 30),
+    questionLimit: Number(
+      row.question_limit ?? row.questionLimit ?? 0
+    ),
+    attemptLimit: Number(
+      row.attempt_limit ?? row.attemptLimit ?? 1
+    ),
+    isFinal: Boolean(
+      row.is_final ?? row.isFinal ?? false
+    ),
+    duration: Number(
+      row.duration_minutes ?? row.duration ?? 30
+    ),
     startDate: row.start_date ?? row.startDate ?? "",
     endDate: row.end_date ?? row.endDate ?? "",
     startTime: row.start_time ?? row.startTime ?? "",
@@ -144,59 +163,96 @@ function showPage(pageId) {
   });
 
   const page = document.getElementById(pageId);
+
   if (page) {
     page.classList.add("active");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   }
+}
+
+function getAdminPageId() {
+  return document.getElementById("adminDashboardPage")
+    ? "adminDashboardPage"
+    : "adminPage";
 }
 
 function openStudentLogin() {
   document.getElementById("postLoginRoleNav")?.remove();
+
   showPage("studentLoginPage");
+
   const input = document.getElementById("nameInput");
-  if (input) setTimeout(() => input.focus(), 100);
+
+  if (input) {
+    setTimeout(() => input.focus(), 100);
+  }
 }
 
 function openAdminLogin() {
   document.getElementById("postLoginRoleNav")?.remove();
+
   showPage("adminLoginPage");
+
   const input = document.getElementById("adminUsername");
-  if (input) setTimeout(() => input.focus(), 100);
+
+  if (input) {
+    setTimeout(() => input.focus(), 100);
+  }
 }
 
 /* =========================================================
    POST-LOGIN ROLE NAVIGATION
-   Fuula jalqabaa irratti Google fi Telegram qofa.
-   Erga login dhugaa booda Barataa/Admin bottom navigation
-   keessatti mul'atu.
 ========================================================= */
 
 function setupPostLoginRoleNav(authenticated = false) {
   const rolePage = document.getElementById("rolePage");
+
   if (!rolePage) return;
 
   const oldNav = document.getElementById("postLoginRoleNav");
-  if (oldNav) oldNav.remove();
 
-  rolePage.querySelectorAll('[onclick*="openStudentLogin"], [onclick*="openAdminLogin"]').forEach((el) => {
-    el.style.display = "none";
-  });
+  if (oldNav) {
+    oldNav.remove();
+  }
+
+  rolePage
+    .querySelectorAll(
+      '[onclick*="openStudentLogin"], [onclick*="openAdminLogin"]'
+    )
+    .forEach((el) => {
+      el.style.display = "none";
+    });
 
   if (!authenticated) return;
 
   const nav = document.createElement("div");
+
   nav.id = "postLoginRoleNav";
   nav.className = "bottom-nav";
-  nav.innerHTML = `
-    <button type="button" class="nav-item" onclick="openStudentLogin()">
+
+  nav.innerHTML = 
+    <button
+      type="button"
+      class="nav-item"
+      onclick="openStudentLogin()"
+    >
       <span>👨‍🎓</span>
       <small>Barataa</small>
     </button>
-    <button type="button" class="nav-item" onclick="openAdminLogin()">
+
+    <button
+      type="button"
+      class="nav-item"
+      onclick="openAdminLogin()"
+    >
       <span>⚙️</span>
       <small>Admin</small>
     </button>
-  `;
+  ;
+
   document.body.appendChild(nav);
 }
 
@@ -215,102 +271,180 @@ function showPostLoginRoles() {
 ========================================================= */
 
 async function studentRegister() {
-  const name = document.getElementById("nameInput")?.value.trim() || "";
+  const name =
+    document.getElementById("nameInput")?.value.trim() || "";
 
   if (name.length < 2) {
-    showStudentMessage("Maqaa kee guutuu sirriitti galchi.", "error");
-    return;
-  }
-
-  try {
-    const { data: existing, error: existingError } = await db
-      .from("students")
-      .select("id,student_id,activation_code,name,status")
-      .ilike("name", name)
-      .maybeSingle();
-
-    if (existingError && existingError.code !== "PGRST116") {
-      throw existingError;
-    }
-
-    if (existing) {
-      showStudentMessage(
-        `Maqaan kun duraan galmaa'eera. Student ID: ${existing.student_id}`,
-        "error"
-      );
-      return;
-    }
-
-    let studentId = generateStudentCode();
-    let activationCode = generateActivationCode();
-
-    for (let i = 0; i < 10; i++) {
-      const { data: duplicate } = await db
-        .from("students")
-        .select("id")
-        .or(`student_id.eq.${studentId},activation_code.eq.${activationCode}`)
-        .limit(1);
-
-      if (!duplicate?.length) break;
-
-      studentId = generateStudentCode();
-      activationCode = generateActivationCode();
-    }
-
-    const { data: student, error } = await db
-      .from("students")
-      .insert({
-        student_id: studentId,
-        activation_code: activationCode,
-        name,
-        status: "pending"
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    alert(
-      `Galmeen milkaa'e!\n\nMaqaa: ${student.name}\nStudent ID: ${student.student_id}\nActivation Code: ${student.activation_code}\n\nAdminiin erga si mirkaneessee booda seenuu dandeessa.`
-    );
-
-    document.getElementById("nameInput").value = "";
-    showStudentMessage("Galmeen kee milkaa'eera. Admin eegi.", "success");
-  } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    showStudentMessage(getErrorMessage(error), "error");
-  }
-}
-
-async function studentLogin() {
-  const studentId =
-    document.getElementById("studentIdInput")?.value.trim() || "";
-  const activationCode =
-    document.getElementById("activationCodeInput")?.value.trim() || "";
-
-  if (!studentId || !activationCode) {
     showStudentMessage(
-      "Student ID fi Activation Code lamaan isaanii galchi.",
+      "Maqaa kee guutuu sirriitti galchi.",
       "error"
     );
     return;
   }
 
   try {
-    const { data: student, error } = await db
+    const {
+      data: existing,
+      error: existingError
+    } = await db
+      .from("students")
+      .select(
+        "id,student_code,activation_code,name,status"
+      )
+      .ilike("name", name)
+      .maybeSingle();
+
+    if (
+      existingError &&
+      existingError.code !== "PGRST116"
+    ) {
+      throw existingError;
+    }
+
+    if (existing) {
+      showStudentMessage(
+        Maqaan kun duraan galmaa'eera. Student ID: ${
+          existing.student_code || "-"
+        },
+        "error"
+      );
+
+      return;
+    }
+
+    let studentCode = generateStudentCode();
+    let activationCode = generateActivationCode();
+    let student = null;
+    let lastError = null;
+
+    for (let i = 0; i < 10; i++) {
+      const { data: duplicate } = await db
+        .from("students")
+        .select("id")
+        .or(
+          student_code.eq.${studentCode},activation_code.eq.${activationCode}
+        )
+        .limit(1);
+
+      if (duplicate?.length) {
+        studentCode = generateStudentCode();
+        activationCode = generateActivationCode();
+        continue;
+      }
+
+const {
+        data,
+        error
+      } = await db
+        .from("students")
+        .insert({
+          student_code: studentCode,
+          activation_code: activationCode,
+          name,
+          status: "pending"
+        })
+        .select()
+        .single();
+
+      if (!error) {
+        student = data;
+        break;
+      }
+
+      lastError = error;
+
+      if (
+        !String(error.code || "").startsWith("23")
+      ) {
+        break;
+      }
+
+      studentCode = generateStudentCode();
+      activationCode = generateActivationCode();
+    }
+
+    if (!student) {
+      throw (
+        lastError ||
+        new Error(
+          "Galmee barataa uumuu hin dandeenye."
+        )
+      );
+    }
+
+    alert(
+      Galmeen milkaa'e!\n\n +
+      Maqaa: ${student.name}\n +
+      Student ID: ${student.student_code}\n +
+      Activation Code: ${student.activation_code}\n\n +
+      Adminiin erga si mirkaneessee booda seenuu dandeessa.
+    );
+
+    const input =
+      document.getElementById("nameInput");
+
+    if (input) {
+      input.value = "";
+    }
+
+    showStudentMessage(
+      "Galmeen kee milkaa'eera. Admin eegi.",
+      "success"
+    );
+  } catch (error) {
+    console.error(
+      "REGISTER ERROR:",
+      error
+    );
+
+    showStudentMessage(
+      getErrorMessage(error),
+      "error"
+    );
+  }
+}
+
+async function studentLogin() {
+  const studentId =
+    document
+      .getElementById("studentIdInput")
+      ?.value.trim() || "";
+
+  const activationCode =
+    document
+      .getElementById("activationCodeInput")
+      ?.value.trim() || "";
+
+  if (!studentId || !activationCode) {
+    showStudentMessage(
+      "Student ID fi Activation Code lamaan isaanii galchi.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+    const {
+      data: student,
+      error
+    } = await db
       .from("students")
       .select("*")
-      .eq("student_id", studentId)
+      .eq("student_code", studentId)
       .eq("activation_code", activationCode)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     if (!student) {
       showStudentMessage(
         "Student ID ykn Activation Code sirrii miti.",
         "error"
       );
+
       return;
     }
 
@@ -321,46 +455,88 @@ async function studentLogin() {
           : "Account kee adminiin cufameera.",
         "error"
       );
+
       return;
     }
 
     currentStudent = student;
-    localStorage.setItem("ao_student_id", student.id);
 
-    document.getElementById("studentIdInput").value = "";
-    document.getElementById("activationCodeInput").value = "";
+    localStorage.setItem(
+      "ao_student_id",
+      student.id
+    );
+
+    const studentIdInput =
+      document.getElementById("studentIdInput");
+
+    const activationInput =
+      document.getElementById("activationCodeInput");
+
+    if (studentIdInput) {
+      studentIdInput.value = "";
+    }
+
+    if (activationInput) {
+      activationInput.value = "";
+    }
 
     showPage("studentHomePage");
+
     await loadStudentHome();
   } catch (error) {
-    console.error("STUDENT LOGIN ERROR:", error);
-    showStudentMessage(getErrorMessage(error), "error");
+    console.error(
+      "STUDENT LOGIN ERROR:",
+      error
+    );
+
+    showStudentMessage(
+      getErrorMessage(error),
+      "error"
+    );
   }
 }
 
 async function restoreStudent() {
-  const id = localStorage.getItem("ao_student_id");
-  if (!id) return null;
+  const id =
+    localStorage.getItem("ao_student_id");
+
+  if (!id) {
+    return null;
+  }
 
   try {
-    const { data, error } = await db
+    const {
+      data,
+      error
+    } = await db
       .from("students")
       .select("*")
       .eq("id", id)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     if (!data || data.status !== "active") {
-      localStorage.removeItem("ao_student_id");
+      localStorage.removeItem(
+        "ao_student_id"
+      );
+
       currentStudent = null;
+
       return null;
     }
 
     currentStudent = data;
+
     return data;
   } catch (error) {
-    console.error("RESTORE STUDENT ERROR:", error);
+    console.error(
+      "RESTORE STUDENT ERROR:",
+      error
+    );
+
     return null;
   }
 }
@@ -370,6 +546,7 @@ function requireStudent() {
     showPage("studentLoginPage");
     return null;
   }
+
   return currentStudent;
 }
 
@@ -379,12 +556,23 @@ function requireStudent() {
 
 async function loadStudentHome() {
   const student = requireStudent();
+
   if (!student) return;
 
-  const nameEl = document.getElementById("studentWelcomeName");
-  const messageEl = document.getElementById("studentHomeMessage");
+const nameEl =
+    document.getElementById(
+      "studentWelcomeName"
+    );
 
-  if (nameEl) nameEl.textContent = student.name;
+  const messageEl =
+    document.getElementById(
+      "studentHomeMessage"
+    );
+
+  if (nameEl) {
+    nameEl.textContent = student.name;
+  }
+
   if (messageEl) {
     messageEl.textContent =
       "Barnoota dubbisi, qormaata fudhadhu, qabxii kees ilaali.";
@@ -394,54 +582,103 @@ async function loadStudentHome() {
 }
 
 async function loadStudentLessons() {
-  const container = document.getElementById("studentLessons");
+  const container =
+    document.getElementById(
+      "studentLessons"
+    );
+
   if (!container) return;
 
-  const { data, error } = await db
+  const {
+    data,
+    error
+  } = await db
     .from("lessons")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", {
+      ascending: false
+    });
 
   if (error) {
-    container.innerHTML = `<div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>`;
+    container.innerHTML =
+      <div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>;
+
     console.error(error);
+
     return;
   }
 
   if (!data?.length) {
-    container.innerHTML = `<div class="empty-state">📚 Ammaaf barnoonni hin fe'amne.</div>`;
+    container.innerHTML =
+      <div class="empty-state">📚 Ammaaf barnoonni hin fe'amne.</div>;
+
     return;
   }
 
-  container.innerHTML = data.map((lesson) => `
-    <article class="item-card">
-      <div class="item-icon">📚</div>
-      <div class="item-main">
-        <h4>${escapeHtml(lesson.title)}</h4>
-        <p>${escapeHtml(truncate(lesson.content, 120))}</p>
-        <button type="button" class="small-btn" onclick="openLesson('${lesson.id}')">
-          Baradhu →
-        </button>
-      </div>
-    </article>
-  `).join("");
+  container.innerHTML = data
+    .map(
+      (lesson) => 
+        <article class="item-card">
+          <div class="item-icon">📚</div>
+
+          <div class="item-main">
+            <h4>
+              ${escapeHtml(lesson.title)}
+            </h4>
+
+            <p>
+              ${escapeHtml(
+                truncate(lesson.content, 120)
+              )}
+            </p>
+
+            <button
+              type="button"
+              class="small-btn"
+              onclick="openLesson('${lesson.id}')"
+            >
+              Baradhu →
+            </button>
+          </div>
+        </article>
+      
+    )
+    .join("");
 }
 
 async function openLesson(lessonId) {
-  const { data, error } = await db
+  const {
+    data,
+    error
+  } = await db
     .from("lessons")
     .select("*")
     .eq("id", lessonId)
     .maybeSingle();
 
-  if (error || !data) return;
+  if (error || !data) {
+    return;
+  }
 
-  const title = document.getElementById("lessonDetailTitle");
-  const content = document.getElementById("lessonDetailContent");
+  const title =
+    document.getElementById(
+      "lessonDetailTitle"
+    );
 
-  if (title) title.textContent = data.title;
+  const content =
+    document.getElementById(
+      "lessonDetailContent"
+    );
+
+  if (title) {
+    title.textContent = data.title;
+  }
+
   if (content) {
-    content.innerHTML = `<div class="lesson-content">${formatText(data.content)}</div>`;
+    content.innerHTML =
+      <div class="lesson-content">${formatText(
+        data.content
+      )}</div>;
   }
 
   showPage("lessonDetailPage");
@@ -455,44 +692,91 @@ function getExamWindowStatus(exam) {
   const now = new Date();
 
   if (exam.startDate) {
-    const start = new Date(`${exam.startDate}T${exam.startTime || "00:00"}`);
-    if (!Number.isNaN(start.getTime()) && now < start) {
-      return { available: false, reason: "not_started", date: start };
+    const start = new Date(
+      ${exam.startDate}T${
+        exam.startTime || "00:00"
+      }
+    );
+
+    if (
+      !Number.isNaN(start.getTime()) &&
+      now < start
+    ) {
+      return {
+        available: false,
+        reason: "not_started",
+        date: start
+      };
     }
   }
 
   if (exam.endDate) {
-    const end = new Date(`${exam.endDate}T${exam.endTime || "23:59:59"}`);
-    if (!Number.isNaN(end.getTime()) && now > end) {
-      return { available: false, reason: "ended", date: end };
+    const end = new Date(
+      ${exam.endDate}T${
+        exam.endTime || "23:59:59"
+      }
+    );
+
+    if (
+      !Number.isNaN(end.getTime()) &&
+      now > end
+    ) {
+      return {
+        available: false,
+        reason: "ended",
+        date: end
+      };
     }
   }
 
   if (exam.status === "disabled") {
-    return { available: false, reason: "disabled" };
+    return {
+      available: false,
+      reason: "disabled"
+    };
   }
 
-  return { available: true, reason: "available" };
+  return {
+    available: true,
+    reason: "available"
+  };
 }
 
 function formatDateTime(value) {
   if (!value) return "";
+
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
   return date.toLocaleString("om-ET");
 }
 
-async function getCompletedAttempts(examId, studentId) {
-  const { data, error } = await db
+async function getCompletedAttempts(
+  examId,
+  studentId
+) {
+  const {
+    data,
+    error
+  } = await db
     .from("exam_attempts")
     .select("*")
     .eq("exam_id", examId)
     .eq("student_id", studentId)
     .eq("completed", true)
-    .order("attempt_number", { ascending: false });
+    .order("attempt_number", {
+      ascending: false
+    });
 
   if (error) {
-    console.error("ATTEMPTS ERROR:", error);
+    console.error(
+      "ATTEMPTS ERROR:",
+      error
+    );
+
     return [];
   }
 
@@ -501,70 +785,146 @@ async function getCompletedAttempts(examId, studentId) {
 
 async function loadExams() {
   const student = requireStudent();
+
   if (!student) return;
 
-  const container = document.getElementById("studentExams");
+  const container =
+    document.getElementById(
+      "studentExams"
+    );
+
   if (!container) return;
 
-  const { data, error } = await db
+const {
+    data,
+    error
+  } = await db
     .from("exams")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", {
+      ascending: false
+    });
 
   if (error) {
-    container.innerHTML = `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
+    container.innerHTML =
+      <div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>;
+
     console.error(error);
+
     return;
   }
 
   if (!data?.length) {
-    container.innerHTML = `<div class="empty-state">📝 Ammaaf qormaanni hin jiru.</div>`;
+    container.innerHTML =
+      <div class="empty-state">📝 Ammaaf qormaanni hin jiru.</div>;
+
     return;
   }
 
-  const exams = data.map(normalizeExam);
+  const exams =
+    data.map(normalizeExam);
+
   const cards = [];
 
   for (const exam of exams) {
-    const attempts = await getCompletedAttempts(exam.id, student.id);
-    const limit = Number(exam.attemptLimit || 1);
-    const window = getExamWindowStatus(exam);
+    const attempts =
+      await getCompletedAttempts(
+        exam.id,
+        student.id
+      );
+
+    const limit =
+      Number(
+        exam.attemptLimit || 1
+      );
+
+    const window =
+      getExamWindowStatus(exam);
+
     let action = "";
 
     if (!window.available) {
       const text =
         window.reason === "not_started"
-          ? `⏳ Hin jalqabne: ${formatDateTime(window.date)}`
+          ? ⏳ Hin jalqabne: ${formatDateTime(
+              window.date
+            )}
           : window.reason === "ended"
           ? "⛔ Yeroon qormaataa darbeera."
-          : "⛔ Qormaanni cufameera.";
-      action = `<span class="status blocked">${escapeHtml(text)}</span>`;
-    } else if (attempts.length >= limit) {
-      action = `<span class="status blocked">Attempt xumurame</span>`;
+          : "⛔ Qormaanni cufame.";
+
+      action = 
+        <span class="status blocked">
+          ${escapeHtml(text)}
+        </span>
+      ;
+    } else if (
+      attempts.length >= limit
+    ) {
+      action = 
+        <span class="status blocked">
+          Attempt xumurame
+        </span>
+      ;
     } else {
-      action = `
-        <button type="button" class="small-btn" onclick="startExam(${exam.id})">
+      action = 
+        <button
+          type="button"
+          class="small-btn"
+          onclick="startExam(${exam.id})"
+        >
           Qormaata Jalqabi →
         </button>
-      `;
+      ;
     }
 
-    cards.push(`
+    cards.push(
       <article class="exam-card">
-        <div class="exam-badge">${exam.isFinal ? "🏆 FINAL" : "📝 EXAM"}</div>
-        <h3>${escapeHtml(exam.title)}</h3>
-        <p>${escapeHtml(exam.description || "")}</p>
-        <div class="exam-meta">
-          <span>❓ ${exam.questionLimit > 0 ? exam.questionLimit : "Hunda"}</span>
-          <span>⏱️ ${exam.duration} daqiiqaa</span>
-          <span>🔢 ${attempts.length}/${limit}</span>
+
+        <div class="exam-badge">
+          ${exam.isFinal ? "🏆 FINAL" : "📝 EXAM"}
         </div>
-        <div class="exam-action">${action}</div>
+
+        <h3>
+          ${escapeHtml(exam.title)}
+        </h3>
+
+        <p>
+          ${escapeHtml(
+            exam.description || ""
+          )}
+        </p>
+
+        <div class="exam-meta">
+
+          <span>
+            ❓ ${
+              exam.questionLimit > 0
+                ? exam.questionLimit
+                : "Hunda"
+            }
+          </span>
+
+          <span>
+            ⏱️ ${exam.duration} daqiiqaa
+          </span>
+
+          <span>
+            🔢 ${attempts.length}/${limit}
+          </span>
+
+        </div>
+
+        <div class="exam-action">
+          ${action}
+        </div>
+
       </article>
-    `);
+    );
   }
 
-  container.innerHTML = cards.join("");
+  container.innerHTML =
+    cards.join("");
 }
 
 /* =========================================================
@@ -573,9 +933,13 @@ async function loadExams() {
 
 async function startExam(examId) {
   const student = requireStudent();
+
   if (!student) return;
 
-  const { data: examRow, error: examError } = await db
+  const {
+    data: examRow,
+    error: examError
+  } = await db
     .from("exams")
     .select("*")
     .eq("id", examId)
@@ -586,8 +950,11 @@ async function startExam(examId) {
     return;
   }
 
-  const exam = normalizeExam(examRow);
-  const window = getExamWindowStatus(exam);
+  const exam =
+    normalizeExam(examRow);
+
+  const window =
+    getExamWindowStatus(exam);
 
   if (!window.available) {
     alert(
@@ -597,384 +964,306 @@ async function startExam(examId) {
         ? "Yeroon qormaataa darbeera."
         : "Qormaanni cufameera."
     );
+
     return;
   }
 
-  const completedAttempts = await getCompletedAttempts(exam.id, student.id);
-  const attemptLimit = Number(exam.attemptLimit || 1);
+  const completedAttempts =
+    await getCompletedAttempts(
+      exam.id,
+      student.id
+    );
 
-  if (completedAttempts.length >= attemptLimit) {
-    alert("Attempt kee xumurameera.");
+  const attemptLimit =
+    Number(
+      exam.attemptLimit || 1
+    );
+
+  if (
+    completedAttempts.length >=
+    attemptLimit
+  ) {
+    alert(
+      "Attempt kee xumurameera."
+    );
+
     return;
   }
 
-  const { data: questionRows, error: questionError } = await db
+  const {
+    data: questionRows,
+    error: questionError
+  } = await db
     .from("questions")
     .select("*")
     .eq("exam_id", exam.id);
 
   if (questionError) {
-    alert(getErrorMessage(questionError));
+    alert(
+      getErrorMessage(
+        questionError
+      )
+    );
+
     return;
   }
 
-  let questions = (questionRows || []).map(normalizeQuestion);
+  let questions =
+    (questionRows || [])
+      .map(normalizeQuestion);
 
   if (!questions.length) {
-    alert("Qormaata kana keessatti gaaffiin hin jiru.");
+    alert(
+      "Qormaata kana keessatti gaaffiin hin jiru."
+    );
+
     return;
   }
 
-  const questionLimit = Number(exam.questionLimit || 0);
+  questions =
+    questions.sort(
+      () => Math.random() - 0.5
+    );
 
-  if (questionLimit > 0 && questions.length > questionLimit) {
-    questions = questions.slice(0, questionLimit);
-  }
+const requestedQuestionCount =
+    Number(
+      exam.questionLimit || 0
+    );
 
-  /* -------------------------------------------------------
-     Attempt number
-  ------------------------------------------------------- */
-
-  const attemptNumber = completedAttempts.length + 1;
-
-  /*
-    Incomplete attempt duraan jiraachuu danda'a.
-    Yoo jiraate, isa sana irra deebi'amee fayyadama.
-    Kun duplicate key exam_attempts_unique_attempt
-    akka hin uumamneef barbaachisaa dha.
-  */
-
-  const { data: existingAttempt, error: existingAttemptError } = await db
-    .from("exam_attempts")
-    .select("*")
-    .eq("exam_id", exam.id)
-    .eq("student_id", student.id)
-    .eq("attempt_number", attemptNumber)
-    .eq("completed", false)
-    .maybeSingle();
-
-  if (existingAttemptError) {
-    console.error("EXISTING ATTEMPT ERROR:", existingAttemptError);
-  }
-
-  let attempt = existingAttempt;
-
-  if (!attempt) {
-    const { data: createdAttempt, error: attemptError } = await db
-      .from("exam_attempts")
-      .insert({
-        student_id: student.id,
-        exam_id: exam.id,
-        attempt_number: attemptNumber,
-        score: 0,
-        total: questions.length,
-        percentage: 0,
-        started_at: new Date().toISOString(),
-        completed: false
-      })
-      .select()
-      .single();
-
-    if (attemptError) {
-      console.error("CREATE ATTEMPT ERROR:", attemptError);
-      alert(
-        "Qormaata jalqabuun hin danda'amne: " +
-        getErrorMessage(attemptError)
+  if (requestedQuestionCount > 0) {
+    questions =
+      questions.slice(
+        0,
+        requestedQuestionCount
       );
-      return;
-    }
+  }
 
-    attempt = createdAttempt;
+  const attemptNumber =
+    completedAttempts.length + 1;
+
+  const {
+    data: attempt,
+    error: attemptError
+  } = await db
+    .from("exam_attempts")
+    .insert({
+      student_id: student.id,
+      exam_id: exam.id,
+      attempt_number: attemptNumber,
+      score: 0,
+      total: questions.length,
+      percentage: 0,
+      completed: false
+    })
+    .select()
+    .single();
+
+  if (attemptError) {
+    console.error(
+      attemptError
+    );
+
+    alert(
+      "Qormaata jalqabuun hin danda'amne: " +
+        getErrorMessage(
+          attemptError
+        )
+    );
+
+    return;
   }
 
   currentExam = exam;
   currentQuestions = questions;
   currentQuestionIndex = 0;
-  currentAttempt = attempt;
-
-  /*
-    Deebii duraan qabame yoo jiraate deebisnee feena.
-  */
-
   currentAnswers = {};
+  currentAttempt = attempt;
+  pendingSubmit = false;
 
-  try {
-    const { data: savedAnswers, error: savedAnswersError } = await db
-      .from("exam_attempt_answers")
-      .select("*")
-      .eq("attempt_id", attempt.id);
+  const title =
+    document.getElementById(
+      "examTitle"
+    );
 
-    if (!savedAnswersError && savedAnswers?.length) {
-      savedAnswers.forEach((answer) => {
-        if (answer.question_id != null) {
-          currentAnswers[answer.question_id] =
-            answer.selected_answer || "";
-        }
-      });
-    }
-  } catch (error) {
-    /*
-      exam_attempt_answers table yoo hin jirre,
-      qormaanni akka hin cufamneef itti fufa.
-    */
-    console.warn("ANSWER RESTORE SKIPPED:", error);
+  if (title) {
+    title.textContent =
+      exam.title;
   }
 
-  showPage("examPage");
+  examSecondsLeft =
+    Math.max(
+      1,
+      exam.duration * 60
+    );
+
+  startExamTimer();
 
   renderCurrentQuestion();
 
-  startExamTimer(exam.duration);
-
-  await updateExamHeader();
+  showPage("examPage");
 }
-
-/* =========================================================
-   EXAM HEADER
-========================================================= */
-
-async function updateExamHeader() {
-  if (!currentExam) return;
-
-  const titleEl = document.getElementById("examTitle");
-  const questionCountEl = document.getElementById("examQuestionCount");
-
-  if (titleEl) {
-    titleEl.textContent = currentExam.title;
-  }
-
-  if (questionCountEl) {
-    questionCountEl.textContent =
-      `${currentQuestionIndex + 1}/${currentQuestions.length}`;
-  }
-}
-
-/* =========================================================
-   TIMER
-========================================================= */
-
-function startExamTimer(durationMinutes) {
-  stopExamTimer();
-
-  examSecondsLeft = Math.max(
-    1,
-    Number(durationMinutes || 30) * 60
-  );
-
-  updateExamTimerDisplay();
-
-  examTimer = setInterval(() => {
-    examSecondsLeft--;
-
-    updateExamTimerDisplay();
-
-    if (examSecondsLeft <= 0) {
-      stopExamTimer();
-
-      alert(
-        "⏰ Yeroon qormaataa xumurameera. Qormaanni ofumaan submit ta'a."
-      );
-
-      submitExam(true);
-    }
-  }, 1000);
-}
-
-function stopExamTimer() {
-  if (examTimer) {
-    clearInterval(examTimer);
-    examTimer = null;
-  }
-}
-
-function updateExamTimerDisplay() {
-  const timerEl =
-    document.getElementById("examTimer") ||
-    document.getElementById("timer");
-
-  if (!timerEl) return;
-
-  const minutes = Math.floor(examSecondsLeft / 60);
-  const seconds = examSecondsLeft % 60;
-
-  timerEl.textContent =
-    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-
-  if (examSecondsLeft <= 60) {
-    timerEl.classList.add("danger");
-  } else {
-    timerEl.classList.remove("danger");
-  }
-}
-
-/* =========================================================
-   RENDER CURRENT QUESTION
-========================================================= */
 
 function renderCurrentQuestion() {
-  if (!currentExam || !currentQuestions.length) return;
+  if (
+    !currentExam ||
+    !currentQuestions.length
+  ) {
+    return;
+  }
 
-  const question = currentQuestions[currentQuestionIndex];
+  const question =
+    currentQuestions[
+      currentQuestionIndex
+    ];
 
-  const questionNumberEl =
-    document.getElementById("currentQuestionNumber");
+  const total =
+    currentQuestions.length;
 
-  const questionTextEl =
-    document.getElementById("currentQuestionText");
+  const number =
+    document.getElementById(
+      "questionNumber"
+    );
 
-  const optionsContainer =
-    document.getElementById("questionOptions");
+  const text =
+    document.getElementById(
+      "questionText"
+    );
+
+  const container =
+    document.getElementById(
+      "answersContainer"
+    );
+
+  if (number) {
+    number.textContent =
+       ${currentQuestionIndex + 1}/${total};
+  }
+
+  if (text) {
+    text.textContent =
+      question.text;
+  }
+
+  if (!container) return;
+
+  const selected =
+    currentAnswers[
+      question.id
+    ];
+
+  const options = [
+    ["A", question.optionA],
+    ["B", question.optionB],
+    ["C", question.optionC],
+    ["D", question.optionD]
+  ];
+
+  container.innerHTML =
+    options
+      .map(
+        ([letter, value]) => 
+          <label class="answer-option">
+
+            <input
+              type="radio"
+              name="currentAnswer"
+              value="${letter}"
+              ${
+                selected === letter
+                  ? "checked"
+                  : ""
+              }
+              onchange="selectAnswer('${letter}')"
+            >
+
+            <span>
+              <strong>${letter}.</strong>
+              ${escapeHtml(value)}
+            </span>
+
+          </label>
+        
+      )
+      .join("");
 
   const nextButton =
-    document.getElementById("nextQuestionButton");
+    document.getElementById(
+      "nextQuestionButton"
+    );
 
   const submitButton =
-    document.getElementById("submitExamButton");
+    document.getElementById(
+      "submitExamButton"
+    );
 
-  if (questionNumberEl) {
-    questionNumberEl.textContent =
-      `Gaaffii ${currentQuestionIndex + 1}`;
-  }
-
-  if (questionTextEl) {
-    questionTextEl.textContent = question.text;
-  }
-
-  if (optionsContainer) {
-    const selected =
-      currentAnswers[question.id] || "";
-
-    optionsContainer.innerHTML = `
-      <label class="answer-option">
-        <input
-          type="radio"
-          name="examAnswer"
-          value="A"
-          ${selected === "A" ? "checked" : ""}
-          onchange="selectAnswer('A')"
-        />
-        <span>
-          <strong>A.</strong>
-          ${escapeHtml(question.optionA)}
-        </span>
-      </label>
-
-      <label class="answer-option">
-        <input
-          type="radio"
-          name="examAnswer"
-          value="B"
-          ${selected === "B" ? "checked" : ""}
-          onchange="selectAnswer('B')"
-        />
-        <span>
-          <strong>B.</strong>
-          ${escapeHtml(question.optionB)}
-        </span>
-      </label>
-
-      <label class="answer-option">
-        <input
-          type="radio"
-          name="examAnswer"
-          value="C"
-          ${selected === "C" ? "checked" : ""}
-          onchange="selectAnswer('C')"
-        />
-        <span>
-          <strong>C.</strong>
-          ${escapeHtml(question.optionC)}
-        </span>
-      </label>
-
-      <label class="answer-option">
-        <input
-          type="radio"
-          name="examAnswer"
-          value="D"
-          ${selected === "D" ? "checked" : ""}
-          onchange="selectAnswer('D')"
-        />
-        <span>
-          <strong>D.</strong>
-          ${escapeHtml(question.optionD)}
-        </span>
-      </label>
-    `;
-  }
+  const answered =
+    Boolean(
+      currentAnswers[
+        question.id
+      ]
+    );
 
   if (nextButton) {
+    nextButton.disabled =
+      !answered;
+
     nextButton.style.display =
-      currentQuestionIndex < currentQuestions.length - 1
-        ? "inline-flex"
-        : "none";
+      currentQuestionIndex ===
+      total - 1
+        ? "none"
+        : "block";
   }
 
   if (submitButton) {
+    submitButton.disabled =
+      !answered;
+
     submitButton.style.display =
-      currentQuestionIndex === currentQuestions.length - 1
-        ? "inline-flex"
+      currentQuestionIndex ===
+      total - 1
+        ? "block"
         : "none";
   }
-
-  updateExamHeader();
 }
 
-/* =========================================================
-   SELECT ANSWER
-========================================================= */
+function selectAnswer(letter) {
+  const question =
+    currentQuestions[
+      currentQuestionIndex
+    ];
 
-async function selectAnswer(answer) {
-  if (!currentQuestions.length) return;
+  if (!question) return;
 
-  const question = currentQuestions[currentQuestionIndex];
+  currentAnswers[
+    question.id
+  ] = letter;
 
-  currentAnswers[question.id] = String(answer || "").toUpperCase();
+  const nextButton =
+    document.getElementById(
+      "nextQuestionButton"
+    );
 
-  /*
-    Deebii battalum Supabase keessatti kaa'a.
-    Table yoo hin jirre, local state qofa irratti itti fufa.
-  */
+  const submitButton =
+    document.getElementById(
+      "submitExamButton"
+    );
 
-  try {
-    if (currentAttempt?.id) {
-      const selectedAnswer = currentAnswers[question.id];
-      const correctAnswer = question.correctAnswer;
+  if (nextButton) {
+    nextButton.disabled =
+      false;
+  }
 
-      await db
-        .from("exam_attempt_answers")
-        .upsert(
-          {
-            attempt_id: currentAttempt.id,
-            question_id: question.id,
-            question_text: question.text,
-            option_a: question.optionA,
-            option_b: question.optionB,
-            option_c: question.optionC,
-            option_d: question.optionD,
-            selected_answer: selectedAnswer,
-            correct_answer: correctAnswer,
-            is_correct: selectedAnswer === correctAnswer,
-            answered_at: new Date().toISOString()
-          },
-          {
-            onConflict: "attempt_id,question_id"
-          }
-        );
-    }
-  } catch (error) {
-    console.warn("ANSWER SAVE ERROR:", error);
+  if (submitButton) {
+    submitButton.disabled =
+      false;
   }
 }
 
-/* =========================================================
-   NEXT QUESTION
-========================================================= */
-
 function nextQuestion() {
-  if (!currentQuestions.length) return;
-
-  if (currentQuestionIndex >= currentQuestions.length - 1) {
+  if (
+    currentQuestionIndex >=
+    currentQuestions.length - 1
+  ) {
     return;
   }
 
@@ -988,478 +1277,786 @@ function nextQuestion() {
   });
 }
 
-/* =========================================================
-   SUBMIT WARNING
-========================================================= */
-
 function requestSubmitExam() {
-  if (!currentExam || !currentQuestions.length) return;
+  if (!currentExam) return;
 
-  const unanswered = currentQuestions.filter(
-    (question) => !currentAnswers[question.id]
-  ).length;
+  const unanswered =
+    currentQuestions.filter(
+      (question) =>
+        !currentAnswers[
+          question.id
+        ]
+    ).length;
 
   const message =
-    unanswered > 0
-      ? `⚠️ Gaaffii ${unanswered} hin deebifne.\n\nQormaata submit gochuu barbaaddaa?`
-      : "⚠️ Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?";
+    document.getElementById(
+      "submitWarningMessage"
+    );
 
-  /*
-    Fuula confirmation yoo HTML keessatti jiraate fayyadama.
-  */
-
-  const confirmPage = document.getElementById("submitConfirmPage");
-
-  if (confirmPage) {
-    const textEl =
-      document.getElementById("submitConfirmText");
-
-    if (textEl) {
-      textEl.textContent = message;
-    }
-
-    showPage("submitConfirmPage");
-    return;
+  if (message) {
+    message.textContent =
+      unanswered > 0
+        ? Gaaffii ${unanswered} hin deebifne. Qormaata submit gochuu barbaaddaa?
+        : "Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?";
   }
-
-  /*
-    Fallback yoo confirmation page hin jirre.
-  */
-
-  if (confirm(message)) {
-    submitExam(false);
-  }
-}
-
-/* =========================================================
-   CONFIRM SUBMIT
-========================================================= */
-
-function confirmSubmitExam() {
-  submitExam(false);
-}
-
-/* =========================================================
-   CANCEL SUBMIT
-========================================================= */
-
-function cancelSubmitExam() {
-  showPage("examPage");
-  renderCurrentQuestion();
-}
-
-/* =========================================================
-   SUBMIT EXAM
-========================================================= */
-
-async function submitExam(autoSubmit = false) {
-  if (!currentExam || !currentStudent || !currentAttempt) {
-    return;
-  }
-
-  if (pendingSubmit) return;
 
   pendingSubmit = true;
 
+  showPage(
+    "submitConfirmPage"
+  );
+}
+
+function confirmSubmitExam(
+  confirmSubmit
+) {
+  if (!confirmSubmit) {
+    pendingSubmit = false;
+
+    showPage("examPage");
+
+    return;
+  }
+
+  if (
+    !pendingSubmit ||
+    !currentExam
+  ) {
+    return;
+  }
+
+  finishExam();
+}
+
+/* =========================================================
+   FINISH EXAM
+========================================================= */
+
+async function finishExam() {
+  const student =
+    requireStudent();
+
+  if (
+    !student ||
+    !currentExam ||
+    !currentAttempt
+  ) {
+    return;
+  }
+
   stopExamTimer();
 
-  try {
-    let correct = 0;
+  let correct = 0;
 
-    currentQuestions.forEach((question) => {
-      const selected =
-        currentAnswers[question.id] || "";
-
+  currentQuestions.forEach(
+    (question) => {
       if (
-        selected.toUpperCase() ===
-        String(question.correctAnswer).toUpperCase()
+        currentAnswers[
+          question.id
+        ] ===
+        question.correctAnswer
       ) {
         correct++;
       }
-    });
+    }
+  );
 
-    const total = currentQuestions.length;
+  const total =
+    currentQuestions.length;
 
-    const percentage =
-      total > 0
-        ? Math.round((correct / total) * 100)
-        : 0;
+  const percentage =
+    total
+      ? Math.round(
+          (correct / total) *
+            100
+        )
+      : 0;
 
-    const submittedAt =
-      new Date().toISOString();
-
-    const { error: attemptUpdateError } = await db
+  try {
+    const {
+      error: attemptError
+    } = await db
       .from("exam_attempts")
       .update({
         score: correct,
         total,
         percentage,
-        submitted_at: submittedAt,
-        completed: true
+        completed: true,
+        submitted_at:
+          new Date().toISOString()
       })
-      .eq("id", currentAttempt.id);
+      .eq(
+        "id",
+        currentAttempt.id
+      );
 
-    if (attemptUpdateError) {
-      throw attemptUpdateError;
+    if (attemptError) {
+      throw attemptError;
     }
 
     /*
-      Old results table waliin compatibility eega.
+      Deebii tokko-tokkoo guutuu snapshot godhamee
+      results.answers keessatti kuufama.
+      Kanaaf gaaffiin booda haqamus admin
+      deebii duraanii ilaalu danda'a.
     */
+
+    const answerDetails = {};
+
+    currentQuestions.forEach(
+      (question, index) => {
+        const selectedAnswer =
+          currentAnswers[
+            question.id
+          ] || "";
+
+        answerDetails[
+          String(question.id)
+        ] = {
+          question_id:
+            question.id,
+
+          number:
+            index + 1,
+
+          question:
+            question.text,
+
+          option_a:
+            question.optionA,
+
+          option_b:
+            question.optionB,
+
+          option_c:
+            question.optionC,
+
+          option_d:
+            question.optionD,
+
+          selected_answer:
+            selectedAnswer,
+
+          correct_answer:
+            question.correctAnswer,
+
+          is_correct:
+            selectedAnswer ===
+            question.correctAnswer
+        };
+      }
+    );
 
     const resultPayload = {
-      student_id: currentStudent.id,
-      exam_id: currentExam.id,
+      student_id:
+        student.id,
+
+      exam_id:
+        currentExam.id,
+
+      exam_title:
+        currentExam.title,
+
       correct,
+
       total,
+
       percentage,
-      submitted_at: submittedAt,
-      exam_title: currentExam.title
+
+      answers:
+        answerDetails,
+
+      submitted_at:
+        new Date().toISOString()
     };
 
-    const { error: resultError } = await db
+    const {
+      data: oldResult
+    } = await db
       .from("results")
-      .insert(resultPayload);
+      .select("id")
+      .eq(
+        "student_id",
+        student.id
+      )
+      .eq(
+        "exam_id",
+        currentExam.id
+      )
+      .maybeSingle();
 
-    if (resultError) {
-      console.warn("RESULT INSERT ERROR:", resultError);
-    }
+    if (oldResult?.id) {
+      const {
+        error
+      } = await db
+        .from("results")
+        .update(
+          resultPayload
+        )
+        .eq(
+          "id",
+          oldResult.id
+        );
 
-    /*
-      Deebii hunda mirkaneeffanna.
-      Yoo exam_attempt_answers table jiraate,
-      selected answers hunda keessa kaa'ama.
-    */
-
-    try {
-      const answerRows = currentQuestions.map((question) => {
-        const selected =
-          currentAnswers[question.id] || "";
-
-        return {
-          attempt_id: currentAttempt.id,
-          question_id: question.id,
-          question_text: question.text,
-          option_a: question.optionA,
-          option_b: question.optionB,
-          option_c: question.optionC,
-          option_d: question.optionD,
-          selected_answer: selected,
-          correct_answer: question.correctAnswer,
-          is_correct:
-            selected.toUpperCase() ===
-            String(question.correctAnswer).toUpperCase(),
-          answered_at: submittedAt
-        };
-      });
-
-      if (answerRows.length) {
-        await db
-          .from("exam_attempt_answers")
-          .upsert(answerRows, {
-            onConflict: "attempt_id,question_id"
-          });
+      if (error) {
+        throw error;
       }
-    } catch (error) {
-      console.warn("ANSWER FINAL SAVE ERROR:", error);
+    } else {
+      const {
+        error
+      } = await db
+        .from("results")
+        .insert(
+          resultPayload
+        );
+
+      if (error) {
+        throw error;
+      }
     }
 
-    pendingSubmit = false;
+    alert(
+      Qormaanni xumurameera!\n\n +
+        Qabxii: ${correct}/${total}\n +
+        Dhibbeentaa: ${percentage}%
+    );
 
-    currentAttempt = {
-      ...currentAttempt,
-      score: correct,
-      total,
-      percentage,
-      completed: true,
-      submitted_at: submittedAt
-    };
+currentExam = null;
+    currentQuestions = [];
+    currentQuestionIndex = 0;
+    currentAnswers = {};
+    currentAttempt = null;
+    pendingSubmit = false;
 
     showPage("scorePage");
 
-    await showScore({
-      correct,
-      total,
-      percentage,
-      autoSubmit
-    });
+    await showScore();
   } catch (error) {
-    console.error("SUBMIT EXAM ERROR:", error);
-
-    pendingSubmit = false;
-
-    alert(
-      "Qormaata submit gochuun hin danda'amne: " +
-      getErrorMessage(error)
+    console.error(
+      "FINISH EXAM ERROR:",
+      error
     );
 
-    showPage("examPage");
-    renderCurrentQuestion();
-
-    if (currentExam?.duration) {
-      startExamTimer(
-        Math.max(
-          1,
-          Math.ceil(examSecondsLeft / 60)
-        )
-      );
-    }
+    alert(
+      "Qormaata submit gochuun hin milkoofne: " +
+        getErrorMessage(error)
+    );
   }
 }
 
 /* =========================================================
-   SCORE PAGE
+   TIMER
 ========================================================= */
 
-async function showScore(scoreData = null) {
-  const student = requireStudent();
+function startExamTimer() {
+  stopExamTimer();
+
+  updateExamTimer();
+
+  examTimer =
+    setInterval(() => {
+      examSecondsLeft--;
+
+      updateExamTimer();
+
+      if (
+        examSecondsLeft <= 0
+      ) {
+        stopExamTimer();
+
+        alert(
+          "Yeroon qormaataa xumurameera. Qormaanni kee submit ta'a."
+        );
+
+        finishExam();
+      }
+    }, 1000);
+}
+
+function updateExamTimer() {
+  const el =
+    document.getElementById(
+      "examTimerValue"
+    );
+
+  if (el) {
+    const minutes =
+      Math.floor(
+        Math.max(
+          0,
+          examSecondsLeft
+        ) / 60
+      );
+
+    const seconds =
+      Math.max(
+        0,
+        examSecondsLeft
+      ) % 60;
+
+    el.textContent =
+      ${String(minutes).padStart(
+        2,
+        "0"
+      )}:${String(seconds).padStart(
+        2,
+        "0"
+      )};
+  }
+}
+
+function stopExamTimer() {
+  if (examTimer) {
+    clearInterval(
+      examTimer
+    );
+
+    examTimer = null;
+  }
+}
+
+/* =========================================================
+   SCORE / PROFILE
+========================================================= */
+
+async function showScore() {
+  const student =
+    requireStudent();
+
   if (!student) return;
 
-  let result = scoreData;
-
-  if (!result && currentAttempt) {
-    result = {
-      correct: Number(currentAttempt.score || 0),
-      total: Number(currentAttempt.total || 0),
-      percentage: Number(currentAttempt.percentage || 0)
-    };
-  }
-
-  if (!result) {
-    return;
-  }
-
-  const correctEl =
-    document.getElementById("scoreCorrect");
-
-  const totalEl =
-    document.getElementById("scoreTotal");
-
-  const percentageEl =
-    document.getElementById("scorePercentage");
-
-  const titleEl =
-    document.getElementById("scoreExamTitle");
-
-  if (correctEl) {
-    correctEl.textContent = result.correct;
-  }
-
-  if (totalEl) {
-    totalEl.textContent = result.total;
-  }
-
-  if (percentageEl) {
-    percentageEl.textContent =
-      `${result.percentage}%`;
-  }
-
-  if (titleEl) {
-    titleEl.textContent =
-      currentExam?.title || "Qormaata";
-  }
-
-  await loadStudentResults();
-}
-
-/* =========================================================
-   STUDENT RESULTS
-========================================================= */
-
-async function loadStudentResults() {
-  if (!currentStudent) return;
-
   const container =
-    document.getElementById("studentResults");
+    document.getElementById(
+      "studentScore"
+    );
 
   if (!container) return;
 
-  const { data, error } = await db
+  const {
+    data,
+    error
+  } = await db
     .from("results")
-    .select("*, exams(title)")
-    .eq("student_id", currentStudent.id)
-    .order("submitted_at", {
-      ascending: false
-    });
+    .select("*")
+    .eq(
+      "student_id",
+      student.id
+    )
+    .order(
+      "submitted_at",
+      {
+        ascending: false
+      }
+    );
 
   if (error) {
-    console.error("STUDENT RESULTS ERROR:", error);
     container.innerHTML =
-      `<div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>`;
+      <div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>;
+
+    console.error(error);
+
     return;
   }
 
   if (!data?.length) {
     container.innerHTML =
-      `<div class="empty-state">Qabxiin ammaaf hin jiru.</div>`;
+      <div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>;
+
     return;
   }
 
-  container.innerHTML = data.map((result) => `
-    <div class="result-card">
-      <div>
-        <h4>
-          ${escapeHtml(
-            result.exams?.title ||
-            result.exam_title ||
-            "Qormaata"
-          )}
-        </h4>
-        <p>${formatDateTime(result.submitted_at)}</p>
-      </div>
+  container.innerHTML =
+    data
+      .map(
+        (result) => 
+          <div class="result-card">
 
-      <div class="result-score">
-        <strong>
-          ${Number(result.correct || 0)}/${Number(result.total || 0)}
-        </strong>
-        <span>
-          ${Number(result.percentage || 0)}%
-        </span>
-      </div>
-    </div>
-  `).join("");
+            <div>
+              <h3>
+                ${escapeHtml(
+                  result.exam_title ||
+                    "Qormaata"
+                )}
+              </h3>
+
+              <p>
+                ${formatDateTime(
+                  result.submitted_at
+                )}
+              </p>
+            </div>
+
+            <div class="result-score">
+
+              <strong>
+                ${Number(
+                  result.percentage || 0
+                )}%
+              </strong>
+
+              <span>
+                ${Number(
+                  result.correct || 0
+                )}/${Number(
+                  result.total || 0
+                )}
+              </span>
+
+            </div>
+
+          </div>
+        
+      )
+      .join("");
 }
 
-/* =========================================================
-   PROFILE
-========================================================= */
-
 async function loadProfile() {
-  const student = requireStudent();
+  const student =
+    requireStudent();
+
   if (!student) return;
 
   const nameInput =
-    document.getElementById("profileNameInput");
+    document.getElementById(
+      "profileNameInput"
+    );
 
-  const idEl =
-    document.getElementById("profileStudentId");
+  const code =
+    document.getElementById(
+      "profileCode"
+    );
 
-  const codeEl =
-    document.getElementById("profileActivationCode");
+  const activation =
+    document.getElementById(
+      "profileActivationCode"
+    );
 
-  const statusEl =
-    document.getElementById("profileStatus");
+  const status =
+    document.getElementById(
+      "profileStatus"
+    );
 
   if (nameInput) {
-    nameInput.value = student.name || "";
+    nameInput.value =
+      student.name || "";
   }
 
-  if (idEl) {
-    idEl.textContent = student.student_id || "";
+  if (code) {
+    code.textContent =
+      student.student_code ||
+      student.student_id ||
+      "";
   }
 
-  if (codeEl) {
-    codeEl.textContent =
-      student.activation_code || "";
+  if (activation) {
+    activation.textContent =
+      student.activation_code ||
+      "";
   }
 
-  if (statusEl) {
-    statusEl.textContent =
-      student.status || "";
-  }
-
-  await loadStudentAverage();
-}
-
-/* =========================================================
-   STUDENT AVERAGE
-========================================================= */
-
-async function loadStudentAverage() {
-  const student = requireStudent();
-  if (!student) return;
-
-  const { data, error } = await db
-    .from("results")
-    .select("percentage")
-    .eq("student_id", student.id);
-
-  if (error) {
-    console.error("AVERAGE ERROR:", error);
-    return;
-  }
-
-  const values = (data || [])
-    .map((row) => Number(row.percentage || 0))
-    .filter((value) => Number.isFinite(value));
-
-  const average =
-    values.length
-      ? Math.round(
-          values.reduce((a, b) => a + b, 0) /
-          values.length
-        )
-      : 0;
-
-  const averageEl =
-    document.getElementById("profileAverage");
-
-  if (averageEl) {
-    averageEl.textContent = `${average}%`;
+if (status) {
+    status.innerHTML =
+      student.status === "active"
+        ? '<span class="status active">● Active</span>'
+        : '<span class="status blocked">● Cufame</span>';
   }
 }
-
-/* =========================================================
-   SAVE PROFILE
-========================================================= */
 
 async function saveProfile() {
-  const student = requireStudent();
+  const student =
+    requireStudent();
+
   if (!student) return;
 
   const name =
-    document.getElementById("profileNameInput")
+    document
+      .getElementById(
+        "profileNameInput"
+      )
       ?.value.trim() || "";
 
   if (name.length < 2) {
-    alert("Maqaa sirrii galchi.");
+    alert(
+      "Maqaa sirrii galchi."
+    );
+
     return;
   }
 
-  const { data, error } = await db
+  const {
+    data,
+    error
+  } = await db
     .from("students")
     .update({
       name
     })
-    .eq("id", student.id)
+    .eq(
+      "id",
+      student.id
+    )
     .select()
     .single();
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
+
     return;
   }
 
   currentStudent = data;
 
-  alert("Maqaan kee sirreeffameera.");
-
   await loadProfile();
   await loadStudentHome();
+
+  alert(
+    "Maqaan kee olkaa'ameera."
+  );
 }
 
-/* =========================================================
-   STUDENT LOGOUT
-========================================================= */
-
 async function studentLogout() {
-  stopExamTimer();
+  localStorage.removeItem(
+    "ao_student_id"
+  );
 
   currentStudent = null;
+
+  stopExamTimer();
+
   currentExam = null;
   currentQuestions = [];
   currentAnswers = {};
   currentAttempt = null;
 
-  localStorage.removeItem("ao_student_id");
-
   try {
     await db.auth.signOut();
   } catch (error) {
-    console.warn("AUTH SIGNOUT:", error);
+    console.error(
+      "STUDENT LOGOUT ERROR:",
+      error
+    );
   }
 
   showPublicLoginPage();
+}
+
+/* =========================================================
+   GOOGLE / ADMIN IDENTITY HELPERS
+========================================================= */
+
+function isGoogleAdminEmail(email) {
+  return ADMIN_GOOGLE_EMAILS.includes(
+    String(email || "")
+      .trim()
+      .toLowerCase()
+  );
+}
+
+function getGoogleDisplayName(user) {
+  return (
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Barataa"
+  ).trim();
+}
+
+async function findOrCreateGoogleStudent(user) {
+  if (!user?.id) {
+    throw new Error(
+      "Google user ID hin argamne."
+    );
+  }
+
+  const userId =
+    user.id;
+
+  const googleName =
+    getGoogleDisplayName(
+      user
+    );
+
+  /*
+    Jalqaba ID Google/Auth UUIDn barbaada.
+    Yoo jiraate insert irra deebi'amee hin godhamu.
+  */
+
+  const {
+    data: existing,
+    error: findError
+  } = await db
+    .from("students")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (
+    findError &&
+    findError.code !== "PGRST116"
+  ) {
+    throw findError;
+  }
+
+  if (existing) {
+    currentStudent =
+      existing;
+
+    return existing;
+  }
+
+  let lastError =
+    null;
+
+  /*
+    Callback Google lama yeroo tokko keessatti
+    yoo dhufe illee duplicate key irraa
+    of eega.
+  */
+
+  for (
+    let attempt = 0;
+    attempt < 10;
+    attempt++
+  ) {
+    const studentCode =
+      generateStudentCode();
+
+    const activationCode =
+      generateActivationCode();
+
+    const {
+      data: created,
+      error: createError
+    } = await db
+      .from("students")
+      .insert({
+        id: userId,
+        student_code:
+          studentCode,
+        activation_code:
+          activationCode,
+        name: googleName,
+        status: "pending"
+      })
+      .select()
+      .single();
+
+    if (
+      !createError &&
+      created
+    ) {
+      currentStudent =
+        created;
+
+      return created;
+    }
+
+    lastError =
+      createError;
+
+    /*
+      Yoo callback lama walitti bu'e:
+      callback tokko row uuma,
+      kan biraan duplicate key argata.
+      Sana booda row duraan uumame barbaada.
+    */
+
+    if (
+      createError?.code ===
+        "23505" ||
+      /duplicate key/i.test(
+        createError?.message ||
+          ""
+      )
+    ) {
+      const {
+        data: racedStudent,
+        error: racedError
+      } = await db
+        .from("students")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (racedError) {
+        throw racedError;
+      }
+
+      if (racedStudent) {
+        currentStudent =
+          racedStudent;
+
+        return racedStudent;
+      }
+
+      continue;
+    }
+
+    /*
+      student_code ykn activation_code
+      duplicate yoo ta'e code haaraa
+      qopheessa.
+    */
+
+if (
+      String(
+        createError?.code || ""
+      ).startsWith("23")
+    ) {
+      continue;
+    }
+
+    break;
+  }
+
+  throw (
+    lastError ||
+    new Error(
+      "Google barataa uumuu hin dandeenye."
+    )
+  );
+}
+
+async function handleGoogleStudent(
+  user
+) {
+  const student =
+    await findOrCreateGoogleStudent(
+      user
+    );
+
+  if (
+    student.status !==
+    "active"
+  ) {
+    localStorage.removeItem(
+      "ao_student_id"
+    );
+
+    showPublicLoginPage();
+
+    alert(
+      student.status ===
+        "pending"
+        ? "Google Login milkaa'eera. Garuu account kee adminiin mirkaneessuu qaba."
+        : "Account kee adminiin cufameera."
+    );
+
+    return;
+  }
+
+  localStorage.setItem(
+    "ao_student_id",
+    String(student.id)
+  );
+
+  showPage(
+    "studentHomePage"
+  );
+
+  await loadStudentHome();
 }
 
 /* =========================================================
@@ -1468,157 +2065,2390 @@ async function studentLogout() {
 
 async function adminLogin() {
   const username =
-    document.getElementById("adminUsername")
+    document
+      .getElementById(
+        "adminUsername"
+      )
       ?.value.trim() || "";
 
   const password =
-    document.getElementById("adminPassword")
-      ?.value || "";
+    document
+      .getElementById(
+        "adminPassword"
+      )?.value || "";
 
-  if (!username || !password)
-async function populateExamSelects(exams = null) {
-  let list = exams;
+  if (
+    !username ||
+    !password
+  ) {
+    showAdminMessage(
+      "Username fi Password galchi.",
+      "error"
+    );
 
-  if (!list) {
-    const { data } = await db
-      .from("exams")
-      .select("id,title")
-      .order("created_at", { ascending: false });
-
-    list = data || [];
+    return;
   }
 
-  ["questionExamSelect", "aiQuestionExamSelect"].forEach((id) => {
-    const select = document.getElementById(id);
-    if (!select) return;
+  try {
+    const {
+      data,
+      error
+    } = await db
+      .from("admins")
+      .select("*")
+      .eq(
+        "username",
+        username
+      )
+      .eq(
+        "password",
+        password
+      )
+      .maybeSingle();
 
-    const current = select.value;
-
-    select.innerHTML = `
-      <option value="">Qormaata filadhu</option>
-      ${list
-        .map(
-          (exam) =>
-            `<option value="${exam.id}">${escapeHtml(exam.title)}</option>`
-        )
-        .join("")}
-    `;
-
-    if (list.some((exam) => String(exam.id) === String(current))) {
-      select.value = current;
+    if (error) {
+      throw error;
     }
-  });
+
+    if (!data) {
+      showAdminMessage(
+        "Username ykn Password sirrii miti.",
+        "error"
+      );
+
+      return;
+    }
+
+    currentAdmin = data;
+
+    localStorage.setItem(
+      "ao_admin_id",
+      String(data.id)
+    );
+
+    showPage(
+      getAdminPageId()
+    );
+
+    await initializeAdmin();
+  } catch (error) {
+    console.error(
+      "ADMIN LOGIN ERROR:",
+      error
+    );
+
+    showAdminMessage(
+      getErrorMessage(error),
+      "error"
+    );
+  }
 }
 
-async function createExam() {
-  return createUnifiedExam();
+async function adminLogout() {
+  localStorage.removeItem(
+    "ao_admin_id"
+  );
+
+  localStorage.removeItem(
+    "ao_admin_google_email"
+  );
+
+  currentAdmin = null;
+
+  try {
+    await db.auth.signOut();
+  } catch (error) {
+    console.error(
+      "ADMIN LOGOUT ERROR:",
+      error
+    );
+  }
+
+  showPublicLoginPage();
+}
+
+async function restoreAdmin() {
+  const savedGoogleEmail =
+    localStorage.getItem(
+      "ao_admin_google_email"
+    );
+
+  const savedAdminId =
+    localStorage.getItem(
+      "ao_admin_id"
+    );
+
+  /*
+    Google admin session yoo jiraate
+    admins table irratti hirkachuu hin qabu.
+  */
+
+  if (
+    savedGoogleEmail &&
+    savedAdminId &&
+    isGoogleAdminEmail(
+      savedGoogleEmail
+    )
+  ) {
+    const {
+      data: sessionData
+    } = await db.auth.getSession();
+
+    const user =
+      sessionData?.session?.user;
+
+    if (
+      user &&
+      String(user.id) ===
+        String(savedAdminId) &&
+      isGoogleAdminEmail(
+        user.email
+      )
+    ) {
+      currentAdmin = {
+        id: user.id,
+        username:
+          String(
+            user.email
+          ).toLowerCase(),
+        name:
+          getGoogleDisplayName(
+            user
+          ),
+        google_email:
+          String(
+            user.email
+          ).toLowerCase(),
+        auth_user_id:
+          user.id
+      };
+
+      return currentAdmin;
+    }
+
+    localStorage.removeItem(
+      "ao_admin_google_email"
+    );
+
+    localStorage.removeItem(
+      "ao_admin_id"
+    );
+  }
+
+  /*
+    Old username/password admin
+    yoo jiraate, inniis itti fufa.
+  */
+
+  const id =
+    localStorage.getItem(
+      "ao_admin_id"
+    );
+
+  if (!id) {
+    return null;
+  }
+
+  try {
+    const {
+      data,
+      error
+    } = await db
+      .from("admins")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      localStorage.removeItem(
+        "ao_admin_id"
+      );
+
+return null;
+    }
+
+    currentAdmin = data;
+
+    return data;
+  } catch (error) {
+    console.error(
+      "RESTORE ADMIN ERROR:",
+      error
+    );
+
+    return null;
+  }
+}
+
+function requireAdmin() {
+  if (!currentAdmin) {
+    showPage(
+      "adminLoginPage"
+    );
+
+    return null;
+  }
+
+  return currentAdmin;
+}
+
+async function initializeAdmin() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  await openAdminPanel(
+    "students"
+  );
+
+  await refreshAllAdminLists();
+}
+
+async function openAdminPanel(
+  panel
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const panels = {
+    students:
+      "adminStudentsPanel",
+
+    results:
+      "adminResultsPanel",
+
+    lessons:
+      "adminLessonsPanel",
+
+    exams:
+      "adminExamsPanel"
+  };
+
+  Object.values(
+    panels
+  ).forEach((id) => {
+    const el =
+      document.getElementById(
+        id
+      );
+
+    if (el) {
+      el.classList.remove(
+        "active"
+      );
+
+      el.style.display =
+        "none";
+    }
+  });
+
+  const selected =
+    document.getElementById(
+      panels[panel]
+    );
+
+  if (selected) {
+    selected.classList.add(
+      "active"
+    );
+
+    selected.style.display =
+      "block";
+  }
+
+  if (
+    panel === "students"
+  ) {
+    await loadAdminStudents();
+  }
+
+  if (
+    panel === "results"
+  ) {
+    await loadAdminResults();
+  }
+
+  if (
+    panel === "lessons"
+  ) {
+    await loadAdminLessons();
+  }
+
+  if (
+    panel === "exams"
+  ) {
+    await loadAdminExams();
+  }
 }
 
 /* =========================================================
-   ADMIN - MANUAL QUESTIONS
-   Old single-question function kept for compatibility.
+   ADMIN - STUDENTS
 ========================================================= */
 
-async function createQuestion() {
-  if (!requireAdmin()) return;
+async function loadAdminStudents() {
+  if (!requireAdmin()) {
+    return;
+  }
 
-  alert(
-    "Gaaffilee hunda Qormaata Haaraa Uumi keessatti bakka tokkootti copy/paste godhi."
-  );
-}
+  const container =
+    document.getElementById(
+      "adminStudentsList"
+    );
 
-async function loadAdminQuestions() {
-  if (!requireAdmin()) return;
+  if (!container) {
+    return;
+  }
 
-  const container = document.getElementById("adminQuestionsList");
-  if (!container) return;
-
-  const { data, error } = await db
-    .from("questions")
-    .select("*, exams(title)")
-    .order("id", { ascending: false });
+  const {
+    data,
+    error
+  } = await db
+    .from("students")
+    .select("*")
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
 
   if (error) {
     container.innerHTML =
-      `<div class="empty-state">❌ Gaaffilee fe'uu hin dandeenye.</div>`;
+      <div class="empty-state">❌ Barattoota fe'uu hin dandeenye.</div>;
+
     console.error(error);
+
     return;
   }
 
   if (!data?.length) {
     container.innerHTML =
-      `<div class="empty-state">❓ Gaaffiin hin jiru.</div>`;
+      <div class="empty-state">👨‍🎓 Barataan hin galmoofne.</div>;
+
     return;
   }
 
-  container.innerHTML = data
-    .map((row, index) => {
-      const question = normalizeQuestion(row);
+  container.innerHTML =
+    data
+      .map(
+        (student) => `
+          <div class="admin-list-item">
 
-      return `
-        <div class="question-admin-item">
-          <div class="question-number">${index + 1}</div>
+            <div class="item-main">
 
-          <div class="item-main">
-            <small>
-              ${escapeHtml(row.exams?.title || "Qormaata")}
-            </small>
+              <h3>
+                ${escapeHtml(
+                  student.name
+                )}
+              </h3>
 
-            <h3>
-              ${escapeHtml(question.text)}
-            </h3>
+              <p>
+                ID:
+                <strong>
+                  ${escapeHtml(
+                    student.student_code ||
+                      student.student_id ||
+                      "-"
+                  )}
+                </strong>
 
-            <div class="options-preview">
-              <span>
-                A. ${escapeHtml(question.optionA)}
+                <br>
+
+                Code:
+                <strong>
+                  ${escapeHtml(
+                    student.activation_code
+                  )}
+                </strong>
+
+                <br>
+
+                Galmaa'e:
+                ${formatDateTime(
+                  student.created_at
+                )}
+              </p>
+
+              <span
+                class="status ${
+                  student.status ===
+                  "active"
+                    ? "active"
+                    : "blocked"
+                }"
+              >
+                ● ${
+                  student.status ===
+                  "active"
+                    ? "Active"
+                    : student.status ===
+                      "pending"
+                    ? "Pending"
+                    : "Cufame"
+                }
               </span>
 
-              <span>
-                B. ${escapeHtml(question.optionB)}
-              </span>
-
-              <span>
-                C. ${escapeHtml(question.optionC)}
-              </span>
-
-              <span>
-                D. ${escapeHtml(question.optionD)}
-              </span>
             </div>
 
-            <p class="correct-answer">
-              Deebii sirrii:
-              ${escapeHtml(question.correctAnswer)}
-            </p>
-          </div>
+            <div class="admin-actions">
 
-          <button
-            type="button"
-            class="danger-small-btn"
-            onclick="deleteQuestion(${question.id})"
-          >
-            🗑️
-          </button>
-        </div>
-      `;
-    })
-    .join("");
+              <button
+                type="button"
+                class="small-btn"
+                onclick="toggleStudentStatus('${student.id}')"
+              >
+                ${
+                  student.status ===
+                  "active"
+                    ? "🔒 Cufi"
+                    : "🔓 Bani"
+                }
+              </button>
+
+<button
+                type="button"
+                class="danger-small-btn"
+                onclick="deleteStudent('${student.id}')"
+              >
+                🗑️ Haqi
+              </button>
+
+            </div>
+
+          </div>
+        
+      )
+      .join("");
 }
 
-async function deleteQuestion(questionId) {
-  if (!requireAdmin()) return;
-
-  if (!confirm("Gaaffii kana haquuf mirkaneessi.")) {
+async function toggleStudentStatus(
+  studentId
+) {
+  if (!requireAdmin()) {
     return;
   }
 
-  const { error } = await db
-    .from("questions")
-    .delete()
-    .eq("id", questionId);
+  const {
+    data: student,
+    error: findError
+  } = await db
+    .from("students")
+    .select("id,status")
+    .eq("id", studentId)
+    .maybeSingle();
+
+  if (
+    findError ||
+    !student
+  ) {
+    return;
+  }
+
+  const newStatus =
+    student.status ===
+    "active"
+      ? "blocked"
+      : "active";
+
+  const {
+    error
+  } = await db
+    .from("students")
+    .update({
+      status: newStatus
+    })
+    .eq(
+      "id",
+      studentId
+    );
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  await loadAdminStudents();
+}
+
+async function deleteStudent(
+  studentId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "Barataa kana haquuf mirkaneessi."
+    )
+  ) {
+    return;
+  }
+
+  await db
+    .from("results")
+    .delete()
+    .eq(
+      "student_id",
+      studentId
+    );
+
+  await db
+    .from("exam_attempts")
+    .delete()
+    .eq(
+      "student_id",
+      studentId
+    );
+
+  const {
+    error
+  } = await db
+    .from("students")
+    .delete()
+    .eq(
+      "id",
+      studentId
+    );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  await loadAdminStudents();
+  await loadAdminResults();
+}
+
+/* =========================================================
+   ADMIN - RESULTS
+========================================================= */
+
+async function loadAdminResults() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const table =
+    document.getElementById(
+      "adminResultsTable"
+    );
+
+  if (!table) {
+    return;
+  }
+
+  const thead =
+    table.querySelector(
+      "thead"
+    );
+
+  const tbody =
+    table.querySelector(
+      "tbody"
+    );
+
+  const {
+    data,
+    error
+  } = await db
+    .from("results")
+    .select(
+      "*, students(name,student_code), exams(title)"
+    )
+    .order(
+      "submitted_at",
+      {
+        ascending: false
+      }
+    );
+
+  if (error) {
+    console.error(error);
+
+    if (tbody) {
+      tbody.innerHTML =
+        <tr><td colspan="8">❌ Qabxii fe'uu hin dandeenye.</td></tr>;
+    }
+
+    return;
+  }
+
+  const results =
+    data || [];
+
+  /*
+    Average barataa:
+    bu'aa qormaatawwan isaa hunda irraa
+    dhibbeentaa giddu-galeessaa.
+  */
+
+  const studentStats = {};
+
+  results.forEach(
+    (result) => {
+      const sid =
+        String(
+          result.student_id ||
+            ""
+        );
+
+      if (!sid) {
+        return;
+      }
+
+      if (!studentStats[sid]) {
+        studentStats[sid] = {
+          sum: 0,
+          count: 0
+        };
+      }
+
+      studentStats[sid].sum +=
+        Number(
+          result.percentage ||
+            0
+        );
+
+      studentStats[sid].count +=
+        1;
+    }
+  );
+
+  /*
+    Sadarkaa:
+    average % ol irraa gara gadiitti.
+  */
+
+  const ranking =
+    Object.entries(
+      studentStats
+    )
+      .map(
+        ([studentId, stat]) => ({
+          studentId,
+
+          average:
+            stat.count
+              ? stat.sum /
+                stat.count
+              : 0
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.average -
+          a.average
+      );
+
+  const rankMap = {};
+
+  ranking.forEach(
+    (item, index) => {
+      rankMap[
+        item.studentId
+      ] =
+        index + 1;
+    }
+  );
+
+  if (thead) {
+    thead.innerHTML = 
+      <tr>
+        <th>Barataa</th>
+        <th>ID</th>
+        <th>Qormaata</th>
+        <th>Qabxii</th>
+        <th>%</th>
+        <th>Average</th>
+        <th>Sadarkaa</th>
+        <th>Detail</th>
+      </tr>
+    ;
+  }
+
+  if (!results.length) {
+    if (tbody) {
+      tbody.innerHTML =
+        <tr><td colspan="8" class="empty-cell">Hanga ammaatti bu'aan qormaataa hin jiru.</td></tr>`;
+    }
+
+renderAdminResultDetails(
+      null
+    );
+
+    return;
+  }
+
+  if (tbody) {
+    tbody.innerHTML =
+      results
+        .map(
+          (result) => {
+            const sid =
+              String(
+                result.student_id ||
+                  ""
+              );
+
+            const avg =
+              Number(
+                studentStats[
+                  sid
+                ]?.count
+                  ? studentStats[
+                      sid
+                    ].sum /
+                      studentStats[
+                        sid
+                      ].count
+                  : 0
+              );
+
+            const rank =
+              rankMap[sid] ||
+              "-";
+
+            return 
+              <tr>
+
+                <td>
+                  ${escapeHtml(
+                    result
+                      .students
+                      ?.name ||
+                      "Barataa"
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    result
+                      .students
+                      ?.student_code ||
+                      "-"
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    result
+                      .exams
+                      ?.title ||
+                      result.exam_title ||
+                      "Qormaata"
+                  )}
+                </td>
+
+                <td>
+                  ${Number(
+                    result.correct ||
+                      0
+                  )}/${Number(
+                    result.total ||
+                      0
+                  )}
+                </td>
+
+                <td>
+                  <strong>
+                    ${Number(
+                      result.percentage ||
+                        0
+                    )}%
+                  </strong>
+                </td>
+
+                <td>
+                  ${avg.toFixed(
+                    1
+                  )}%
+                </td>
+
+                <td>
+                  <strong>
+                    ${rank}
+                  </strong>
+                </td>
+
+                <td>
+                  <button
+                    type="button"
+                    class="small-btn"
+                    onclick="showAdminResultDetails('${result.id}')"
+                  >
+                    👁️ Ilaali
+                  </button>
+                </td>
+
+              </tr>
+            ;
+          }
+        )
+        .join("");
+  }
+
+  if (
+    !document.getElementById(
+      "adminResultDetails"
+    )
+  ) {
+    const wrapper =
+      document.createElement(
+        "div"
+      );
+
+    wrapper.id =
+      "adminResultDetails";
+
+    wrapper.style.marginTop =
+      "16px";
+
+    table.parentElement?.appendChild(
+      wrapper
+    );
+  }
+
+  renderAdminResultDetails(
+    null
+  );
+}
+
+function getResultAnswerEntries(
+  result
+) {
+  const raw =
+    result?.answers;
+
+  if (!raw) {
+    return [];
+  }
+
+  if (Array.isArray(raw)) {
+    return raw;
+  }
+
+  if (
+    typeof raw ===
+    "object"
+  ) {
+    return Object.values(
+      raw
+    ).map((item) => {
+      if (
+        typeof item ===
+        "string"
+      ) {
+        return {
+          selected_answer:
+            item
+        };
+      }
+
+      return item || {};
+    });
+  }
+
+  return [];
+}
+
+async function showAdminResultDetails(
+  resultId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const {
+    data: result,
+    error
+  } = await db
+    .from("results")
+    .select(
+      "*, students(name,student_code), exams(title)"
+    )
+    .eq(
+      "id",
+      resultId
+    )
+    .maybeSingle();
+
+  if (
+    error ||
+    !result
+  ) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  renderAdminResultDetails(
+    result
+  );
+}
+
+function renderAdminResultDetails(
+  result
+) {
+  const container =
+    document.getElementById(
+      "adminResultDetails"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  if (!result) {
+    container.innerHTML =
+      "";
+
+    return;
+  }
+
+const entries =
+    getResultAnswerEntries(
+      result
+    ).sort(
+      (a, b) =>
+        Number(
+          a.number || 0
+        ) -
+        Number(
+          b.number || 0
+        )
+    );
+
+  if (!entries.length) {
+    container.innerHTML = 
+      <div class="admin-list-item">
+
+        <div class="item-main">
+
+          <h3>
+            📋 Deebiiwwan hin kuufamne
+          </h3>
+
+          <p>
+            Bu'aan kun deebii gaaffii tokko-tokkoo hin qabu.
+          </p>
+
+        </div>
+
+      </div>
+    ;
+
+    return;
+  }
+
+  container.innerHTML = 
+    <div class="admin-list-item">
+
+      <div class="item-main">
+
+        <h3>
+          📋
+          ${escapeHtml(
+            result
+              .students
+              ?.name ||
+              "Barataa"
+          )}
+          —
+          ${escapeHtml(
+            result
+              .exams
+              ?.title ||
+              result.exam_title ||
+              "Qormaata"
+          )}
+        </h3>
+
+        <p>
+          Qabxii:
+          <strong>
+            ${Number(
+              result.correct ||
+                0
+            )}/${Number(
+              result.total ||
+                0
+            )}
+          </strong>
+
+          —
+          ${Number(
+            result.percentage ||
+              0
+          )}%
+        </p>
+
+        <div
+          style="
+            display:grid;
+            gap:10px;
+            margin-top:12px;
+          "
+        >
+
+          ${entries
+            .map(
+              (item, index) => {
+                const selected =
+                  String(
+                    item.selected_answer ||
+                      ""
+                  ).toUpperCase();
+
+                const correct =
+                  String(
+                    item.correct_answer ||
+                      ""
+                  ).toUpperCase();
+
+                const answered =
+                  Boolean(
+                    selected
+                  );
+
+                const ok =
+                  Boolean(
+                    item.is_correct
+                  ) ||
+                  (
+                    answered &&
+                    selected ===
+                      correct
+                  );
+
+                const statusText =
+                  !answered
+                    ? "Hin deebifne"
+                    : ok
+                    ? "Sirrii"
+                    : "Dogoggora";
+
+                const statusIcon =
+                  !answered
+                    ? "⚪"
+                    : ok
+                    ? "🟢 ✓"
+                    : "🔴 ✕";
+
+                return 
+                  <div
+                    style="
+                      padding:12px;
+                      border:1px solid rgba(127,127,127,.25);
+                      border-radius:12px;
+                    "
+                  >
+
+                    <strong>
+                      ${Number(
+                        item.number ||
+                          index + 1
+                      )}.
+                      ${escapeHtml(
+                        item.question ||
+                          "Gaaffii"
+                      )}
+                    </strong>
+
+                    <div
+                      style="margin-top:6px;"
+                    >
+                      Deebii barataa:
+                      <strong>
+                        ${escapeHtml(
+                          selected ||
+                            "-"
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      Deebii sirrii:
+                      <strong>
+                        ${escapeHtml(
+                          correct ||
+                            "-"
+                        )}
+                      </strong>
+                    </div>
+
+                    <div
+                      style="margin-top:5px;"
+                    >
+                      ${statusIcon}
+                      ${statusText}
+                    </div>
+
+                  </div>
+                `;
+              }
+            )
+            .join("")}
+
+</div>
+
+      </div>
+
+    </div>
+  ;
+}
+
+/* =========================================================
+   ADMIN - LESSONS
+========================================================= */
+
+async function loadAdminLessons() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const container =
+    document.getElementById(
+      "adminLessonsList"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("lessons")
+    .select("*")
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
+  if (error) {
+    container.innerHTML =
+      <div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>;
+
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML =
+      <div class="empty-state">📚 Barnoonni hin jiru.</div>;
+
+    return;
+  }
+
+  container.innerHTML =
+    data
+      .map(
+        (lesson) => 
+          <div class="admin-list-item">
+
+            <div class="item-main">
+
+              <h3>
+                ${escapeHtml(
+                  lesson.title
+                )}
+              </h3>
+
+              <p>
+                ${escapeHtml(
+                  truncate(
+                    lesson.content,
+                    180
+                  )
+                )}
+              </p>
+
+            </div>
+
+            <div class="admin-actions">
+
+              <button
+                type="button"
+                class="small-btn"
+                onclick="editLesson('${lesson.id}')"
+              >
+                ✏️ Sirreessi
+              </button>
+
+              <button
+                type="button"
+                class="danger-small-btn"
+                onclick="deleteLesson('${lesson.id}')"
+              >
+                🗑️ Haqi
+              </button>
+
+            </div>
+
+          </div>
+        `
+      )
+      .join("");
+}
+
+async function createLesson() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const title =
+    document
+      .getElementById(
+        "lessonTitleInput"
+      )
+      ?.value.trim() || "";
+
+  const content =
+    document
+      .getElementById(
+        "lessonContentInput"
+      )
+      ?.value.trim() || "";
+
+  if (
+    !title ||
+    !content
+  ) {
+    alert(
+      "Mata-duree fi qabiyyee barnootaa lamaan galchi."
+    );
+
+    return;
+  }
+
+  const {
+    error
+  } = await db
+    .from("lessons")
+    .insert({
+      title,
+      content
+    });
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  const titleInput =
+    document.getElementById(
+      "lessonTitleInput"
+    );
+
+  const contentInput =
+    document.getElementById(
+      "lessonContentInput"
+    );
+
+  if (titleInput) {
+    titleInput.value = "";
+  }
+
+  if (contentInput) {
+    contentInput.value = "";
+  }
+
+  await loadAdminLessons();
+  await loadStudentLessons();
+
+  alert(
+    "Barnoonni dabalameera."
+  );
+}
+
+async function editLesson(
+  lessonId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const {
+    data: lesson,
+    error
+  } = await db
+    .from("lessons")
+    .select("*")
+    .eq(
+      "id",
+      lessonId
+    )
+    .maybeSingle();
+
+  if (
+    error ||
+    !lesson
+  ) {
+    return;
+  }
+
+  const title =
+    prompt(
+      "Mata-duree haaraa:",
+      lesson.title
+    );
+
+  if (title === null) {
+    return;
+  }
+
+  const content =
+    prompt(
+      "Qabiyyee haaraa:",
+      lesson.content
+    );
+
+  if (content === null) {
+    return;
+  }
+
+  const {
+    error: updateError
+  } = await db
+    .from("lessons")
+    .update({
+      title:
+        title.trim() ||
+        lesson.title,
+
+      content:
+        content.trim() ||
+        lesson.content
+    })
+    .eq(
+      "id",
+      lessonId
+    );
+
+  if (updateError) {
+    alert(
+      getErrorMessage(
+        updateError
+      )
+    );
+
+    return;
+  }
+
+  await loadAdminLessons();
+  await loadStudentLessons();
+}
+
+async function deleteLesson(
+  lessonId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "Barnoota kana haquuf mirkaneessi."
+    )
+  ) {
+    return;
+  }
+
+const {
+    error
+  } = await db
+    .from("lessons")
+    .delete()
+    .eq(
+      "id",
+      lessonId
+    );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  await loadAdminLessons();
+  await loadStudentLessons();
+}
+
+/* =========================================================
+   ADMIN - EXAMS
+========================================================= */
+
+async function loadAdminExams() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const container =
+    document.getElementById(
+      "adminExamsList"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("exams")
+    .select("*")
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
+  if (error) {
+    container.innerHTML =
+      <div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>;
+
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML =
+      <div class="empty-state">📝 Qormaanni hin jiru.</div>;
+
+    await populateExamSelects(
+      []
+    );
+
+    return;
+  }
+
+  const exams =
+    data.map(normalizeExam);
+
+  const counts = {};
+
+  const {
+    data: questionRows
+  } = await db
+    .from("questions")
+    .select(
+      "id,exam_id"
+    );
+
+  (
+    questionRows || []
+  ).forEach(
+    (q) => {
+      counts[q.exam_id] =
+        (counts[
+          q.exam_id
+        ] || 0) + 1;
+    }
+  );
+
+  container.innerHTML =
+    exams
+      .map(
+        (exam) => 
+          <div
+            class="admin-list-item exam-admin-item"
+          >
+
+            <div class="item-main">
+
+              <h3>
+                ${escapeHtml(
+                  exam.title
+                )}
+
+                ${
+                  exam.isFinal
+                    ? " 🏆"
+                    : ""
+                }
+              </h3>
+
+              <p>
+                ${escapeHtml(
+                  exam.description ||
+                    ""
+                )}
+              </p>
+
+              <div class="exam-meta">
+
+                <span>
+                  ❓ Gaaffii:
+                  ${
+                    counts[
+                      exam.id
+                    ] || 0
+                  }
+                </span>
+
+                <span>
+                  🔢 Attempt:
+                  ${
+                    exam.attemptLimit
+                  }
+                </span>
+
+                <span>
+                  ⏱️
+                  ${
+                    exam.duration
+                  } min
+                </span>
+
+              </div>
+
+              <span
+                class="status ${
+                  exam.status ===
+                  "active"
+                    ? "active"
+                    : "blocked"
+                }"
+              >
+                ● ${
+                  exam.status ===
+                  "active"
+                    ? "Active"
+                    : "Disabled"
+                }
+              </span>
+
+            </div>
+
+            <div class="admin-actions">
+
+              <button
+                type="button"
+                class="small-btn"
+                onclick="toggleExamStatus(${exam.id})"
+              >
+                ${
+                  exam.status ===
+                  "active"
+                    ? "⏸️ Cufi"
+                    : "▶️ Bani"
+                }
+              </button>
+
+              <button
+                type="button"
+                class="small-btn"
+                onclick="editExam(${exam.id})"
+              >
+                ✏️ Sirreessi
+              </button>
+
+              <button
+                type="button"
+                class="danger-small-btn"
+                onclick="deleteExam(${exam.id})"
+              >
+                🗑️ Haqi
+              </button>
+
+            </div>
+
+          </div>
+        
+      )
+      .join("");
+
+  await populateExamSelects(
+    exams
+  );
+
+  await loadAdminQuestions();
+}
+
+async function populateExamSelects(
+  exams = null
+) {
+  let list = exams;
+
+if (!list) {
+    const {
+      data
+    } = await db
+      .from("exams")
+      .select(
+        "id,title"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+    list =
+      data || [];
+  }
+
+  [
+    "questionExamSelect",
+    "aiQuestionExamSelect"
+  ].forEach(
+    (id) => {
+      const select =
+        document.getElementById(
+          id
+        );
+
+      if (!select) {
+        return;
+      }
+
+      const current =
+        select.value;
+
+      select.innerHTML = 
+        <option value="">
+          Qormaata filadhu
+        </option>
+
+        ${list
+          .map(
+            (exam) =>
+              <option value="${exam.id}">
+                ${escapeHtml(
+                  exam.title
+                )}
+              </option>
+          )
+          .join("")}
+      ;
+
+      if (
+        list.some(
+          (exam) =>
+            String(
+              exam.id
+            ) ===
+            String(
+              current
+            )
+        )
+      ) {
+        select.value =
+          current;
+      }
+    }
+  );
+}
+
+async function createExam() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const title =
+    document
+      .getElementById(
+        "examTitleInput"
+      )
+      ?.value.trim() || "";
+
+  const description =
+    document
+      .getElementById(
+        "examDescriptionInput"
+      )
+      ?.value.trim() || "";
+
+  const questionLimit =
+    Number(
+      document
+        .getElementById(
+          "examQuestionLimitInput"
+        )
+        ?.value || 0
+    );
+
+  const attemptLimit =
+    Number(
+      document
+        .getElementById(
+          "examAttemptLimitInput"
+        )
+        ?.value || 1
+    );
+
+  const isFinal =
+    document
+      .getElementById(
+        "examFinalInput"
+      )
+      ?.value === "true";
+
+  const duration =
+    Number(
+      document
+        .getElementById(
+          "examDurationInput"
+        )
+        ?.value || 30
+    );
+
+  const startDate =
+    document
+      .getElementById(
+        "examStartDateInput"
+      )
+      ?.value || null;
+
+  const endDate =
+    document
+      .getElementById(
+        "examEndDateInput"
+      )
+      ?.value || null;
+
+  const startTime =
+    document
+      .getElementById(
+        "examStartTimeInput"
+      )
+      ?.value || null;
+
+  const endTime =
+    document
+      .getElementById(
+        "examEndTimeInput"
+      )
+      ?.value || null;
+
+  if (!title) {
+    alert(
+      "Mata-duree qormaataa galchi."
+    );
+
+    return;
+  }
+
+  if (
+    startDate &&
+    endDate &&
+    startDate > endDate
+  ) {
+    alert(
+      "Guyyaan jalqabaa guyyaa xumuraa caaluu hin qabu."
+    );
+
+    return;
+  }
+
+  const {
+    error
+  } = await db
+    .from("exams")
+    .insert({
+      title,
+      description,
+      question_limit:
+        questionLimit,
+      attempt_limit:
+        attemptLimit,
+      is_final:
+        isFinal,
+      duration_minutes:
+        duration,
+      start_date:
+        startDate,
+      end_date:
+        endDate,
+      start_time:
+        startTime,
+      end_time:
+        endTime,
+      status:
+        "active"
+    });
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  [
+    "examTitleInput",
+    "examDescriptionInput",
+    "examStartDateInput",
+    "examEndDateInput",
+    "examStartTimeInput",
+    "examEndTimeInput"
+  ].forEach(
+    (id) => {
+      const el =
+        document.getElementById(
+          id
+        );
+
+      if (el) {
+        el.value = "";
+      }
+    }
+  );
+
+  await loadAdminExams();
+
+  alert(
+    "Qormaanni uumameera. Amma gaaffii itti dabali."
+  );
+}
+
+async function toggleExamStatus(
+  examId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const {
+    data: exam,
+    error: findError
+  } = await db
+    .from("exams")
+    .select(
+      "id,status"
+    )
+    .eq(
+      "id",
+      examId
+    )
+    .maybeSingle();
+
+  if (
+    findError ||
+    !exam
+  ) {
+    return;
+  }
+
+const {
+    error
+  } = await db
+    .from("exams")
+    .update({
+      status:
+        exam.status ===
+        "active"
+          ? "disabled"
+          : "active"
+    })
+    .eq(
+      "id",
+      examId
+    );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  await loadAdminExams();
+}
+
+async function editExam(
+  examId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const {
+    data: exam,
+    error
+  } = await db
+    .from("exams")
+    .select("*")
+    .eq(
+      "id",
+      examId
+    )
+    .maybeSingle();
+
+  if (
+    error ||
+    !exam
+  ) {
+    return;
+  }
+
+  const title =
+    prompt(
+      "Mata-duree:",
+      exam.title
+    );
+
+  if (title === null) {
+    return;
+  }
+
+  const description =
+    prompt(
+      "Ibsa:",
+      exam.description || ""
+    );
+
+  if (
+    description === null
+  ) {
+    return;
+  }
+
+  const {
+    error: updateError
+  } = await db
+    .from("exams")
+    .update({
+      title:
+        title.trim() ||
+        exam.title,
+
+      description:
+        description.trim()
+    })
+    .eq(
+      "id",
+      examId
+    );
+
+  if (updateError) {
+    alert(
+      getErrorMessage(
+        updateError
+      )
+    );
+
+    return;
+  }
+
+  await loadAdminExams();
+}
+
+async function deleteExam(
+  examId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const {
+    data: exam
+  } = await db
+    .from("exams")
+    .select(
+      "id,title"
+    )
+    .eq(
+      "id",
+      examId
+    )
+    .maybeSingle();
+
+  if (!exam) {
+    return;
+  }
+
+  if (
+    !confirm(
+      Qormaata "${exam.title}" fi gaaffilee isaa haquuf mirkaneessi.
+    )
+  ) {
+    return;
+  }
+
+  await db
+    .from("results")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  await db
+    .from("exam_attempts")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  await db
+    .from("questions")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  const {
+    error
+  } = await db
+    .from("exams")
+    .delete()
+    .eq(
+      "id",
+      examId
+    );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  await loadAdminExams();
+  await loadAdminResults();
+}
+
+/* =========================================================
+   ADMIN - MANUAL QUESTIONS
+========================================================= */
+
+async function createQuestion() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const examId =
+    document
+      .getElementById(
+        "questionExamSelect"
+      )
+      ?.value || "";
+
+  const question =
+    document
+      .getElementById(
+        "questionTextInput"
+      )
+      ?.value.trim() || "";
+
+  const optionA =
+    document
+      .getElementById(
+        "optionAInput"
+      )
+      ?.value.trim() || "";
+
+  const optionB =
+    document
+      .getElementById(
+        "optionBInput"
+      )
+      ?.value.trim() || "";
+
+  const optionC =
+    document
+      .getElementById(
+        "optionCInput"
+      )
+      ?.value.trim() || "";
+
+  const optionD =
+    document
+      .getElementById(
+        "optionDInput"
+      )
+      ?.value.trim() || "";
+
+  const correctAnswer =
+    document
+      .getElementById(
+        "correctAnswerInput"
+      )
+      ?.value || "";
+
+  if (
+    !examId ||
+    !question ||
+    !optionA ||
+    !optionB ||
+    !optionC ||
+    !optionD ||
+    !correctAnswer
+  ) {
+    alert(
+      "Qormaata, gaaffii, A-D fi deebii sirrii hunda guuti."
+    );
+
+    return;
+  }
+
+  const {
+    error
+  } = await db
+    .from("questions")
+    .insert({
+      exam_id:
+        examId,
+
+      question,
+
+      option_a:
+        optionA,
+
+      option_b:
+        optionB,
+
+      option_c:
+        optionC,
+
+      option_d:
+        optionD,
+
+      correct_answer:
+        correctAnswer,
+
+      source_type:
+        "admin",
+
+      source_text:
+        null
+    });
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
+    return;
+  }
+
+  [
+    "questionTextInput",
+    "optionAInput",
+    "optionBInput",
+    "optionCInput",
+    "optionDInput"
+  ].forEach(
+    (id) => {
+      const el =
+        document.getElementById(
+          id
+        );
+
+if (el) {
+        el.value = "";
+      }
+    }
+  );
+
+  const correctInput =
+    document.getElementById(
+      "correctAnswerInput"
+    );
+
+  if (correctInput) {
+    correctInput.value = "";
+  }
+
+  await loadAdminQuestions();
+  await loadAdminExams();
+
+  alert(
+    "Gaaffiin dabalameera."
+  );
+}
+
+async function loadAdminQuestions() {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const container =
+    document.getElementById(
+      "adminQuestionsList"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("questions")
+    .select(
+      "*, exams(title)"
+    )
+    .order(
+      "id",
+      {
+        ascending: false
+      }
+    );
+
+  if (error) {
+    container.innerHTML =
+      <div class="empty-state">❌ Gaaffilee fe'uu hin dandeenye.</div>;
+
+    console.error(error);
+
+    return;
+  }
+
+  if (!data?.length) {
+    container.innerHTML =
+      <div class="empty-state">❓ Gaaffiin hin jiru.</div>;
+
+    return;
+  }
+
+  container.innerHTML =
+    data
+      .map(
+        (row, index) => {
+          const question =
+            normalizeQuestion(
+              row
+            );
+
+          return 
+            <div class="question-admin-item">
+
+              <div class="question-number">
+                ${index + 1}
+              </div>
+
+              <div class="item-main">
+
+                <small>
+                  ${escapeHtml(
+                    row.exams?.title ||
+                      "Qormaata"
+                  )}
+                </small>
+
+                <h3>
+                  ${escapeHtml(
+                    question.text
+                  )}
+                </h3>
+
+                <div class="options-preview">
+
+                  <span>
+                    A.
+                    ${escapeHtml(
+                      question.optionA
+                    )}
+                  </span>
+
+                  <span>
+                    B.
+                    ${escapeHtml(
+                      question.optionB
+                    )}
+                  </span>
+
+                  <span>
+                    C.
+                    ${escapeHtml(
+                      question.optionC
+                    )}
+                  </span>
+
+                  <span>
+                    D.
+                    ${escapeHtml(
+                      question.optionD
+                    )}
+                  </span>
+
+                </div>
+
+                <p class="correct-answer">
+                  Deebii sirrii:
+                  ${escapeHtml(
+                    question.correctAnswer
+                  )}
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                class="danger-small-btn"
+                onclick="deleteQuestion(${question.id})"
+              >
+                🗑️
+              </button>
+
+            </div>
+          ;
+        }
+      )
+      .join("");
+}
+
+async function deleteQuestion(
+  questionId
+) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "Gaaffii kana haquuf mirkaneessi."
+    )
+  ) {
+    return;
+  }
+
+  const {
+    error
+  } = await db
+    .from("questions")
+    .delete()
+    .eq(
+      "id",
+      questionId
+    );
+
+  if (error) {
+    alert(
+      getErrorMessage(error)
+    );
+
     return;
   }
 
@@ -1627,306 +4457,395 @@ async function deleteQuestion(questionId) {
 }
 
 /* =========================================================
-   ADMIN - DELETE WHOLE EXAM
-   Qormaata + gaaffilee + attempts + results ni haqa.
-========================================================= */
-
-async function deleteExam(examId) {
-  if (!requireAdmin()) return;
-
-  const { data: exam, error: examError } = await db
-    .from("exams")
-    .select("id,title")
-    .eq("id", examId)
-    .maybeSingle();
-
-  if (examError) {
-    console.error(examError);
-    alert(getErrorMessage(examError));
-    return;
-  }
-
-  if (!exam) {
-    alert("Qormaanni kun hin argamne.");
-    return;
-  }
-
-  const confirmed = confirm(
-    `Qormaata "${exam.title}" fi wantoota isaa hunda haquuf mirkaneessi.\n\n` +
-    `• Maqaa qormaataa\n` +
-    `• Gaaffilee\n` +
-    `• Bu'aawwan\n` +
-    `• Attemptwwan\n\n` +
-    `Haqamuu isaa mirkaneessaa?`
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  /*
-    Answer details yoo table'n jiraate,
-    dura haqna. Yoo table'n hin jirre error isaa
-    hojii delete qormaataa hin dhaabu.
-  */
-  try {
-    await db
-      .from("exam_attempt_answers")
-      .delete()
-      .in(
-        "attempt_id",
-        (
-          await db
-            .from("exam_attempts")
-            .select("id")
-            .eq("exam_id", examId)
-        ).data?.map((row) => row.id) || []
-      );
-  } catch (error) {
-    console.warn(
-      "exam_attempt_answers delete skipped:",
-      error
-    );
-  }
-
-  /*
-    Results haqna.
-  */
-  const { error: resultsError } = await db
-    .from("results")
-    .delete()
-    .eq("exam_id", examId);
-
-  if (resultsError) {
-    console.warn(
-      "Results delete warning:",
-      resultsError
-    );
-  }
-
-  /*
-    Exam attempts haqna.
-  */
-  const { error: attemptsError } = await db
-    .from("exam_attempts")
-    .delete()
-    .eq("exam_id", examId);
-
-  if (attemptsError) {
-    console.warn(
-      "Attempts delete warning:",
-      attemptsError
-    );
-  }
-
-  /*
-    Questions haqna.
-  */
-  const { error: questionsError } = await db
-    .from("questions")
-    .delete()
-    .eq("exam_id", examId);
-
-  if (questionsError) {
-    alert(
-      "Gaaffilee qormaataa haquun hin danda'amne: " +
-        getErrorMessage(questionsError)
-    );
-    return;
-  }
-
-  /*
-    Dhuma irratti exam mataa isaa haqna.
-  */
-  const { error: deleteExamError } = await db
-    .from("exams")
-    .delete()
-    .eq("id", examId);
-
-  if (deleteExamError) {
-    alert(
-      "Qormaata mataa isaa haquun hin danda'amne: " +
-        getErrorMessage(deleteExamError)
-    );
-    return;
-  }
-
-  alert(
-    `✅ Qormaata "${exam.title}" fi wantoonni isaa hundi haqamaniiru.`
-  );
-
-  await loadAdminExams();
-  await loadAdminResults();
-  await populateExamSelects();
-}
-
-/* =========================================================
-   END OF PART 3
-========================================================= */
-/* =========================================================
    AI QUESTION GENERATOR
 ========================================================= */
 
 function changeAIQuestionSource() {
   const type =
-    document.getElementById("aiQuestionSourceType")?.value || "topic";
+    document
+      .getElementById(
+        "aiQuestionSourceType"
+      )
+      ?.value || "topic";
 
   const map = {
-    topic: "aiTopicSource",
-    text: "aiTextSource",
-    pdf: "aiPdfSource",
-    image: "aiImageSource"
+    topic:
+      "aiTopicSource",
+
+    text:
+      "aiTextSource",
+
+    pdf:
+      "aiPdfSource",
+
+    image:
+      "aiImageSource"
   };
 
-  Object.values(map).forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = "none";
-  });
+  Object.values(
+    map
+  ).forEach(
+    (id) => {
+      const el =
+        document.getElementById(
+          id
+        );
 
-  const selected = document.getElementById(map[type]);
+      if (el) {
+        el.style.display =
+          "none";
+      }
+    }
+  );
 
-  if (selected) {
-    selected.style.display = "block";
+  const selected =
+    document.getElementById(
+      map[type]
+    );
+
+if (selected) {
+    selected.style.display =
+      "block";
   }
 }
 
+function fileToBase64(
+  file
+) {
+  return new Promise(
+    (resolve, reject) => {
+      const reader =
+        new FileReader();
+
+      reader.onload = () => {
+        const result =
+          String(
+            reader.result ||
+              ""
+          );
+
+        const comma =
+          result.indexOf(
+            ","
+          );
+
+        resolve(
+          comma >= 0
+            ? result.slice(
+                comma + 1
+              )
+            : result
+        );
+      };
+
+      reader.onerror =
+        reject;
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
 async function generateAIQuestions() {
-  if (!requireAdmin()) return;
+  if (!requireAdmin()) {
+    return;
+  }
 
   const examId =
-    document.getElementById("aiQuestionExamSelect")?.value || "";
+    document
+      .getElementById(
+        "aiQuestionExamSelect"
+      )
+      ?.value || "";
 
-  const type =
-    document.getElementById("aiQuestionSourceType")?.value || "topic";
+  const sourceType =
+    document
+      .getElementById(
+        "aiQuestionSourceType"
+      )
+      ?.value || "topic";
 
-  const count = Number(
-    document.getElementById("aiQuestionCount")?.value || 5
-  );
+  const count =
+    Number(
+      document
+        .getElementById(
+          "aiQuestionCount"
+        )
+        ?.value || 5
+    );
+
+  const button =
+    document.getElementById(
+      "generateAIQuestionsButton"
+    );
 
   if (!examId) {
-    setMessage(
-      "aiQuestionMessage",
-      "Dura qormaata gaaffiin itti galuu filadhu.",
+    showAIMessage(
+      "❌ Qormaata filadhu.",
       "error"
     );
+
     return;
   }
 
-  let source = "";
-
-  if (type === "topic") {
-    source =
-      document.getElementById("aiTopicInput")?.value.trim() || "";
-  }
-
-  if (type === "text") {
-    source =
-      document.getElementById("aiTextInput")?.value.trim() || "";
-  }
-
-  if (type === "pdf") {
-    const file =
-      document.getElementById("aiPdfInput")?.files?.[0];
-
-    source = file ? file.name : "";
-  }
-
-  if (type === "image") {
-    const file =
-      document.getElementById("aiImageInput")?.files?.[0];
-
-    source = file ? file.name : "";
-  }
-
-  if (!source) {
-    setMessage(
-      "aiQuestionMessage",
-      "Madda barnootaa guuti.",
+  if (
+    ![
+      5,
+      10,
+      20,
+      30,
+      50,
+      75,
+      100
+    ].includes(count)
+  ) {
+    showAIMessage(
+      "❌ Lakkoofsa gaaffii sirrii filadhu.",
       "error"
     );
+
     return;
   }
 
-  setMessage(
-    "aiQuestionMessage",
-    "⏳ Gaaffii AI qopheessaa jira...",
-    ""
-  );
+  if (button) {
+    button.disabled =
+      true;
 
-  /*
-    Yoo backend AI jiraate itti fayyadama.
-  */
+    button.textContent =
+      "⏳ AI qopheessaa jira...";
+  }
 
   try {
-    const response = await fetch(
-      window.AI_FUNCTION_URL || "/api/generate-questions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          exam_id: examId,
-          source_type: type,
-          source,
-          count
-        })
+    const body = {
+      exam_id:
+        Number(examId),
+
+      source_type:
+        sourceType,
+
+      count
+    };
+
+    if (
+      sourceType ===
+      "topic"
+    ) {
+      const topic =
+        document
+          .getElementById(
+            "aiTopicInput"
+          )
+          ?.value.trim() ||
+        "";
+
+      if (!topic) {
+        throw new Error(
+          "Mata-duree galchi."
+        );
       }
+
+      body.topic =
+        topic;
+    }
+
+    if (
+      sourceType ===
+      "text"
+    ) {
+      const sourceText =
+        document
+          .getElementById(
+            "aiTextInput"
+          )
+          ?.value.trim() ||
+        "";
+
+      if (!sourceText) {
+        throw new Error(
+          "Barreeffama galchi."
+        );
+      }
+
+      body.source_text =
+        sourceText;
+    }
+
+    if (
+      sourceType ===
+      "pdf"
+    ) {
+      const file =
+        document
+          .getElementById(
+            "aiPdfInput"
+          )
+          ?.files?.[0];
+
+      if (!file) {
+        throw new Error(
+          "PDF filadhu."
+        );
+      }
+
+      if (
+        file.size >
+        50 *
+          1024 *
+          1024
+      ) {
+        throw new Error(
+          "PDF'n 50 MB ol ta'uu hin qabu."
+        );
+      }
+
+      body.file_name =
+        file.name;
+
+      body.file_mime_type =
+        file.type ||
+        "application/pdf";
+
+      body.file_base64 =
+        await fileToBase64(
+          file
+        );
+    }
+
+    if (
+      sourceType ===
+      "image"
+    ) {
+      const file =
+        document
+          .getElementById(
+            "aiImageInput"
+          )
+          ?.files?.[0];
+
+      if (!file) {
+        throw new Error(
+          "Suuraa filadhu."
+        );
+      }
+
+      if (
+        file.size >
+        15 *
+          1024 *
+          1024
+      ) {
+        throw new Error(
+          "Suuraan 15 MB ol ta'uu hin qabu."
+        );
+      }
+
+      body.file_name =
+        file.name;
+
+      body.file_mime_type =
+        file.type ||
+        "image/jpeg";
+
+      body.file_base64 =
+        await fileToBase64(
+          file
+        );
+    }
+
+    showAIMessage(
+      "⏳ Gaaffilee AI irraa qopheessaa jira...",
+      "info"
     );
 
+    const response =
+      await fetch(
+        AI_FUNCTION_URL,
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            apikey:
+              SUPABASE_ANON_KEY
+          },
+
+body:
+            JSON.stringify(
+              body
+            )
+        }
+      );
+
+    let result =
+      null;
+
+    try {
+      result =
+        await response.json();
+    } catch (_) {
+      result =
+        null;
+    }
+
     if (!response.ok) {
-      throw new Error("AI API request failed");
+      throw new Error(
+        result?.error ||
+          result?.message ||
+          AI server error: ${response.status}
+      );
     }
 
-    const result = await response.json();
+    const inserted =
+      Number(
+        result?.count ||
+          result
+            ?.questions
+            ?.length ||
+          0
+      );
 
-    const generated = result.questions || [];
-
-    if (!generated.length) {
-      throw new Error("Gaaffii AI hin argamne.");
+    if (!inserted) {
+      throw new Error(
+        "AI gaaffii tokko illee hin galchine."
+      );
     }
 
-    const rows = generated.map((q) => ({
-      exam_id: examId,
-      question_text: q.question || q.text || "",
-      option_a: q.option_a || q.optionA || "",
-      option_b: q.option_b || q.optionB || "",
-      option_c: q.option_c || q.optionC || "",
-      option_d: q.option_d || q.optionD || "",
-      correct_answer: String(
-        q.correct_answer || q.correctAnswer || ""
-      ).toUpperCase(),
-      source_type: type,
-      source_text: source
-    }));
-
-    const { error } = await db
-      .from("questions")
-      .insert(rows);
-
-    if (error) {
-      throw error;
-    }
-
-    setMessage(
-      "aiQuestionMessage",
-      `✅ Gaaffii ${rows.length} milkaa'inaan dabalameera.`,
+    showAIMessage(
+      <div class="success-box">✅ ${inserted} gaaffii AI irraa qormaata keessa galchame.</div>,
       "success"
     );
 
     await loadAdminQuestions();
     await loadAdminExams();
   } catch (error) {
-    console.error(error);
+    console.error(
+      "AI ERROR:",
+      error
+    );
 
-    setMessage(
-      "aiQuestionMessage",
-      "⚠️ AI question generator amma hin hojjenne. Gaaffii harkaan galchuu dandeessa.",
+    showAIMessage(
+      ❌ ${escapeHtml(
+        getErrorMessage(
+          error
+        )
+      )},
       "error"
     );
+  } finally {
+    if (button) {
+      button.disabled =
+        false;
+
+      button.textContent =
+        "🤖 Gaaffii AI Uumi";
+    }
   }
 }
-
 
 /* =========================================================
    GOOGLE LOGIN
@@ -1934,205 +4853,142 @@ async function generateAIQuestions() {
 
 async function googleLogin() {
   try {
-    const { error } = await db.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo:
-          window.location.origin +
-          window.location.pathname
+    const {
+      error
+    } = await db.auth.signInWithOAuth(
+      {
+        provider:
+          "google",
+
+        options: {
+          redirectTo:
+            window.location.origin +
+            window.location.pathname
+        }
       }
-    });
+    );
 
     if (error) {
-      console.error(error);
+      console.error(
+        "GOOGLE LOGIN ERROR:",
+        error
+      );
+
       alert(
-        "Google Login irratti rakkoon uumame:\n" +
-          getErrorMessage(error)
+        "Google Login irratti dogoggorri uumame: " +
+          getErrorMessage(
+            error
+          )
       );
     }
   } catch (error) {
-    console.error(error);
+    console.error(
+      "GOOGLE LOGIN ERROR:",
+      error
+    );
 
     alert(
-      "Google Login hin milkoofne:\n" +
-        getErrorMessage(error)
+      "Google Login hin milkoofne: " +
+        getErrorMessage(
+          error
+        )
     );
   }
 }
-
 
 /* =========================================================
    GOOGLE AUTH SESSION
 ========================================================= */
 
-async function handleAuthSession(session) {
-  if (!session?.user) return;
+async function handleAuthSession(
+  session
+) {
+  if (!session?.user) {
+    return;
+  }
 
-  const user = session.user;
+  const user =
+    session.user;
 
   const email =
-    String(user.email || "")
+    String(
+      user.email || ""
+    )
       .trim()
       .toLowerCase();
 
-  console.log(
-    "Google user authenticated:",
-    email || user.id
-  );
-
-  /*
-    Admin Google accounts
-  */
-
-  const ADMIN_EMAILS = [
-    "suufiyaanjeeylaanofficial@gmail.com",
-    "seyfudin67@gmail.com"
-  ];
-
-  if (ADMIN_EMAILS.includes(email)) {
-    setSession({
-      type: "admin",
-      authUserId: user.id,
-      email,
-      name:
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        email
-    });
-
-    showPage("adminDashboardPage");
-
-    await initializeAdmin();
-
-    return;
-  }
-
-  /*
-    Student Google account.
-    Existing student hin jiru taanaan record haaraa uuma.
-  */
-
-  let { data: student, error } = await db
-    .from("students")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    console.error(error);
-    alert(
-      "Barataa Google irraa barbaaduun hin danda'amne:\n" +
-        getErrorMessage(error)
-    );
-    return;
-  }
-
-  /*
-    Yoo Google user kun duraan hin jirre,
-    student_code haaraa uuma.
-  */
-
-  if (!student) {
-    const fullName =
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      email.split("@")[0] ||
-      "Barataa";
-
-    const studentCode =
-      "ST-" +
-      Math.floor(
-        100000 +
-          Math.random() * 900000
-      );
-
-    const { data: createdStudent, error: createError } =
-      await db
-        .from("students")
-        .insert({
-          id: user.id,
-          student_code: studentCode,
-          name: fullName,
-          status: "pending"
-        })
-        .select("*")
-        .single();
-
+  try {
     /*
-      Yoo yeroo wal fakkaataa keessatti
-      record uumame, duplicate key hin dhaabu.
+      Email admin keessaa tokko yoo ta'e
+      Admin Dashboard kallattiin bana.
     */
 
-    if (createError) {
-      if (
-        String(createError.code) === "23505" ||
-        String(createError.message || "").includes(
-          "duplicate key"
+    if (
+      isGoogleAdminEmail(
+        email
+      )
+    ) {
+      currentAdmin = {
+        id: user.id,
+
+        username:
+          email,
+
+        name:
+          getGoogleDisplayName(
+            user
+          ),
+
+        google_email:
+          email,
+
+        auth_user_id:
+          user.id
+      };
+
+      localStorage.setItem(
+        "ao_admin_id",
+        String(user.id)
+      );
+
+      localStorage.setItem(
+        "ao_admin_google_email",
+        email
+      );
+
+      showPage(
+        getAdminPageId()
+      );
+
+      await initializeAdmin();
+
+      return;
+    }
+
+    /*
+      Google account biraa:
+      student.
+    */
+
+    await handleGoogleStudent(
+      user
+    );
+  } catch (error) {
+    console.error(
+      "GOOGLE AUTH SESSION ERROR:",
+      error
+    );
+
+    alert(
+      "Google Login booda app keessatti dogoggorri uumame: " +
+        getErrorMessage(
+          error
         )
-      ) {
-        const retry = await db
-          .from("students")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
+    );
 
-        if (retry.error || !retry.data) {
-          alert(
-            "Student account argachuu hin dandeenye."
-          );
-          return;
-        }
-
-        student = retry.data;
-      } else {
-        console.error(createError);
-
-        alert(
-          "Student account uumuu hin dandeenye:\n" +
-            getErrorMessage(createError)
-        );
-
-        return;
-      }
-    } else {
-      student = createdStudent;
-    }
+    showPublicLoginPage();
   }
-
-  /*
-    Google account tokko = student record tokko.
-    Kanaaf yeroo itti aanu ID fi qabxii isaa hin badu.
-  */
-
-  setSession({
-    type: "student",
-    authUserId: user.id,
-    studentId: student.id,
-    studentCode: student.student_code,
-    name: student.name,
-    status: student.status || "pending",
-    email
-  });
-
-  if (student.status !== "active") {
-    showPage("studentHomePage");
-
-    const message =
-      document.getElementById("studentHomeMessage");
-
-    if (message) {
-      message.textContent =
-        "⏳ Galmeen kee admin'n akka mirkaneessu eeggachaa jira.";
-    }
-
-    return;
-  }
-
-  showPage("studentHomePage");
-
-  await loadStudentHome();
 }
-
 
 /* =========================================================
    TELEGRAM LOGIN
@@ -2140,13 +4996,12 @@ async function handleAuthSession(session) {
 
 async function telegramLogin() {
   alert(
-    "Telegram Login qindeessaa jirra. Google Login amma qophaa'eera."
+    "Telegram Login ammallee qindaa'aa jira. Google Loginiin erga seentee booda app fayyadamuu dandeessa."
   );
 }
 
-
 /* =========================================================
-   REFRESH ADMIN
+   REFRESH
 ========================================================= */
 
 async function refreshAllAdminLists() {
@@ -2157,25 +5012,29 @@ async function refreshAllAdminLists() {
   await loadAdminQuestions();
 }
 
-
 /* =========================================================
    AUTH STATE
 ========================================================= */
 
-let authListenerReady = false;
-
 function initializeAuthListener() {
-  if (authListenerReady) return;
+  if (authListenerReady) {
+    return;
+  }
 
-  authListenerReady = true;
+  authListenerReady =
+    true;
 
   db.auth.onAuthStateChange(
-    async (_event, session) => {
-      await handleAuthSession(session);
+    async (
+      _event,
+      session
+    ) => {
+      await handleAuthSession(
+        session
+      );
     }
   );
 }
-
 
 /* =========================================================
    INITIALIZATION
@@ -2186,41 +5045,76 @@ async function initializeApp() {
 
   changeAIQuestionSource();
 
-  const student = await restoreStudent();
+  /*
+    Jalqaba Supabase Google session ilaala.
+  */
+
+  const {
+    data: sessionData
+  } = await db.auth.getSession();
+
+  if (
+    sessionData
+      ?.session
+      ?.user
+  ) {
+    await handleAuthSession(
+      sessionData.session
+    );
+
+    return;
+  }
+
+  const student =
+    await restoreStudent();
 
   if (student) {
-    showPage("studentHomePage");
+    showPage(
+      "studentHomePage"
+    );
 
     await loadStudentHome();
 
     return;
   }
 
-  const admin = await restoreAdmin();
+  const admin =
+    await restoreAdmin();
 
   if (admin) {
-    showPage("adminDashboardPage");
+    showPage(
+      getAdminPageId()
+    );
 
     await initializeAdmin();
 
     return;
   }
 
-  showPage("rolePage");
+  showPublicLoginPage();
 }
-
 
 /* =========================================================
    INLINE HTML FUNCTIONS
 ========================================================= */
 
-window.showPage = showPage;
+window.showPage =
+  showPage;
 
 window.openStudentLogin =
   openStudentLogin;
 
 window.openAdminLogin =
   openAdminLogin;
+
+window.setupPostLoginRoleNav =
+  setupPostLoginRoleNav;
+
+window.showPublicLoginPage =
+  showPublicLoginPage;
+
+window.showPostLoginRoles =
+  showPostLoginRoles;
 
 window.studentRegister =
   studentRegister;
@@ -2264,9 +5158,6 @@ window.studentLogout =
 window.openLesson =
   openLesson;
 
-
-/* ADMIN */
-
 window.adminLogin =
   adminLogin;
 
@@ -2294,15 +5185,6 @@ window.deleteLesson =
 window.createExam =
   createExam;
 
-window.createUnifiedExam =
-  createUnifiedExam;
-
-window.previewUnifiedQuestions =
-  previewUnifiedQuestions;
-
-window.clearUnifiedExamForm =
-  clearUnifiedExamForm;
-
 window.toggleExamStatus =
   toggleExamStatus;
 
@@ -2315,11 +5197,14 @@ window.deleteExam =
 window.createQuestion =
   createQuestion;
 
+window.loadAdminQuestions =
+  loadAdminQuestions;
+
+window.showAdminResultDetails =
+  showAdminResultDetails;
+
 window.deleteQuestion =
   deleteQuestion;
-
-
-/* AI */
 
 window.changeAIQuestionSource =
   changeAIQuestionSource;
@@ -2327,18 +5212,14 @@ window.changeAIQuestionSource =
 window.generateAIQuestions =
   generateAIQuestions;
 
-
-/* LOGIN */
-
 window.googleLogin =
   googleLogin;
 
 window.telegramLogin =
   telegramLogin;
 
-
 /* =========================================================
-   START APP
+   START
 ========================================================= */
 
 document.addEventListener(
