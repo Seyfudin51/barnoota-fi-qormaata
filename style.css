@@ -1,41 +1,14 @@
-/* =========================================================
-   🎓 AKKAADAAMII OROMIYAA — MODERN APP UI
-   Design refresh — functionality hin tuqu
-========================================================= */
-
-:root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-light: #eff6ff;
-  --purple: #7c3aed;
-  --green: #059669;
-  --red: #dc2626;
-  --orange: #ea580c;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --surface: #ffffff;
-  --background: #f8fafc;
-  --shadow-sm: 0 4px 15px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.09);
-  --shadow-lg: 0 18px 45px rgba(15, 23, 42, 0.13);
-}
-
-/* =========================
-   GLOBAL
-========================= */
-
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, #eff6ff 0, transparent 30%),
-    radial-gradient(circle at top right, #f5f3ff 0, transparent 28%),
-    var(--background);
-  color: var(--text);
+  min-height: 100vh;
   font-family:
     Inter,
     system-ui,
@@ -43,6 +16,14 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  background:
+    linear-gradient(
+      135deg,
+      #f8fbff 0%,
+      #eef3ff 50%,
+      #faf9ff 100%
+    );
+  color: #172033;
 }
 
 button,
@@ -56,785 +37,637 @@ button {
   cursor: pointer;
 }
 
-.container {
-  width: min(100% - 32px, 1050px);
-  margin: 0 auto;
-}
-
-/* =========================
-   HERO / BRAND
-========================= */
-
-.hero {
-  text-align: center;
-  padding: 42px 20px 28px;
-}
-
-.hero h1 {
-  margin: 0;
-  font-size: clamp(28px, 6vw, 44px);
-  font-weight: 900;
-  letter-spacing: -1px;
-  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hero p {
-  margin: 9px 0 0;
-  color: var(--muted);
-  font-size: 15px;
-  font-weight: 600;
-}
-
-/* =========================
-   GENERAL CARD
-========================= */
-
-.card {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 24px;
-  box-shadow: var(--shadow-md);
-  padding: 26px;
-  margin-bottom: 20px;
-}
-
-.card h2,
-.card h3 {
-  color: var(--text);
-  font-weight: 850;
-}
-
-/* =========================
-   FIRST LOGIN PAGE
-========================= */
-
-#rolePage .container {
-  max-width: 560px;
+.page {
+  display: none !important;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-#rolePage .hero {
-  padding-bottom: 22px;
-}
-
-#rolePage .card {
-  padding: 30px 24px;
-  text-align: center;
-}
-
-#rolePage .card h2 {
-  margin: 0 0 8px;
-  font-size: 25px;
-}
-
-#rolePage .card::before {
-  content: "🔐";
-  display: flex;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 18px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #eff6ff, #f5f3ff);
-  font-size: 30px;
-}
-
-#rolePage .card p {
-  color: var(--muted);
-  margin-bottom: 22px;
-}
-
-/* Login buttons */
-
-#rolePage button,
-#studentLoginPage button {
-  width: 100%;
-  min-height: 52px;
-  margin-top: 10px;
-  border-radius: 15px;
-  font-weight: 800;
-  transition: 0.2s ease;
-}
-
-#rolePage button:hover,
-#studentLoginPage button:hover {
-  transform: translateY(-2px);
-}
-
-/* =========================
-   GOOGLE / TELEGRAM
-========================= */
-
-.google-login-btn,
-.telegram-login-btn {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--text);
-  box-shadow: var(--shadow-sm);
-}
-
-.google-login-btn:hover {
-  border-color: #cbd5e1;
-  box-shadow: var(--shadow-md);
-}
-
-.telegram-login-btn {
-  background: linear-gradient(135deg, #229ed9, #168ac0);
-  color: #fff;
-  border: none;
-}
-
-.telegram-login-btn:hover {
-  box-shadow: 0 10px 25px rgba(34, 158, 217, 0.28);
-}
-
-/* =========================
-   STUDENT LOGIN
-========================= */
-
-#studentLoginPage .container {
-  max-width: 560px;
-}
-
-#studentLoginPage .card {
-  box-shadow: var(--shadow-md);
-}
-
-#studentLoginPage h2 {
-  font-size: 25px;
-  margin-top: 0;
-}
-
-#studentLoginPage input,
-#studentLoginPage select,
-#studentLoginPage textarea {
-  width: 100%;
-  min-height: 50px;
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  padding: 12px 14px;
-  outline: none;
-  background: #fff;
-  transition: 0.2s;
-}
-
-#studentLoginPage input:focus,
-#studentLoginPage select:focus,
-#studentLoginPage textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.09);
-}
-
-/* =========================
-   STUDENT DASHBOARD
-========================= */
-
-#studentHomePage .container {
-  max-width: 1050px;
-}
-
-#studentHomePage .card {
-  border-radius: 24px;
-}
-
-#studentHomePage h2 {
-  font-size: 25px;
-}
-
-#studentHomePage h3 {
-  font-size: 20px;
-}
-
-/* =========================
-   ADMIN DASHBOARD
-========================= */
-
-#adminDashboardPage .container,
-#adminPage .container {
-  max-width: 1150px;
-}
-
-#adminDashboardPage .hero,
-#adminPage .hero {
-  padding-top: 25px;
-}
-
-/* Admin navigation */
-
-.admin-nav,
-.admin-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 22px;
-}
-
-.admin-nav button,
-.admin-tabs button {
-  min-height: 48px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: #fff;
-  color: var(--muted);
-  font-weight: 800;
-  box-shadow: var(--shadow-sm);
-}
-
-.admin-nav button:hover,
-.admin-tabs button:hover {
-  color: var(--primary);
-  border-color: #bfdbfe;
-}
-
-/* =========================
-   EXAM CREATE HEADER
-========================= */
-
-.exam-create-header {
-  padding: 8px 0 20px;
-}
-
-.exam-create-header h2 {
-  margin: 0;
-  font-size: clamp(23px, 5vw, 31px);
-  font-weight: 900;
-}
-
-.exam-create-header p {
-  margin-top: 7px;
-  color: var(--muted);
-}
-
-/* =========================
-   AI / ADMIN TWO CARDS
-========================= */
-
-.exam-create-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.exam-create-option {
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-}
-
-.exam-create-option:hover {
-  box-shadow: var(--shadow-lg);
-}
-
-.exam-create-option.ai-option {
-  border-color: #ddd6fe;
-  background: linear-gradient(145deg, #fff, #faf5ff);
-}
-
-.exam-create-option.admin-option {
-  border-color: #bfdbfe;
-  background: linear-gradient(145deg, #fff, #eff6ff);
-}
-
-.exam-create-option > summary {
-  min-height: 185px;
-  padding: 28px 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  list-style: none;
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.exam-create-option > summary::-webkit-details-marker {
-  display: none;
-}
-
-.exam-create-option > summary:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.exam-create-option[open] {
-  grid-column: 1 / -1;
-}
-
-.exam-create-option[open] > summary {
-  min-height: 75px;
-  justify-content: flex-start;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.exam-create-option .option-body {
-  padding: 24px;
-}
-
-/* =========================
-   FORM DESIGN
-========================= */
-
-.exam-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 15px;
-}
-
-.exam-form-full {
-  grid-column: 1 / -1;
-}
-
-.exam-create-option label {
-  display: block;
-  margin-bottom: 6px;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.exam-create-option input,
-.exam-create-option select,
-.exam-create-option textarea {
-  width: 100%;
-  min-height: 50px;
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  padding: 12px 14px;
-  background: #fff;
-  color: var(--text);
-  outline: none;
-  transition: 0.2s;
-}
-
-.exam-create-option textarea {
-  min-height: 110px;
-  resize: vertical;
-}
-
-.exam-create-option input:focus,
-.exam-create-option select:focus,
-.exam-create-option textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
-}
-
-.answer-input-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-/* =========================
-   BUTTONS
-========================= */
-
-.primary-btn,
-.secondary-btn,
-.danger-btn {
-  min-height: 48px;
-  border-radius: 13px;
-  border: none;
-  padding: 11px 18px;
-  font-weight: 800;
-  transition: 0.2s ease;
-}
-
-.primary-btn {
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
-}
-
-.primary-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.27);
-}
-
-.secondary-btn {
-  background: #fff;
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.secondary-btn:hover {
-  border-color: #93c5fd;
-  background: #f8fafc;
-}
-
-.danger-btn {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.danger-btn:hover {
-  background: #fecaca;
-}
-
-/* =========================
-   LESSON / EXAM CARDS
-========================= */
-
-.lesson-card,
-.exam-card,
-.score-card,
-.student-card {
-  border: 1px solid var(--border);
-  background: #fff;
-  border-radius: 20px;
-  padding: 20px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
-  transition: 0.2s;
-}
-
-.lesson-card:hover,
-.exam-card:hover,
-.score-card:hover,
-.student-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-/* =========================
-   EXAM PAGE
-========================= */
-
-#examPage .container {
-  max-width: 760px;
-}
-
-#examPage .card {
-  border-radius: 25px;
-}
-
-#examTimer {
-  border-radius: 15px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  padding: 13px 16px;
-  font-weight: 900;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-#questionNumber {
-  color: var(--primary);
-  font-size: 14px;
-  font-weight: 900;
-}
-
-#questionText {
-  font-size: clamp(19px, 4vw, 25px);
-  line-height: 1.55;
-  font-weight: 850;
-  margin: 12px 0 20px;
-}
-
-#answersContainer {
-  display: grid;
-  gap: 12px;
-}
-
-#answersContainer label,
-.answer-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 58px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  background: #fff;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-#answersContainer label:hover,
-.answer-option:hover {
-  border-color: #93c5fd;
-  background: #eff6ff;
-}
-
-/* =========================
-   CONFIRM SUBMIT
-========================= */
-
-#submitConfirmPage .card {
-  max-width: 560px;
-  margin: 40px auto;
-  text-align: center;
-}
-
-#submitWarningMessage {
-  padding: 18px;
-  border-radius: 15px;
-  background: #fff7ed;
-  color: #9a3412;
-  font-weight: 750;
-  line-height: 1.6;
-}
-
-/* =========================
-   PROFILE
-========================= */
-
-#studentProfilePage .card {
-  max-width: 650px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#studentProfilePage input {
-  width: 100%;
-  min-height: 50px;
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  padding: 12px 14px;
-  outline: none;
-}
-
-#studentProfilePage strong {
-  color: #334155;
-}
-
-/* =========================
-   ADMIN LISTS
-========================= */
-
-#adminStudentsList,
-#adminResultsList,
-#adminLessonsList,
-#adminExamsList,
-#adminQuestionsList {
-  display: grid;
-  gap: 12px;
-}
-
-#adminStudentsList > *,
-#adminResultsList > *,
-#adminLessonsList > *,
-#adminExamsList > *,
-#adminQuestionsList > * {
-  border-radius: 18px;
-}
-
-/* =========================
-   SUCCESS / ERROR
-========================= */
-
-.success-box {
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-  font-weight: 750;
-  margin-top: 12px;
-}
-
-.error-box {
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-  font-weight: 750;
-  margin-top: 12px;
-}
-
-/* =========================
-   MOBILE APP
-========================= */
-
-@media (max-width: 700px) {
-
-  .container {
-    width: min(100% - 20px, 1050px);
-  }
-
-  .hero {
-    padding: 28px 12px 18px;
-  }
-
-  .hero h1 {
-    font-size: 29px;
-  }
-
-  .card {
-    padding: 19px 16px;
-    border-radius: 20px;
-  }
-
-  #rolePage .container {
-    width: min(100% - 20px, 560px);
-  }
-
-  #rolePage .card {
-    padding: 24px 17px;
-  }
-
-  .exam-create-options {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .exam-create-option > summary {
-    min-height: 145px;
-  }
-
-  .exam-create-option[open] {
-    grid-column: auto;
-  }
-
-  .exam-create-option[open] > summary {
-    min-height: 65px;
-  }
-
-  .exam-form-grid {
-    grid-template-columns: 1fr;
-    gap: 11px;
-  }
-
-  .exam-form-full {
-    grid-column: auto;
-  }
-
-  .answer-input-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-nav,
-  .admin-tabs {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .admin-nav button,
-  .admin-tabs button {
-    font-size: 13px;
-  }
-}
-
-/* =========================
-   SMALL PHONES
-========================= */
-
-@media (max-width: 390px) {
-
-  .container {
-    width: min(100% - 14px, 1050px);
-  }
-
-  .hero h1 {
-    font-size: 25px;
-  }
-
-  .hero p {
-    font-size: 13px;
-  }
-
-  .card {
-    padding: 16px 13px;
-  }
-
-  #rolePage .card h2 {
-    font-size: 21px;
-  }
-
-  .exam-create-option > summary {
-    min-height: 125px;
-    padding: 17px 12px;
-    font-size: 16px;
-  }
-
-  .exam-create-option .option-body {
-    padding: 15px 12px;
-  }
-
-  .admin-nav,
-  .admin-tabs {
-    gap: 7px;
-  }
-
-  .admin-nav button,
-  .admin-tabs button {
-    min-height: 44px;
-    padding: 7px 5px;
-    font-size: 12px;
-  }
-}
-
-/* =========================
-   SMOOTH APP FEEL
-========================= */
-
-.page {
-  animation: pageIn 0.25s ease;
-}
-
-@keyframes pageIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* =========================
-   HIDE EMPTY SPACES
-========================= */
-
-[style*="display: none"] {
-  display: none !important;
-}
-/* =========================================================
-   PAGE VISIBILITY FIX
-   Fuula tokko qofa yeroo tokko akka mul'atu
-========================================================= */
-
-.page {
-  display: none !important;
 }
 
 .page.active {
   display: block !important;
 }
 
-/* Fuula jalqabaa */
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
 #rolePage {
   min-height: 100vh;
 }
 
 #rolePage.active {
   display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 620px;
+}
+
+.brand-area {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.brand-title {
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  background:
+    linear-gradient(
+      90deg,
+      #145eea,
+      #5b2bea
+    );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-subtitle {
+  margin-top: 8px;
+  color: #687386;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #e3e8f2;
+  border-radius: 28px;
+  padding: 40px;
+  box-shadow:
+    0 20px 60px rgba(40, 55, 90, 0.12);
+  text-align: center;
+}
+
+.login-icon {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 28px;
+  background: #f0f3ff;
+  font-size: 42px;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.login-description {
+  color: #748094;
+  margin: 12px 0 28px;
+}
+
+.google-login-btn,
+.telegram-login-btn {
+  width: 100%;
+  min-height: 58px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 800;
+  font-size: 17px;
+  transition: 0.2s ease;
+}
+
+.google-login-btn {
+  color: white;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #4f46e5
+    );
+  box-shadow:
+    0 10px 25px rgba(37, 99, 235, 0.25);
+}
+
+.telegram-login-btn {
+  margin-top: 14px;
+  color: #172033;
+  background: white;
+  border-color: #dfe5ee;
+}
+
+.google-login-btn:hover,
+.telegram-login-btn:hover {
+  transform: translateY(-2px);
+}
+
+.telegram-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #29a9ea;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-15deg);
+}
+
+
+/* =====================================================
+   COMMON
+===================================================== */
+
+.page-container {
+  width: min(1100px, calc(100% - 30px));
+  margin: auto;
+  padding: 25px 0 60px;
+}
+
+.top-header,
+.app-header,
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.app-header,
+.admin-header {
+  padding: 20px;
+  border-radius: 22px;
+  background: #111827;
+  color: white;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.app-header h2,
+.admin-header h1 {
+  margin: 0;
+}
+
+.app-header p,
+.admin-header p {
+  margin: 7px 0 0;
+  opacity: 0.7;
+}
+
+.back-btn,
+.logout-btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-weight: 700;
+}
+
+.back-btn {
+  background: white;
+  color: #2456d8;
+  border: 1px solid #dce4f1;
+}
+
+.logout-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.form-card,
+.content-card,
+.center-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 15px 45px rgba(40, 55, 90, 0.08);
+}
+
+.form-card {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.form-card label,
+.admin-form label {
+  display: block;
+  margin: 15px 0 7px;
+  font-weight: 700;
+  color: #475569;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid #d9e1ed;
+  background: #fff;
+  color: #172033;
+  border-radius: 13px;
+  padding: 13px 14px;
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #3969ed;
+  box-shadow: 0 0 0 4px rgba(57, 105, 237, 0.1);
+}
+
+textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.primary-btn,
+.secondary-btn,
+.submit-btn,
+.ai-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 13px;
+  padding: 13px 17px;
+  margin-top: 14px;
+  font-weight: 800;
+}
+
+.primary-btn {
+  color: white;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+}
+
+.secondary-btn {
+  background: white;
+  color: #334155;
+  border: 1px solid #dbe3ee;
+}
+
+.submit-btn {
+  color: white;
+  background: #dc2626;
+}
+
+.ai-btn {
+  color: white;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+}
+
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.submit-btn:disabled,
+.ai-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #e5eaf2;
+  margin: 25px 0;
+}
+
+.message {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.info-box {
+  padding: 15px;
+  border-radius: 14px;
+  background: #eef5ff;
+  color: #2450a5;
+  margin-bottom: 20px;
+}
+
+.section-heading {
+  margin-bottom: 20px;
+}
+
+.section-heading h1 {
+  margin-bottom: 5px;
+}
+
+
+/* =====================================================
+   STUDENT MENU
+===================================================== */
+
+.student-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.menu-card {
+  border: 1px solid #e1e7f0;
+  background: white;
+  border-radius: 18px;
+  padding: 20px 10px;
+  display: flex;
   flex-direction: column;
+  gap: 9px;
+  align-items: center;
+  color: #536176;
+  box-shadow: 0 10px 30px rgba(40, 55, 90, 0.06);
 }
 
-/* Fuula qormaataa */
-#examPage.active {
-  display: block !important;
+.menu-card span {
+  font-size: 27px;
 }
 
-/* Admin Dashboard */
-#adminDashboardPage.active {
-  display: block !important;
+.menu-card strong {
+  font-size: 14px;
 }
 
-/* Admin panels — yeroo jalqabaatti tokko qofa */
+.content-section {
+  margin-top: 20px;
+}
+
+.content-section h2 {
+  margin-bottom: 15px;
+}
+
+
+/* =====================================================
+   ITEMS
+===================================================== */
+
+.item-card,
+.exam-card,
+.result-card,
+.admin-list-item,
+.question-admin-item {
+  background: white;
+  border: 1px solid #e0e6ef;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 13px;
+  box-shadow: 0 8px 25px rgba(40, 55, 90, 0.05);
+}
+
+.item-card {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.item-icon {
+  font-size: 30px;
+}
+
+.item-main {
+  flex: 1;
+}
+
+.item-main h3,
+.item-main h4 {
+  margin: 0 0 8px;
+}
+
+.item-main p {
+  color: #687386;
+  line-height: 1.6;
+}
+
+.small-btn,
+.danger-small-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.small-btn {
+  background: #eaf1ff;
+  color: #245bd8;
+}
+
+.danger-small-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.status {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status.active {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.status.blocked {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+
+/* =====================================================
+   EXAM
+===================================================== */
+
+.exam-wrapper {
+  width: min(850px, calc(100% - 25px));
+  margin: auto;
+  padding: 25px 0;
+}
+
+.exam-topbar {
+  background: #111827;
+  color: white;
+  border-radius: 20px;
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.exam-topbar h2 {
+  margin: 0 0 7px;
+}
+
+.timer-box {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #374151;
+}
+
+.exam-card {
+  background: white;
+  border: 1px solid #dfe6ef;
+  border-radius: 24px;
+  padding: 25px;
+}
+
+.question-label {
+  color: #3565dc;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+#questionText {
+  line-height: 1.5;
+}
+
+.answer-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #dce3ed;
+  border-radius: 15px;
+  padding: 15px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.answer-option:hover {
+  border-color: #4670e8;
+  background: #f7f9ff;
+}
+
+.answer-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: #315fe3;
+}
+
+.exam-navigation {
+  margin-top: 22px;
+}
+
+
+/* =====================================================
+   CONFIRM
+===================================================== */
+
+#submitConfirmPage.active {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.center-card {
+  width: min(500px, 100%);
+  text-align: center;
+}
+
+.big-icon {
+  font-size: 50px;
+}
+
+.confirm-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+
+/* =====================================================
+   RESULTS
+===================================================== */
+
+.result-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
+}
+
+.result-card h3 {
+  margin: 0;
+}
+
+.result-card p {
+  color: #718096;
+}
+
+.result-score {
+  text-align: center;
+}
+
+.result-score strong {
+  display: block;
+  font-size: 28px;
+  color: #315fe3;
+}
+
+.result-score span {
+  color: #687386;
+}
+
+
+/* =====================================================
+   ADMIN
+===================================================== */
+
+.admin-container {
+  width: min(1200px, calc(100% - 25px));
+  margin: auto;
+  padding: 20px 0 60px;
+}
+
+.admin-menu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.admin-menu-btn {
+  border: 1px solid #dfe6ef;
+  background: white;
+  border-radius: 18px;
+  padding: 18px 10px;
+  color: #536176;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  font-weight: 800;
+  transition: 0.2s;
+}
+
+.admin-menu-btn span {
+  font-size: 23px;
+}
+
+.admin-menu-btn:hover,
+.admin-menu-btn.active-menu {
+  border-color: #4771e7;
+  color: #285ad7;
+  box-shadow: 0 8px 25px rgba(45, 85, 200, 0.1);
+}
+
+
+/*
+  IMPORTANT:
+  Admin panel JS class active waliin hojjeta.
+*/
+
 .admin-panel {
   display: none !important;
 }
@@ -843,23 +676,202 @@ button {
   display: block !important;
 }
 
-/* Admin dashboard yeroo banamu */
-#studentsPanel.active,
-#resultsPanel.active,
-#lessonsPanel.active,
-#examsPanel.active {
-  display: block !important;
+.panel-title {
+  margin-bottom: 15px;
 }
 
-/* Mobile */
-@media (max-width: 700px) {
-  .page.active {
-    width: 100%;
-    min-height: 100vh;
-  }
+.admin-form {
+  background: white;
+  border: 1px solid #e0e6ef;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 25px rgba(40, 55, 90, 0.05);
 }
-/* DHOKSA: Barataa fi Admin fuula jalqabaa */
-#rolePage [onclick*="openStudentLogin"],
-#rolePage [onclick*="openAdminLogin"] {
-  display: none !important;
+
+.admin-form h3 {
+  margin-top: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 13px;
+}
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.ai-box {
+  border: 2px solid #e5dcff;
+  background: linear-gradient(
+    135deg,
+    #ffffff,
+    #faf8ff
+  );
+}
+
+.exam-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.exam-meta span {
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 6px 9px;
+}
+
+.question-admin-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.question-number {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #eef3ff;
+  color: #285ad7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+.options-preview {
+  display: grid;
+  gap: 5px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.correct-answer {
+  color: #15803d !important;
+  font-weight: 800;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border-radius: 18px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 13px;
+  border-bottom: 1px solid #e5eaf1;
+  text-align: left;
+}
+
+th {
+  background: #f5f7fb;
+  color: #475569;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 800px) {
+
+  .student-menu-grid,
+  .admin-menu {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  #rolePage.active {
+    padding: 14px;
+  }
+
+  .login-card {
+    padding: 25px 18px;
+    border-radius: 22px;
+  }
+
+  .brand-title {
+    font-size: 30px;
+  }
+
+  .page-container {
+    width: min(100% - 18px, 1100px);
+    padding-top: 12px;
+  }
+
+  .app-header,
+  .admin-header {
+    padding: 15px;
+  }
+
+  .app-header h2,
+  .admin-header h1 {
+    font-size: 20px;
+  }
+
+  .student-menu-grid,
+  .admin-menu {
+    gap: 8px;
+  }
+
+  .menu-card,
+  .admin-menu-btn {
+    padding: 14px 7px;
+  }
+
+  .form-card,
+  .content-card,
+  .exam-card,
+  .admin-form {
+    padding: 18px;
+  }
+
+  .confirm-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .result-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .question-admin-item {
+    flex-wrap: wrap;
+  }
+
+}
+
+@media (max-width: 420px) {
+
+  .student-menu-grid,
+  .admin-menu {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .google-login-btn,
+  .telegram-login-btn {
+    font-size: 15px;
+  }
+
 }
