@@ -2722,3 +2722,521 @@ async function generateAIQuestions() {
     }
   }
 }
+const ADMIN_GOOGLE_EMAILS = new Set([
+  "suufiyaanjeeylaanofficial@gmail.com",
+  "seyfudin67@gmail.com"
+]);
+
+async function googleLogin() {
+  const client = initSupabase();
+
+  if (!client) {
+    alert(
+      "Supabase hin fe'amne. Fuula haaromsiitii yaali."
+    );
+    return;
+  }
+
+  try {
+    const { error } =
+      await client.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo:
+            window.location.origin +
+            window.location.pathname
+        }
+      });
+
+    if (error) {
+      console.error(
+        "GOOGLE LOGIN ERROR:",
+        error
+      );
+
+      alert(
+        "Google Login irratti dogoggorri uumame: " +
+          getErrorMessage(error)
+      );
+    }
+  } catch (error) {
+    console.error(
+      "GOOGLE LOGIN ERROR:",
+      error
+    );
+
+    alert(
+      "Google Login hin milkoofne: " +
+        getErrorMessage(error)
+    );
+  }
+}
+
+async function findOrCreateGoogleStudent(user) {
+  const client = requireDb();
+
+  const email =
+    String(user?.email || "")
+      .trim()
+      .toLowerCase();
+
+  const googleUserId =
+    user?.id || null;
+
+  if (!email || !googleUserId) {
+    throw new Error(
+      "Google account irraa email ykn ID hin argamne."
+    );
+  }
+
+  let {
+    data: student,
+    error
+  } = await client
+    .from("students")
+    .select("*")
+    .eq(
+      "google_user_id",
+      googleUserId
+    )
+    .maybeSingle();
+
+  if (
+    error &&
+    error.code !== "PGRST116"
+  ) {
+    throw error;
+  }
+
+  if (!student) {
+    const byEmail =
+      await client
+        .from("students")
+        .select("*")
+        .eq(
+          "google_email",
+          email
+        )
+        .maybeSingle();
+
+    if (
+      byEmail.error &&
+      byEmail.error.code !==
+        "PGRST116"
+    ) {
+      throw byEmail.error;
+    }
+
+    student =
+      byEmail.data || null;
+  }
+
+  if (student) {
+    const updates = {
+      google_email: email,
+      google_user_id:
+        googleUserId,
+      status: "active"
+    };
+
+    const updated =
+      await client
+        .from("students")
+        .update(updates)
+        .eq("id", student.id)
+        .select()
+        .single();
+
+    if (updated.error) {
+      throw updated.error;
+    }
+
+    return updated.data;
+  }
+
+  const meta =
+    user.user_metadata || {};
+
+  const name =
+    String(
+      meta.full_name ||
+        meta.name ||
+        [
+          meta.given_name,
+          meta.family_name
+        ]
+          .filter(Boolean)
+          .join(" ") ||
+        email.split("@")[0] ||
+        "Barataa"
+    ).trim();
+
+  let studentId =
+    generateStudentCode();
+
+  let activationCode =
+    generateActivationCode();
+
+  for (let i = 0; i < 10; i++) {
+    const duplicate =
+      await client
+        .from("students")
+        .select("id")
+        .or(
+          `student_id.eq.${studentId},activation_code.eq.${activationCode}`
+        )
+        .limit(1);
+
+    if (duplicate.error) {
+      throw duplicate.error;
+    }
+
+    if (!duplicate.data?.length) {
+      break;
+    }
+
+    studentId =
+      generateStudentCode();
+
+    activationCode =
+      generateActivationCode();
+  }
+
+  const created =
+    await client
+      .from("students")
+      .insert({
+        student_id:
+          studentId,
+        activation_code:
+          activationCode,
+        name,
+        status: "active",
+        google_email:
+          email,
+        google_user_id:
+          googleUserId
+      })
+      .select()
+      .single();
+
+  if (created.error) {
+    throw created.error;
+  }
+
+  return created.data;
+}
+
+async function handleAuthSession(session) {
+  if (!session?.user) return;
+
+  const email =
+    String(
+      session.user.email || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  console.log(
+    "Google user authenticated:",
+    email || session.user.id
+  );
+
+  try {
+    if (
+      ADMIN_GOOGLE_EMAILS.has(
+        email
+      )
+    ) {
+      currentStudent = null;
+
+      localStorage.removeItem(
+        "ao_student_id"
+      );
+
+      currentAdmin = {
+        id:
+          `google-${session.user.id}`,
+        username: email,
+        email,
+        google_user_id:
+          session.user.id,
+        auth_user_id:
+          session.user.id
+      };
+
+      localStorage.setItem(
+        "ao_google_admin_email",
+        email
+      );
+
+      showPage(
+        "adminDashboardPage"
+      );
+
+      await initializeAdmin();
+
+      return;
+    }
+
+    const student =
+      await findOrCreateGoogleStudent(
+        session.user
+      );
+
+    currentStudent =
+      student;
+
+    localStorage.setItem(
+      "ao_student_id",
+      String(student.id)
+    );
+
+    localStorage.removeItem(
+      "ao_google_admin_email"
+    );
+
+    showPage(
+      "studentHomePage"
+    );
+
+    await loadStudentHome();
+  } catch (error) {
+    console.error(
+      "GOOGLE ACCOUNT SETUP ERROR:",
+      error
+    );
+
+    alert(
+      "Google Login booda app keessatti rakkoon uumame: " +
+        getErrorMessage(error)
+    );
+  }
+}
+
+async function telegramLogin() {
+  alert(
+    "Telegram Login qindeessaa jirra. Google Login amma qophaa'eera."
+  );
+}
+
+async function refreshAllAdminLists() {
+  await loadAdminStudents();
+  await loadAdminResults();
+  await loadAdminLessons();
+  await loadAdminExams();
+  await loadAdminQuestions();
+}
+
+function initializeAuthListener() {
+  if (authListenerReady) return;
+
+  const client =
+    initSupabase();
+
+  if (!client) return;
+
+  authListenerReady = true;
+
+  client.auth.onAuthStateChange(
+    async (_event, session) => {
+      await handleAuthSession(
+        session
+      );
+    }
+  );
+}
+
+async function initializeApp() {
+  initSupabase();
+
+  initializeAuthListener();
+
+  changeAIQuestionSource();
+
+  const googleAdminEmail =
+    localStorage.getItem(
+      "ao_google_admin_email"
+    );
+
+  if (
+    googleAdminEmail &&
+    ADMIN_GOOGLE_EMAILS.has(
+      googleAdminEmail
+    )
+  ) {
+    currentAdmin = {
+      id:
+        `google-${googleAdminEmail}`,
+      username:
+        googleAdminEmail,
+      email:
+        googleAdminEmail
+    };
+
+    showPage(
+      "adminDashboardPage"
+    );
+
+    await initializeAdmin();
+
+    return;
+  }
+
+  const client =
+    initSupabase();
+
+  if (client) {
+    const {
+      data: authData
+    } = await client.auth.getSession();
+
+    if (authData?.session) {
+      await handleAuthSession(
+        authData.session
+      );
+
+      if (
+        currentStudent ||
+        currentAdmin
+      ) {
+        return;
+      }
+    }
+  }
+
+  const student =
+    await restoreStudent();
+
+  if (student) {
+    showPage(
+      "studentHomePage"
+    );
+
+    await loadStudentHome();
+
+    return;
+  }
+
+  const admin =
+    await restoreAdmin();
+
+  if (admin) {
+    showPage(
+      "adminDashboardPage"
+    );
+
+    await initializeAdmin();
+
+    return;
+  }
+
+  showPage("rolePage");
+}
+
+window.showPage = showPage;
+window.openStudentLogin =
+  openStudentLogin;
+window.openAdminLogin =
+  openAdminLogin;
+
+window.studentRegister =
+  studentRegister;
+
+window.studentLogin =
+  studentLogin;
+
+window.loadStudentHome =
+  loadStudentHome;
+
+window.loadExams =
+  loadExams;
+
+window.startExam =
+  startExam;
+
+window.selectAnswer =
+  selectAnswer;
+
+window.nextQuestion =
+  nextQuestion;
+
+window.requestSubmitExam =
+  requestSubmitExam;
+
+window.confirmSubmitExam =
+  confirmSubmitExam;
+
+window.showScore =
+  showScore;
+
+window.loadProfile =
+  loadProfile;
+
+window.saveProfile =
+  saveProfile;
+
+window.studentLogout =
+  studentLogout;
+
+window.openLesson =
+  openLesson;
+
+window.adminLogin =
+  adminLogin;
+
+window.adminLogout =
+  adminLogout;
+
+window.openAdminPanel =
+  openAdminPanel;
+
+window.toggleStudentStatus =
+  toggleStudentStatus;
+
+window.deleteStudent =
+  deleteStudent;
+
+window.createLesson =
+  createLesson;
+
+window.editLesson =
+  editLesson;
+
+window.deleteLesson =
+  deleteLesson;
+
+window.createExam =
+  createExam;
+
+window.toggleExamStatus =
+  toggleExamStatus;
+
+window.editExam =
+  editExam;
+
+window.deleteExam =
+  deleteExam;
+
+window.createQuestion =
+  createQuestion;
+
+window.deleteQuestion =
+  deleteQuestion;
+
+window.changeAIQuestionSource =
+  changeAIQuestionSource;
+
+window.generateAIQuestions =
+  generateAIQuestions;
+
+window.googleLogin =
+  googleLogin;
+
+window.telegramLogin =
+  telegramLogin;
+
+document.addEventListener(
+  "DOMContentLoaded",
+  initializeApp
+);
