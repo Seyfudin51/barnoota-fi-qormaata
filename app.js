@@ -12,21 +12,16 @@
 const SUPABASE_URL = "https://xhkkaevhcqvkwabcsljm.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_8nBE4n2bQ1jRnEr_83FrdA_vSqqIpSz";
 const AI_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/generate-ai-questions`;
+
 const ADMIN_GOOGLE_EMAILS = [
   "suufiyaanjeeylaanofficial@gmail.com",
   "seyfudin67@gmail.com"
 ].map((email) => email.toLowerCase());
 
-let db = null;
-
-function getDb() {
-  if (db) return db;
-  if (!window.supabase || typeof window.supabase.createClient !== "function") {
-    throw new Error("Supabase library hin fe'amne. Fuula haaromsii deebi'ii yaali.");
-  }
-  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return db;
-}
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 /* =========================================================
    APP STATE
@@ -250,26 +245,29 @@ async function studentRegister() {
       return;
     }
 
-    let studentId = generateStudentCode();
+    let studentCode = generateStudentCode();
     let activationCode = generateActivationCode();
 
-    for (let i = 0; i < 10; i++) {
-      const { data: duplicate } = await db
+    for (let i = 0; i < 20; i++) {
+      const { data: duplicate, error: duplicateError } = await db
         .from("students")
         .select("id")
-        .or(`student_code.eq.${studentId},activation_code.eq.${activationCode}`)
+        .or(
+          `student_code.eq.${studentCode},activation_code.eq.${activationCode}`
+        )
         .limit(1);
 
+      if (duplicateError) throw duplicateError;
       if (!duplicate?.length) break;
 
-      studentId = generateStudentCode();
+      studentCode = generateStudentCode();
       activationCode = generateActivationCode();
     }
 
     const { data: student, error } = await db
       .from("students")
       .insert({
-        student_code: studentId,
+        student_code: studentCode,
         activation_code: activationCode,
         name,
         status: "pending"
@@ -294,6 +292,7 @@ async function studentRegister() {
 async function studentLogin() {
   const studentId =
     document.getElementById("studentIdInput")?.value.trim() || "";
+
   const activationCode =
     document.getElementById("activationCodeInput")?.value.trim() || "";
 
@@ -334,7 +333,7 @@ async function studentLogin() {
     }
 
     currentStudent = student;
-    localStorage.setItem("ao_student_id", student.id);
+    localStorage.setItem("ao_student_id", String(student.id));
 
     document.getElementById("studentIdInput").value = "";
     document.getElementById("activationCodeInput").value = "";
@@ -394,6 +393,7 @@ async function loadStudentHome() {
   const messageEl = document.getElementById("studentHomeMessage");
 
   if (nameEl) nameEl.textContent = student.name;
+
   if (messageEl) {
     messageEl.textContent =
       "Barnoota dubbisi, qormaata fudhadhu, qabxii kees ilaali.";
@@ -412,17 +412,21 @@ async function loadStudentLessons() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    container.innerHTML = `<div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">❌ Barnoota fe'uu hin dandeenye.</div>`;
     console.error(error);
     return;
   }
 
   if (!data?.length) {
-    container.innerHTML = `<div class="empty-state">📚 Ammaaf barnoonni hin fe'amne.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">📚 Ammaaf barnoonni hin fe'amne.</div>`;
     return;
   }
 
-  container.innerHTML = data.map((lesson) => `
+  container.innerHTML = data
+    .map(
+      (lesson) => `
     <article class="item-card">
       <div class="item-icon">📚</div>
       <div class="item-main">
@@ -433,7 +437,9 @@ async function loadStudentLessons() {
         </button>
       </div>
     </article>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
 async function openLesson(lessonId) {
@@ -449,8 +455,10 @@ async function openLesson(lessonId) {
   const content = document.getElementById("lessonDetailContent");
 
   if (title) title.textContent = data.title;
+
   if (content) {
-    content.innerHTML = `<div class="lesson-content">${formatText(data.content)}</div>`;
+    content.innerHTML =
+      `<div class="lesson-content">${formatText(data.content)}</div>`;
   }
 
   showPage("lessonDetailPage");
@@ -464,30 +472,55 @@ function getExamWindowStatus(exam) {
   const now = new Date();
 
   if (exam.startDate) {
-    const start = new Date(`${exam.startDate}T${exam.startTime || "00:00"}`);
+    const start = new Date(
+      `${exam.startDate}T${exam.startTime || "00:00"}`
+    );
+
     if (!Number.isNaN(start.getTime()) && now < start) {
-      return { available: false, reason: "not_started", date: start };
+      return {
+        available: false,
+        reason: "not_started",
+        date: start
+      };
     }
   }
 
   if (exam.endDate) {
-    const end = new Date(`${exam.endDate}T${exam.endTime || "23:59:59"}`);
+    const end = new Date(
+      `${exam.endDate}T${exam.endTime || "23:59:59"}`
+    );
+
     if (!Number.isNaN(end.getTime()) && now > end) {
-      return { available: false, reason: "ended", date: end };
+      return {
+        available: false,
+        reason: "ended",
+        date: end
+      };
     }
   }
 
   if (exam.status === "disabled") {
-    return { available: false, reason: "disabled" };
+    return {
+      available: false,
+      reason: "disabled"
+    };
   }
 
-  return { available: true, reason: "available" };
+  return {
+    available: true,
+    reason: "available"
+  };
 }
 
 function formatDateTime(value) {
   if (!value) return "";
+
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
   return date.toLocaleString("om-ET");
 }
 
@@ -521,13 +554,15 @@ async function loadExams() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    container.innerHTML = `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">❌ Qormaata fe'uu hin dandeenye.</div>`;
     console.error(error);
     return;
   }
 
   if (!data?.length) {
-    container.innerHTML = `<div class="empty-state">📝 Ammaaf qormaanni hin jiru.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">📝 Ammaaf qormaanni hin jiru.</div>`;
     return;
   }
 
@@ -538,6 +573,7 @@ async function loadExams() {
     const attempts = await getCompletedAttempts(exam.id, student.id);
     const limit = Number(exam.attemptLimit || 1);
     const window = getExamWindowStatus(exam);
+
     let action = "";
 
     if (!window.available) {
@@ -547,12 +583,19 @@ async function loadExams() {
           : window.reason === "ended"
           ? "⛔ Yeroon qormaataa darbeera."
           : "⛔ Qormaanni cufameera.";
-      action = `<span class="status blocked">${escapeHtml(text)}</span>`;
+
+      action =
+        `<span class="status blocked">${escapeHtml(text)}</span>`;
     } else if (attempts.length >= limit) {
-      action = `<span class="status blocked">Attempt xumurame</span>`;
+      action =
+        `<span class="status blocked">Attempt xumurame</span>`;
     } else {
       action = `
-        <button type="button" class="small-btn" onclick="startExam(${exam.id})">
+        <button
+          type="button"
+          class="small-btn"
+          onclick="startExam(${exam.id})"
+        >
           Qormaata Jalqabi →
         </button>
       `;
@@ -560,15 +603,31 @@ async function loadExams() {
 
     cards.push(`
       <article class="exam-card">
-        <div class="exam-badge">${exam.isFinal ? "🏆 FINAL" : "📝 EXAM"}</div>
-        <h3>${escapeHtml(exam.title)}</h3>
-        <p>${escapeHtml(exam.description || "")}</p>
-        <div class="exam-meta">
-          <span>❓ ${exam.questionLimit > 0 ? exam.questionLimit : "Hunda"}</span>
-          <span>⏱️ ${exam.duration} daqiiqaa</span>
-          <span>🔢 ${attempts.length}/${limit}</span>
+        <div class="exam-badge">
+          ${exam.isFinal ? "🏆 FINAL" : "📝 EXAM"}
         </div>
-        <div class="exam-action">${action}</div>
+
+        <h3>${escapeHtml(exam.title)}</h3>
+
+        <p>${escapeHtml(exam.description || "")}</p>
+
+        <div class="exam-meta">
+          <span>
+            ❓ ${exam.questionLimit > 0 ? exam.questionLimit : "Hunda"}
+          </span>
+
+          <span>
+            ⏱️ ${exam.duration} daqiiqaa
+          </span>
+
+          <span>
+            🔢 ${attempts.length}/${limit}
+          </span>
+        </div>
+
+        <div class="exam-action">
+          ${action}
+        </div>
       </article>
     `);
   }
@@ -609,7 +668,9 @@ async function startExam(examId) {
     return;
   }
 
-  const completedAttempts = await getCompletedAttempts(exam.id, student.id);
+  const completedAttempts =
+    await getCompletedAttempts(exam.id, student.id);
+
   const attemptLimit = Number(exam.attemptLimit || 1);
 
   if (completedAttempts.length >= attemptLimit) {
@@ -636,6 +697,13 @@ async function startExam(examId) {
 
   questions = questions.sort(() => Math.random() - 0.5);
 
+  /*
+    IMPORTANT:
+    Admin yoo 50 filate -> barataan hanga 50 argata.
+    Yoo 30 filate -> 30.
+    Yoo 40 filate -> 40.
+    Yoo 0/empty ta'e -> gaaffii hunda.
+  */
   if (exam.questionLimit > 0) {
     questions = questions.slice(0, exam.questionLimit);
   }
@@ -658,7 +726,10 @@ async function startExam(examId) {
 
   if (attemptError) {
     console.error(attemptError);
-    alert("Qormaata jalqabuun hin danda'amne: " + getErrorMessage(attemptError));
+    alert(
+      "Qormaata jalqabuun hin danda'amne: " +
+        getErrorMessage(attemptError)
+    );
     return;
   }
 
@@ -673,6 +744,7 @@ async function startExam(examId) {
   if (title) title.textContent = exam.title;
 
   examSecondsLeft = Math.max(1, exam.duration * 60);
+
   startExamTimer();
   renderCurrentQuestion();
   showPage("examPage");
@@ -683,15 +755,30 @@ function renderCurrentQuestion() {
 
   const question = currentQuestions[currentQuestionIndex];
   const total = currentQuestions.length;
-  const number = document.getElementById("questionNumber");
-  const text = document.getElementById("questionText");
-  const container = document.getElementById("answersContainer");
 
-  if (number) number.textContent = ` ${currentQuestionIndex + 1}/${total}`;
-  if (text) text.textContent = question.text;
+  const number =
+    document.getElementById("questionNumber");
+
+  const text =
+    document.getElementById("questionText");
+
+  const container =
+    document.getElementById("answersContainer");
+
+  if (number) {
+    number.textContent =
+      ` ${currentQuestionIndex + 1}/${total}`;
+  }
+
+  if (text) {
+    text.textContent = question.text;
+  }
+
   if (!container) return;
 
-  const selected = currentAnswers[question.id];
+  const selected =
+    currentAnswers[question.id];
+
   const options = [
     ["A", question.optionA],
     ["B", question.optionB],
@@ -699,7 +786,9 @@ function renderCurrentQuestion() {
     ["D", question.optionD]
   ];
 
-  container.innerHTML = options.map(([letter, value]) => `
+  container.innerHTML = options
+    .map(
+      ([letter, value]) => `
     <label class="answer-option">
       <input
         type="radio"
@@ -708,55 +797,99 @@ function renderCurrentQuestion() {
         ${selected === letter ? "checked" : ""}
         onchange="selectAnswer('${letter}')"
       >
-      <span><strong>${letter}.</strong> ${escapeHtml(value)}</span>
-    </label>
-  `).join("");
 
-  const nextButton = document.getElementById("nextQuestionButton");
-  const submitButton = document.getElementById("submitExamButton");
-  const answered = Boolean(currentAnswers[question.id]);
+      <span>
+        <strong>${letter}.</strong>
+        ${escapeHtml(value)}
+      </span>
+    </label>
+  `
+    )
+    .join("");
+
+  const nextButton =
+    document.getElementById("nextQuestionButton");
+
+  const submitButton =
+    document.getElementById("submitExamButton");
+
+  const answered =
+    Boolean(currentAnswers[question.id]);
 
   if (nextButton) {
     nextButton.disabled = !answered;
+
     nextButton.style.display =
-      currentQuestionIndex === total - 1 ? "none" : "block";
+      currentQuestionIndex === total - 1
+        ? "none"
+        : "block";
   }
 
   if (submitButton) {
     submitButton.disabled = !answered;
+
     submitButton.style.display =
-      currentQuestionIndex === total - 1 ? "block" : "none";
+      currentQuestionIndex === total - 1
+        ? "block"
+        : "none";
   }
 }
 
 function selectAnswer(letter) {
-  const question = currentQuestions[currentQuestionIndex];
+  const question =
+    currentQuestions[currentQuestionIndex];
+
   if (!question) return;
 
   currentAnswers[question.id] = letter;
 
-  const nextButton = document.getElementById("nextQuestionButton");
-  const submitButton = document.getElementById("submitExamButton");
+  const nextButton =
+    document.getElementById("nextQuestionButton");
 
-  if (nextButton) nextButton.disabled = false;
-  if (submitButton) submitButton.disabled = false;
+  const submitButton =
+    document.getElementById("submitExamButton");
+
+  if (nextButton) {
+    nextButton.disabled = false;
+  }
+
+  if (submitButton) {
+    submitButton.disabled = false;
+  }
 }
 
 function nextQuestion() {
-  if (currentQuestionIndex >= currentQuestions.length - 1) return;
+  if (
+    currentQuestionIndex >=
+    currentQuestions.length - 1
+  ) {
+    return;
+  }
+
   currentQuestionIndex++;
+
   renderCurrentQuestion();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 function requestSubmitExam() {
   if (!currentExam) return;
 
-  const unanswered = currentQuestions.filter(
-    (question) => !currentAnswers[question.id]
-  ).length;
+  const unanswered =
+    currentQuestions.filter(
+      (question) =>
+        !currentAnswers[question.id]
+    ).length;
 
-  const message = document.getElementById("submitWarningMessage");
+  const message =
+    document.getElementById(
+      "submitWarningMessage"
+    );
+
   if (message) {
     message.textContent =
       unanswered > 0
@@ -765,6 +898,7 @@ function requestSubmitExam() {
   }
 
   pendingSubmit = true;
+
   showPage("submitConfirmPage");
 }
 
@@ -776,6 +910,7 @@ function confirmSubmitExam(confirmSubmit) {
   }
 
   if (!pendingSubmit || !currentExam) return;
+
   finishExam();
 }
 
@@ -785,33 +920,53 @@ function confirmSubmitExam(confirmSubmit) {
 
 async function finishExam() {
   const student = requireStudent();
-  if (!student || !currentExam || !currentAttempt) return;
+
+  if (
+    !student ||
+    !currentExam ||
+    !currentAttempt
+  ) {
+    return;
+  }
 
   stopExamTimer();
 
   let correct = 0;
+
   currentQuestions.forEach((question) => {
-    if (currentAnswers[question.id] === question.correctAnswer) {
+    if (
+      currentAnswers[question.id] ===
+      question.correctAnswer
+    ) {
       correct++;
     }
   });
 
   const total = currentQuestions.length;
-  const percentage = total ? Math.round((correct / total) * 100) : 0;
+
+  const percentage =
+    total
+      ? Math.round((correct / total) * 100)
+      : 0;
 
   try {
-    const { error: attemptError } = await db
+    const {
+      error: attemptError
+    } = await db
       .from("exam_attempts")
       .update({
         score: correct,
         total,
         percentage,
         completed: true,
-        submitted_at: new Date().toISOString()
+        submitted_at:
+          new Date().toISOString()
       })
       .eq("id", currentAttempt.id);
 
-    if (attemptError) throw attemptError;
+    if (attemptError) {
+      throw attemptError;
+    }
 
     const resultPayload = {
       student_id: student.id,
@@ -821,26 +976,32 @@ async function finishExam() {
       total,
       percentage,
       answers: currentAnswers,
-      submitted_at: new Date().toISOString()
+      submitted_at:
+        new Date().toISOString()
     };
 
-    const { data: oldResult } = await db
-      .from("results")
-      .select("id")
-      .eq("student_id", student.id)
-      .eq("exam_id", currentExam.id)
-      .maybeSingle();
+    const { data: oldResult } =
+      await db
+        .from("results")
+        .select("id")
+        .eq("student_id", student.id)
+        .eq("exam_id", currentExam.id)
+        .maybeSingle();
 
     if (oldResult?.id) {
-      const { error } = await db
-        .from("results")
-        .update(resultPayload)
-        .eq("id", oldResult.id);
+      const { error } =
+        await db
+          .from("results")
+          .update(resultPayload)
+          .eq("id", oldResult.id);
+
       if (error) throw error;
     } else {
-      const { error } = await db
-        .from("results")
-        .insert(resultPayload);
+      const { error } =
+        await db
+          .from("results")
+          .insert(resultPayload);
+
       if (error) throw error;
     }
 
@@ -856,10 +1017,18 @@ async function finishExam() {
     pendingSubmit = false;
 
     showPage("scorePage");
+
     await showScore();
   } catch (error) {
-    console.error("FINISH EXAM ERROR:", error);
-    alert("Qormaata submit gochuun hin milkoofne: " + getErrorMessage(error));
+    console.error(
+      "FINISH EXAM ERROR:",
+      error
+    );
+
+    alert(
+      "Qormaata submit gochuun hin milkoofne: " +
+        getErrorMessage(error)
+    );
   }
 }
 
@@ -869,26 +1038,43 @@ async function finishExam() {
 
 function startExamTimer() {
   stopExamTimer();
+
   updateExamTimer();
 
   examTimer = setInterval(() => {
     examSecondsLeft--;
+
     updateExamTimer();
 
     if (examSecondsLeft <= 0) {
       stopExamTimer();
-      alert("Yeroon qormaataa xumurameera. Qormaanni kee submit ta'a.");
+
+      alert(
+        "Yeroon qormaataa xumurameera. Qormaanni kee submit ta'a."
+      );
+
       finishExam();
     }
   }, 1000);
 }
 
 function updateExamTimer() {
-  const el = document.getElementById("examTimerValue");
+  const el =
+    document.getElementById(
+      "examTimerValue"
+    );
+
   if (el) {
-    const minutes = Math.floor(Math.max(0, examSecondsLeft) / 60);
-    const seconds = Math.max(0, examSecondsLeft) % 60;
-    el.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    const minutes =
+      Math.floor(
+        Math.max(0, examSecondsLeft) / 60
+      );
+
+    const seconds =
+      Math.max(0, examSecondsLeft) % 60;
+
+    el.textContent =
+      `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 }
 
@@ -907,52 +1093,116 @@ async function showScore() {
   const student = requireStudent();
   if (!student) return;
 
-  const container = document.getElementById("studentScore");
+  const container =
+    document.getElementById(
+      "studentScore"
+    );
+
   if (!container) return;
 
-  const { data, error } = await db
-    .from("results")
-    .select("*")
-    .eq("student_id", student.id)
-    .order("submitted_at", { ascending: false });
+  const { data, error } =
+    await db
+      .from("results")
+      .select("*")
+      .eq("student_id", student.id)
+      .order("submitted_at", {
+        ascending: false
+      });
 
   if (error) {
-    container.innerHTML = `<div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>`;
+
     console.error(error);
     return;
   }
 
   if (!data?.length) {
-    container.innerHTML = `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
+
     return;
   }
 
-  container.innerHTML = data.map((result) => `
+  container.innerHTML = data
+    .map(
+      (result) => `
     <div class="result-card">
       <div>
-        <h3>${escapeHtml(result.exam_title || "Qormaata")}</h3>
-        <p>${formatDateTime(result.submitted_at)}</p>
+        <h3>
+          ${escapeHtml(
+            result.exam_title ||
+              "Qormaata"
+          )}
+        </h3>
+
+        <p>
+          ${formatDateTime(
+            result.submitted_at
+          )}
+        </p>
       </div>
+
       <div class="result-score">
-        <strong>${Number(result.percentage || 0)}%</strong>
-        <span>${Number(result.correct || 0)}/${Number(result.total || 0)}</span>
+        <strong>
+          ${Number(
+            result.percentage || 0
+          )}%
+        </strong>
+
+        <span>
+          ${Number(
+            result.correct || 0
+          )}/${Number(
+            result.total || 0
+          )}
+        </span>
       </div>
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
 async function loadProfile() {
   const student = requireStudent();
   if (!student) return;
 
-  const nameInput = document.getElementById("profileNameInput");
-  const code = document.getElementById("profileCode");
-  const activation = document.getElementById("profileActivationCode");
-  const status = document.getElementById("profileStatus");
+  const nameInput =
+    document.getElementById(
+      "profileNameInput"
+    );
 
-  if (nameInput) nameInput.value = student.name || "";
-  if (code) code.textContent = student.student_code || "";
-  if (activation) activation.textContent = student.activation_code || "";
+  const code =
+    document.getElementById(
+      "profileCode"
+    );
+
+  const activation =
+    document.getElementById(
+      "profileActivationCode"
+    );
+
+  const status =
+    document.getElementById(
+      "profileStatus"
+    );
+
+  if (nameInput) {
+    nameInput.value =
+      student.name || "";
+  }
+
+  if (code) {
+    code.textContent =
+      student.student_code || "";
+  }
+
+  if (activation) {
+    activation.textContent =
+      student.activation_code || "";
+  }
+
   if (status) {
     status.innerHTML =
       student.status === "active"
@@ -966,19 +1216,22 @@ async function saveProfile() {
   if (!student) return;
 
   const name =
-    document.getElementById("profileNameInput")?.value.trim() || "";
+    document.getElementById(
+      "profileNameInput"
+    )?.value.trim() || "";
 
   if (name.length < 2) {
     alert("Maqaa sirrii galchi.");
     return;
   }
 
-  const { data, error } = await db
-    .from("students")
-    .update({ name })
-    .eq("id", student.id)
-    .select()
-    .single();
+  const { data, error } =
+    await db
+      .from("students")
+      .update({ name })
+      .eq("id", student.id)
+      .select()
+      .single();
 
   if (error) {
     alert(getErrorMessage(error));
@@ -986,25 +1239,32 @@ async function saveProfile() {
   }
 
   currentStudent = data;
+
   await loadProfile();
   await loadStudentHome();
+
   alert("Maqaan kee olkaa'ameera.");
 }
 
 async function studentLogout() {
-  localStorage.removeItem("ao_student_id");
+  try {
+    await db.auth.signOut();
+  } catch (error) {
+    console.error(error);
+  }
+
+  localStorage.removeItem(
+    "ao_student_id"
+  );
+
   currentStudent = null;
+
   stopExamTimer();
+
   currentExam = null;
   currentQuestions = [];
   currentAnswers = {};
   currentAttempt = null;
-
-  try {
-    await getDb().auth.signOut();
-  } catch (error) {
-    console.error("STUDENT GOOGLE SIGNOUT ERROR:", error);
-  }
 
   showPublicLoginPage();
 }
@@ -1015,75 +1275,124 @@ async function studentLogout() {
 
 async function adminLogin() {
   const username =
-    document.getElementById("adminUsername")?.value.trim() || "";
-  const password = document.getElementById("adminPassword")?.value || "";
+    document.getElementById(
+      "adminUsername"
+    )?.value.trim() || "";
+
+  const password =
+    document.getElementById(
+      "adminPassword"
+    )?.value || "";
 
   if (!username || !password) {
-    showAdminMessage("Username fi Password galchi.", "error");
+    showAdminMessage(
+      "Username fi Password galchi.",
+      "error"
+    );
     return;
   }
 
   try {
-    const { data, error } = await db
-      .from("admins")
-      .select("*")
-      .eq("username", username)
-      .eq("password", password)
-      .maybeSingle();
+    const { data, error } =
+      await db
+        .from("admins")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .maybeSingle();
 
     if (error) throw error;
 
     if (!data) {
-      showAdminMessage("Username ykn Password sirrii miti.", "error");
+      showAdminMessage(
+        "Username ykn Password sirrii miti.",
+        "error"
+      );
       return;
     }
 
     currentAdmin = data;
-    localStorage.setItem("ao_admin_id", String(data.id));
 
-    showPage("adminDashboardPage");
+    localStorage.setItem(
+      "ao_admin_id",
+      String(data.id)
+    );
+
+    showPage("adminPage");
+
     await initializeAdmin();
   } catch (error) {
-    console.error("ADMIN LOGIN ERROR:", error);
-    showAdminMessage(getErrorMessage(error), "error");
+    console.error(
+      "ADMIN LOGIN ERROR:",
+      error
+    );
+
+    showAdminMessage(
+      getErrorMessage(error),
+      "error"
+    );
   }
 }
 
 async function adminLogout() {
-  localStorage.removeItem("ao_admin_id");
-  localStorage.removeItem("ao_admin_google_email");
-  currentAdmin = null;
-
   try {
-    await getDb().auth.signOut();
+    await db.auth.signOut();
   } catch (error) {
-    console.error("ADMIN GOOGLE SIGNOUT ERROR:", error);
+    console.error(error);
   }
+
+  localStorage.removeItem(
+    "ao_admin_id"
+  );
+
+  localStorage.removeItem(
+    "ao_admin_google_id"
+  );
+
+  localStorage.removeItem(
+    "ao_admin_google_email"
+  );
+
+  currentAdmin = null;
 
   showPublicLoginPage();
 }
 
 async function restoreAdmin() {
-  const id = localStorage.getItem("ao_admin_id");
+  const id =
+    localStorage.getItem(
+      "ao_admin_id"
+    );
+
   if (!id) return null;
 
   try {
-    const { data, error } = await db
-      .from("admins")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+    const { data, error } =
+      await db
+        .from("admins")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
 
     if (error) throw error;
+
     if (!data) {
-      localStorage.removeItem("ao_admin_id");
+      localStorage.removeItem(
+        "ao_admin_id"
+      );
+
       return null;
     }
 
     currentAdmin = data;
+
     return data;
   } catch (error) {
-    console.error("RESTORE ADMIN ERROR:", error);
+    console.error(
+      "RESTORE ADMIN ERROR:",
+      error
+    );
+
     return null;
   }
 }
@@ -1093,12 +1402,17 @@ function requireAdmin() {
     showPage("adminLoginPage");
     return null;
   }
+
   return currentAdmin;
 }
 
 async function initializeAdmin() {
   if (!requireAdmin()) return;
-  await openAdminPanel("students");
+
+  await openAdminPanel(
+    "students"
+  );
+
   await refreshAllAdminLists();
 }
 
@@ -1112,24 +1426,50 @@ async function openAdminPanel(panel) {
     exams: "adminExamsPanel"
   };
 
-  Object.values(panels).forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.classList.remove("active");
-      el.style.display = "none";
-    }
-  });
+  Object.values(panels).forEach(
+    (id) => {
+      const el =
+        document.getElementById(id);
 
-  const selected = document.getElementById(panels[panel]);
+      if (el) {
+        el.classList.remove(
+          "active"
+        );
+
+        el.style.display = "none";
+      }
+    }
+  );
+
+  const selected =
+    document.getElementById(
+      panels[panel]
+    );
+
   if (selected) {
-    selected.classList.add("active");
-    selected.style.display = "block";
+    selected.classList.add(
+      "active"
+    );
+
+    selected.style.display =
+      "block";
   }
 
-  if (panel === "students") await loadAdminStudents();
-  if (panel === "results") await loadAdminResults();
-  if (panel === "lessons") await loadAdminLessons();
-  if (panel === "exams") await loadAdminExams();
+  if (panel === "students") {
+    await loadAdminStudents();
+  }
+
+  if (panel === "results") {
+    await loadAdminResults();
+  }
+
+  if (panel === "lessons") {
+    await loadAdminLessons();
+  }
+
+  if (panel === "exams") {
+    await loadAdminExams();
+  }
 }
 
 /* =========================================================
@@ -1139,54 +1479,128 @@ async function openAdminPanel(panel) {
 async function loadAdminStudents() {
   if (!requireAdmin()) return;
 
-  const container = document.getElementById("adminStudentsList");
+  const container =
+    document.getElementById(
+      "adminStudentsList"
+    );
+
   if (!container) return;
 
-  const { data, error } = await db
-    .from("students")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const { data, error } =
+    await db
+      .from("students")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
   if (error) {
-    container.innerHTML = `<div class="empty-state">❌ Barattoota fe'uu hin dandeenye.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">❌ Barattoota fe'uu hin dandeenye.</div>`;
+
     console.error(error);
     return;
   }
 
   if (!data?.length) {
-    container.innerHTML = `<div class="empty-state">👨‍🎓 Barataan hin galmoofne.</div>`;
+    container.innerHTML =
+      `<div class="empty-state">👨‍🎓 Barataan hin galmoofne.</div>`;
+
     return;
   }
 
-  container.innerHTML = data.map((student) => `
+  container.innerHTML = data
+    .map(
+      (student) => `
     <div class="admin-list-item">
       <div class="item-main">
-        <h3>${escapeHtml(student.name)}</h3>
+
+        <h3>
+          ${escapeHtml(
+            student.name
+          )}
+        </h3>
+
         <p>
-          ID: <strong>${escapeHtml(student.student_code)}</strong><br>
-          Code: <strong>${escapeHtml(student.activation_code)}</strong><br>
-          Galmaa'e: ${formatDateTime(student.created_at)}
+          ID:
+          <strong>
+            ${escapeHtml(
+              student.student_code ||
+                ""
+            )}
+          </strong>
+          <br>
+
+          Code:
+          <strong>
+            ${escapeHtml(
+              student.activation_code ||
+                ""
+            )}
+          </strong>
+          <br>
+
+          Galmaa'e:
+          ${formatDateTime(
+            student.created_at
+          )}
         </p>
-        <span class="status ${student.status === "active" ? "active" : "blocked"}">
-          ● ${student.status === "active" ? "Active" : student.status === "pending" ? "Pending" : "Cufame"}
+
+        <span class="status ${
+          student.status === "active"
+            ? "active"
+            : "blocked"
+        }">
+          ● ${
+            student.status === "active"
+              ? "Active"
+              : student.status ===
+                "pending"
+              ? "Pending"
+              : "Cufame"
+          }
         </span>
+
       </div>
+
       <div class="admin-actions">
-        <button type="button" class="small-btn" onclick="toggleStudentStatus('${student.id}')">
-          ${student.status === "active" ? "🔒 Cufi" : "🔓 Bani"}
+
+        <button
+          type="button"
+          class="small-btn"
+          onclick="toggleStudentStatus('${student.id}')"
+        >
+          ${
+            student.status === "active"
+              ? "🔒 Cufi"
+              : "🔓 Bani"
+          }
         </button>
-        <button type="button" class="danger-small-btn" onclick="deleteStudent('${student.id}')">
+
+        <button
+          type="button"
+          class="danger-small-btn"
+          onclick="deleteStudent('${student.id}')"
+        >
           🗑️ Haqi
         </button>
+
       </div>
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
-async function toggleStudentStatus(studentId) {
+async function toggleStudentStatus(
+  studentId
+) {
   if (!requireAdmin()) return;
 
-  const { data: student, error: findError } = await db
+  const {
+    data: student,
+    error: findError
+  } = await db
     .from("students")
     .select("id,status")
     .eq("id", studentId)
@@ -1195,36 +1609,67 @@ async function toggleStudentStatus(studentId) {
   if (findError || !student) return;
 
   const newStatus =
-    student.status === "active" ? "blocked" : "active";
+    student.status === "active"
+      ? "blocked"
+      : "active";
 
-  const { error } = await db
-    .from("students")
-    .update({ status: newStatus })
-    .eq("id", studentId);
+  const { error } =
+    await db
+      .from("students")
+      .update({
+        status: newStatus
+      })
+      .eq("id", studentId);
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
   await loadAdminStudents();
 }
 
-async function deleteStudent(studentId) {
+async function deleteStudent(
+  studentId
+) {
   if (!requireAdmin()) return;
 
-  if (!confirm("Barataa kana haquuf mirkaneessi.")) return;
+  if (
+    !confirm(
+      "Barataa kana haquuf mirkaneessi."
+    )
+  ) {
+    return;
+  }
 
-  await db.from("results").delete().eq("student_id", studentId);
-  await db.from("exam_attempts").delete().eq("student_id", studentId);
-
-  const { error } = await db
-    .from("students")
+  await db
+    .from("results")
     .delete()
-    .eq("id", studentId);
+    .eq(
+      "student_id",
+      studentId
+    );
+
+  await db
+    .from("exam_attempts")
+    .delete()
+    .eq(
+      "student_id",
+      studentId
+    );
+
+  const { error } =
+    await db
+      .from("students")
+      .delete()
+      .eq("id", studentId);
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
@@ -1239,33 +1684,50 @@ async function deleteStudent(studentId) {
 async function loadAdminResults() {
   if (!requireAdmin()) return;
 
-  const table = document.getElementById("adminResultsTable");
+  const table =
+    document.getElementById(
+      "adminResultsTable"
+    );
+
   if (!table) return;
 
-  const thead = table.querySelector("thead");
-  const tbody = table.querySelector("tbody");
+  const thead =
+    table.querySelector("thead");
 
-  const { data, error } = await db
-    .from("results")
-    .select("*, students(name,student_code), exams(title)")
-    .order("submitted_at", { ascending: false });
+  const tbody =
+    table.querySelector("tbody");
+
+  const { data, error } =
+    await db
+      .from("results")
+      .select(
+        "*, students(name,student_code), exams(title)"
+      )
+      .order("submitted_at", {
+        ascending: false
+      });
 
   if (error) {
     console.error(error);
+
     if (tbody) {
       tbody.innerHTML =
-        `<tr><td colspan="5">❌ Qabxii fe'uu hin dandeenye.</td></tr>`;
+        `<tr><td colspan="8">❌ Qabxii fe'uu hin dandeenye.</td></tr>`;
     }
+
     return;
   }
 
   if (thead) {
     thead.innerHTML = `
       <tr>
+        <th>Rank</th>
         <th>Barataa</th>
         <th>Qormaata</th>
         <th>Qabxii</th>
         <th>%</th>
+        <th>Average</th>
+        <th>Gaaffii</th>
         <th>Guyyaa</th>
       </tr>
     `;
@@ -1274,22 +1736,413 @@ async function loadAdminResults() {
   if (!data?.length) {
     if (tbody) {
       tbody.innerHTML =
-        `<tr><td colspan="5" class="empty-cell">Hanga ammaatti bu'aan qormaataa hin jiru.</td></tr>`;
+        `<tr><td colspan="8" class="empty-cell">Hanga ammaatti bu'aan qormaataa hin jiru.</td></tr>`;
     }
+
     return;
   }
 
+  const studentTotals = {};
+
+  data.forEach(
+    (result) => {
+      const id =
+        String(result.student_id);
+
+      if (!studentTotals[id]) {
+        studentTotals[id] = {
+          sum: 0,
+          count: 0
+        };
+      }
+
+      studentTotals[id].sum +=
+        Number(
+          result.percentage || 0
+        );
+
+      studentTotals[id].count += 1;
+    }
+  );
+
+  const ranked =
+    Object.entries(studentTotals)
+      .map(
+        ([studentId, value]) => ({
+          studentId,
+          average:
+            value.count
+              ? value.sum /
+                value.count
+              : 0
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.average - a.average
+      );
+
+  const rankMap = {};
+
+  ranked.forEach(
+    (item, index) => {
+      rankMap[item.studentId] =
+        index + 1;
+    }
+  );
+
   if (tbody) {
-    tbody.innerHTML = data.map((result) => `
-      <tr>
-        <td>${escapeHtml(result.students?.name || "Barataa")}</td>
-        <td>${escapeHtml(result.exams?.title || result.exam_title || "Qormaata")}</td>
-        <td>${Number(result.correct || 0)}/${Number(result.total || 0)}</td>
-        <td><strong>${Number(result.percentage || 0)}%</strong></td>
-        <td>${formatDateTime(result.submitted_at)}</td>
-      </tr>
-    `).join("");
+    tbody.innerHTML =
+      data
+        .map((result) => {
+          const studentId =
+            String(
+              result.student_id
+            );
+
+          const average =
+            studentTotals[
+              studentId
+            ]?.count
+              ? Math.round(
+                  studentTotals[
+                    studentId
+                  ].sum /
+                    studentTotals[
+                      studentId
+                    ].count
+                )
+              : 0;
+
+          const answers =
+            result.answers &&
+            typeof result.answers ===
+              "object"
+              ? result.answers
+              : {};
+
+          const answeredCount =
+            Object.keys(
+              answers
+            ).filter(
+              (key) =>
+                answers[key]
+            ).length;
+
+          const total =
+            Number(
+              result.total || 0
+            );
+
+          const missed =
+            Math.max(
+              0,
+              total -
+                answeredCount
+            );
+
+          return `
+            <tr>
+
+              <td>
+                <strong>
+                  #${
+                    rankMap[
+                      studentId
+                    ] || "-"
+                  }
+                </strong>
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  result.students
+                    ?.name ||
+                    "Barataa"
+                )}
+                <br>
+                <small>
+                  ${escapeHtml(
+                    result.students
+                      ?.student_code ||
+                      ""
+                  )}
+                </small>
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  result.exams
+                    ?.title ||
+                    result.exam_title ||
+                    "Qormaata"
+                )}
+              </td>
+
+              <td>
+                ${Number(
+                  result.correct ||
+                    0
+                )}/${total}
+              </td>
+
+              <td>
+                <strong>
+                  ${Number(
+                    result.percentage ||
+                      0
+                  )}%
+                </strong>
+              </td>
+
+              <td>
+                <strong>
+                  ${average}%
+                </strong>
+              </td>
+
+              <td>
+                ${answeredCount}/${total}
+
+                ${
+                  missed > 0
+                    ? `<br><small style="color:#b42318">${missed} hafee</small>`
+                    : ""
+                }
+
+                <br>
+
+                <button
+                  type="button"
+                  class="small-btn"
+                  onclick="showResultDetails(${result.id})"
+                >
+                  👁️ Ilaali
+                </button>
+              </td>
+
+              <td>
+                ${formatDateTime(
+                  result.submitted_at
+                )}
+              </td>
+
+            </tr>
+
+            <tr
+              id="resultDetailsRow-${result.id}"
+              style="display:none"
+            >
+              <td
+                colspan="8"
+                id="resultDetailsCell-${result.id}"
+              ></td>
+            </tr>
+          `;
+        })
+        .join("");
   }
+}
+
+async function showResultDetails(
+  resultId
+) {
+  if (!requireAdmin()) return;
+
+  const row =
+    document.getElementById(
+      `resultDetailsRow-${resultId}`
+    );
+
+  const cell =
+    document.getElementById(
+      `resultDetailsCell-${resultId}`
+    );
+
+  if (!row || !cell) return;
+
+  if (row.style.display !== "none") {
+    row.style.display = "none";
+    return;
+  }
+
+  cell.innerHTML =
+    "⏳ Gaaffilee qormaataa fe'aa jira...";
+
+  row.style.display = "table-row";
+
+  const {
+    data: result,
+    error: resultError
+  } = await db
+    .from("results")
+    .select(
+      "*, students(name,student_code), exams(title)"
+    )
+    .eq("id", resultId)
+    .maybeSingle();
+
+  if (resultError || !result) {
+    cell.innerHTML =
+      `<div class="empty-state">❌ Bu'aa kana bal'inaan ilaaluun hin danda'amne.</div>`;
+    return;
+  }
+
+  const {
+    data: questions,
+    error: questionError
+  } = await db
+    .from("questions")
+    .select("*")
+    .eq(
+      "exam_id",
+      result.exam_id
+    )
+    .order("id", {
+      ascending: true
+    });
+
+  if (questionError) {
+    cell.innerHTML =
+      `<div class="empty-state">❌ Gaaffilee fe'uu hin dandeenye.</div>`;
+    return;
+  }
+
+  const answers =
+    result.answers &&
+    typeof result.answers ===
+      "object"
+      ? result.answers
+      : {};
+
+  cell.innerHTML = `
+    <div
+      style="padding:12px;text-align:left"
+    >
+
+      <h4>
+        ${escapeHtml(
+          result.students
+            ?.name ||
+            "Barataa"
+        )}
+        —
+        ${escapeHtml(
+          result.exams
+            ?.title ||
+            result.exam_title ||
+            "Qormaata"
+        )}
+      </h4>
+
+      <p>
+        <strong>Qabxii:</strong>
+        ${Number(
+          result.correct || 0
+        )}/${Number(
+          result.total || 0
+        )}
+        (${Number(
+          result.percentage || 0
+        )}%)
+      </p>
+
+      <div>
+
+        ${(questions || [])
+          .map(
+            (row, index) => {
+              const q =
+                normalizeQuestion(
+                  row
+                );
+
+              const answer =
+                String(
+                  answers[
+                    q.id
+                  ] || ""
+                ).toUpperCase();
+
+              const isCorrect =
+                answer &&
+                answer ===
+                  q.correctAnswer;
+
+              const state =
+                !answer
+                  ? "⚪ Hin deebifne"
+                  : isCorrect
+                  ? "✅ Sirrii"
+                  : "❌ Dogoggora";
+
+              const chosenText =
+                answer
+                  ? row[
+                      `option_${answer.toLowerCase()}`
+                    ]
+                  : "";
+
+              const correctText =
+                row[
+                  `option_${q.correctAnswer.toLowerCase()}`
+                ] || "";
+
+              return `
+                <div
+                  style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,.08)"
+                >
+
+                  <strong>
+                    ${index + 1}.
+                    ${escapeHtml(
+                      q.text
+                    )}
+                  </strong>
+
+                  <br>
+
+                  <span>
+                    ${state}
+                  </span>
+
+                  <br>
+
+                  <small>
+                    Deebii barataa:
+                    ${
+                      answer
+                        ? `${escapeHtml(
+                            answer
+                          )}. ${escapeHtml(
+                            chosenText ||
+                              ""
+                          )}`
+                        : "Hin deebifne"
+                    }
+                  </small>
+
+                  <br>
+
+                  <small>
+                    Deebii sirrii:
+                    ${escapeHtml(
+                      q.correctAnswer
+                    )}.
+                    ${escapeHtml(
+                      correctText
+                    )}
+                  </small>
+
+                </div>
+              `;
+            }
+          )
+          .join("")}
+
+      </div>
+    </div>
+  `;
 }
 
 /* =========================================================
@@ -1299,13 +2152,20 @@ async function loadAdminResults() {
 async function loadAdminLessons() {
   if (!requireAdmin()) return;
 
-  const container = document.getElementById("adminLessonsList");
+  const container =
+    document.getElementById(
+      "adminLessonsList"
+    );
+
   if (!container) return;
 
-  const { data, error } = await db
-    .from("lessons")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const { data, error } =
+    await db
+      .from("lessons")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
   if (error) {
     container.innerHTML =
@@ -1319,59 +2179,116 @@ async function loadAdminLessons() {
     return;
   }
 
-  container.innerHTML = data.map((lesson) => `
+  container.innerHTML = data
+    .map(
+      (lesson) => `
     <div class="admin-list-item">
+
       <div class="item-main">
-        <h3>${escapeHtml(lesson.title)}</h3>
-        <p>${escapeHtml(truncate(lesson.content, 180))}</p>
+
+        <h3>
+          ${escapeHtml(
+            lesson.title
+          )}
+        </h3>
+
+        <p>
+          ${escapeHtml(
+            truncate(
+              lesson.content,
+              180
+            )
+          )}
+        </p>
+
       </div>
+
       <div class="admin-actions">
-        <button type="button" class="small-btn" onclick="editLesson('${lesson.id}')">
+
+        <button
+          type="button"
+          class="small-btn"
+          onclick="editLesson('${lesson.id}')"
+        >
           ✏️ Sirreessi
         </button>
-        <button type="button" class="danger-small-btn" onclick="deleteLesson('${lesson.id}')">
+
+        <button
+          type="button"
+          class="danger-small-btn"
+          onclick="deleteLesson('${lesson.id}')"
+        >
           🗑️ Haqi
         </button>
+
       </div>
+
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
 async function createLesson() {
   if (!requireAdmin()) return;
 
   const title =
-    document.getElementById("lessonTitleInput")?.value.trim() || "";
+    document.getElementById(
+      "lessonTitleInput"
+    )?.value.trim() || "";
+
   const content =
-    document.getElementById("lessonContentInput")?.value.trim() || "";
+    document.getElementById(
+      "lessonContentInput"
+    )?.value.trim() || "";
 
   if (!title || !content) {
-    alert("Mata-duree fi qabiyyee barnootaa lamaan galchi.");
+    alert(
+      "Mata-duree fi qabiyyee barnootaa lamaan galchi."
+    );
     return;
   }
 
-  const { error } = await db
-    .from("lessons")
-    .insert({ title, content });
+  const { error } =
+    await db
+      .from("lessons")
+      .insert({
+        title,
+        content
+      });
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
-  document.getElementById("lessonTitleInput").value = "";
-  document.getElementById("lessonContentInput").value = "";
+  document.getElementById(
+    "lessonTitleInput"
+  ).value = "";
+
+  document.getElementById(
+    "lessonContentInput"
+  ).value = "";
 
   await loadAdminLessons();
   await loadStudentLessons();
 
-  alert("Barnoonni dabalameera.");
+  alert(
+    "Barnoonni dabalameera."
+  );
 }
 
-async function editLesson(lessonId) {
+async function editLesson(
+  lessonId
+) {
   if (!requireAdmin()) return;
 
-  const { data: lesson, error } = await db
+  const {
+    data: lesson,
+    error
+  } = await db
     .from("lessons")
     .select("*")
     .eq("id", lessonId)
@@ -1379,22 +2296,43 @@ async function editLesson(lessonId) {
 
   if (error || !lesson) return;
 
-  const title = prompt("Mata-duree haaraa:", lesson.title);
+  const title =
+    prompt(
+      "Mata-duree haaraa:",
+      lesson.title
+    );
+
   if (title === null) return;
 
-  const content = prompt("Qabiyyee haaraa:", lesson.content);
+  const content =
+    prompt(
+      "Qabiyyee haaraa:",
+      lesson.content
+    );
+
   if (content === null) return;
 
-  const { error: updateError } = await db
+  const {
+    error: updateError
+  } = await db
     .from("lessons")
     .update({
-      title: title.trim() || lesson.title,
-      content: content.trim() || lesson.content
+      title:
+        title.trim() ||
+        lesson.title,
+
+      content:
+        content.trim() ||
+        lesson.content
     })
     .eq("id", lessonId);
 
   if (updateError) {
-    alert(getErrorMessage(updateError));
+    alert(
+      getErrorMessage(
+        updateError
+      )
+    );
     return;
   }
 
@@ -1402,18 +2340,29 @@ async function editLesson(lessonId) {
   await loadStudentLessons();
 }
 
-async function deleteLesson(lessonId) {
+async function deleteLesson(
+  lessonId
+) {
   if (!requireAdmin()) return;
 
-  if (!confirm("Barnoota kana haquuf mirkaneessi.")) return;
+  if (
+    !confirm(
+      "Barnoota kana haquuf mirkaneessi."
+    )
+  ) {
+    return;
+  }
 
-  const { error } = await db
-    .from("lessons")
-    .delete()
-    .eq("id", lessonId);
+  const { error } =
+    await db
+      .from("lessons")
+      .delete()
+      .eq("id", lessonId);
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
@@ -1428,13 +2377,20 @@ async function deleteLesson(lessonId) {
 async function loadAdminExams() {
   if (!requireAdmin()) return;
 
-  const container = document.getElementById("adminExamsList");
+  const container =
+    document.getElementById(
+      "adminExamsList"
+    );
+
   if (!container) return;
 
-  const { data, error } = await db
-    .from("exams")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const { data, error } =
+    await db
+      .from("exams")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
 
   if (error) {
     container.innerHTML =
@@ -1445,87 +2401,194 @@ async function loadAdminExams() {
   if (!data?.length) {
     container.innerHTML =
       `<div class="empty-state">📝 Qormaanni hin jiru.</div>`;
+
     await populateExamSelects([]);
+
     return;
   }
 
-  const exams = data.map(normalizeExam);
+  const exams =
+    data.map(normalizeExam);
+
   const counts = {};
 
-  const { data: questionRows } = await db
+  const {
+    data: questionRows
+  } = await db
     .from("questions")
-    .select("id,exam_id");
+    .select(
+      "id,exam_id"
+    );
 
-  (questionRows || []).forEach((q) => {
-    counts[q.exam_id] = (counts[q.exam_id] || 0) + 1;
-  });
+  (questionRows || [])
+    .forEach((q) => {
+      counts[q.exam_id] =
+        (counts[q.exam_id] ||
+          0) + 1;
+    });
 
-  container.innerHTML = exams.map((exam) => `
+  container.innerHTML =
+    exams
+      .map(
+        (exam) => `
     <div class="admin-list-item exam-admin-item">
+
       <div class="item-main">
-        <h3>${escapeHtml(exam.title)}${exam.isFinal ? " 🏆" : ""}</h3>
-        <p>${escapeHtml(exam.description || "")}</p>
+
+        <h3>
+          ${escapeHtml(
+            exam.title
+          )}
+          ${
+            exam.isFinal
+              ? " 🏆"
+              : ""
+          }
+        </h3>
+
+        <p>
+          ${escapeHtml(
+            exam.description ||
+              ""
+          )}
+        </p>
+
         <div class="exam-meta">
-          <span>❓ Gaaffii: ${counts[exam.id] || 0}</span>
-          <span>🔢 Attempt: ${exam.attemptLimit}</span>
-          <span>⏱️ ${exam.duration} min</span>
+
+          <span>
+            ❓ Gaaffii:
+            ${counts[exam.id] || 0}
+          </span>
+
+          <span>
+            🔢 Attempt:
+            ${exam.attemptLimit}
+          </span>
+
+          <span>
+            ⏱️
+            ${exam.duration}
+            min
+          </span>
+
         </div>
-        <span class="status ${exam.status === "active" ? "active" : "blocked"}">
-          ● ${exam.status === "active" ? "Active" : "Disabled"}
+
+        <span class="status ${
+          exam.status === "active"
+            ? "active"
+            : "blocked"
+        }">
+
+          ● ${
+            exam.status === "active"
+              ? "Active"
+              : "Disabled"
+          }
+
         </span>
+
       </div>
+
       <div class="admin-actions">
-        <button type="button" class="small-btn" onclick="toggleExamStatus(${exam.id})">
-          ${exam.status === "active" ? "⏸️ Cufi" : "▶️ Bani"}
+
+        <button
+          type="button"
+          class="small-btn"
+          onclick="toggleExamStatus(${exam.id})"
+        >
+          ${
+            exam.status ===
+            "active"
+              ? "⏸️ Cufi"
+              : "▶️ Bani"
+          }
         </button>
-        <button type="button" class="small-btn" onclick="editExam(${exam.id})">
+
+        <button
+          type="button"
+          class="small-btn"
+          onclick="editExam(${exam.id})"
+        >
           ✏️ Sirreessi
         </button>
-        <button type="button" class="danger-small-btn" onclick="deleteExam(${exam.id})">
+
+        <button
+          type="button"
+          class="danger-small-btn"
+          onclick="deleteExam(${exam.id})"
+        >
           🗑️ Haqi
         </button>
-      </div>
-    </div>
-  `).join("");
 
-  await populateExamSelects(exams);
+      </div>
+
+    </div>
+  `
+      )
+      .join("");
+
+  await populateExamSelects(
+    exams
+  );
+
   await loadAdminQuestions();
 }
 
-async function populateExamSelects(exams = null) {
+async function populateExamSelects(
+  exams = null
+) {
   let list = exams;
 
   if (!list) {
-    const { data } = await db
-      .from("exams")
-      .select("id,title")
-      .order("created_at", { ascending: false });
+    const { data } =
+      await db
+        .from("exams")
+        .select("id,title")
+        .order("created_at", {
+          ascending: false
+        });
 
     list = data || [];
   }
 
-  ["questionExamSelect", "aiQuestionExamSelect"].forEach((id) => {
-    const select = document.getElementById(id);
+  [
+    "questionExamSelect",
+    "aiQuestionExamSelect"
+  ].forEach((id) => {
+    const select =
+      document.getElementById(id);
+
     if (!select) return;
 
-    const current = select.value;
+    const current =
+      select.value;
 
     select.innerHTML = `
-      <option value="">Qormaata filadhu</option>
+      <option value="">
+        Qormaata filadhu
+      </option>
+
       ${list
         .map(
           (exam) =>
-            `<option value="${exam.id}">${escapeHtml(exam.title)}</option>`
+            `<option value="${exam.id}">
+              ${escapeHtml(
+                exam.title
+              )}
+            </option>`
         )
         .join("")}
     `;
 
     if (
       list.some(
-        (exam) => String(exam.id) === String(current)
+        (exam) =>
+          String(exam.id) ===
+          String(current)
       )
     ) {
-      select.value = current;
+      select.value =
+        current;
     }
   });
 }
@@ -1534,57 +2597,108 @@ async function createExam() {
   if (!requireAdmin()) return;
 
   const title =
-    document.getElementById("examTitleInput")?.value.trim() || "";
+    document.getElementById(
+      "examTitleInput"
+    )?.value.trim() || "";
+
   const description =
-    document.getElementById("examDescriptionInput")?.value.trim() || "";
-  const questionLimit = Number(
-    document.getElementById("examQuestionLimitInput")?.value || 0
-  );
-  const attemptLimit = Number(
-    document.getElementById("examAttemptLimitInput")?.value || 1
-  );
+    document.getElementById(
+      "examDescriptionInput"
+    )?.value.trim() || "";
+
+  const questionLimit =
+    Number(
+      document.getElementById(
+        "examQuestionLimitInput"
+      )?.value || 0
+    );
+
+  const attemptLimit =
+    Number(
+      document.getElementById(
+        "examAttemptLimitInput"
+      )?.value || 1
+    );
+
   const isFinal =
-    document.getElementById("examFinalInput")?.value === "true";
-  const duration = Number(
-    document.getElementById("examDurationInput")?.value || 30
-  );
+    document.getElementById(
+      "examFinalInput"
+    )?.value === "true";
+
+  const duration =
+    Number(
+      document.getElementById(
+        "examDurationInput"
+      )?.value || 30
+    );
+
   const startDate =
-    document.getElementById("examStartDateInput")?.value || null;
+    document.getElementById(
+      "examStartDateInput"
+    )?.value || null;
+
   const endDate =
-    document.getElementById("examEndDateInput")?.value || null;
+    document.getElementById(
+      "examEndDateInput"
+    )?.value || null;
+
   const startTime =
-    document.getElementById("examStartTimeInput")?.value || null;
+    document.getElementById(
+      "examStartTimeInput"
+    )?.value || null;
+
   const endTime =
-    document.getElementById("examEndTimeInput")?.value || null;
+    document.getElementById(
+      "examEndTimeInput"
+    )?.value || null;
 
   if (!title) {
-    alert("Mata-duree qormaataa galchi.");
+    alert(
+      "Mata-duree qormaataa galchi."
+    );
     return;
   }
 
-  if (startDate && endDate && startDate > endDate) {
-    alert("Guyyaan jalqabaa guyyaa xumuraa caaluu hin qabu.");
+  if (
+    startDate &&
+    endDate &&
+    startDate > endDate
+  ) {
+    alert(
+      "Guyyaan jalqabaa guyyaa xumuraa caaluu hin qabu."
+    );
     return;
   }
 
-  const { error } = await db
-    .from("exams")
-    .insert({
-      title,
-      description,
-      question_limit: questionLimit,
-      attempt_limit: attemptLimit,
-      is_final: isFinal,
-      duration_minutes: duration,
-      start_date: startDate,
-      end_date: endDate,
-      start_time: startTime,
-      end_time: endTime,
-      status: "active"
-    });
+  const { error } =
+    await db
+      .from("exams")
+      .insert({
+        title,
+        description,
+        question_limit:
+          questionLimit,
+        attempt_limit:
+          attemptLimit,
+        is_final:
+          isFinal,
+        duration_minutes:
+          duration,
+        start_date:
+          startDate,
+        end_date:
+          endDate,
+        start_time:
+          startTime,
+        end_time:
+          endTime,
+        status: "active"
+      });
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
@@ -1596,46 +2710,67 @@ async function createExam() {
     "examStartTimeInput",
     "examEndTimeInput"
   ].forEach((id) => {
-    const el = document.getElementById(id);
+    const el =
+      document.getElementById(id);
+
     if (el) el.value = "";
   });
 
   await loadAdminExams();
 
-  alert("Qormaanni uumameera. Amma gaaffii itti dabali.");
+  alert(
+    "Qormaanni uumameera. Amma gaaffii itti dabali."
+  );
 }
 
-async function toggleExamStatus(examId) {
+async function toggleExamStatus(
+  examId
+) {
   if (!requireAdmin()) return;
 
-  const { data: exam, error: findError } = await db
+  const {
+    data: exam,
+    error: findError
+  } = await db
     .from("exams")
     .select("id,status")
     .eq("id", examId)
     .maybeSingle();
 
-  if (findError || !exam) return;
+  if (findError || !exam)
+    return;
 
-  const { error } = await db
-    .from("exams")
-    .update({
-      status:
-        exam.status === "active" ? "disabled" : "active"
-    })
-    .eq("id", examId);
+  const { error } =
+    await db
+      .from("exams")
+      .update({
+        status:
+          exam.status ===
+          "active"
+            ? "disabled"
+            : "active"
+      })
+      .eq("id", examId);
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
   await loadAdminExams();
 }
 
-async function editExam(examId) {
+async function editExam(
+  examId
+) {
   if (!requireAdmin()) return;
 
-  const { data: exam, error } = await db
+  const {
+    data: exam,
+    error
+  } = await db
     .from("exams")
     .select("*")
     .eq("id", examId)
@@ -1643,40 +2778,62 @@ async function editExam(examId) {
 
   if (error || !exam) return;
 
-  const title = prompt("Mata-duree:", exam.title);
+  const title =
+    prompt(
+      "Mata-duree:",
+      exam.title
+    );
+
   if (title === null) return;
 
-  const description = prompt(
-    "Ibsa:",
-    exam.description || ""
-  );
+  const description =
+    prompt(
+      "Ibsa:",
+      exam.description || ""
+    );
 
-  if (description === null) return;
+  if (description === null)
+    return;
 
-  const { error: updateError } = await db
+  const {
+    error: updateError
+  } = await db
     .from("exams")
     .update({
-      title: title.trim() || exam.title,
-      description: description.trim()
+      title:
+        title.trim() ||
+        exam.title,
+
+      description:
+        description.trim()
     })
     .eq("id", examId);
 
   if (updateError) {
-    alert(getErrorMessage(updateError));
+    alert(
+      getErrorMessage(
+        updateError
+      )
+    );
     return;
   }
 
   await loadAdminExams();
 }
 
-async function deleteExam(examId) {
+async function deleteExam(
+  examId
+) {
   if (!requireAdmin()) return;
 
-  const { data: exam } = await db
-    .from("exams")
-    .select("id,title")
-    .eq("id", examId)
-    .maybeSingle();
+  const { data: exam } =
+    await db
+      .from("exams")
+      .select(
+        "id,title"
+      )
+      .eq("id", examId)
+      .maybeSingle();
 
   if (!exam) return;
 
@@ -1688,17 +2845,40 @@ async function deleteExam(examId) {
     return;
   }
 
-  await db.from("results").delete().eq("exam_id", examId);
-  await db.from("exam_attempts").delete().eq("exam_id", examId);
-  await db.from("questions").delete().eq("exam_id", examId);
-
-  const { error } = await db
-    .from("exams")
+  await db
+    .from("results")
     .delete()
-    .eq("id", examId);
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  await db
+    .from("exam_attempts")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  await db
+    .from("questions")
+    .delete()
+    .eq(
+      "exam_id",
+      examId
+    );
+
+  const { error } =
+    await db
+      .from("exams")
+      .delete()
+      .eq("id", examId);
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
@@ -1714,19 +2894,39 @@ async function createQuestion() {
   if (!requireAdmin()) return;
 
   const examId =
-    document.getElementById("questionExamSelect")?.value || "";
+    document.getElementById(
+      "questionExamSelect"
+    )?.value || "";
+
   const question =
-    document.getElementById("questionTextInput")?.value.trim() || "";
+    document.getElementById(
+      "questionTextInput"
+    )?.value.trim() || "";
+
   const optionA =
-    document.getElementById("optionAInput")?.value.trim() || "";
+    document.getElementById(
+      "optionAInput"
+    )?.value.trim() || "";
+
   const optionB =
-    document.getElementById("optionBInput")?.value.trim() || "";
+    document.getElementById(
+      "optionBInput"
+    )?.value.trim() || "";
+
   const optionC =
-    document.getElementById("optionCInput")?.value.trim() || "";
+    document.getElementById(
+      "optionCInput"
+    )?.value.trim() || "";
+
   const optionD =
-    document.getElementById("optionDInput")?.value.trim() || "";
+    document.getElementById(
+      "optionDInput"
+    )?.value.trim() || "";
+
   const correctAnswer =
-    document.getElementById("correctAnswerInput")?.value || "";
+    document.getElementById(
+      "correctAnswerInput"
+    )?.value || "";
 
   if (
     !examId ||
@@ -1743,22 +2943,28 @@ async function createQuestion() {
     return;
   }
 
-  const { error } = await db
-    .from("questions")
-    .insert({
-      exam_id: examId,
-      question,
-      option_a: optionA,
-      option_b: optionB,
-      option_c: optionC,
-      option_d: optionD,
-      correct_answer: correctAnswer,
-      source_type: "admin",
-      source_text: null
-    });
+  const { error } =
+    await db
+      .from("questions")
+      .insert({
+        exam_id: examId,
+        question,
+        option_a: optionA,
+        option_b: optionB,
+        option_c: optionC,
+        option_d: optionD,
+        correct_answer:
+          correctAnswer,
+        source_type:
+          "admin",
+        source_text:
+          null
+      });
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
@@ -1769,34 +2975,48 @@ async function createQuestion() {
     "optionCInput",
     "optionDInput"
   ].forEach((id) => {
-    const el = document.getElementById(id);
+    const el =
+      document.getElementById(id);
+
     if (el) el.value = "";
   });
 
-  document.getElementById("correctAnswerInput").value = "";
+  document.getElementById(
+    "correctAnswerInput"
+  ).value = "";
 
   await loadAdminQuestions();
   await loadAdminExams();
 
-  alert("Gaaffiin dabalameera.");
+  alert(
+    "Gaaffiin dabalameera."
+  );
 }
 
 async function loadAdminQuestions() {
   if (!requireAdmin()) return;
 
   const container =
-    document.getElementById("adminQuestionsList");
+    document.getElementById(
+      "adminQuestionsList"
+    );
 
   if (!container) return;
 
-  const { data, error } = await db
-    .from("questions")
-    .select("*, exams(title)")
-    .order("id", { ascending: false });
+  const { data, error } =
+    await db
+      .from("questions")
+      .select(
+        "*, exams(title)"
+      )
+      .order("id", {
+        ascending: false
+      });
 
   if (error) {
     container.innerHTML =
       `<div class="empty-state">❌ Gaaffilee fe'uu hin dandeenye.</div>`;
+
     console.error(error);
     return;
   }
@@ -1804,63 +3024,123 @@ async function loadAdminQuestions() {
   if (!data?.length) {
     container.innerHTML =
       `<div class="empty-state">❓ Gaaffiin hin jiru.</div>`;
+
     return;
   }
 
-  container.innerHTML = data
-    .map((row, index) => {
-      const question = normalizeQuestion(row);
+  container.innerHTML =
+    data
+      .map(
+        (row, index) => {
+          const question =
+            normalizeQuestion(
+              row
+            );
 
-      return `
-        <div class="question-admin-item">
-          <div class="question-number">${index + 1}</div>
+          return `
+            <div class="question-admin-item">
 
-          <div class="item-main">
-            <small>${escapeHtml(
-              row.exams?.title || "Qormaata"
-            )}</small>
+              <div class="question-number">
+                ${index + 1}
+              </div>
 
-            <h3>${escapeHtml(question.text)}</h3>
+              <div class="item-main">
 
-            <div class="options-preview">
-              <span>A. ${escapeHtml(question.optionA)}</span>
-              <span>B. ${escapeHtml(question.optionB)}</span>
-              <span>C. ${escapeHtml(question.optionC)}</span>
-              <span>D. ${escapeHtml(question.optionD)}</span>
+                <small>
+                  ${escapeHtml(
+                    row.exams?.title ||
+                      "Qormaata"
+                  )}
+                </small>
+
+                <h3>
+                  ${escapeHtml(
+                    question.text
+                  )}
+                </h3>
+
+                <div class="options-preview">
+
+                  <span>
+                    A.
+                    ${escapeHtml(
+                      question.optionA
+                    )}
+                  </span>
+
+                  <span>
+                    B.
+                    ${escapeHtml(
+                      question.optionB
+                    )}
+                  </span>
+
+                  <span>
+                    C.
+                    ${escapeHtml(
+                      question.optionC
+                    )}
+                  </span>
+
+                  <span>
+                    D.
+                    ${escapeHtml(
+                      question.optionD
+                    )}
+                  </span>
+
+                </div>
+
+                <p class="correct-answer">
+                  Deebii sirrii:
+                  ${escapeHtml(
+                    question.correctAnswer
+                  )}
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                class="danger-small-btn"
+                onclick="deleteQuestion(${question.id})"
+              >
+                🗑️
+              </button>
+
             </div>
-
-            <p class="correct-answer">
-              Deebii sirrii: ${escapeHtml(
-                question.correctAnswer
-              )}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            class="danger-small-btn"
-            onclick="deleteQuestion(${question.id})"
-          >
-            🗑️
-          </button>
-        </div>
-      `;
-    })
-    .join("");
+          `;
+        }
+      )
+      .join("");
 }
 
-async function deleteQuestion(questionId) {
+async function deleteQuestion(
+  questionId
+) {
   if (!requireAdmin()) return;
 
-  if (!confirm("Gaaffii kana haquuf mirkaneessi.")) return;
+  if (
+    !confirm(
+      "Gaaffii kana haquuf mirkaneessi."
+    )
+  ) {
+    return;
+  }
 
-  const { error } = await db
-    .from("questions")
-    .delete()
-    .eq("id", questionId);
+  const { error } =
+    await db
+      .from("questions")
+      .delete()
+      .eq(
+        "id",
+        questionId
+      );
 
   if (error) {
-    alert(getErrorMessage(error));
+    alert(
+      getErrorMessage(error)
+    );
     return;
   }
 
@@ -1870,13 +3150,13 @@ async function deleteQuestion(questionId) {
 
 /* =========================================================
    AI QUESTION GENERATOR
-   Supports topic, text, PDF and image.
 ========================================================= */
 
 function changeAIQuestionSource() {
   const type =
-    document.getElementById("aiQuestionSourceType")?.value ||
-    "topic";
+    document.getElementById(
+      "aiQuestionSourceType"
+    )?.value || "topic";
 
   const map = {
     topic: "aiTopicSource",
@@ -1885,59 +3165,110 @@ function changeAIQuestionSource() {
     image: "aiImageSource"
   };
 
-  Object.values(map).forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = "none";
-  });
+  Object.values(map).forEach(
+    (id) => {
+      const el =
+        document.getElementById(id);
 
-  const selected = document.getElementById(map[type]);
+      if (el) {
+        el.style.display =
+          "none";
+      }
+    }
+  );
 
-  if (selected) selected.style.display = "block";
+  const selected =
+    document.getElementById(
+      map[type]
+    );
+
+  if (selected) {
+    selected.style.display =
+      "block";
+  }
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+function fileToBase64(
+  file
+) {
+  return new Promise(
+    (resolve, reject) => {
+      const reader =
+        new FileReader();
 
-    reader.onload = () => {
-      const result = String(reader.result || "");
-      const comma = result.indexOf(",");
+      reader.onload = () => {
+        const result =
+          String(
+            reader.result || ""
+          );
 
-      resolve(
-        comma >= 0
-          ? result.slice(comma + 1)
-          : result
+        const comma =
+          result.indexOf(",");
+
+        resolve(
+          comma >= 0
+            ? result.slice(
+                comma + 1
+              )
+            : result
+        );
+      };
+
+      reader.onerror =
+        reject;
+
+      reader.readAsDataURL(
+        file
       );
-    };
-
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+    }
+  );
 }
 
 async function generateAIQuestions() {
   if (!requireAdmin()) return;
 
   const examId =
-    document.getElementById("aiQuestionExamSelect")?.value || "";
+    document.getElementById(
+      "aiQuestionExamSelect"
+    )?.value || "";
 
   const sourceType =
-    document.getElementById("aiQuestionSourceType")?.value ||
-    "topic";
+    document.getElementById(
+      "aiQuestionSourceType"
+    )?.value || "topic";
 
-  const count = Number(
-    document.getElementById("aiQuestionCount")?.value || 5
-  );
+  const count =
+    Number(
+      document.getElementById(
+        "aiQuestionCount"
+      )?.value || 5
+    );
 
   const button =
-    document.getElementById("generateAIQuestionsButton");
+    document.getElementById(
+      "generateAIQuestionsButton"
+    );
 
   if (!examId) {
-    showAIMessage("❌ Qormaata filadhu.", "error");
+    showAIMessage(
+      "❌ Qormaata filadhu.",
+      "error"
+    );
     return;
   }
 
-  if (![5, 10, 20, 30, 50, 75, 100].includes(count)) {
+  if (
+    ![
+      5,
+      10,
+      20,
+      30,
+      40,
+      50,
+      75,
+      100
+    ].includes(count)
+  ) {
     showAIMessage(
       "❌ Lakkoofsa gaaffii sirrii filadhu.",
       "error"
@@ -1947,7 +3278,8 @@ async function generateAIQuestions() {
 
   if (button) {
     button.disabled = true;
-    button.textContent = "⏳ AI qopheessaa jira...";
+    button.textContent =
+      "⏳ AI qopheessaa jira...";
   }
 
   try {
@@ -1959,11 +3291,14 @@ async function generateAIQuestions() {
 
     if (sourceType === "topic") {
       const topic =
-        document.getElementById("aiTopicInput")?.value.trim() ||
-        "";
+        document.getElementById(
+          "aiTopicInput"
+        )?.value.trim() || "";
 
       if (!topic) {
-        throw new Error("Mata-duree galchi.");
+        throw new Error(
+          "Mata-duree galchi."
+        );
       }
 
       body.topic = topic;
@@ -1971,50 +3306,86 @@ async function generateAIQuestions() {
 
     if (sourceType === "text") {
       const sourceText =
-        document.getElementById("aiTextInput")?.value.trim() ||
-        "";
+        document.getElementById(
+          "aiTextInput"
+        )?.value.trim() || "";
 
       if (!sourceText) {
-        throw new Error("Barreeffama galchi.");
+        throw new Error(
+          "Barreeffama galchi."
+        );
       }
 
-      body.source_text = sourceText;
+      body.source_text =
+        sourceText;
     }
 
     if (sourceType === "pdf") {
       const file =
-        document.getElementById("aiPdfInput")?.files?.[0];
+        document.getElementById(
+          "aiPdfInput"
+        )?.files?.[0];
 
       if (!file) {
-        throw new Error("PDF filadhu.");
+        throw new Error(
+          "PDF filadhu."
+        );
       }
 
-      if (file.size > 50 * 1024 * 1024) {
-        throw new Error("PDF'n 50 MB ol ta'uu hin qabu.");
+      if (
+        file.size >
+        50 * 1024 * 1024
+      ) {
+        throw new Error(
+          "PDF'n 50 MB ol ta'uu hin qabu."
+        );
       }
 
-      body.file_name = file.name;
+      body.file_name =
+        file.name;
+
       body.file_mime_type =
-        file.type || "application/pdf";
-      body.file_base64 = await fileToBase64(file);
+        file.type ||
+        "application/pdf";
+
+      body.file_base64 =
+        await fileToBase64(
+          file
+        );
     }
 
     if (sourceType === "image") {
       const file =
-        document.getElementById("aiImageInput")?.files?.[0];
+        document.getElementById(
+          "aiImageInput"
+        )?.files?.[0];
 
       if (!file) {
-        throw new Error("Suuraa filadhu.");
+        throw new Error(
+          "Suuraa filadhu."
+        );
       }
 
-      if (file.size > 15 * 1024 * 1024) {
-        throw new Error("Suuraan 15 MB ol ta'uu hin qabu.");
+      if (
+        file.size >
+        15 * 1024 * 1024
+      ) {
+        throw new Error(
+          "Suuraan 15 MB ol ta'uu hin qabu."
+        );
       }
 
-      body.file_name = file.name;
+      body.file_name =
+        file.name;
+
       body.file_mime_type =
-        file.type || "image/jpeg";
-      body.file_base64 = await fileToBase64(file);
+        file.type ||
+        "image/jpeg";
+
+      body.file_base64 =
+        await fileToBase64(
+          file
+        );
     }
 
     showAIMessage(
@@ -2022,19 +3393,30 @@ async function generateAIQuestions() {
       "info"
     );
 
-    const response = await fetch(AI_FUNCTION_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify(body)
-    });
+    const response =
+      await fetch(
+        AI_FUNCTION_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            apikey:
+              SUPABASE_ANON_KEY
+          },
+
+          body:
+            JSON.stringify(body)
+        }
+      );
 
     let result = null;
 
     try {
-      result = await response.json();
+      result =
+        await response.json();
     } catch (_) {
       result = null;
     }
@@ -2042,16 +3424,18 @@ async function generateAIQuestions() {
     if (!response.ok) {
       throw new Error(
         result?.error ||
-        result?.message ||
-        `AI server error: ${response.status}`
+          result?.message ||
+          `AI server error: ${response.status}`
       );
     }
 
-    const inserted = Number(
-      result?.count ||
-      result?.questions?.length ||
-      0
-    );
+    const inserted =
+      Number(
+        result?.count ||
+          result?.questions
+            ?.length ||
+          0
+      );
 
     if (!inserted) {
       throw new Error(
@@ -2066,17 +3450,25 @@ async function generateAIQuestions() {
 
     await loadAdminQuestions();
     await loadAdminExams();
+
   } catch (error) {
-    console.error("AI ERROR:", error);
+    console.error(
+      "AI ERROR:",
+      error
+    );
 
     showAIMessage(
-      `❌ ${escapeHtml(getErrorMessage(error))}`,
+      `❌ ${escapeHtml(
+        getErrorMessage(error)
+      )}`,
       "error"
     );
+
   } finally {
     if (button) {
       button.disabled = false;
-      button.textContent = "🤖 Gaaffii AI Uumi";
+      button.textContent =
+        "🤖 Gaaffii AI Uumi";
     }
   }
 }
@@ -2086,35 +3478,33 @@ async function generateAIQuestions() {
 ========================================================= */
 
 async function googleLogin() {
-  const button =
-    document.getElementById("googleLoginButton");
-
   try {
-    getDb();
-
-    if (button) {
-      button.disabled = true;
-
-      const span = button.querySelector("span");
-
-      if (span) {
-        span.textContent = "Google Login...";
-      }
-    }
-
     const { error } =
       await db.auth.signInWithOAuth({
         provider: "google",
+
         options: {
           redirectTo:
             window.location.origin +
             window.location.pathname,
+
           scopes:
-            "https://www.googleapis.com/auth/userinfo.email"
+            "email profile"
         }
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error(
+        "GOOGLE LOGIN ERROR:",
+        error
+      );
+
+      alert(
+        "Google Login irratti dogoggorri uumame: " +
+          getErrorMessage(error)
+      );
+    }
+
   } catch (error) {
     console.error(
       "GOOGLE LOGIN ERROR:",
@@ -2123,128 +3513,196 @@ async function googleLogin() {
 
     alert(
       "Google Login hin milkoofne: " +
-      getErrorMessage(error)
+        getErrorMessage(error)
     );
-
-    if (button) {
-      button.disabled = false;
-
-      const span =
-        button.querySelector("span");
-
-      if (span) {
-        span.textContent =
-          "Log in with Google";
-      }
-    }
   }
 }
 
-async function findOrCreateGoogleStudent(user) {
-  const client = getDb();
+async function findOrCreateGoogleStudent(
+  user
+) {
+  const userId = user.id;
 
-  const userId = user?.id;
-
-  const email = String(
-    user?.email || ""
-  ).trim().toLowerCase();
+  const email =
+    String(
+      user.email || ""
+    ).toLowerCase();
 
   const metadata =
-    user?.user_metadata || {};
+    user.user_metadata ||
+    {};
 
   const googleName =
     metadata.full_name ||
     metadata.name ||
+    metadata.user_name ||
     email.split("@")[0] ||
     "Barataa Google";
 
-  if (!userId) {
-    throw new Error(
-      "Google user ID hin argamne."
-    );
-  }
-
   const {
-    data: student,
-    error
-  } = await client
+    data: existing,
+    error: findError
+  } = await db
     .from("students")
     .select("*")
     .eq("id", userId)
     .maybeSingle();
 
-  if (error) throw error;
+  if (
+    findError &&
+    findError.code !==
+      "PGRST116"
+  ) {
+    throw findError;
+  }
 
-  if (student) return student;
+  if (existing) {
+    return existing;
+  }
 
   let studentCode =
     generateStudentCode();
 
-  for (let i = 0; i < 10; i++) {
+  let activationCode =
+    generateActivationCode();
+
+  for (
+    let i = 0;
+    i < 30;
+    i++
+  ) {
     const {
       data: duplicate,
       error: duplicateError
-    } = await client
+    } = await db
       .from("students")
       .select("id")
-      .eq("student_code", studentCode)
+      .or(
+        `student_code.eq.${studentCode},activation_code.eq.${activationCode}`
+      )
       .limit(1);
 
     if (duplicateError) {
       throw duplicateError;
     }
 
-    if (!duplicate?.length) break;
+    if (!duplicate?.length) {
+      break;
+    }
 
     studentCode =
       generateStudentCode();
+
+    activationCode =
+      generateActivationCode();
   }
 
+  /*
+    UPSERT + ignoreDuplicates:
+    Google callback yeroo tokko ol yoo dhufe,
+    students.id irratti duplicate key hin uumamu.
+  */
   const {
     data: created,
-    error: createError
-  } = await client
+    error: insertError
+  } = await db
     .from("students")
-    .insert({
-      id: userId,
-      student_code: studentCode,
-      name: googleName,
-      status: "pending"
-    })
-    .select("*")
-    .single();
+    .upsert(
+      {
+        id: userId,
+        student_code:
+          studentCode,
+        activation_code:
+          activationCode,
+        name:
+          googleName,
+        status:
+          "pending"
+      },
+      {
+        onConflict:
+          "id",
+        ignoreDuplicates:
+          true
+      }
+    )
+    .select()
+    .maybeSingle();
 
-  if (createError) {
-    throw createError;
+  if (insertError) {
+    console.error(
+      "GOOGLE STUDENT UPSERT ERROR:",
+      insertError
+    );
+
+    throw insertError;
   }
 
-  return created;
+  if (created) {
+    return created;
+  }
+
+  /*
+    Callback lama wal fakkaataan yeroo tokko keessatti
+    dhufnaan row inni jalqabaa uumame deebi'ee fudhatama.
+  */
+  const {
+    data: racedStudent,
+    error: racedError
+  } = await db
+    .from("students")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (racedError) {
+    throw racedError;
+  }
+
+  if (racedStudent) {
+    return racedStudent;
+  }
+
+  throw new Error(
+    "Google student galmeessuu hin dandeenye."
+  );
 }
 
-async function handleAuthSession(session) {
+async function handleAuthSession(
+  session
+) {
   if (!session?.user) return;
 
-  const email = String(
-    session.user.email || ""
-  ).trim().toLowerCase();
+  const user =
+    session.user;
 
-  /* GOOGLE ADMIN */
+  const email =
+    String(
+      user.email || ""
+    ).toLowerCase();
+
+  /*
+    ONLY these two Google accounts
+    become admin.
+  */
   if (
-    ADMIN_GOOGLE_EMAILS.includes(email)
+    ADMIN_GOOGLE_EMAILS.includes(
+      email
+    )
   ) {
     currentAdmin = {
-      id: session.user.id,
-      email,
+      id: user.id,
       username: email,
+      email,
       name:
-        session.user.user_metadata
+        user.user_metadata
           ?.full_name ||
         email
     };
 
     localStorage.setItem(
-      "ao_admin_id",
-      session.user.id
+      "ao_admin_google_id",
+      user.id
     );
 
     localStorage.setItem(
@@ -2252,60 +3710,74 @@ async function handleAuthSession(session) {
       email
     );
 
-    showPage("adminDashboardPage");
+    localStorage.removeItem(
+      "ao_student_id"
+    );
+
+    showPage("adminPage");
 
     await initializeAdmin();
 
     return;
   }
 
-  /* GOOGLE STUDENT */
   try {
     const student =
       await findOrCreateGoogleStudent(
-        session.user
+        user
       );
 
+    currentStudent =
+      student;
+
     if (
-      !student ||
-      student.status !== "active"
+      student.status !==
+      "active"
     ) {
-      currentStudent =
-        student || null;
+      localStorage.removeItem(
+        "ao_student_id"
+      );
 
       showPublicLoginPage();
 
       alert(
-        student?.status === "pending"
-          ? "Galmeen Google kee milkaa'eera. Amma adminiin si mirkaneessuu qaba."
-          : "Account barataa kee cufameera."
+        `Google Login milkaa'e. Garuu account kee adminiin mirkaneessuu qaba.\n\nStudent ID: ${student.student_code}`
       );
 
       return;
     }
 
-    currentStudent = student;
-
     localStorage.setItem(
       "ao_student_id",
-      student.id
+      String(student.id)
     );
 
-    showPage("studentHomePage");
+    localStorage.removeItem(
+      "ao_admin_google_id"
+    );
+
+    localStorage.removeItem(
+      "ao_admin_google_email"
+    );
+
+    showPage(
+      "studentHomePage"
+    );
 
     await loadStudentHome();
+
   } catch (error) {
     console.error(
-      "GOOGLE STUDENT ERROR:",
+      "GOOGLE SESSION ERROR:",
       error
     );
 
+    showPublicLoginPage();
+
     alert(
       "Google Login booda app keessatti dogoggorri uumame: " +
-      getErrorMessage(error)
+        getErrorMessage(error)
     );
-
-    showPublicLoginPage();
   }
 }
 
@@ -2340,11 +3812,11 @@ function initializeAuthListener() {
 
   authListenerReady = true;
 
-  getDb().auth.onAuthStateChange(
+  db.auth.onAuthStateChange(
     async (_event, session) => {
-      if (session?.user) {
-        await handleAuthSession(session);
-      }
+      await handleAuthSession(
+        session
+      );
     }
   );
 }
@@ -2354,19 +3826,17 @@ function initializeAuthListener() {
 ========================================================= */
 
 async function initializeApp() {
+  initializeAuthListener();
+  changeAIQuestionSource();
+
   try {
-    getDb();
-
-    initializeAuthListener();
-
-    changeAIQuestionSource();
-
     const {
       data: sessionData
-    } = await getDb().auth.getSession();
+    } = await db.auth.getSession();
 
     if (
-      sessionData?.session?.user
+      sessionData?.session
+        ?.user
     ) {
       await handleAuthSession(
         sessionData.session
@@ -2375,41 +3845,38 @@ async function initializeApp() {
       return;
     }
 
-    const student =
-      await restoreStudent();
-
-    if (student) {
-      showPage(
-        "studentHomePage"
-      );
-
-      await loadStudentHome();
-
-      return;
-    }
-
-    const admin =
-      await restoreAdmin();
-
-    if (admin) {
-      showPage(
-        "adminDashboardPage"
-      );
-
-      await initializeAdmin();
-
-      return;
-    }
-
-    showPublicLoginPage();
   } catch (error) {
     console.error(
-      "INITIALIZATION ERROR:",
+      "AUTH SESSION ERROR:",
       error
     );
-
-    showPublicLoginPage();
   }
+
+  const student =
+    await restoreStudent();
+
+  if (student) {
+    showPage(
+      "studentHomePage"
+    );
+
+    await loadStudentHome();
+
+    return;
+  }
+
+  const admin =
+    await restoreAdmin();
+
+  if (admin) {
+    showPage("adminPage");
+
+    await initializeAdmin();
+
+    return;
+  }
+
+  showPublicLoginPage();
 }
 
 /* =========================================================
@@ -2463,6 +3930,9 @@ window.confirmSubmitExam =
 
 window.showScore =
   showScore;
+
+window.showResultDetails =
+  showResultDetails;
 
 window.loadProfile =
   loadProfile;
