@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - app.js
-   Supabase version
+   Supabase version (Sirreeffame)
    ========================================================= */
 
 "use strict";
@@ -871,7 +871,7 @@ async function loadExams() {
         <button
           type="button"
           class="small-btn"
-          onclick="startExam(${exam.id})"
+          onclick="startExam('${exam.id}')"
         >
           Qormaata Jalqabi →
         </button>
@@ -1394,13 +1394,6 @@ async function finishExam() {
       throw attemptError;
     }
 
-    /*
-      Deebii tokko-tokkoo guutuu snapshot godhamee
-      results.answers keessatti kuufama.
-      Kanaaf gaaffiin booda haqamus admin
-      deebii duraanii ilaalu danda'a.
-    */
-
     const answerDetails = {};
 
     currentQuestions.forEach(
@@ -1878,11 +1871,6 @@ async function findOrCreateGoogleStudent(user) {
       user
     );
 
-  /*
-    Jalqaba ID Google/Auth UUIDn barbaada.
-    Yoo jiraate insert irra deebi'amee hin godhamu.
-  */
-
   const {
     data: existing,
     error: findError
@@ -1908,12 +1896,6 @@ async function findOrCreateGoogleStudent(user) {
 
   let lastError =
     null;
-
-  /*
-    Callback Google lama yeroo tokko keessatti
-    yoo dhufe illee duplicate key irraa
-    of eega.
-  */
 
   for (
     let attempt = 0;
@@ -1956,13 +1938,6 @@ async function findOrCreateGoogleStudent(user) {
     lastError =
       createError;
 
-    /*
-      Yoo callback lama walitti bu'e:
-      callback tokko row uuma,
-      kan biraan duplicate key argata.
-      Sana booda row duraan uumame barbaada.
-    */
-
     if (
       createError?.code ===
         "23505" ||
@@ -1993,12 +1968,6 @@ async function findOrCreateGoogleStudent(user) {
 
       continue;
     }
-
-    /*
-      student_code ykn activation_code
-      duplicate yoo ta'e code haaraa
-      qopheessa.
-    */
 
     if (
       String(
@@ -2178,11 +2147,6 @@ async function restoreAdmin() {
       "ao_admin_id"
     );
 
-  /*
-    Google admin session yoo jiraate
-    admins table irratti hirkachuu hin qabu.
-  */
-
   if (
     savedGoogleEmail &&
     savedAdminId &&
@@ -2234,11 +2198,6 @@ async function restoreAdmin() {
       "ao_admin_id"
     );
   }
-
-  /*
-    Old username/password admin
-    yoo jiraate, inniis itti fufa.
-  */
 
   const id =
     localStorage.getItem(
@@ -2688,12 +2647,6 @@ async function loadAdminResults() {
   const results =
     data || [];
 
-  /*
-    Average barataa:
-    bu'aa qormaatawwan isaa hunda irraa
-    dhibbeentaa giddu-galeessaa.
-  */
-
   const studentStats = {};
 
   results.forEach(
@@ -2725,11 +2678,6 @@ async function loadAdminResults() {
         1;
     }
   );
-
-  /*
-    Sadarkaa:
-    average % ol irraa gara gadiitti.
-  */
 
   const ranking =
     Object.entries(
@@ -3647,7 +3595,7 @@ async function loadAdminExams() {
               <button
                 type="button"
                 class="small-btn"
-                onclick="toggleExamStatus(${exam.id})"
+                onclick="toggleExamStatus('${exam.id}')"
               >
                 ${
                   exam.status ===
@@ -3660,7 +3608,7 @@ async function loadAdminExams() {
               <button
                 type="button"
                 class="small-btn"
-                onclick="editExam(${exam.id})"
+                onclick="editExam('${exam.id}')"
               >
                 ✏️ Sirreessi
               </button>
@@ -3668,7 +3616,7 @@ async function loadAdminExams() {
               <button
                 type="button"
                 class="danger-small-btn"
-                onclick="deleteExam(${exam.id})"
+                onclick="deleteExam('${exam.id}')"
               >
                 🗑️ Haqi
               </button>
@@ -3951,19 +3899,18 @@ async function toggleExamStatus(
     findError ||
     !exam
   ) {
+    alert("Qormaanni hin argamne.");
     return;
   }
+
+  const newStatus = exam.status === "active" ? "disabled" : "active";
 
   const {
     error
   } = await db
     .from("exams")
     .update({
-      status:
-        exam.status ===
-        "active"
-          ? "disabled"
-          : "active"
+      status: newStatus
     })
     .eq(
       "id",
@@ -4067,7 +4014,8 @@ async function deleteExam(
   }
 
   const {
-    data: exam
+    data: exam,
+    error: findError
   } = await db
     .from("exams")
     .select(
@@ -4079,7 +4027,8 @@ async function deleteExam(
     )
     .maybeSingle();
 
-  if (!exam) {
+  if (findError || !exam) {
+    alert("Qormaanni hin argamne.");
     return;
   }
 
@@ -4091,50 +4040,61 @@ async function deleteExam(
     return;
   }
 
-  await db
-    .from("results")
-    .delete()
-    .eq(
-      "exam_id",
-      examId
-    );
+  try {
+    const { error: resultsError } = await db
+      .from("results")
+      .delete()
+      .eq(
+        "exam_id",
+        examId
+      );
 
-  await db
-    .from("exam_attempts")
-    .delete()
-    .eq(
-      "exam_id",
-      examId
-    );
+    if (resultsError) throw resultsError;
 
-  await db
-    .from("questions")
-    .delete()
-    .eq(
-      "exam_id",
-      examId
-    );
+    const { error: attemptsError } = await db
+      .from("exam_attempts")
+      .delete()
+      .eq(
+        "exam_id",
+        examId
+      );
 
-  const {
-    error
-  } = await db
-    .from("exams")
-    .delete()
-    .eq(
-      "id",
-      examId
-    );
+    if (attemptsError) throw attemptsError;
 
-  if (error) {
+    const { error: questionsError } = await db
+      .from("questions")
+      .delete()
+      .eq(
+        "exam_id",
+        examId
+      );
+
+    if (questionsError) throw questionsError;
+
+    const {
+      error: examError
+    } = await db
+      .from("exams")
+      .delete()
+      .eq(
+        "id",
+        examId
+      );
+
+    if (examError) throw examError;
+
+    alert("✅ Qormaanni fi wantoonni isaa hundi haqamaniiru.");
+
+    await loadAdminExams();
+    await loadAdminResults();
+    await loadAdminQuestions();
+  } catch (error) {
+    console.error("DELETE EXAM ERROR:", error);
     alert(
+      "Qormaata haquun hin danda'amne:\n" +
       getErrorMessage(error)
     );
-
-    return;
   }
-
-  await loadAdminExams();
-  await loadAdminResults();
 }
 
 /* =========================================================
@@ -4918,11 +4878,6 @@ async function handleAuthSession(
       .toLowerCase();
 
   try {
-    /*
-      Email admin keessaa tokko yoo ta'e
-      Admin Dashboard kallattiin bana.
-    */
-
     if (
       isGoogleAdminEmail(
         email
@@ -4964,11 +4919,6 @@ async function handleAuthSession(
 
       return;
     }
-
-    /*
-      Google account biraa:
-      student.
-    */
 
     await handleGoogleStudent(
       user
@@ -5044,10 +4994,6 @@ async function initializeApp() {
   initializeAuthListener();
 
   changeAIQuestionSource();
-
-  /*
-    Jalqaba Supabase Google session ilaala.
-  */
 
   const {
     data: sessionData
