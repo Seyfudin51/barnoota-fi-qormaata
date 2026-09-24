@@ -129,79 +129,6 @@
 
 
   <!-- =====================================================
-       OLD STUDENT LOGIN
-  ====================================================== -->
-
-  <section id="studentLoginPage" class="page">
-
-    <div class="page-container">
-
-      <div class="top-header">
-        <button
-          type="button"
-          class="back-btn"
-          onclick="showPage('rolePage')"
-        >
-          ← Duubatti
-        </button>
-
-        <h2>👨‍🎓 Seensa Barataa</h2>
-      </div>
-
-      <div class="form-card">
-
-        <label>Maqaa</label>
-
-        <input
-          id="nameInput"
-          type="text"
-          placeholder="Maqaa kee galchi"
-        >
-
-        <button
-          type="button"
-          class="primary-btn"
-          onclick="studentRegister()"
-        >
-          Galmaa'i
-        </button>
-
-        <hr>
-
-        <label>Student ID</label>
-
-        <input
-          id="studentIdInput"
-          type="text"
-          placeholder="ST-123456"
-        >
-
-        <label>Activation Code</label>
-
-        <input
-          id="activationCodeInput"
-          type="text"
-          placeholder="Activation Code"
-        >
-
-        <button
-          type="button"
-          class="secondary-btn"
-          onclick="studentLogin()"
-        >
-          Seeni
-        </button>
-
-        <div id="studentLoginMessage" class="message"></div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
        STUDENT HOME
   ====================================================== -->
 
@@ -508,35 +435,15 @@
 
         <h2>👤 Profile Koo</h2>
 
-        <label>Maqaa</label>
-
-        <input
-          id="profileNameInput"
-          type="text"
-        >
-
         <p>
-          <strong>Student ID:</strong>
-          <span id="profileCode"></span>
-        </p>
-
-        <p>
-          <strong>Activation Code:</strong>
-          <span id="profileActivationCode"></span>
+          <strong>Account:</strong>
+          <span id="profileCode">Google Account</span>
         </p>
 
         <p>
           <strong>Status:</strong>
-          <span id="profileStatus"></span>
+          <span id="profileStatus"><span class="status active">● Active</span></span>
         </p>
-
-        <button
-          type="button"
-          class="primary-btn"
-          onclick="saveProfile()"
-        >
-          Olkaa'i
-        </button>
 
       </div>
 
@@ -1009,11 +916,48 @@
         </div>
 
 
+        <!-- BULK / MULTIPLE QUESTIONS IMPORT (GAAFFII HEDDUU PASTE GOCHUU) -->
+
+        <div class="admin-form">
+
+          <h3>📋 Gaaffii Hedduu Walitti (Bulk) Galchi</h3>
+
+          <select id="bulkExamSelect">
+            <option value="">Qormaata filadhu</option>
+          </select>
+
+          <textarea
+            id="bulkQuestionsInput"
+            rows="8"
+            placeholder="Asiitti gaaffilee kee hunda copy-paste godhi (Fakk:
+1. Gaaffiin...
+A) ...
+B) ...
+C) ...
+D) ...
+✅ Deebii: A
+2. Gaaffiin...
+...)"
+          ></textarea>
+
+          <button
+            type="button"
+            class="primary-btn"
+            onclick="createBulkQuestions()"
+          >
+            📥 Gaaffilee Hedduu Galchi
+          </button>
+
+          <div id="bulkMessage" class="message"></div>
+
+        </div>
+
+
         <!-- MANUAL QUESTIONS -->
 
         <div class="admin-form">
 
-          <h3>✍️ Gaaffii Ofii Keetii Uumi</h3>
+          <h3>✍️ Gaaffii Ofii Keetii Uumi (Tokko tokkoon)</h3>
 
 
           <select id="questionExamSelect">
