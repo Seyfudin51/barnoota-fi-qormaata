@@ -1763,3 +1763,585 @@ async function deleteExam(examId) {
 /* =========================================================
    END OF PART 3
 ========================================================= */
+/* =========================================================
+   AI QUESTION GENERATOR
+========================================================= */
+
+function changeAIQuestionSource() {
+  const type =
+    document.getElementById("aiQuestionSourceType")?.value || "topic";
+
+  const map = {
+    topic: "aiTopicSource",
+    text: "aiTextSource",
+    pdf: "aiPdfSource",
+    image: "aiImageSource"
+  };
+
+  Object.values(map).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+
+  const selected = document.getElementById(map[type]);
+
+  if (selected) {
+    selected.style.display = "block";
+  }
+}
+
+async function generateAIQuestions() {
+  if (!requireAdmin()) return;
+
+  const examId =
+    document.getElementById("aiQuestionExamSelect")?.value || "";
+
+  const type =
+    document.getElementById("aiQuestionSourceType")?.value || "topic";
+
+  const count = Number(
+    document.getElementById("aiQuestionCount")?.value || 5
+  );
+
+  if (!examId) {
+    setMessage(
+      "aiQuestionMessage",
+      "Dura qormaata gaaffiin itti galuu filadhu.",
+      "error"
+    );
+    return;
+  }
+
+  let source = "";
+
+  if (type === "topic") {
+    source =
+      document.getElementById("aiTopicInput")?.value.trim() || "";
+  }
+
+  if (type === "text") {
+    source =
+      document.getElementById("aiTextInput")?.value.trim() || "";
+  }
+
+  if (type === "pdf") {
+    const file =
+      document.getElementById("aiPdfInput")?.files?.[0];
+
+    source = file ? file.name : "";
+  }
+
+  if (type === "image") {
+    const file =
+      document.getElementById("aiImageInput")?.files?.[0];
+
+    source = file ? file.name : "";
+  }
+
+  if (!source) {
+    setMessage(
+      "aiQuestionMessage",
+      "Madda barnootaa guuti.",
+      "error"
+    );
+    return;
+  }
+
+  setMessage(
+    "aiQuestionMessage",
+    "⏳ Gaaffii AI qopheessaa jira...",
+    ""
+  );
+
+  /*
+    Yoo backend AI jiraate itti fayyadama.
+  */
+
+  try {
+    const response = await fetch(
+      window.AI_FUNCTION_URL || "/api/generate-questions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          exam_id: examId,
+          source_type: type,
+          source,
+          count
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("AI API request failed");
+    }
+
+    const result = await response.json();
+
+    const generated = result.questions || [];
+
+    if (!generated.length) {
+      throw new Error("Gaaffii AI hin argamne.");
+    }
+
+    const rows = generated.map((q) => ({
+      exam_id: examId,
+      question_text: q.question || q.text || "",
+      option_a: q.option_a || q.optionA || "",
+      option_b: q.option_b || q.optionB || "",
+      option_c: q.option_c || q.optionC || "",
+      option_d: q.option_d || q.optionD || "",
+      correct_answer: String(
+        q.correct_answer || q.correctAnswer || ""
+      ).toUpperCase(),
+      source_type: type,
+      source_text: source
+    }));
+
+    const { error } = await db
+      .from("questions")
+      .insert(rows);
+
+    if (error) {
+      throw error;
+    }
+
+    setMessage(
+      "aiQuestionMessage",
+      `✅ Gaaffii ${rows.length} milkaa'inaan dabalameera.`,
+      "success"
+    );
+
+    await loadAdminQuestions();
+    await loadAdminExams();
+  } catch (error) {
+    console.error(error);
+
+    setMessage(
+      "aiQuestionMessage",
+      "⚠️ AI question generator amma hin hojjenne. Gaaffii harkaan galchuu dandeessa.",
+      "error"
+    );
+  }
+}
+
+
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
+async function googleLogin() {
+  try {
+    const { error } = await db.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo:
+          window.location.origin +
+          window.location.pathname
+      }
+    });
+
+    if (error) {
+      console.error(error);
+      alert(
+        "Google Login irratti rakkoon uumame:\n" +
+          getErrorMessage(error)
+      );
+    }
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Google Login hin milkoofne:\n" +
+        getErrorMessage(error)
+    );
+  }
+}
+
+
+/* =========================================================
+   GOOGLE AUTH SESSION
+========================================================= */
+
+async function handleAuthSession(session) {
+  if (!session?.user) return;
+
+  const user = session.user;
+
+  const email =
+    String(user.email || "")
+      .trim()
+      .toLowerCase();
+
+  console.log(
+    "Google user authenticated:",
+    email || user.id
+  );
+
+  /*
+    Admin Google accounts
+  */
+
+  const ADMIN_EMAILS = [
+    "suufiyaanjeeylaanofficial@gmail.com",
+    "seyfudin67@gmail.com"
+  ];
+
+  if (ADMIN_EMAILS.includes(email)) {
+    setSession({
+      type: "admin",
+      authUserId: user.id,
+      email,
+      name:
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        email
+    });
+
+    showPage("adminDashboardPage");
+
+    await initializeAdmin();
+
+    return;
+  }
+
+  /*
+    Student Google account.
+    Existing student hin jiru taanaan record haaraa uuma.
+  */
+
+  let { data: student, error } = await db
+    .from("students")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    alert(
+      "Barataa Google irraa barbaaduun hin danda'amne:\n" +
+        getErrorMessage(error)
+    );
+    return;
+  }
+
+  /*
+    Yoo Google user kun duraan hin jirre,
+    student_code haaraa uuma.
+  */
+
+  if (!student) {
+    const fullName =
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      email.split("@")[0] ||
+      "Barataa";
+
+    const studentCode =
+      "ST-" +
+      Math.floor(
+        100000 +
+          Math.random() * 900000
+      );
+
+    const { data: createdStudent, error: createError } =
+      await db
+        .from("students")
+        .insert({
+          id: user.id,
+          student_code: studentCode,
+          name: fullName,
+          status: "pending"
+        })
+        .select("*")
+        .single();
+
+    /*
+      Yoo yeroo wal fakkaataa keessatti
+      record uumame, duplicate key hin dhaabu.
+    */
+
+    if (createError) {
+      if (
+        String(createError.code) === "23505" ||
+        String(createError.message || "").includes(
+          "duplicate key"
+        )
+      ) {
+        const retry = await db
+          .from("students")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (retry.error || !retry.data) {
+          alert(
+            "Student account argachuu hin dandeenye."
+          );
+          return;
+        }
+
+        student = retry.data;
+      } else {
+        console.error(createError);
+
+        alert(
+          "Student account uumuu hin dandeenye:\n" +
+            getErrorMessage(createError)
+        );
+
+        return;
+      }
+    } else {
+      student = createdStudent;
+    }
+  }
+
+  /*
+    Google account tokko = student record tokko.
+    Kanaaf yeroo itti aanu ID fi qabxii isaa hin badu.
+  */
+
+  setSession({
+    type: "student",
+    authUserId: user.id,
+    studentId: student.id,
+    studentCode: student.student_code,
+    name: student.name,
+    status: student.status || "pending",
+    email
+  });
+
+  if (student.status !== "active") {
+    showPage("studentHomePage");
+
+    const message =
+      document.getElementById("studentHomeMessage");
+
+    if (message) {
+      message.textContent =
+        "⏳ Galmeen kee admin'n akka mirkaneessu eeggachaa jira.";
+    }
+
+    return;
+  }
+
+  showPage("studentHomePage");
+
+  await loadStudentHome();
+}
+
+
+/* =========================================================
+   TELEGRAM LOGIN
+========================================================= */
+
+async function telegramLogin() {
+  alert(
+    "Telegram Login qindeessaa jirra. Google Login amma qophaa'eera."
+  );
+}
+
+
+/* =========================================================
+   REFRESH ADMIN
+========================================================= */
+
+async function refreshAllAdminLists() {
+  await loadAdminStudents();
+  await loadAdminResults();
+  await loadAdminLessons();
+  await loadAdminExams();
+  await loadAdminQuestions();
+}
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+let authListenerReady = false;
+
+function initializeAuthListener() {
+  if (authListenerReady) return;
+
+  authListenerReady = true;
+
+  db.auth.onAuthStateChange(
+    async (_event, session) => {
+      await handleAuthSession(session);
+    }
+  );
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+async function initializeApp() {
+  initializeAuthListener();
+
+  changeAIQuestionSource();
+
+  const student = await restoreStudent();
+
+  if (student) {
+    showPage("studentHomePage");
+
+    await loadStudentHome();
+
+    return;
+  }
+
+  const admin = await restoreAdmin();
+
+  if (admin) {
+    showPage("adminDashboardPage");
+
+    await initializeAdmin();
+
+    return;
+  }
+
+  showPage("rolePage");
+}
+
+
+/* =========================================================
+   INLINE HTML FUNCTIONS
+========================================================= */
+
+window.showPage = showPage;
+
+window.openStudentLogin =
+  openStudentLogin;
+
+window.openAdminLogin =
+  openAdminLogin;
+
+window.studentRegister =
+  studentRegister;
+
+window.studentLogin =
+  studentLogin;
+
+window.loadStudentHome =
+  loadStudentHome;
+
+window.loadExams =
+  loadExams;
+
+window.startExam =
+  startExam;
+
+window.selectAnswer =
+  selectAnswer;
+
+window.nextQuestion =
+  nextQuestion;
+
+window.requestSubmitExam =
+  requestSubmitExam;
+
+window.confirmSubmitExam =
+  confirmSubmitExam;
+
+window.showScore =
+  showScore;
+
+window.loadProfile =
+  loadProfile;
+
+window.saveProfile =
+  saveProfile;
+
+window.studentLogout =
+  studentLogout;
+
+window.openLesson =
+  openLesson;
+
+
+/* ADMIN */
+
+window.adminLogin =
+  adminLogin;
+
+window.adminLogout =
+  adminLogout;
+
+window.openAdminPanel =
+  openAdminPanel;
+
+window.toggleStudentStatus =
+  toggleStudentStatus;
+
+window.deleteStudent =
+  deleteStudent;
+
+window.createLesson =
+  createLesson;
+
+window.editLesson =
+  editLesson;
+
+window.deleteLesson =
+  deleteLesson;
+
+window.createExam =
+  createExam;
+
+window.createUnifiedExam =
+  createUnifiedExam;
+
+window.previewUnifiedQuestions =
+  previewUnifiedQuestions;
+
+window.clearUnifiedExamForm =
+  clearUnifiedExamForm;
+
+window.toggleExamStatus =
+  toggleExamStatus;
+
+window.editExam =
+  editExam;
+
+window.deleteExam =
+  deleteExam;
+
+window.createQuestion =
+  createQuestion;
+
+window.deleteQuestion =
+  deleteQuestion;
+
+
+/* AI */
+
+window.changeAIQuestionSource =
+  changeAIQuestionSource;
+
+window.generateAIQuestions =
+  generateAIQuestions;
+
+
+/* LOGIN */
+
+window.googleLogin =
+  googleLogin;
+
+window.telegramLogin =
+  telegramLogin;
+
+
+/* =========================================================
+   START APP
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  initializeApp
+);
