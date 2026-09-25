@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - app.js
-   Supabase version (Guutuu - Google Login, RLS, Bulk Paste & Leaderboard)
+   Supabase version (Guutuu - Google Login, RLS, Bulk Paste &amp; Leaderboard)
    ========================================================= */
 
 "use strict";
@@ -1043,6 +1043,14 @@ async function startExam(examId) {
 
   const attemptNumber =
     completedAttempts.length + 1;
+
+  // Clean up any uncompleted attempts to avoid unique constraint conflict
+  await db
+    .from("exam_attempts")
+    .delete()
+    .eq("exam_id", exam.id)
+    .eq("student_id", student.id)
+    .eq("completed", false);
 
   const {
     data: attempt,
