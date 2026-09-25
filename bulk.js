@@ -1,10 +1,11 @@
 "use strict";
 
-const BULK_SUPABASE_URL =
-  "https://xhkkaevhcqvkwabcsljm.supabase.co";
+/* =========================================================
+   BULK QUESTIONS IMPORT HANDLER
+========================================================= */
 
-const BULK_SUPABASE_ANON_KEY =
-  "sb_publishable_8nBE4n2bQ1jRnEr_83FrdA_vSqqIpSz";
+const BULK_SUPABASE_URL = "https://xhkkaevhcqvkwabcsljm.supabase.co";
+const BULK_SUPABASE_ANON_KEY = "sb_publishable_8nBE4n2bQ1jRnEr_83FrdA_vSqqIpSz";
 
 const bulkDb = window.supabase.createClient(
   BULK_SUPABASE_URL,
@@ -13,40 +14,9 @@ const bulkDb = window.supabase.createClient(
 
 function showBulkMessage(message, type = "info") {
   const box = document.getElementById("bulkMessage");
-
   if (!box) return;
-
   box.textContent = message;
   box.className = `message ${type}`.trim();
-}
-
-async function loadBulkExamSelect() {
-  const select = document.getElementById("bulkExamSelect");
-
-  if (!select) return;
-
-  const { data, error } = await bulkDb
-    .from("exams")
-    .select("id,title")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("BULK EXAM SELECT ERROR:", error);
-    return;
-  }
-
-  select.innerHTML = `
-    <option value="">Qormaata filadhu</option>
-    ${(data || [])
-      .map(
-        (exam) => `
-          <option value="${exam.id}">
-            ${escapeBulkHtml(exam.title)}
-          </option>
-        `
-      )
-      .join("")}
-  `;
 }
 
 function escapeBulkHtml(value) {
@@ -58,60 +28,67 @@ function escapeBulkHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-function parseBulkQuestions(text) {
-  const cleaned = String(text || "")
-    .replace(/\r/g, "")
-    .trim();
+async function loadBulkExamSelect() {
+  const select = document.getElementById("bulkExamSelect");
+  if (!select) return;
 
+  try {
+    const { data: exams, error } = await bulkDb
+      .from("exams")
+      .select("id, title")
+      .order("created_at", { ascending: false });
+
+    if (error || !exams) {
+      return;
+    }
+
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">Qormaata filadhu</option>' +
+      exams.map(e => `<option value="${e.id}">${escapeBulkHtml(e.title)}</option>`).join("");
+
+    if (currentVal && exams.some(e => String(e.id) === String(currentVal))) {
+      select.value = currentVal;
+    }
+  } catch (err) {
+    console.error("BULK EXAM POPULATE EXCEPTION:", err);
+  }
+}
+
+function parseBulkQuestions(text) {
+  const cleaned = String(text || "").replace(/\r/g, "").trim();
   if (!cleaned) {
     throw new Error("Gaaffilee galchi.");
   }
 
+  // Lakkoofsa gaaffiitiin (fakkeenyaaf: 1., 2., 1), 2)) qooda
   const blocks = cleaned
     .split(/(?=^\s*\d+\s*[\.\)]\s*)/gm)
-    .map((item) => item.trim())
+    .map(item => item.trim())
     .filter(Boolean);
+
+  if (!blocks.length) {
+    throw new Error("Gaaffiin tokkollee hin argamne. Qindoomina isaa ilaali.");
+  }
 
   const questions = [];
 
   for (let index = 0; index < blocks.length; index++) {
     const block = blocks[index];
 
-    const questionMatch = block.match(
-      /^\s*\d+\s*[\.\)]\s*(.+?)(?=\n\s*A[\)\.:])/is
-    );
+    // 1. Gaaffii baasuu
+    const questionMatch = block.match(/^\s*\d+\s*[\.\)]\s*(.+?)(?=\n\s*A[\)\.:])/is);
 
-    const optionAMatch = block.match(
-      /(?:^|\n)\s*A[\)\.:]\s*(.+?)(?=\n\s*B[\)\.:])/is
-    );
+    // 2. Filannoowwan A, B, C, D baasuu
+    const optionAMatch = block.match(/(?:^|\n)\s*A[\)\.:]\s*(.+?)(?=\n\s*B[\)\.:])/is);
+    const optionBMatch = block.match(/(?:^|\n)\s*B[\)\.:]\s*(.+?)(?=\n\s*C[\)\.:])/is);
+    const optionCMatch = block.match(/(?:^|\n)\s*C[\)\.:]\s*(.+?)(?=\n\s*D[\)\.:])/is);
+    const optionDMatch = block.match(/(?:^|\n)\s*D[\)\.:]\s*(.+?)(?=\n|$)/is);
 
-    const optionBMatch = block.match(
-      /(?:^|\n)\s*B[\)\.:]\s*(.+?)(?=\n\s*C[\)\.:])/is
-    );
+    // 3. Deebii sirrii baasuu (Fakkeenya: Deebii: A, Deebii sirrii: B, Answer: C, ✅ Deebii: D)
+    const answerMatch = block.match(/(?:✅\s*)?(?:Deebii\s*sirrii|Deebii|Answer)\s*:\s*([ABCD])/i);
 
-    const optionCMatch = block.match(
-      /(?:^|\n)\s*C[\)\.:]\s*(.+?)(?=\n\s*D[\)\.:])/is
-    );
-
-    const optionDMatch = block.match(
-      /(?:^|\n)\s*D[\)\.:]\s*(.+?)(?=\n|$)/is
-    );
-
-    const answerMatch = block.match(
-      /(?:✅\s*)?(?:Deebii\s*sirrii|Deebii|Answer)\s*:\s*([ABCD])/i
-    );
-
-    if (
-      !questionMatch ||
-      !optionAMatch ||
-      !optionBMatch ||
-      !optionCMatch ||
-      !optionDMatch ||
-      !answerMatch
-    ) {
-      throw new Error(
-        `Gaaffii ${index + 1} sirriitti hin qindaa'in. Lakkoofsa, A-D fi Deebii sirrii mirkaneessi.`
-      );
+    if (!questionMatch || !optionAMatch || !optionBMatch || !optionCMatch || !optionDMatch || !answerMatch) {
+      throw new Error(`Gaaffii ${index + 1}ffaa irratti dogoggorri jira! Gaaffii, A, B, C, D fi "Deebii: [A/B/C/D]" jiraachuu isaa mirkaneessi.`);
     }
 
     questions.push({
@@ -132,26 +109,20 @@ function parseBulkQuestions(text) {
 async function createBulkQuestions() {
   const select = document.getElementById("bulkExamSelect");
   const input = document.getElementById("bulkQuestionsInput");
-  const button = document.querySelector(
-    '[onclick="createBulkQuestions()"]'
-  );
+  const button = document.querySelector('[onclick="createBulkQuestions()"]');
 
   const examId = select?.value || "";
   const text = input?.value || "";
 
   if (!examId) {
-    showBulkMessage(
-      "❌ Jalqaba qormaata filadhu.",
-      "error"
-    );
+    alert("❌ Jalqaba qormaata filadhu.");
+    showBulkMessage("❌ Qormaata filadhu.", "error");
     return;
   }
 
   if (!text.trim()) {
-    showBulkMessage(
-      "❌ Gaaffilee copy gootee textarea keessa galchi.",
-      "error"
-    );
+    alert("❌ Gaaffilee copy gootee galchi.");
+    showBulkMessage("❌ Gaaffilee galchi.", "error");
     return;
   }
 
@@ -161,11 +132,12 @@ async function createBulkQuestions() {
       button.textContent = "⏳ Gaaffilee galchaa jira...";
     }
 
-    const questions = parseBulkQuestions(text);
+    const parsedQuestions = parseBulkQuestions(text);
 
-    const rows = questions.map((question) => ({
-      ...question,
-      exam_id: examId
+    // Exam ID wajjin qindeessuu
+    const rows = parsedQuestions.map(q => ({
+      ...q,
+      exam_id: Number.isInteger(Number(examId)) ? Number(examId) : examId
     }));
 
     const { error } = await bulkDb
@@ -176,27 +148,22 @@ async function createBulkQuestions() {
       throw error;
     }
 
-    showBulkMessage(
-      `✅ Gaaffiiwwan ${rows.length} milkaa'inaan galfamaniiru.`,
-      "success"
-    );
+    alert(`✅ Gaaffiiwwan ${rows.length} milkaa'inaan galfamaniiru!`);
+    showBulkMessage(`✅ Gaaffiiwwan ${rows.length} qormaata keessa galaniiru.`, "success");
 
     input.value = "";
 
+    // Admin view haaromsuu
     if (typeof window.loadAdminQuestions === "function") {
       await window.loadAdminQuestions();
     }
-
     if (typeof window.loadAdminExams === "function") {
       await window.loadAdminExams();
     }
   } catch (error) {
     console.error("BULK IMPORT ERROR:", error);
-
-    showBulkMessage(
-      `❌ ${error.message || "Gaaffilee galchuun hin milkoofne."}`,
-      "error"
-    );
+    alert("❌ " + (error.message || "Gaaffilee galchuun hin danda'amne."));
+    showBulkMessage("❌ " + (error.message || "Dogoggorri uumame."), "error");
   } finally {
     if (button) {
       button.disabled = false;
@@ -205,9 +172,18 @@ async function createBulkQuestions() {
   }
 }
 
+// Window irratti qabsiisuu
 window.createBulkQuestions = createBulkQuestions;
 window.loadBulkExamSelect = loadBulkExamSelect;
 
+// Yeroo banamu dropdown guutuu
 document.addEventListener("DOMContentLoaded", () => {
   loadBulkExamSelect();
 });
+
+setInterval(() => {
+  const select = document.getElementById("bulkExamSelect");
+  if (select && select.options.length <= 1) {
+    loadBulkExamSelect();
+  }
+}, 2000);
