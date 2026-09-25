@@ -1,5 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - MASTER MOBILE APP CSS (style.css)
+   Clean, Professional, 100% Matching Provided Design
 ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -37,14 +38,13 @@
 }
 
 body {
-  background-color: #0f172a; /* Outer backdrop */
+  background-color: #0f172a;
   color: var(--text-primary);
   display: flex;
   justify-content: center;
   min-height: 100vh;
 }
 
-/* App Shell to restrict display area like a real mobile app */
 .app-shell {
   width: 100%;
   max-width: 480px;
@@ -60,88 +60,178 @@ body {
 .page {
   display: none;
   width: 100%;
-  padding-bottom: 95px; /* spacer for bottom nav */
-  animation: slideUpTransition 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding-bottom: 95px;
+  animation: fadeInEffect 0.25s ease-in-out;
 }
 
 .page.active {
   display: block;
 }
 
-@keyframes slideUpTransition {
-  from { opacity: 0; transform: translateY(12px); }
+@keyframes fadeInEffect {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* =========================================================
-   1. SPLASH / ROLE WELCOME DESIGN (100% Matching image)
+   1. SPLASH / START SCREEN (Image 3 - 1)
 ========================================================= */
 
-.splash-view {
+.splash-view-modern {
   background: linear-gradient(180deg, #1e3a8a 0%, #020617 100%);
   min-height: 100vh;
-  padding-bottom: 0;
+  color: #ffffff;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.splash-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  min-height: 95vh;
-  padding: 30px 24px;
   text-align: center;
 }
 
-.brand-showcase {
-  margin-top: 40px;
+.splash-top-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
 }
 
-.app-logo-large {
-  width: 110px;
-  height: 110px;
-  border-radius: 28px;
-  border: 4px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  margin-bottom: 20px;
+.app-logo-badge {
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  border: 2px solid rgba(255,255,255,0.2);
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-.brand-main-title {
-  font-size: 2rem;
+.splash-top-brand h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.splash-top-brand p {
+  font-size: 0.8rem;
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+.splash-hero-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.hero-illustration-box {
+  width: 100%;
+  max-width: 320px;
+  height: 220px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-illustration-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-fallback-graphic {
+  font-size: 4rem;
+}
+
+.hero-quote-title {
+  font-size: 1.35rem;
   font-weight: 800;
   color: #ffffff;
-  letter-spacing: -0.03em;
+  line-height: 1.4;
+  padding: 0 10px;
 }
 
-.brand-tagline {
+.splash-go-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(37,99,235,0.4);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* =========================================================
+   LOGIN SELECTION / GOOGLE & TELEGRAM (Image 3 - 2)
+========================================================= */
+
+.login-menu-container {
+  background: linear-gradient(180deg, #1e3a8a 0%, #020617 100%);
+  min-height: 100vh;
+  color: #ffffff;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.login-menu-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.app-logo-sm {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  margin-bottom: 8px;
+}
+
+.login-menu-header h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.login-menu-header p {
+  font-size: 0.8rem;
   color: #93c5fd;
-  font-size: 0.95rem;
   font-weight: 600;
+}
+
+.login-welcome-box {
+  margin-bottom: 24px;
+}
+
+.login-welcome-box h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.login-welcome-box p {
+  font-size: 0.85rem;
+  color: #94a3b8;
   margin-top: 6px;
 }
 
-.splash-welcome-box {
-  margin: 30px 0;
-}
-
-.welcome-heading {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.welcome-desc {
-  color: #94a3b8;
-  font-size: 0.9rem;
-  margin-top: 8px;
-}
-
-/* Auth Buttons block */
-.auth-buttons-wrapper {
+.auth-buttons-column {
   width: 100%;
+  max-width: 360px;
 }
 
 .google-login-btn, .telegram-login-btn, .action-submit-btn {
@@ -157,7 +247,7 @@ body {
   border: none;
   cursor: pointer;
   margin-bottom: 12px;
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease;
 }
 
 .google-login-btn {
@@ -171,16 +261,16 @@ body {
   color: #ffffff;
 }
 
-.divider {
+.divider-line {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 15px 0;
+  margin: 16px 0;
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
-.divider::before, .divider::after {
+.divider-line::before, .divider-line::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -188,13 +278,14 @@ body {
   margin: 0 10px;
 }
 
-.alternative-text {
+.login-hint-subtext {
   font-size: 0.8rem;
   color: #94a3b8;
-  margin-bottom: 10px;
+  line-height: 1.4;
+  margin-bottom: 8px;
 }
 
-.secondary-auth-btn {
+.text-link-btn {
   background: none;
   border: none;
   color: #60a5fa;
@@ -358,7 +449,7 @@ body {
   margin-bottom: 14px;
 }
 
-/* Menu Grid UI (3rd Image layout) */
+/* Menu Grid UI (Image 3 - 3) */
 .navigation-menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -396,7 +487,6 @@ body {
   font-weight: 700;
 }
 
-/* Soft colors matching dashboard */
 .bg-soft-blue { background-color: var(--soft-blue); }
 .bg-soft-purple { background-color: var(--soft-purple); }
 .bg-soft-green { background-color: var(--soft-green); }
@@ -416,7 +506,7 @@ body {
 }
 
 /* =========================================================
-   ITEMS, CARDS, SEARCH & FILTERS
+   CARDS, SEARCH & FILTERS
 ========================================================= */
 
 .search-input-wrapper {
@@ -470,7 +560,6 @@ body {
   gap: 12px;
 }
 
-/* Elegant Cards */
 .item-card, .exam-card, .result-card, .notification-card-item {
   background-color: var(--card-white);
   border-radius: var(--radius-md);
@@ -665,7 +754,7 @@ body {
 }
 
 /* =========================================================
-   BOTTOM NAVIGATION BAR (Highly responsive, gorgeous)
+   BOTTOM NAVIGATION BAR
 ========================================================= */
 
 .bottom-nav {
@@ -812,10 +901,6 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.admin-opt-label i {
-  font-size: 1.15rem;
 }
 
 /* =========================================================
