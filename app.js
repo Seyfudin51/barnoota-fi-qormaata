@@ -58,7 +58,7 @@ function showPage(pageId) {
   // Handle Bottom Navigation visibility based on Active Page
   const bottomNav = document.getElementById("bottomNav");
   if (bottomNav) {
-    const hiddenPages = ["rolePage", "adminLoginPage", "studentLoginPage", "examPage", "submitConfirmPage"];
+    const hiddenPages = ["rolePage", "loginMenuPage", "adminLoginPage", "studentLoginPage", "examPage", "submitConfirmPage"];
     if (hiddenPages.includes(pageId) || pageId.startsWith("admin")) {
       bottomNav.classList.add("hidden");
     } else {
@@ -87,7 +87,6 @@ function updateBottomNavActiveState(pageId) {
   }
 }
 
-// Master redirect handler for bottom navigation tabs
 function showSection(section) {
   if (section === 'barnoota') {
     showPage('barnootaPage');
@@ -193,10 +192,6 @@ function normalizeExam(row) {
     startTime: row.start_time ?? row.startTime ?? "",
     endTime: row.end_time ?? row.endTime ?? ""
   };
-}
-
-function getAdminPageId() {
-  return "adminDashboardPage";
 }
 
 function openStudentLogin() {
@@ -396,8 +391,11 @@ async function loadStudentHome() {
 
   const nameEl = document.getElementById("studentWelcomeName");
   const settingsNameEl = document.getElementById("settingsUserName");
+  const profileNameHeader = document.getElementById("profileNameHeader");
+  
   if (nameEl) nameEl.textContent = student.name;
   if (settingsNameEl) settingsNameEl.textContent = student.name;
+  if (profileNameHeader) profileNameHeader.textContent = student.name;
 
   const displayImgTop = document.getElementById("profileImageDisplayTop");
   const savedAvatar = student.avatar_url || localStorage.getItem(`avatar_${student.id}`);
@@ -1038,15 +1036,17 @@ async function loadProfile() {
   const profileNameHeader = document.getElementById("profileNameHeader");
   const code = document.getElementById("profileCode");
   const status = document.getElementById("profileStatus");
+  const emailEl = document.getElementById("profileEmail");
   const imgDisplay = document.getElementById("profileImageDisplay");
 
   if (nameInput) nameInput.value = student.name || "";
   if (profileNameHeader) profileNameHeader.textContent = student.name || "";
-  if (code) code.textContent = student.student_code || "Google Account";
+  if (code) code.textContent = `Barataa • ID: ${student.student_code || "Google"}`;
+  if (emailEl) emailEl.textContent = student.email || student.student_code || "Google Account";
   if (status) {
     status.innerHTML = student.status === "active"
-      ? '<span class="status active">● Active</span>'
-      : '<span class="status blocked">● Cufame</span>';
+      ? '<span class="status active" style="color:var(--emerald-green); font-weight:700;">● Active</span>'
+      : '<span class="status blocked" style="color:#ef4444; font-weight:700;">● Cufame</span>';
   }
 
   const savedAvatar = student.avatar_url || localStorage.getItem(`avatar_${student.id}`);
@@ -1080,7 +1080,7 @@ function handleProfileImageUpload(event) {
       if (displayImg) displayImg.src = compressedDataUrl;
 
       tempProfileImageBase64 = compressedDataUrl;
-      alert("✅ Suuraan filatameera! Olkaahuuf button '💾 Olkaa'i (Save)' tuqi.");
+      alert("✅ Suuraan filatameera! Olkaahuuf button '💾 Oordu Barbaachisaa (Save)' tuqi.");
     };
     img.src = e.target.result;
   };
@@ -1167,6 +1167,7 @@ async function findOrCreateGoogleStudent(user) {
   const userId = user.id;
   const googleName = getGoogleDisplayName(user);
   const googleAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+  const googleEmail = user?.email || null;
 
   const { data: existing, error: findError } = await db
     .from("students")
@@ -1193,6 +1194,7 @@ async function findOrCreateGoogleStudent(user) {
         student_code: studentCode,
         activation_code: activationCode,
         name: googleName,
+        email: googleEmail,
         avatar_url: googleAvatar,
         status: "active"
       })
@@ -1352,6 +1354,13 @@ function requireAdmin() {
 
 async function initializeAdmin() {
   if (!requireAdmin()) return;
+  
+  const dateEl = document.getElementById("adminDashboardDate");
+  if (dateEl) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    dateEl.innerText = new Date().toLocaleDateString('om-ET', options);
+  }
+
   await refreshAllAdminLists();
 }
 
@@ -1544,7 +1553,6 @@ async function createExam() {
   const description = document.getElementById("examDescriptionInput")?.value.trim() || "";
   const questionLimit = Number(document.getElementById("examQuestionLimitInput")?.value || 0);
   const attemptLimit = Number(document.getElementById("examAttemptLimitInput")?.value || 1);
-  const isFinal = document.getElementById("examFinalInput")?.value === "true";
   const duration = Number(document.getElementById("examDurationInput")?.value || 30);
 
   if (!title) {
@@ -1557,7 +1565,6 @@ async function createExam() {
     description,
     question_limit: questionLimit,
     attempt_limit: attemptLimit,
-    is_final: isFinal,
     duration_minutes: duration,
     status: "active",
     show_leaderboard: false
@@ -1882,7 +1889,7 @@ async function generateAIQuestions() {
 
   const examId = document.getElementById("aiQuestionExamSelect")?.value || "";
   const sourceType = document.getElementById("aiQuestionSourceType")?.value || "topic";
-  const count = Number(document.getElementById("aiQuestionCount")?.value || 5);
+  const count = 5;
   const button = document.getElementById("generateAIQuestionsButton");
 
   if (!examId) {
@@ -2002,7 +2009,7 @@ function initializeAuthListener() {
 }
 
 /* =========================================================
-   LOCAL SEARCH ALGORITHMS (Fast Client-side Filtering)
+   LOCAL SEARCH ALGORITHMS
 ========================================================= */
 
 function searchLessonsLocal(query) {
