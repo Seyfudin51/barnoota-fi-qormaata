@@ -51,6 +51,11 @@
         </div>
       </div>
 
+      <!-- IN-APP BROWSER (TELEGRAM/FACEBOOK) WARNING -->
+      <div id="webviewWarning" style="display:none; background:#fee2e2; color:#b91c1c; padding:12px; margin: 10px; border-radius:8px; font-size:14px; text-align:center; font-weight:bold; border: 1px solid #fca5a5;">
+        ⚠️ Google Account bilbila kee irratti akka filatamuuf gubbaa mirgaatiin tuqiitii <strong>"Open in Chrome"</strong> (ykn 'Browser irratti bani') filadhu!
+      </div>
+
       <div class="login-card">
 
         <div class="login-icon">
@@ -431,7 +436,7 @@
 
 
   <!-- =====================================================
-       PROFILE
+       PROFILE WITH AVATAR IMAGE SUPPORT
   ====================================================== -->
 
   <section id="profilePage" class="page">
@@ -446,19 +451,62 @@
         ← Duubatti
       </button>
 
-      <div class="form-card">
+      <div class="form-card" style="text-align: center;">
 
         <h2>👤 Profile Koo</h2>
 
-        <p>
-          <strong>Account:</strong>
-          <span id="profileCode">Google Account</span>
-        </p>
+        <!-- Profile Picture Upload -->
+        <div style="position: relative; width: 120px; height: 120px; margin: 0 auto 20px auto;">
+          <img
+            id="profileImageDisplay"
+            src="https://img.icons8.com/illustrations/xl/m/user-male-circle.png"
+            style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #4f46e5;"
+            alt="Avatar"
+          />
+          <button
+            type="button"
+            onclick="document.getElementById('profileImageInput').click()"
+            style="position: absolute; bottom: 0; right: 0; background: #4f46e5; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+          >
+            📸
+          </button>
+          <input
+            id="profileImageInput"
+            type="file"
+            accept="image/*"
+            style="display: none;"
+            onchange="handleProfileImageUpload(event)"
+          >
+        </div>
 
-        <p>
-          <strong>Status:</strong>
-          <span id="profileStatus"><span class="status active">● Active</span></span>
-        </p>
+        <div style="text-align: left; width: 100%;">
+          <label style="font-weight: bold; display: block; margin-bottom: 5px;">Maqaa</label>
+          <input
+            id="profileNameInput"
+            type="text"
+            style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; margin-bottom: 15px;"
+            placeholder="Maqaa kee guutuu galchi"
+          >
+
+          <p>
+            <strong>Account:</strong>
+            <span id="profileCode">-</span>
+          </p>
+
+          <p>
+            <strong>Status:</strong>
+            <span id="profileStatus">-</span>
+          </p>
+
+          <button
+            type="button"
+            class="primary-btn"
+            onclick="saveProfile()"
+            style="width: 100%; margin-top: 10px;"
+          >
+            💾 Olkaa'i (Save)
+          </button>
+        </div>
 
       </div>
 
