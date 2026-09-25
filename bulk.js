@@ -1,7 +1,7 @@
 "use strict";
 
 /* =========================================================
-   BULK QUESTIONS IMPORT HANDLER
+   BULK QUESTIONS IMPORT & CLIPBOARD PASTE HANDLER
 ========================================================= */
 
 const BULK_SUPABASE_URL = "https://xhkkaevhcqvkwabcsljm.supabase.co";
@@ -28,6 +28,40 @@ function escapeBulkHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+/* =========================================================
+   1-CLICK CLIPBOARD PASTE
+========================================================= */
+
+async function pasteClipboardToBulk() {
+  const input = document.getElementById("bulkQuestionsInput");
+  if (!input) return;
+
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.readText) {
+      throw new Error("Browser kee clipboard dubbisuu hin hayyamne.");
+    }
+
+    const text = await navigator.clipboard.readText();
+
+    if (!text || !text.trim()) {
+      alert("⚠️ Clipboard keerra waanti qabame hin jiru. Jalqaba gaaffilee copy godhadhu.");
+      return;
+    }
+
+    input.value = text;
+    showBulkMessage("📋 Gaaffileen clipboard irraa milkaa'inaan paste ta'aniiru!", "success");
+  } catch (err) {
+    console.error("CLIPBOARD READ ERROR:", err);
+    alert(
+      "Clipboard irraa paste gochuuf browser keerraa eeyyama (permission) kenni, ykn box sana keessa gadi dhiibii Paste godhi."
+    );
+  }
+}
+
+/* =========================================================
+   LOAD EXAMS TO BULK DROPDOWN
+========================================================= */
+
 async function loadBulkExamSelect() {
   const select = document.getElementById("bulkExamSelect");
   if (!select) return;
@@ -38,9 +72,7 @@ async function loadBulkExamSelect() {
       .select("id, title")
       .order("created_at", { ascending: false });
 
-    if (error || !exams) {
-      return;
-    }
+    if (error || !exams) return;
 
     const currentVal = select.value;
     select.innerHTML = '<option value="">Qormaata filadhu</option>' +
@@ -54,13 +86,16 @@ async function loadBulkExamSelect() {
   }
 }
 
+/* =========================================================
+   PARSE MULTIPLE QUESTIONS
+========================================================= */
+
 function parseBulkQuestions(text) {
   const cleaned = String(text || "").replace(/\r/g, "").trim();
   if (!cleaned) {
     throw new Error("Gaaffilee galchi.");
   }
 
-  // Lakkoofsa gaaffiitiin (fakkeenyaaf: 1., 2., 1), 2)) qooda
   const blocks = cleaned
     .split(/(?=^\s*\d+\s*[\.\)]\s*)/gm)
     .map(item => item.trim())
@@ -75,16 +110,11 @@ function parseBulkQuestions(text) {
   for (let index = 0; index < blocks.length; index++) {
     const block = blocks[index];
 
-    // 1. Gaaffii baasuu
     const questionMatch = block.match(/^\s*\d+\s*[\.\)]\s*(.+?)(?=\n\s*A[\)\.:])/is);
-
-    // 2. Filannoowwan A, B, C, D baasuu
     const optionAMatch = block.match(/(?:^|\n)\s*A[\)\.:]\s*(.+?)(?=\n\s*B[\)\.:])/is);
     const optionBMatch = block.match(/(?:^|\n)\s*B[\)\.:]\s*(.+?)(?=\n\s*C[\)\.:])/is);
     const optionCMatch = block.match(/(?:^|\n)\s*C[\)\.:]\s*(.+?)(?=\n\s*D[\)\.:])/is);
     const optionDMatch = block.match(/(?:^|\n)\s*D[\)\.:]\s*(.+?)(?=\n|$)/is);
-
-    // 3. Deebii sirrii baasuu (Fakkeenya: Deebii: A, Deebii sirrii: B, Answer: C, ✅ Deebii: D)
     const answerMatch = block.match(/(?:✅\s*)?(?:Deebii\s*sirrii|Deebii|Answer)\s*:\s*([ABCD])/i);
 
     if (!questionMatch || !optionAMatch || !optionBMatch || !optionCMatch || !optionDMatch || !answerMatch) {
@@ -105,6 +135,10 @@ function parseBulkQuestions(text) {
 
   return questions;
 }
+
+/* =========================================================
+   IMPORT QUESTIONS TO SUPABASE
+========================================================= */
 
 async function createBulkQuestions() {
   const select = document.getElementById("bulkExamSelect");
@@ -134,7 +168,6 @@ async function createBulkQuestions() {
 
     const parsedQuestions = parseBulkQuestions(text);
 
-    // Exam ID wajjin qindeessuu
     const rows = parsedQuestions.map(q => ({
       ...q,
       exam_id: Number.isInteger(Number(examId)) ? Number(examId) : examId
@@ -144,16 +177,13 @@ async function createBulkQuestions() {
       .from("questions")
       .insert(rows);
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     alert(`✅ Gaaffiiwwan ${rows.length} milkaa'inaan galfamaniiru!`);
     showBulkMessage(`✅ Gaaffiiwwan ${rows.length} qormaata keessa galaniiru.`, "success");
 
     input.value = "";
 
-    // Admin view haaromsuu
     if (typeof window.loadAdminQuestions === "function") {
       await window.loadAdminQuestions();
     }
@@ -172,11 +202,10 @@ async function createBulkQuestions() {
   }
 }
 
-// Window irratti qabsiisuu
 window.createBulkQuestions = createBulkQuestions;
+window.pasteClipboardToBulk = pasteClipboardToBulk;
 window.loadBulkExamSelect = loadBulkExamSelect;
 
-// Yeroo banamu dropdown guutuu
 document.addEventListener("DOMContentLoaded", () => {
   loadBulkExamSelect();
 });
