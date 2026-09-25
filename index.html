@@ -8,7 +8,6 @@
   <title>Akkaadaamii Oromiyaa</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
-  <!-- Font Awesome Icons for beautiful mobile UI -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -16,26 +15,53 @@
   <div class="app-shell">
     
     <!-- =====================================================
-         1. WELCOME / ROLE SPLASH PAGE
+         1. SPLASH / START SCREEN (Image 3 - 1)
     ====================================================== -->
-    <section id="rolePage" class="page active splash-view">
-      <div class="splash-container">
-        <div class="brand-showcase">
-          <img src="192.png" alt="Logo" class="app-logo-large" onerror="this.src='https://img.icons8.com/illustrations/xl/m/graduation-cap.png'">
-          <h1 class="brand-main-title">Akkaadaamii Oromiyaa</h1>
-          <p class="brand-tagline">Barnoota • Qormaata • Qabxii</p>
+    <section id="rolePage" class="page active splash-view-modern">
+      <div class="splash-background-layer">
+        <div class="splash-top-brand">
+          <img src="192.png" alt="Logo" class="app-logo-badge" onerror="this.src='https://img.icons8.com/illustrations/xl/m/graduation-cap.png'">
+          <h2>Akkaadaamii Oromiyaa</h2>
+          <p>Barnoota • Qormaata • Qabxii</p>
+        </div>
+        
+        <div class="splash-hero-center">
+          <div class="hero-illustration-box">
+            <img src="background.jpg" alt="Oromia Landscape" onerror="this.style.display='none'">
+            <div class="hero-fallback-graphic">🎓</div>
+          </div>
+          <h1 class="hero-quote-title">"Barroonni injifannoo keessatti ijaaraati!"</h1>
         </div>
 
-        <div id="webviewWarning" style="display:none; background:#fee2e2; color:#b91c1c; padding:12px; margin: 10px; border-radius:12px; font-size:13px; text-align:center; font-weight:bold; border: 1px solid #fca5a5;">
-          ⚠️ Google Account bilbila kee irratti akka filatamuuf gubbaa mirgaatiin tuqiitii <strong>"Open in Chrome"</strong> filadhu!
+        <div class="splash-bottom-action">
+          <button type="button" class="action-submit-btn splash-go-btn" onclick="showPage('loginMenuPage')">
+            Jalqabi <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         LOGIN SELECTION / GOOGLE & TELEGRAM (Image 3 - 2)
+    ====================================================== -->
+    <section id="loginMenuPage" class="page">
+      <div class="login-menu-container">
+        <div class="login-menu-header">
+          <img src="192.png" alt="Logo" class="app-logo-sm" onerror="this.src='https://img.icons8.com/illustrations/xl/m/graduation-cap.png'">
+          <h2>Akkaadaamii Oromiyaa</h2>
+          <p>Barnoota • Qormaata • Qabxii</p>
         </div>
 
-        <div class="splash-welcome-box">
-          <h2 class="welcome-heading">Baga nagaan dhuftan!</h2>
-          <p class="welcome-desc">Maamilloo ta'uu dandeessu dandeessuu dandeessu.</p>
+        <div class="login-welcome-box">
+          <h3>Baga nagaan dhuftu!</h3>
+          <p>Maamilloo ta'uu dandeessu akkamitti galchuu dandeessa.</p>
         </div>
 
-        <div class="auth-buttons-wrapper">
+        <div id="webviewWarning" style="display:none; background:#fee2e2; color:#b91c1c; padding:10px; border-radius:8px; font-size:12px; text-align:center; font-weight:bold; margin-bottom:12px;">
+          ⚠️ Google Account bilbila kee irratti akka filatamuuf "Open in Chrome" filadhu!
+        </div>
+
+        <div class="auth-buttons-column">
           <button id="googleLoginButton" type="button" class="google-login-btn" onclick="googleLogin()">
             <img src="https://img.icons8.com/color/24/google-logo.png" alt="G">
             <span>Login with Google</span>
@@ -46,22 +72,22 @@
             <span>Login with Telegram</span>
           </button>
 
-          <div class="divider">
+          <div class="divider-line">
             <span>ykn</span>
           </div>
 
-          <p class="alternative-text">Hojii hin barbaaddan? Maqaa barataa akka galmeessitu danda'ama.</p>
-          <button class="secondary-auth-btn" onclick="openStudentLogin()">Akkaadaamii itti fufu →</button>
+          <p class="login-hint-subtext">Hojii hin barbaaddan?<br>Seensa barataa akka ta'if qabdan.</p>
+          <button type="button" class="text-link-btn" onclick="openStudentLogin()">Akkaadaamii itti fufu →</button>
         </div>
       </div>
     </section>
 
     <!-- =====================================================
-         STUDENT LOGIN (GUEST/MANUAL)
+         STUDENT MANUAL LOGIN / REGISTER
     ====================================================== -->
     <section id="studentLoginPage" class="page">
       <div class="sub-header-bar">
-        <button type="button" class="back-action-btn" onclick="showPage('rolePage')">
+        <button type="button" class="back-action-btn" onclick="showPage('loginMenuPage')">
           <i class="fa-solid fa-arrow-left"></i> Duubatti
         </button>
       </div>
@@ -69,17 +95,16 @@
       <div class="padded-container">
         <div class="auth-card">
           <div class="card-icon-header">👨‍🎓</div>
-          <h2>Seensa Barataa</h2>
-          <p class="card-subtitle-desc">Maqaa kee galchuun daddafiin seenaa.</p>
+          <h2>Galmee & Seensa Barataa</h2>
+          <p class="card-subtitle-desc">Maqaa kee guutuu galchuun galmaa'i ykn Seeni.</p>
 
           <div class="form-group-field">
-            <label>Maqaa Guutuu</label>
-            <input id="nameInput" type="text" placeholder="Fakkeenya: Ahmed Mohammed">
+            <label>Maqaa Guutuu (Galmeef)</label>
+            <input id="nameInput" type="text" placeholder="Fakkeenya: Suufiyaan Jeeylaan">
           </div>
-
           <button type="button" class="action-submit-btn" onclick="studentRegister()">Galmeessi (Register)</button>
           
-          <div class="divider"><span>Yookiin Log In</span></div>
+          <div class="divider-line"><span>Yookiin ID Keetiin Seeni</span></div>
 
           <div class="form-group-field">
             <label>Student ID</label>
@@ -97,30 +122,30 @@
     </section>
 
     <!-- =====================================================
-         2. STUDENT DASHBOARD (MAIN HOME)
+         2. STUDENT DASHBOARD (Image 3 - 3)
     ====================================================== -->
     <section id="studentHomePage" class="page">
       <div class="dashboard-header-modern">
         <div class="user-profile-meta">
           <img id="profileImageDisplayTop" src="https://img.icons8.com/illustrations/xl/m/user-male-circle.png" class="user-nav-avatar" onclick="showPage('profilePage'); loadProfile();">
           <div class="user-titles">
-            <h2 id="studentWelcomeName">Suufiyaan Jeeylaan</h2>
-            <p>Barataa • Kutaa 10</p>
+            <h2 id="studentWelcomeName">Barataa</h2>
+            <p>Barataa</p>
           </div>
         </div>
         <div class="header-action-links">
-          <button type="button" class="header-circle-btn" onclick="showPage('profilePage'); loadProfile();">
-            <i class="fa-solid fa-user-astronaut"></i>
+          <button type="button" class="header-circle-btn" onclick="showPage('settingsPage')">
+            <i class="fa-solid fa-gear"></i>
           </button>
         </div>
       </div>
 
       <div class="padded-container">
-        <!-- Goal Banner -->
+        <!-- Motivational Banner (Image 3 - 3) -->
         <div class="motivational-banner">
           <div class="banner-text-side">
             <span class="banner-tag">Kutaa 10</span>
-            <p class="banner-quote">"Barroonni milkaa'inisaa tumsa!"</p>
+            <p class="banner-quote">"Baroonni milkaa'inisaa tumsa!"</p>
           </div>
           <div class="banner-score-chart">
             <div class="circle-chart-inner">
@@ -132,7 +157,7 @@
 
         <h3 class="section-title-label">Wanti barbaachisu</h3>
         
-        <!-- Grid Menu Layout -->
+        <!-- Grid Menu Layout (Image 3 - 3) -->
         <div class="navigation-menu-grid">
           <div class="menu-action-card bg-soft-blue" onclick="showSection('barnoota')">
             <div class="icon-avatar-badge text-blue"><i class="fa-solid fa-book-open"></i></div>
@@ -140,7 +165,7 @@
           </div>
           
           <div class="menu-action-card bg-soft-purple" onclick="showSection('qormaata')">
-            <div class="icon-avatar-badge text-purple"><i class="fa-solid fa-file-signature"></i></div>
+            <div class="icon-avatar-badge text-purple"><i class="fa-solid fa-pen-nib"></i></div>
             <strong>Qormaata Seeni</strong>
           </div>
           
@@ -150,7 +175,7 @@
           </div>
           
           <div class="menu-action-card bg-soft-orange" onclick="showPage('notificationPage')">
-            <div class="icon-avatar-badge text-orange"><i class="fa-solid fa-bullhorn"></i></div>
+            <div class="icon-avatar-badge text-orange"><i class="fa-solid fa-bell"></i></div>
             <strong>Beeksisa Ilaali</strong>
           </div>
 
@@ -160,7 +185,7 @@
           </div>
 
           <div class="menu-action-card bg-soft-indigo" onclick="showPage('profilePage'); loadProfile();">
-            <div class="icon-avatar-badge text-indigo"><i class="fa-solid fa-user-gear"></i></div>
+            <div class="icon-avatar-badge text-indigo"><i class="fa-solid fa-user"></i></div>
             <strong>Profile Koo</strong>
           </div>
         </div>
@@ -168,7 +193,7 @@
     </section>
 
     <!-- =====================================================
-         3. BARNOOTA (LESSONS VIEW ONLY)
+         3. BARNOOTA (Image 3 - 4)
     ====================================================== -->
     <section id="barnootaPage" class="page">
       <div class="sub-header-bar-navy">
@@ -179,7 +204,6 @@
       </div>
 
       <div class="padded-container">
-        <!-- Search -->
         <div class="search-input-wrapper">
           <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
           <input type="text" placeholder="Barnoota barbaadi..." onkeyup="searchLessonsLocal(this.value)">
@@ -196,13 +220,11 @@
       </div>
     </section>
 
-    <!-- =====================================================
-         LESSON DETAIL VIEW
-    ====================================================== -->
+    <!-- LESSON DETAIL VIEW -->
     <section id="lessonDetailPage" class="page">
       <div class="sub-header-bar-navy">
         <div class="nav-title-group">
-          <button type="button" class="header-back-arrow" onclick="showPage('barnootaPage')"><i class="fa-solid fa-chevron-left"></i></button>
+          <button type="button" class="header-back-arrow" onclick="showSection('barnoota')"><i class="fa-solid fa-chevron-left"></i></button>
           <h2 id="lessonDetailTitle">Barnoota</h2>
         </div>
       </div>
@@ -215,7 +237,7 @@
     </section>
 
     <!-- =====================================================
-         4. QORMAATA (EXAMS LIST VIEW ONLY)
+         4. QORMAATA SEENI (Image 3 - 5)
     ====================================================== -->
     <section id="examListPage" class="page">
       <div class="sub-header-bar-navy">
@@ -241,9 +263,7 @@
       </div>
     </section>
 
-    <!-- =====================================================
-         EXAM TESTING SCREEN
-    ====================================================== -->
+    <!-- EXAM TESTING SCREEN -->
     <section id="examPage" class="page">
       <div class="exam-header-bar">
         <div class="exam-header-meta">
@@ -259,7 +279,7 @@
       <div class="padded-container">
         <div class="exam-question-paper-card">
           <span class="question-paper-indicator">Gaaffii</span>
-          <h2 id="questionText" class="question-text-title">Loading question...</h2>
+          <h2 id="questionText" class="question-text-title">Loading...</h2>
 
           <div id="answersContainer" class="answer-multiple-choices-list"></div>
 
@@ -271,15 +291,13 @@
       </div>
     </section>
 
-    <!-- =====================================================
-         SUBMIT EXAM CONFIRMATION MODAL
-    ====================================================== -->
+    <!-- SUBMIT CONFIRM MODAL -->
     <section id="submitConfirmPage" class="page">
-      <div class="padded-container centering-flex-box">
+      <div class="padded-container centering-flex-box" style="min-height:80vh; display:flex; align-items:center; justify-content:center;">
         <div class="confirmation-dialog-card">
           <div class="warning-dialog-icon">⚠️</div>
           <h2>Qormaata Submit</h2>
-          <p id="submitWarningMessage">Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?</p>
+          <p id="submitWarningMessage">Gaaffii hunda xumurteettaa?</p>
           
           <div class="modal-dialog-buttons">
             <button type="button" class="dialog-btn-confirm" onclick="confirmSubmitExam(true)">Eyyee</button>
@@ -290,7 +308,7 @@
     </section>
 
     <!-- =====================================================
-         5. QABXII KOO (SCORES & LEADERBOARD VIEW ONLY)
+         5. QABXII KOO (Image 3 - 6)
     ====================================================== -->
     <section id="scorePage" class="page">
       <div class="sub-header-bar-navy">
@@ -301,7 +319,7 @@
       </div>
 
       <div class="padded-container">
-        <!-- Top Summary Circle -->
+        <!-- Top Summary Circle (Image 3 - 6) -->
         <div class="total-score-overview-card">
           <div class="left-stat-info">
             <span class="score-card-tag">Qabxii Walligalaa</span>
@@ -319,10 +337,10 @@
         <div id="studentScore" class="vertical-results-history-list"></div>
 
         <!-- Leaderboard Area -->
-        <div id="studentLeaderboardSection" class="leaderboard-container-card">
+        <div id="studentLeaderboardSection" class="leaderboard-container-card" style="display:none;">
           <div class="leaderboard-header-meta">
-            <h3><i class="fa-solid fa-trophy"></i> Sadarkaa Barattootaa (Leaderboard)</h3>
-            <p>Giddu-galeessa qabxii irratti hundaa'ee sadarkaa barattoota hundaaf baname.</p>
+            <h3><i class="fa-solid fa-trophy"></i> Sadarkaa Barattootaa</h3>
+            <p>Giddu-galeessa qabxii irratti hundaa'ee sadarkaa barattootaa.</p>
           </div>
           <table id="studentLeaderboardTable" class="leaderboard-modern-table">
             <thead>
@@ -338,47 +356,7 @@
     </section>
 
     <!-- =====================================================
-         6. PROFILE PAGE (MORE)
-    ====================================================== -->
-    <section id="profilePage" class="page">
-      <div class="sub-header-bar-navy">
-        <div class="nav-title-group">
-          <button type="button" class="header-back-arrow" onclick="showPage('studentHomePage')"><i class="fa-solid fa-chevron-left"></i></button>
-          <h2>Profile Koo</h2>
-        </div>
-      </div>
-
-      <div class="padded-container">
-        <div class="profile-card-modern">
-          <div class="profile-avatar-uploader">
-            <img id="profileImageDisplay" src="https://img.icons8.com/illustrations/xl/m/user-male-circle.png" class="upload-avatar-preview">
-            <button type="button" class="trigger-upload-btn" onclick="document.getElementById('profileImageInput').click()"><i class="fa-solid fa-camera"></i></button>
-            <input id="profileImageInput" type="file" accept="image/*" style="display: none;" onchange="handleProfileImageUpload(event)">
-          </div>
-
-          <div class="profile-meta-details-form">
-            <h3 class="user-fullname-card" id="profileNameHeader">Suufiyaan Jeeylaan</h3>
-            <span class="user-id-badge" id="profileCode">ST-123456</span>
-
-            <div class="form-group-field">
-              <label>Maqaa Diheeffannaa</label>
-              <input id="profileNameInput" type="text" placeholder="Maqaa kee sirreessi">
-            </div>
-
-            <div class="user-info-row">
-              <span class="info-label"><i class="fa-solid fa-signal"></i> Status</span>
-              <span id="profileStatus" class="info-val">-</span>
-            </div>
-
-            <button type="button" class="save-profile-btn" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> Oordu Barbaachisaa (Save)</button>
-            <button type="button" class="logout-action-btn" onclick="studentLogout()"><i class="fa-solid fa-right-from-bracket"></i> Ba'i (Logout)</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =====================================================
-         7. NOTIFICATION PAGE
+         6. BEEKSISA (Image 3 - 7)
     ====================================================== -->
     <section id="notificationPage" class="page">
       <div class="sub-header-bar-navy">
@@ -389,13 +367,24 @@
       </div>
 
       <div class="padded-container">
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
+          <input type="text" placeholder="Beeksisa barbaaduu...">
+        </div>
+
+        <div class="filter-tab-row">
+          <button class="filter-tab-btn active">Hundaa</button>
+          <button class="filter-tab-btn">Barnoota</button>
+          <button class="filter-tab-btn">Qormaata</button>
+        </div>
+
         <div class="notification-feed-list">
           <div class="notification-card-item">
             <span class="notif-badge">EXAM</span>
             <h4>Qormaata Matematiksii Kutaa 9</h4>
             <p class="notif-time">10 Aug 2025</p>
             <p class="notif-body">Guyyaa 10/08/2025ti ta'ama.</p>
-            <span class="notif-status">Haala</span>
+            <span class="notif-status text-green">Jalqaba</span>
           </div>
           
           <div class="notification-card-item">
@@ -403,47 +392,108 @@
             <h4>Barnoota Haaraa Afaan Oromoo Kutaa 10</h4>
             <p class="notif-time">08 Aug 2025</p>
             <p class="notif-body">Barnoota haaraa maxxanfameera.</p>
-            <span class="notif-status">Haala</span>
+            <span class="notif-status text-green">Jalqaba</span>
           </div>
         </div>
       </div>
     </section>
 
     <!-- =====================================================
-         8. FEEDBACK PAGE (KUUSAA YAADAA)
+         7. KUUSAA YAADAWWAAN (Image 3 - 8)
     ====================================================== -->
     <section id="feedbackPage" class="page">
       <div class="sub-header-bar-navy">
         <div class="nav-title-group">
           <button type="button" class="header-back-arrow" onclick="showPage('studentHomePage')"><i class="fa-solid fa-chevron-left"></i></button>
-          <h2>Yaada Qabadhu</h2>
+          <h2>Kuusaa Yaadawwan</h2>
         </div>
       </div>
 
       <div class="padded-container">
-        <div class="feedback-composer-card">
-          <h3>Yaada qabduu? Nuuf ergi!</h3>
-          <p>Yaadaa kee deeggarsaaf nuuf kenniti. Deebiin siif kennamaera.</p>
+        <div class="filter-tab-row">
+          <button class="filter-tab-btn active">Hundaa</button>
+          <button class="filter-tab-btn">Dhaamsa</button>
+          <button class="filter-tab-btn">Deebii Kennuu</button>
+        </div>
 
-          <button type="button" class="action-submit-btn" onclick="alert('Yaada galchuuf galmeen qopha\'aa jira!')"><i class="fa-solid fa-plus"></i> Yaada Haaraa</button>
-          
-          <h4 class="sub-section-title">Yaada kee darbee</h4>
-          <div class="feedback-history-list">
-            <div class="feedback-history-item">
-              <div class="fb-meta">
-                <strong>Ahmed Mohammed</strong>
-                <span>12 Aug 2025 • 10:24</span>
-              </div>
-              <p class="fb-text">"Qormaata hiika Afaan Oromoo baafadhuu nu gargaara."</p>
-              <span class="fb-reply-badge">Deebi</span>
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
+          <input type="text" placeholder="Yaada barbaaduu...">
+        </div>
+
+        <div class="feedback-history-list">
+          <div class="feedback-history-item">
+            <div class="fb-meta">
+              <strong>Ahmed Mohammed</strong>
+              <span>12 Aug 2025 • 10:24</span>
             </div>
+            <p class="fb-text">"Qormaata hiika Afaan Oromoo baafadhuu nu gargaara."</p>
+            <span class="fb-reply-badge">Deebii kennuu</span>
           </div>
         </div>
       </div>
     </section>
 
     <!-- =====================================================
-         9. GENERAL SETTINGS
+         8. PROFILE KOO (Image 3 - 9)
+    ====================================================== -->
+    <section id="profilePage" class="page">
+      <div class="sub-header-bar-navy">
+        <div class="nav-title-group">
+          <button type="button" class="header-back-arrow" onclick="showPage('studentHomePage')"><i class="fa-solid fa-chevron-left"></i></button>
+          <h2>Profile Koo</h2>
+        </div>
+      </div>
+
+      <div class="padded-container">
+        <div class="profile-card-modern" style="text-align:center;">
+          <div class="profile-avatar-uploader" style="position:relative; width:100px; height:100px; margin:0 auto 15px auto;">
+            <img id="profileImageDisplay" src="https://img.icons8.com/illustrations/xl/m/user-male-circle.png" class="upload-avatar-preview" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--secondary-royal);">
+            <button type="button" class="trigger-upload-btn" onclick="document.getElementById('profileImageInput').click()" style="position:absolute; bottom:0; right:0; background:var(--secondary-royal); color:#fff; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer;"><i class="fa-solid fa-camera"></i></button>
+            <input id="profileImageInput" type="file" accept="image/*" style="display: none;" onchange="handleProfileImageUpload(event)">
+          </div>
+
+          <h3 class="user-fullname-card" id="profileNameHeader">Suufiyaan Jeeylaan</h3>
+          <span class="user-id-badge" id="profileCode" style="color:var(--text-muted); font-size:0.85rem;">Barataa • ID: BA-123456</span>
+
+          <!-- Stats Grid inside Profile (Image 3 - 9) -->
+          <div class="profile-stats-mini-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:20px 0;">
+            <div class="mini-stat-box" style="background:var(--card-white); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-slate);">
+              <small style="color:var(--text-muted);">Kutaa</small>
+              <h4 style="color:var(--secondary-royal); margin-top:2px;">10</h4>
+            </div>
+            <div class="mini-stat-box" style="background:var(--card-white); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-slate);">
+              <small style="color:var(--text-muted);">Qabxii</small>
+              <h4 style="color:var(--emerald-green); margin-top:2px;">82%</h4>
+            </div>
+            <div class="mini-stat-box" style="background:var(--card-white); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-slate);">
+              <small style="color:var(--text-muted);">Qormaata</small>
+              <h4 style="color:var(--accent-orange); margin-top:2px;">8</h4>
+            </div>
+          </div>
+
+          <div class="form-group-field" style="text-align:left;">
+            <label>Maqaa Diheeffannaa</label>
+            <input id="profileNameInput" type="text" placeholder="Maqaa kee sirreessi">
+          </div>
+
+          <div class="user-info-row" style="text-align:left; font-size:0.85rem; margin:10px 0;">
+            <span class="info-label"><i class="fa-solid fa-envelope"></i> Email</span>
+            <span id="profileEmail" class="info-val">suufiyaan@gmail.com</span>
+          </div>
+
+          <div class="user-info-row" style="text-align:left; font-size:0.85rem; margin:10px 0;">
+            <span class="info-label"><i class="fa-solid fa-signal"></i> Status</span>
+            <span id="profileStatus" class="info-val">-</span>
+          </div>
+
+          <button type="button" class="action-submit-btn" onclick="saveProfile()" style="margin-top:15px;"><i class="fa-solid fa-floppy-disk"></i> Oordu Barbaachisaa (Save)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         9. SETTINGS PAGE (Image 3 - 11)
     ====================================================== -->
     <section id="settingsPage" class="page">
       <div class="sub-header-bar-navy">
@@ -455,11 +505,11 @@
 
       <div class="padded-container">
         <div class="settings-options-card">
-          <div class="settings-user-brief">
-            <img src="https://img.icons8.com/illustrations/xl/m/user-male-circle.png" class="settings-avatar-img">
+          <div class="settings-user-brief" style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+            <img src="https://img.icons8.com/illustrations/xl/m/user-male-circle.png" class="settings-avatar-img" style="width:48px; height:48px; border-radius:50%;">
             <div>
               <h4 id="settingsUserName">Suufiyaan Jeeylaan</h4>
-              <p>Barataa • ID: BA-123456</p>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Barataa • ID: BA-123456</p>
             </div>
           </div>
 
@@ -486,45 +536,42 @@
             <span class="row-value">Wi-Fi kan fayyadam <i class="fa-solid fa-chevron-right"></i></span>
           </div>
 
-          <button class="settings-logout-btn" onclick="studentLogout()"><i class="fa-solid fa-power-off"></i> Ba'i (Logout)</button>
+          <button class="action-submit-btn" style="background:#ef4444; margin-top:20px;" onclick="studentLogout()"><i class="fa-solid fa-power-off"></i> Ba'i (Logout)</button>
         </div>
       </div>
     </section>
 
     <!-- =====================================================
-         ADMIN LOGIN PAGE (MANUAL ACCESSIBLE)
+         10. APP INFO / ABOUT (Image 3 - 12)
     ====================================================== -->
-    <section id="adminLoginPage" class="page">
-      <div class="sub-header-bar">
-        <button type="button" class="back-action-btn" onclick="showPage('rolePage')">
-          <i class="fa-solid fa-arrow-left"></i> Duubatti
-        </button>
+    <section id="aboutAppPage" class="page">
+      <div class="sub-header-bar-navy">
+        <div class="nav-title-group">
+          <button type="button" class="header-back-arrow" onclick="showPage('studentHomePage')"><i class="fa-solid fa-chevron-left"></i></button>
+          <h2>App Info</h2>
+        </div>
       </div>
 
-      <div class="padded-container">
-        <div class="auth-card">
-          <div class="card-icon-header">⚙️</div>
-          <h2>Admin Login</h2>
-          <p class="card-subtitle-desc">Username fi Password admin galchi.</p>
+      <div class="padded-container" style="text-align:center;">
+        <img src="192.png" alt="Logo" style="width:80px; height:80px; border-radius:20px; margin-top:20px;" onerror="this.style.display='none'">
+        <h3 style="margin-top:10px;">Akkaadaamii Oromiyaa</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Barnoota • Qormaata • Qabxii</p>
+        <p style="font-size:0.8rem; margin:15px 0;">Akkaadaamii Oromiyaa app barattootaaf qormaata, barnoota fi qabxii mirkaneessaa akka argatan dhaamsa guddsaa qaba.</p>
+        <span class="badge-accent" style="display:inline-block; padding:6px 16px; margin-bottom:20px;">V1.0.0</span>
 
-          <div class="form-group-field">
-            <label>Username</label>
-            <input id="adminUsername" type="text" placeholder="Username kee galchi">
-          </div>
-
-          <div class="form-group-field">
-            <label>Password</label>
-            <input id="adminPassword" type="password" placeholder="••••••••">
-          </div>
-
-          <button type="button" class="action-submit-btn purple-btn-color" onclick="adminLogin()">Seeni (Log In)</button>
-          <div id="adminLoginMessage" class="message"></div>
+        <div class="feature-checklist" style="text-align:left; background:var(--card-white); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-slate);">
+          <div style="margin:8px 0;"><i class="fa-solid fa-check text-green"></i> Barnoota seenii</div>
+          <div style="margin:8px 0;"><i class="fa-solid fa-check text-green"></i> Qormaata seenii</div>
+          <div style="margin:8px 0;"><i class="fa-solid fa-check text-green"></i> Qabxii</div>
+          <div style="margin:8px 0;"><i class="fa-solid fa-check text-green"></i> Beeksisa</div>
+          <div style="margin:8px 0;"><i class="fa-solid fa-check text-green"></i> Kuusaa yaadawwan</div>
         </div>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:25px;">© 2025 Akkaadaamii Oromiyaa<br>Hundeefame Barattootaaf</p>
       </div>
     </section>
 
     <!-- =====================================================
-         10. ADMIN DASHBOARD (OVERVIEW)
+         11. ADMIN DASHBOARD (Image 2 - 3)
     ====================================================== -->
     <section id="adminDashboardPage" class="page">
       <div class="admin-dashboard-header">
@@ -532,14 +579,14 @@
           <img src="192.png" alt="Admin" class="admin-top-bar-logo" onerror="this.src='https://img.icons8.com/illustrations/xl/m/user-male-circle.png'">
           <div>
             <h2>Admin <span class="admin-crown-badge">W</span></h2>
-            <p>Mataa duree admin</p>
+            <p id="adminDashboardDate">Mudde 12, Cuqaasa 2025</p>
           </div>
         </div>
         <button type="button" class="admin-power-logout-btn" onclick="adminLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
       </div>
 
       <div class="padded-container">
-        <!-- Admin Stats Grid Counter -->
+        <!-- Admin Stats Grid Counter (Image 2 - 3) -->
         <div class="admin-counters-stats-grid">
           <div class="stat-counter-box text-blue">
             <span>Barnoota</span>
@@ -560,17 +607,17 @@
         </div>
 
         <h3 class="section-title-label">Akkuma Kanaf</h3>
-        <p class="sub-paragraph-info">Barnoota fi Qormaata Tajaajila kennaa jira!</p>
+        <p class="sub-paragraph-info">Barnoota fi Qormaata Tajaajila kennaa jiita!</p>
 
         <!-- Admin Control Options Menu -->
         <div class="admin-interactive-options-list">
           <div class="admin-option-row-item" onclick="openAdminPanel('students')">
-            <span class="admin-opt-label"><i class="fa-solid fa-user-graduate text-blue"></i> Barattoota Bulchi</span>
+            <span class="admin-opt-label"><i class="fa-solid fa-user-graduate text-blue"></i> Barattoota</span>
             <i class="fa-solid fa-chevron-right chevron-right-gray"></i>
           </div>
 
           <div class="admin-option-row-item" onclick="openAdminPanel('lessons')">
-            <span class="admin-opt-label"><i class="fa-solid fa-book-medical text-green"></i> Barnoota Bulchi / Dabali</span>
+            <span class="admin-opt-label"><i class="fa-solid fa-book-medical text-green"></i> Barnoota</span>
             <i class="fa-solid fa-chevron-right chevron-right-gray"></i>
           </div>
 
@@ -580,7 +627,7 @@
           </div>
 
           <div class="admin-option-row-item" onclick="openAdminPanel('results')">
-            <span class="admin-opt-label"><i class="fa-solid fa-square-poll-vertical text-orange"></i> Qabxii Barattootaa</span>
+            <span class="admin-opt-label"><i class="fa-solid fa-square-poll-vertical text-orange"></i> Qabxii</span>
             <i class="fa-solid fa-chevron-right chevron-right-gray"></i>
           </div>
         </div>
@@ -613,7 +660,7 @@
           <h3>➕ Barnoota Haaraa Dabali</h3>
           <div class="form-group-field">
             <label>Mata-duree Barnootaa</label>
-            <input id="lessonTitleInput" type="text" placeholder="Fakkeenya: Herrega Safuu">
+            <input id="lessonTitleInput" type="text" placeholder="Fakkeenya: Matematiksii">
           </div>
           <div class="form-group-field">
             <label>Qabiyyee Barnootaa</label>
@@ -647,44 +694,32 @@
             <textarea id="examDescriptionInput" placeholder="Ibsa qormaataa..." rows="2"></textarea>
           </div>
 
-          <div class="form-grid-three-cols">
+          <div class="form-grid-three-cols" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
             <div class="form-group-field">
-              <label>Gaaffii meeqa?</label>
+              <label>Gaaffii?</label>
               <select id="examQuestionLimitInput">
                 <option value="5">5</option>
                 <option value="10" selected>10</option>
                 <option value="20">20</option>
-                <option value="30">30</option>
                 <option value="0">Hunda</option>
               </select>
             </div>
 
             <div class="form-group-field">
-              <label>Attempt meeqa?</label>
+              <label>Attempt?</label>
               <select id="examAttemptLimitInput">
                 <option value="1" selected>1</option>
                 <option value="2">2</option>
-                <option value="3">3</option>
               </select>
             </div>
 
             <div class="form-group-field">
-              <label>Yeroo (daqiiqaa)</label>
+              <label>Daqiiqaa</label>
               <input id="examDurationInput" type="number" min="1" value="30">
             </div>
           </div>
 
-          <div class="form-grid-two-cols">
-            <div class="form-group-field">
-              <label>Final?</label>
-              <select id="examFinalInput">
-                <option value="false">Lakki</option>
-                <option value="true">Eyyee</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="button" class="action-submit-btn" onclick="createExam()">➕ Qormaata Uumi</button>
+          <button type="button" class="action-submit-btn" style="margin-top:10px;" onclick="createExam()">➕ Qormaata Uumi</button>
         </div>
 
         <!-- AI QUESTION BOX -->
@@ -708,19 +743,11 @@
           </div>
 
           <div id="aiTextSource" class="form-group-field" style="display:none;">
-            <label>Barreeffama madda gochuuf</label>
+            <label>Barreeffama</label>
             <textarea id="aiTextInput" placeholder="Barreeffama asitti galchi..."></textarea>
           </div>
 
-          <div class="form-group-field">
-            <label>Gaaffii meeqa?</label>
-            <select id="aiQuestionCount">
-              <option value="5">5</option>
-              <option value="10">10</option>
-            </select>
-          </div>
-
-          <button id="generateAIQuestionsButton" type="button" class="ai-trigger-action-btn" onclick="generateAIQuestions()">🤖 Gaaffii AI Uumi</button>
+          <button id="generateAIQuestionsButton" type="button" class="action-submit-btn" onclick="generateAIQuestions()">🤖 Gaaffii AI Uumi</button>
           <div id="aiQuestionMessage" class="message"></div>
         </div>
 
@@ -732,7 +759,7 @@
             <select id="bulkExamSelect"><option value="">Qormaata filadhu</option></select>
           </div>
           <button type="button" class="action-submit-btn" onclick="pasteClipboardToBulk()">📋 Paste Clipboard</button>
-          <textarea id="bulkQuestionsInput" rows="5" placeholder="Qindoomina gaaffilee paste godhi..."></textarea>
+          <textarea id="bulkQuestionsInput" rows="4" placeholder="Gaaffilee copy godhi..."></textarea>
           <button type="button" class="action-submit-btn" onclick="createBulkQuestions()">📥 Gaaffilee Galchi</button>
           <div id="bulkMessage" class="message"></div>
         </div>
@@ -748,13 +775,13 @@
             <label>Gaaffii</label>
             <textarea id="questionTextInput" placeholder="Gaaffii barreessi..."></textarea>
           </div>
-          <div class="form-grid-two-cols">
+          <div class="form-grid-two-cols" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
             <input id="optionAInput" type="text" placeholder="Option A">
             <input id="optionBInput" type="text" placeholder="Option B">
             <input id="optionCInput" type="text" placeholder="Option C">
             <input id="optionDInput" type="text" placeholder="Option D">
           </div>
-          <div class="form-group-field">
+          <div class="form-group-field" style="margin-top:8px;">
             <label>Deebii Sirrii</label>
             <select id="correctAnswerInput">
               <option value="">Filadhu</option>
