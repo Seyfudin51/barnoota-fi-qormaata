@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - app.js
-   Supabase version (Sirreeffame)
+   Supabase version (Guutuu - Google Login, RLS, Bulk Paste & Leaderboard)
    ========================================================= */
 
 "use strict";
@@ -142,6 +142,9 @@ function normalizeExam(row) {
     ),
     isFinal: Boolean(
       row.is_final ?? row.isFinal ?? false
+    ),
+    show_leaderboard: Boolean(
+      row.show_leaderboard ?? false
     ),
     duration: Number(
       row.duration_minutes ?? row.duration ?? 30
@@ -1609,98 +1612,123 @@ function stopExamTimer() {
 }
 
 /* =========================================================
-   SCORE / PROFILE
+   SCORE / PROFILE / LEADERBOARD (BARATAA)
 ========================================================= */
 
 async function showScore() {
-  const student =
-    requireStudent();
-
+  const student = requireStudent();
   if (!student) return;
 
-  const container =
-    document.getElementById(
-      "studentScore"
-    );
-
+  const container = document.getElementById("studentScore");
   if (!container) return;
 
-  const {
-    data,
-    error
-  } = await db
+  // 1. Qabxii barataa mataa isaa fidi
+  const { data, error } = await db
     .from("results")
     .select("*")
-    .eq(
-      "student_id",
-      student.id
-    )
-    .order(
-      "submitted_at",
-      {
-        ascending: false
-      }
-    );
+    .eq("student_id", student.id)
+    .order("submitted_at", { ascending: false });
 
   if (error) {
-    container.innerHTML =
-      `<div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>`;
-
+    container.innerHTML = `<div class="empty-state">❌ Qabxii fe'uu hin dandeenye.</div>`;
     console.error(error);
-
     return;
   }
 
   if (!data?.length) {
-    container.innerHTML =
-      `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
-
-    return;
-  }
-
-  container.innerHTML =
-    data
+    container.innerHTML = `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
+  } else {
+    container.innerHTML = data
       .map(
         (result) => `
           <div class="result-card">
-
             <div>
-              <h3>
-                ${escapeHtml(
-                  result.exam_title ||
-                    "Qormaata"
-                )}
-              </h3>
-
-              <p>
-                ${formatDateTime(
-                  result.submitted_at
-                )}
-              </p>
+              <h3>${escapeHtml(result.exam_title || "Qormaata")}</h3>
+              <p>${formatDateTime(result.submitted_at)}</p>
             </div>
-
             <div class="result-score">
-
-              <strong>
-                ${Number(
-                  result.percentage || 0
-                )}%
-              </strong>
-
-              <span>
-                ${Number(
-                  result.correct || 0
-                )}/${Number(
-                  result.total || 0
-                )}
-              </span>
-
+              <strong>${Number(result.percentage || 0)}%</strong>
+              <span>${Number(result.correct || 0)}/${Number(result.total || 0)}</span>
             </div>
-
           </div>
         `
       )
       .join("");
+  }
+
+  // 2. Leaderboard agarsiisuu (Admin yoo hayyame)
+  const leaderboardSec = document.getElementById("studentLeaderboardSection");
+  if (!leaderboardSec) return;
+
+  leaderboardSec.style.display = "none"; // Duraan dhoksi
+
+  // Qormaatawwan hunda fidi
+  const { data: exams, error: examsError } = await db
+    .from("exams")
+    .select("id, show_leaderboard");
+
+  if (examsError || !exams) return;
+
+  // Qormaatawwan sadarkaan isaanii akka barattootatti mul'atu qofa fidi
+  const allowedExamIds = exams
+    .filter(e => e.show_leaderboard === true || e.show_leaderboard === "true")
+    .map(e => e.id);
+
+  if (allowedExamIds.length === 0) {
+    return; // Hayyamni hin kennamne yoo ta'e achumatti dhaabi
+  }
+
+  // Bu'aa qormaatawwan sana hunda fidi (barattoota hundaaf)
+  const { data: allResults, error: allResultsError } = await db
+    .from("results")
+    .select("student_id, percentage, students(name)")
+    .in("exam_id", allowedExamIds);
+
+  if (allResultsError || !allResults || allResults.length === 0) return;
+
+  // Giddu-galeessa (Average) barataa tokkoo tokkoo qari
+  const studentStats = {};
+  allResults.forEach((res) => {
+    const sid = String(res.student_id || "");
+    if (!sid) return;
+
+    const name = res.students?.name || "Barataa";
+    if (!studentStats[sid]) {
+      studentStats[sid] = { sum: 0, count: 0, name: name };
+    }
+    studentStats[sid].sum += Number(res.percentage || 0);
+    studentStats[sid].count += 1;
+  });
+
+  // Sadarkaa qindeessi (Average guddaa irraa gara xiqqaatti)
+  const ranking = Object.entries(studentStats)
+    .map(([id, stat]) => ({
+      id,
+      name: stat.name,
+      average: stat.count ? stat.sum / stat.count : 0
+    }))
+    .sort((a, b) => b.average - a.average);
+
+  // HTML Table keessa galchi
+  const tbody = document.querySelector("#studentLeaderboardTable tbody");
+  if (tbody) {
+    tbody.innerHTML = ranking
+      .map((item, index) => {
+        const isMe = String(item.id) === String(student.id);
+        const rankStyle = isMe ? "background-color: #fef3c7; font-weight: bold; border-left: 4px solid #f59e0b;" : "";
+        const medal = index === 0 ? "🥇 " : index === 1 ? "🥈 " : index === 2 ? "🥉 " : "";
+        return `
+          <tr style="${rankStyle} border-bottom: 1px solid #f3f4f6;">
+            <td style="padding: 10px;">${medal}${index + 1}</td>
+            <td style="padding: 10px;">${escapeHtml(item.name)} ${isMe ? "(Ati)" : ""}</td>
+            <td style="padding: 10px; text-align: right;">${item.average.toFixed(1)}%</td>
+          </tr>
+        `;
+      })
+      .join("");
+    
+    leaderboardSec.style.display = "block"; // Amma agarsiisi
+  }
 }
 
 async function loadProfile() {
@@ -3608,6 +3636,15 @@ async function loadAdminExams() {
               <button
                 type="button"
                 class="small-btn"
+                onclick="toggleLeaderboardVisibility('${exam.id}')"
+                style="background-color: ${exam.show_leaderboard ? '#10b981' : '#6b7280'}; color: white;"
+              >
+                ${exam.show_leaderboard ? "🔒 Leaderboard Cufi" : "🔓 Leaderboard Bani"}
+              </button>
+
+              <button
+                type="button"
+                class="small-btn"
                 onclick="editExam('${exam.id}')"
               >
                 ✏️ Sirreessi
@@ -3661,7 +3698,8 @@ async function populateExamSelects(
 
   [
     "questionExamSelect",
-    "aiQuestionExamSelect"
+    "aiQuestionExamSelect",
+    "bulkExamSelect"
   ].forEach(
     (id) => {
       const select =
@@ -3836,7 +3874,8 @@ async function createExam() {
       end_time:
         endTime,
       status:
-        "active"
+        "active",
+      show_leaderboard: false
     });
 
   if (error) {
@@ -3924,6 +3963,49 @@ async function toggleExamStatus(
 
     return;
   }
+
+  await loadAdminExams();
+}
+
+async function toggleLeaderboardVisibility(examId) {
+  if (!requireAdmin()) {
+    return;
+  }
+
+  const {
+    data: exam,
+    error: findError
+  } = await db
+    .from("exams")
+    .select("id,title,show_leaderboard")
+    .eq("id", examId)
+    .maybeSingle();
+
+  if (findError || !exam) {
+    alert("Qormaanni hin argamne.");
+    return;
+  }
+
+  const currentVal = Boolean(exam.show_leaderboard);
+  const newVal = !currentVal;
+
+  const { error: updateError } = await db
+    .from("exams")
+    .update({
+      show_leaderboard: newVal
+    })
+    .eq("id", exam.id);
+
+  if (updateError) {
+    alert("Dogoggora: " + getErrorMessage(updateError));
+    return;
+  }
+
+  alert(
+    newVal
+      ? `✅ Leaderboard qormaata "${exam.title}" barattootaaf banameera.`
+      : `⏸️ Leaderboard qormaata "${exam.title}" barattootaaf dhokfameera.`
+  );
 
   await loadAdminExams();
 }
@@ -4823,7 +4905,10 @@ async function googleLogin() {
         options: {
           redirectTo:
             window.location.origin +
-            window.location.pathname
+            window.location.pathname,
+          queryParams: {
+            prompt: "select_account"
+          }
         }
       }
     );
@@ -5133,6 +5218,9 @@ window.createExam =
 
 window.toggleExamStatus =
   toggleExamStatus;
+
+window.toggleLeaderboardVisibility =
+  toggleLeaderboardVisibility;
 
 window.editExam =
   editExam;
