@@ -2,240 +2,709 @@
 <html lang="om">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <meta name="description" content="Akkaadaamii Oromiyaa - Barnoota fi Qormaata">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Akkaadaamii Oromiyaa - Barnoota fi Qormaata"
+  >
+
   <meta name="theme-color" content="#111827">
+
   <title>Akkaadaamii Oromiyaa</title>
+
   <link rel="manifest" href="manifest.json">
+
   <style>
-    html, body { margin: 0; padding: 0; min-height: 100%; }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
   </style>
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <!-- ROLE / LOGIN PAGE -->
+  <!-- =====================================================
+       ROLE / LOGIN PAGE
+  ====================================================== -->
+
   <section id="rolePage" class="page active">
+
     <div class="login-wrapper">
+
       <div class="brand-area">
-        <div class="brand-title">🎓 Akkaadaamii Oromiyaa</div>
-        <div class="brand-subtitle">Barnoota fi Qormaata</div>
+        <div class="brand-title">
+          🎓 Akkaadaamii Oromiyaa
+        </div>
+
+        <div class="brand-subtitle">
+          Barnoota fi Qormaata
+        </div>
       </div>
+
       <div class="login-card">
-        <div class="login-icon">🔐</div>
-        <h1>🔐 Seensa Akkaadaamii</h1>
-        <p class="login-description">Akkaadaamii seenuuf karaa barbaadde filadhu.</p>
-        
-        <button id="googleLoginButton" type="button" class="google-login-btn" onclick="googleLogin()">
-          <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.93-4.18 2.93-7.4z"/><path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.37l-3.14-2.44c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.04H3.28v2.52A9.74 9.74 0 0 0 12 21.5z"/><path fill="#FBBC05" d="M6.53 13.57A5.86 5.86 0 0 1 6.22 12c0-.55.11-1.09.31-1.57V7.91H3.28A9.5 9.5 0 0 0 2.25 12c0 1.47.35 2.86 1.03 4.09l3.25-2.52z"/><path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.45 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.41l3.25 2.52C7.3 8.11 9.46 6.39 12 6.39z"/></svg>
-          <span id="googleLoginText">Log in with Google</span>
+
+        <div class="login-icon">
+          🔐
+        </div>
+
+        <h1>
+          🔐 Seensa Akkaadaamii
+        </h1>
+
+        <p class="login-description">
+          Akkaadaamii seenuuf karaa barbaadde filadhu.
+        </p>
+
+        <!-- GOOGLE -->
+
+        <button
+          id="googleLoginButton"
+          type="button"
+          class="google-login-btn"
+          onclick="googleLogin()"
+        >
+
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              fill="#4285F4"
+              d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.93-4.18 2.93-7.4z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 21.5c2.63 0 4.84-.87 6.45-2.37l-3.14-2.44c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.04H3.28v2.52A9.74 9.74 0 0 0 12 21.5z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M6.53 13.57A5.86 5.86 0 0 1 6.22 12c0-.55.11-1.09.31-1.57V7.91H3.28A9.5 9.5 0 0 0 2.25 12c0 1.47.35 2.86 1.03 4.09l3.25-2.52z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.45 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.41l3.25 2.52C7.3 8.11 9.46 6.39 12 6.39z"
+            />
+          </svg>
+
+          <span id="googleLoginText">
+            Log in with Google
+          </span>
+
         </button>
 
-        <button id="telegramLoginButton" type="button" class="telegram-login-btn" onclick="telegramLogin()">
+        <!-- TELEGRAM -->
+
+        <button
+          id="telegramLoginButton"
+          type="button"
+          class="telegram-login-btn"
+          onclick="telegramLogin()"
+        >
+
           <span class="telegram-icon">➤</span>
-          <span>Log in with Telegram</span>
+
+          <span>
+            Log in with Telegram
+          </span>
+
         </button>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- STUDENT HOME -->
+
+  <!-- =====================================================
+       STUDENT HOME
+  ====================================================== -->
+
   <section id="studentHomePage" class="page">
+
     <div class="page-container">
+
       <header class="app-header">
+
         <div>
           <h2>🎓 Akkaadaamii Oromiyaa</h2>
-          <p>Baga nagaan dhuftan, <strong id="studentWelcomeName">Barataa</strong></p>
+          <p>
+            Baga nagaan dhuftan,
+            <strong id="studentWelcomeName">Barataa</strong>
+          </p>
         </div>
-        <button type="button" class="logout-btn" onclick="studentLogout()">Ba'i</button>
+
+        <button
+          type="button"
+          class="logout-btn"
+          onclick="studentLogout()"
+        >
+          Ba'i
+        </button>
+
       </header>
+
+
       <div id="studentHomeMessage" class="info-box"></div>
+
+
       <div class="student-menu-grid">
-        <button type="button" class="menu-card" onclick="loadStudentLessons()"><span>📚</span><strong>Barnoota</strong></button>
-        <button type="button" class="menu-card" onclick="showPage('examListPage'); loadExams()"><span>📝</span><strong>Qormaata</strong></button>
-        <button type="button" class="menu-card" onclick="showPage('scorePage'); showScore()"><span>📊</span><strong>Qabxii</strong></button>
-        <button type="button" class="menu-card" onclick="showPage('profilePage'); loadProfile()"><span>👤</span><strong>Profile</strong></button>
+
+        <button
+          type="button"
+          class="menu-card"
+          onclick="loadStudentLessons()"
+        >
+          <span>📚</span>
+          <strong>Barnoota</strong>
+        </button>
+
+        <button
+          type="button"
+          class="menu-card"
+          onclick="showPage('examListPage'); loadExams()"
+        >
+          <span>📝</span>
+          <strong>Qormaata</strong>
+        </button>
+
+        <button
+          type="button"
+          class="menu-card"
+          onclick="showPage('scorePage'); showScore()"
+        >
+          <span>📊</span>
+          <strong>Qabxii</strong>
+        </button>
+
+        <button
+          type="button"
+          class="menu-card"
+          onclick="showPage('profilePage'); loadProfile()"
+        >
+          <span>👤</span>
+          <strong>Profile</strong>
+        </button>
+
       </div>
+
+
       <div class="content-section">
+
         <h2>📚 Barnoota</h2>
+
         <div id="studentLessons"></div>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- LESSON DETAIL -->
+
+  <!-- =====================================================
+       LESSON DETAIL
+  ====================================================== -->
+
   <section id="lessonDetailPage" class="page">
+
     <div class="page-container">
-      <button type="button" class="back-btn" onclick="showPage('studentHomePage')">← Duubatti</button>
+
+      <button
+        type="button"
+        class="back-btn"
+        onclick="showPage('studentHomePage')"
+      >
+        ← Duubatti
+      </button>
+
       <div class="content-card">
-        <h1 id="lessonDetailTitle">Barnoota</h1>
+
+        <h1 id="lessonDetailTitle">
+          Barnoota
+        </h1>
+
         <div id="lessonDetailContent"></div>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- EXAM LIST -->
+
+  <!-- =====================================================
+       EXAM LIST
+  ====================================================== -->
+
   <section id="examListPage" class="page">
+
     <div class="page-container">
-      <button type="button" class="back-btn" onclick="showPage('studentHomePage')">← Duubatti</button>
+
+      <button
+        type="button"
+        class="back-btn"
+        onclick="showPage('studentHomePage')"
+      >
+        ← Duubatti
+      </button>
+
       <div class="section-heading">
         <h1>📝 Qormaata</h1>
         <p>Qormaata siif banaa jiru filadhu.</p>
       </div>
+
       <div id="studentExams"></div>
+
     </div>
+
   </section>
 
-  <!-- EXAM PAGE -->
+
+  <!-- =====================================================
+       EXAM PAGE
+  ====================================================== -->
+
   <section id="examPage" class="page">
+
     <div class="exam-wrapper">
+
       <div class="exam-topbar">
+
         <div>
-          <h2 id="examTitle">Qormaata</h2>
-          <span id="questionNumber">1/1</span>
+          <h2 id="examTitle">
+            Qormaata
+          </h2>
+
+          <span id="questionNumber">
+            1/1
+          </span>
         </div>
-        <div class="timer-box">⏱️ <strong id="examTimerValue">00:00</strong></div>
+
+        <div class="timer-box">
+          ⏱️
+          <strong id="examTimerValue">
+            00:00
+          </strong>
+        </div>
+
       </div>
+
+
       <div class="exam-card">
-        <div class="question-label">Gaaffii</div>
-        <h2 id="questionText">Gaaffii</h2>
-        <div id="answersContainer"></div>
-        <div class="exam-navigation">
-          <button id="nextQuestionButton" type="button" class="primary-btn" onclick="nextQuestion()">Itti fufi →</button>
-          <button id="submitExamButton" type="button" class="submit-btn" onclick="requestSubmitExam()">Submit Qormaata</button>
+
+        <div class="question-label">
+          Gaaffii
         </div>
+
+        <h2 id="questionText">
+          Gaaffii
+        </h2>
+
+        <div id="answersContainer"></div>
+
+
+        <div class="exam-navigation">
+
+          <button
+            id="nextQuestionButton"
+            type="button"
+            class="primary-btn"
+            onclick="nextQuestion()"
+          >
+            Itti fufi →
+          </button>
+
+          <button
+            id="submitExamButton"
+            type="button"
+            class="submit-btn"
+            onclick="requestSubmitExam()"
+          >
+            Submit Qormaata
+          </button>
+
+        </div>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- SUBMIT CONFIRM -->
+
+  <!-- =====================================================
+       SUBMIT CONFIRM
+  ====================================================== -->
+
   <section id="submitConfirmPage" class="page">
+
     <div class="center-card">
-      <div class="big-icon">⚠️</div>
-      <h2>Qormaata Submit</h2>
-      <p id="submitWarningMessage">Gaaffii hunda xumurteettaa?</p>
-      <div class="confirm-buttons">
-        <button type="button" class="primary-btn" onclick="confirmSubmitExam(true)">Eyyee</button>
-        <button type="button" class="secondary-btn" onclick="confirmSubmitExam(false)">Hin xumirree</button>
+
+      <div class="big-icon">
+        ⚠️
       </div>
+
+      <h2>Qormaata Submit</h2>
+
+      <p id="submitWarningMessage">
+        Gaaffii hunda xumurteettaa?
+      </p>
+
+      <div class="confirm-buttons">
+
+        <button
+          type="button"
+          class="primary-btn"
+          onclick="confirmSubmitExam(true)"
+        >
+          Eyyee
+        </button>
+
+        <button
+          type="button"
+          class="secondary-btn"
+          onclick="confirmSubmitExam(false)"
+        >
+          Hin xumirree
+        </button>
+
+      </div>
+
     </div>
+
   </section>
 
-  <!-- SCORE & LEADERBOARD PAGE -->
+
+  <!-- =====================================================
+       SCORE
+  ====================================================== -->
+
   <section id="scorePage" class="page">
+
     <div class="page-container">
-      <button type="button" class="back-btn" onclick="showPage('studentHomePage')">← Duubatti</button>
+
+      <button
+        type="button"
+        class="back-btn"
+        onclick="showPage('studentHomePage')"
+      >
+        ← Duubatti
+      </button>
+
       <div class="section-heading">
         <h1>📊 Qabxii Koo</h1>
       </div>
-      <div id="studentScore"></div>
 
-      <!-- LEADERBOARD SECTION (ADMIN YOO HAYYAME QOFA MUL'ATA) -->
-      <div id="studentLeaderboardSection" style="display:none; margin-top: 30px; background: #ffffff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-        <h2 style="margin-top:0;">🏆 Sadarkaa Barattootaa (Leaderboard)</h2>
-        <p style="color:#6b7280; font-size:14px;">Giddu-galeessa Qabxii Barattoota Hundaaf Adminiin saaxile.</p>
-        <table id="studentLeaderboardTable" style="width:100%; border-collapse:collapse; margin-top:12px;">
+      <div id="studentScore" style="margin-bottom: 25px;"></div>
+
+      <!-- LEADERBOARD / SADARKAA (QABXII FI PARSANTA MALEE) -->
+      <div id="studentLeaderboardSection" style="display:none; background: #ffffff; padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <h2 style="margin-top:0; font-size: 1.25rem;">🏆 Sadarkaa Barattootaa (Leaderboard)</h2>
+        <p style="color:#6b7280; font-size:13px; margin-bottom: 12px;">Giddu-galeessa qabxii irratti hundaa'ee sadarkaa barattoota hundaaf baname.</p>
+        <table id="studentLeaderboardTable" style="width:100%; border-collapse:collapse;">
           <thead>
-            <tr style="border-bottom: 2px solid #e5e7eb; text-align: left;">
-              <th style="padding: 8px;">#</th>
+            <tr style="border-bottom: 2px solid #e5e7eb; text-align: left; font-size: 14px; color: #4b5563;">
+              <th style="padding: 8px;">Sadarkaa</th>
               <th style="padding: 8px;">Barataa</th>
-              <th style="padding: 8px; text-align: right;">Giddu-galeessa</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
+
     </div>
+
   </section>
 
-  <!-- PROFILE -->
+
+  <!-- =====================================================
+       PROFILE
+  ====================================================== -->
+
   <section id="profilePage" class="page">
+
     <div class="page-container">
-      <button type="button" class="back-btn" onclick="showPage('studentHomePage')">← Duubatti</button>
+
+      <button
+        type="button"
+        class="back-btn"
+        onclick="showPage('studentHomePage')"
+      >
+        ← Duubatti
+      </button>
+
       <div class="form-card">
+
         <h2>👤 Profile Koo</h2>
-        <p><strong>Account:</strong> <span id="profileCode">Google Account</span></p>
-        <p><strong>Status:</strong> <span id="profileStatus"><span class="status active">● Active</span></span></p>
+
+        <p>
+          <strong>Account:</strong>
+          <span id="profileCode">Google Account</span>
+        </p>
+
+        <p>
+          <strong>Status:</strong>
+          <span id="profileStatus"><span class="status active">● Active</span></span>
+        </p>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- ADMIN LOGIN -->
+
+  <!-- =====================================================
+       ADMIN LOGIN - HIDDEN FROM MAIN LOGIN
+  ====================================================== -->
+
   <section id="adminLoginPage" class="page">
+
     <div class="page-container">
-      <button type="button" class="back-btn" onclick="showPage('rolePage')">← Duubatti</button>
+
+      <button
+        type="button"
+        class="back-btn"
+        onclick="showPage('rolePage')"
+      >
+        ← Duubatti
+      </button>
+
       <div class="form-card">
+
         <h2>⚙️ Admin Login</h2>
+
         <label>Username</label>
-        <input id="adminUsername" type="text">
+
+        <input
+          id="adminUsername"
+          type="text"
+        >
+
         <label>Password</label>
-        <input id="adminPassword" type="password">
-        <button type="button" class="primary-btn" onclick="adminLogin()">Seeni</button>
+
+        <input
+          id="adminPassword"
+          type="password"
+        >
+
+        <button
+          type="button"
+          class="primary-btn"
+          onclick="adminLogin()"
+        >
+          Seeni
+        </button>
+
         <div id="adminLoginMessage" class="message"></div>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- ADMIN DASHBOARD -->
+
+  <!-- =====================================================
+       ADMIN DASHBOARD
+  ====================================================== -->
+
   <section id="adminDashboardPage" class="page">
+
     <div class="admin-container">
+
       <header class="admin-header">
+
         <div>
           <h1>⚙️ Admin Dashboard</h1>
           <p>Akkaadaamii Oromiyaa</p>
         </div>
-        <button type="button" class="logout-btn" onclick="adminLogout()">Ba'i</button>
+
+        <button
+          type="button"
+          class="logout-btn"
+          onclick="adminLogout()"
+        >
+          Ba'i
+        </button>
+
       </header>
 
+
       <div class="admin-menu">
-        <button type="button" class="admin-menu-btn active-menu" onclick="openAdminPanel('students')"><span>👨‍🎓</span><strong>Barattoota</strong></button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('results')"><span>📊</span><strong>Qabxii</strong></button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('lessons')"><span>📚</span><strong>Barnoota</strong></button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('exams')"><span>📝</span><strong>Qormaata</strong></button>
+
+        <button
+          type="button"
+          class="admin-menu-btn active-menu"
+          onclick="openAdminPanel('students')"
+        >
+          <span>👨‍🎓</span>
+          <strong>Barattoota</strong>
+        </button>
+
+        <button
+          type="button"
+          class="admin-menu-btn"
+          onclick="openAdminPanel('results')"
+        >
+          <span>📊</span>
+          <strong>Qabxii</strong>
+        </button>
+
+        <button
+          type="button"
+          class="admin-menu-btn"
+          onclick="openAdminPanel('lessons')"
+        >
+          <span>📚</span>
+          <strong>Barnoota</strong>
+        </button>
+
+        <button
+          type="button"
+          class="admin-menu-btn"
+          onclick="openAdminPanel('exams')"
+        >
+          <span>📝</span>
+          <strong>Qormaata</strong>
+        </button>
+
       </div>
+
 
       <!-- STUDENTS -->
-      <div id="adminStudentsPanel" class="admin-panel active">
-        <div class="panel-title"><h2>👨‍🎓 Barattoota</h2></div>
+
+      <div
+        id="adminStudentsPanel"
+        class="admin-panel active"
+      >
+
+        <div class="panel-title">
+          <h2>👨‍🎓 Barattoota</h2>
+        </div>
+
         <div id="adminStudentsList"></div>
+
       </div>
+
 
       <!-- RESULTS -->
-      <div id="adminResultsPanel" class="admin-panel">
-        <div class="panel-title"><h2>📊 Qabxii</h2></div>
-        <div class="table-wrapper">
-          <table id="adminResultsTable">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
+
+      <div
+        id="adminResultsPanel"
+        class="admin-panel"
+      >
+
+        <div class="panel-title">
+          <h2>📊 Qabxii</h2>
         </div>
+
+        <div class="table-wrapper">
+
+          <table id="adminResultsTable">
+
+            <thead></thead>
+
+            <tbody></tbody>
+
+          </table>
+
+        </div>
+
       </div>
+
 
       <!-- LESSONS -->
-      <div id="adminLessonsPanel" class="admin-panel">
-        <div class="panel-title"><h2>📚 Barnoota</h2></div>
-        <div class="admin-form">
-          <input id="lessonTitleInput" type="text" placeholder="Mata-duree barnootaa">
-          <textarea id="lessonContentInput" placeholder="Qabiyyee barnootaa"></textarea>
-          <button type="button" class="primary-btn" onclick="createLesson()">➕ Barnoota Dabali</button>
+
+      <div
+        id="adminLessonsPanel"
+        class="admin-panel"
+      >
+
+        <div class="panel-title">
+          <h2>📚 Barnoota</h2>
         </div>
+
+
+        <div class="admin-form">
+
+          <input
+            id="lessonTitleInput"
+            type="text"
+            placeholder="Mata-duree barnootaa"
+          >
+
+          <textarea
+            id="lessonContentInput"
+            placeholder="Qabiyyee barnootaa"
+          ></textarea>
+
+          <button
+            type="button"
+            class="primary-btn"
+            onclick="createLesson()"
+          >
+            ➕ Barnoota Dabali
+          </button>
+
+        </div>
+
+
         <div id="adminLessonsList"></div>
+
       </div>
 
+
       <!-- EXAMS -->
-      <div id="adminExamsPanel" class="admin-panel">
-        <div class="panel-title"><h2>📝 Qormaata</h2></div>
+
+      <div
+        id="adminExamsPanel"
+        class="admin-panel"
+      >
+
+        <div class="panel-title">
+          <h2>📝 Qormaata</h2>
+        </div>
+
 
         <!-- CREATE EXAM -->
+
         <div class="admin-form exam-create-form">
+
           <h3>➕ Qormaata Uumi</h3>
-          <input id="examTitleInput" type="text" placeholder="Mata-duree qormaataa">
-          <textarea id="examDescriptionInput" placeholder="Ibsa qormaataa"></textarea>
-          
+
+          <input
+            id="examTitleInput"
+            type="text"
+            placeholder="Mata-duree qormaataa"
+          >
+
+          <textarea
+            id="examDescriptionInput"
+            placeholder="Ibsa qormaataa"
+          ></textarea>
+
+
           <div class="form-grid">
+
             <div>
               <label>Gaaffii meeqa?</label>
+
               <select id="examQuestionLimitInput">
+
                 <option value="5">5</option>
                 <option value="10" selected>10</option>
                 <option value="20">20</option>
@@ -245,60 +714,194 @@
                 <option value="75">75</option>
                 <option value="100">100</option>
                 <option value="0">Hunda</option>
+
               </select>
+
             </div>
+
+
             <div>
               <label>Attempt meeqa?</label>
+
               <select id="examAttemptLimitInput">
+
                 <option value="1" selected>1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
                 <option value="5">5</option>
                 <option value="10">10</option>
+
               </select>
+
             </div>
+
+
             <div>
               <label>Yeroo (daqiiqaa)</label>
-              <input id="examDurationInput" type="number" min="1" value="30">
+
+              <input
+                id="examDurationInput"
+                type="number"
+                min="1"
+                value="30"
+              >
+
             </div>
+
+
             <div>
               <label>Final?</label>
+
               <select id="examFinalInput">
+
                 <option value="false">Lakki</option>
                 <option value="true">Eyyee</option>
+
               </select>
+
             </div>
+
           </div>
+
 
           <div class="form-grid">
-            <div><label>Guyyaa jalqabaa</label><input id="examStartDateInput" type="date"></div>
-            <div><label>Guyyaa xumuraa</label><input id="examEndDateInput" type="date"></div>
-            <div><label>Saa'a jalqabaa</label><input id="examStartTimeInput" type="time"></div>
-            <div><label>Saa'a xumuraa</label><input id="examEndTimeInput" type="time"></div>
+
+            <div>
+              <label>Guyyaa jalqabaa</label>
+
+              <input
+                id="examStartDateInput"
+                type="date"
+              >
+            </div>
+
+            <div>
+              <label>Guyyaa xumuraa</label>
+
+              <input
+                id="examEndDateInput"
+                type="date"
+              >
+            </div>
+
+            <div>
+              <label>Saa'a jalqabaa</label>
+
+              <input
+                id="examStartTimeInput"
+                type="time"
+              >
+            </div>
+
+            <div>
+              <label>Saa'a xumuraa</label>
+
+              <input
+                id="examEndTimeInput"
+                type="time"
+              >
+            </div>
+
           </div>
 
-          <button type="button" class="primary-btn" onclick="createExam()">➕ Qormaata Uumi</button>
+
+          <button
+            type="button"
+            class="primary-btn"
+            onclick="createExam()"
+          >
+            ➕ Qormaata Uumi
+          </button>
+
         </div>
 
+
         <!-- AI QUESTIONS -->
+
         <div class="admin-form ai-box">
+
           <h3>🤖 AI'n Gaaffii Uumi</h3>
+
+
           <label>Qormaata</label>
-          <select id="aiQuestionExamSelect"><option value="">Qormaata filadhu</option></select>
+
+          <select id="aiQuestionExamSelect">
+            <option value="">Qormaata filadhu</option>
+          </select>
+
+
           <label>Madda gaaffii</label>
-          <select id="aiQuestionSourceType" onchange="changeAIQuestionSource()">
+
+          <select
+            id="aiQuestionSourceType"
+            onchange="changeAIQuestionSource()"
+          >
+
             <option value="topic">Mata-duree</option>
             <option value="text">Barreeffama</option>
             <option value="pdf">PDF</option>
             <option value="image">Suuraa</option>
+
           </select>
-          <div id="aiTopicSource"><input id="aiTopicInput" type="text" placeholder="Mata-duree fakkeenya: Neural Network"></div>
-          <div id="aiTextSource" style="display:none;"><textarea id="aiTextInput" placeholder="Barreeffama asitti galchi"></textarea></div>
-          <div id="aiPdfSource" style="display:none;"><input id="aiPdfInput" type="file" accept="application/pdf"></div>
-          <div id="aiImageSource" style="display:none;"><input id="aiImageInput" type="file" accept="image/*"></div>
+
+
+          <div id="aiTopicSource">
+
+            <input
+              id="aiTopicInput"
+              type="text"
+              placeholder="Mata-duree fakkeenya: Neural Network"
+            >
+
+          </div>
+
+
+          <div
+            id="aiTextSource"
+            style="display:none;"
+          >
+
+            <textarea
+              id="aiTextInput"
+              placeholder="Barreeffama asitti galchi"
+            ></textarea>
+
+          </div>
+
+
+          <div
+            id="aiPdfSource"
+            style="display:none;"
+          >
+
+            <input
+              id="aiPdfInput"
+              type="file"
+              accept="application/pdf"
+            >
+
+          </div>
+
+
+          <div
+            id="aiImageSource"
+            style="display:none;"
+          >
+
+            <input
+              id="aiImageInput"
+              type="file"
+              accept="image/*"
+            >
+
+          </div>
+
+
           <label>Gaaffii meeqa?</label>
+
           <select id="aiQuestionCount">
+
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -306,16 +909,38 @@
             <option value="50">50</option>
             <option value="75">75</option>
             <option value="100">100</option>
+
           </select>
-          <button id="generateAIQuestionsButton" type="button" class="ai-btn" onclick="generateAIQuestions()">🤖 Gaaffii AI Uumi</button>
-          <div id="aiQuestionMessage" class="message"></div>
+
+
+          <button
+            id="generateAIQuestionsButton"
+            type="button"
+            class="ai-btn"
+            onclick="generateAIQuestions()"
+          >
+            🤖 Gaaffii AI Uumi
+          </button>
+
+
+          <div
+            id="aiQuestionMessage"
+            class="message"
+          ></div>
+
         </div>
 
-        <!-- BULK / MULTIPLE QUESTIONS IMPORT WITH 1-CLICK PASTE -->
+
+        <!-- BULK / MULTIPLE QUESTIONS IMPORT -->
+
         <div class="admin-form">
+
           <h3>📋 Gaaffii Hedduu Walitti (Bulk) Galchi</h3>
-          <select id="bulkExamSelect"><option value="">Qormaata filadhu</option></select>
-          
+
+          <select id="bulkExamSelect">
+            <option value="">Qormaata filadhu</option>
+          </select>
+
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 6px;">
             <label style="margin:0; font-weight: bold;">Gaaffilee Copy Godhatte Paste Gochuuf:</label>
             <button type="button" class="secondary-btn" onclick="pasteClipboardToBulk()" style="padding: 6px 14px; font-size: 13px;">
@@ -323,57 +948,141 @@
             </button>
           </div>
 
-          <textarea id="bulkQuestionsInput" rows="8" placeholder="Asiitti gaaffilee kee hunda copy-paste godhi (Fakk:
+          <textarea
+            id="bulkQuestionsInput"
+            rows="8"
+            placeholder="Asiitti gaaffilee kee hunda copy-paste godhi (Fakk:
 1. Gaaffiin...
 A) ...
 B) ...
 C) ...
 D) ...
-✅ Deebii: A)"></textarea>
+✅ Deebii: A)"
+          ></textarea>
 
-          <button type="button" class="primary-btn" onclick="createBulkQuestions()">📥 Gaaffilee Hedduu Galchi</button>
+          <button
+            type="button"
+            class="primary-btn"
+            onclick="createBulkQuestions()"
+          >
+            📥 Gaaffilee Hedduu Galchi
+          </button>
+
           <div id="bulkMessage" class="message"></div>
+
         </div>
 
+
         <!-- MANUAL QUESTIONS -->
+
         <div class="admin-form">
+
           <h3>✍️ Gaaffii Ofii Keetii Uumi (Tokko tokkoon)</h3>
-          <select id="questionExamSelect"><option value="">Qormaata filadhu</option></select>
-          <textarea id="questionTextInput" placeholder="Gaaffii"></textarea>
+
+
+          <select id="questionExamSelect">
+
+            <option value="">
+              Qormaata filadhu
+            </option>
+
+          </select>
+
+
+          <textarea
+            id="questionTextInput"
+            placeholder="Gaaffii"
+          ></textarea>
+
+
           <div class="option-grid">
-            <input id="optionAInput" type="text" placeholder="A">
-            <input id="optionBInput" type="text" placeholder="B">
-            <input id="optionCInput" type="text" placeholder="C">
-            <input id="optionDInput" type="text" placeholder="D">
+
+            <input
+              id="optionAInput"
+              type="text"
+              placeholder="A"
+            >
+
+            <input
+              id="optionBInput"
+              type="text"
+              placeholder="B"
+            >
+
+            <input
+              id="optionCInput"
+              type="text"
+              placeholder="C"
+            >
+
+            <input
+              id="optionDInput"
+              type="text"
+              placeholder="D"
+            >
+
           </div>
+
+
           <select id="correctAnswerInput">
-            <option value="">Deebii sirrii filadhu</option>
+
+            <option value="">
+              Deebii sirrii filadhu
+            </option>
+
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
             <option value="D">D</option>
+
           </select>
-          <button type="button" class="primary-btn" onclick="createQuestion()">➕ Gaaffii Dabali</button>
+
+
+          <button
+            type="button"
+            class="primary-btn"
+            onclick="createQuestion()"
+          >
+            ➕ Gaaffii Dabali
+          </button>
+
         </div>
+
 
         <!-- EXISTING EXAMS -->
+
         <div class="admin-subsection">
+
           <h3>📝 Qormaatawwan</h3>
+
           <div id="adminExamsList"></div>
+
         </div>
 
+
         <!-- EXISTING QUESTIONS -->
+
         <div class="admin-subsection">
+
           <h3>❓ Gaaffilee</h3>
+
           <div id="adminQuestionsList"></div>
+
         </div>
 
       </div>
+
     </div>
+
   </section>
 
-  <!-- SUPABASE & SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- SUPABASE -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
   <script src="app.js"></script>
   <script src="bulk.js"></script>
 
