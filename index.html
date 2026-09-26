@@ -112,7 +112,6 @@
   ====================================================== -->
   <section id="studentHomePage" class="page">
     <div class="page-container">
-      <!-- Top Header -->
       <header class="app-header">
         <div class="user-greeting">
           <div style="width:40px; height:40px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🎓</div>
@@ -124,7 +123,6 @@
         <button type="button" class="logout-btn" onclick="studentLogout()">Ba'i</button>
       </header>
 
-      <!-- App Banner Card -->
       <div class="app-banner-card">
         <div class="banner-text">
           <h3>App Kiyya</h3>
@@ -134,7 +132,6 @@
         <div class="banner-icon">🚀</div>
       </div>
 
-      <!-- Main Dashboard Grid -->
       <div class="student-menu-grid">
         <button type="button" class="menu-card card-blue" onclick="navTo('studentLessonsPage')">
           <span class="card-icon">📖</span>
@@ -173,7 +170,6 @@
         </button>
       </div>
 
-      <!-- Quick Section on Home -->
       <div class="content-section">
         <div class="section-title-row">
           <h3>📚 Barnoota Dhiyoo</h3>
@@ -370,7 +366,7 @@
   </section>
 
   <!-- =====================================================
-       14. ⭐ ADMIN DASHBOARD PAGE (FAKKII 2FFAA IRRATTI 100% KAN HUNDAA'E) ⭐
+       14. ⭐ ADMIN DASHBOARD (FAKKII 2FFAA & CLEAN SCREEN SWITCH) ⭐
   ====================================================== -->
   <section id="adminDashboardPage" class="page">
     <div class="admin-app-wrapper">
@@ -378,15 +374,20 @@
       <!-- TOP CURVED APP BAR (Akka Fakkii 2ffaatti) -->
       <header class="admin-top-appbar">
         <div class="admin-topbar-left">
-          <button type="button" class="admin-icon-btn" onclick="toggleAdminMenuDrawer()" title="Menu">
+          <button type="button" class="admin-icon-btn" onclick="showAdminHomeView()" title="Menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
-          <div class="admin-avatar-pill">
-            <div class="admin-avatar-circle">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#0d59b2"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          
+          <!-- ADMIN PROFILE AVATAR WITH PHOTO UPLOAD FROM GALLERY -->
+          <div class="admin-avatar-pill" onclick="document.getElementById('adminAvatarFileInput').click()" title="Suuraa galarii irraa jijjiiri">
+            <div class="admin-avatar-circle" id="adminAvatarContainer">
+              <img id="adminAvatarImg" src="" alt="Admin" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+              <svg id="adminAvatarDefaultSvg" width="18" height="18" viewBox="0 0 24 24" fill="#0d59b2"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             </div>
             <span class="admin-user-title">Admin</span>
           </div>
+          <!-- Hidden File Input for Picking Photo from Gallery -->
+          <input type="file" id="adminAvatarFileInput" accept="image/*" style="display:none;" onchange="handleAdminAvatarUpload(this)">
         </div>
 
         <div class="admin-topbar-right">
@@ -401,111 +402,108 @@
 
       <div class="admin-main-body">
 
-        <!-- 3D HERO BANNER CARD (Akka Fakkii 2ffaatti) -->
-        <div class="admin-3d-banner-card">
-          <div class="banner-inner-content">
-            <div class="banner-3d-art">
-              <!-- Beautiful 3D education illustration art representing Globe, Books & Plant -->
-              <svg viewBox="0 0 360 160" class="banner-svg-art" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Background soft gradient sphere -->
-                <circle cx="210" cy="70" r="50" fill="url(#globeGlow)" opacity="0.3"/>
-                <!-- Desk Surface -->
-                <path d="M20 145 L340 145" stroke="#93c5fd" stroke-width="4" stroke-linecap="round"/>
-                <!-- Pencil Cup Left -->
-                <rect x="50" y="80" width="30" height="55" rx="6" fill="#1d4ed8"/>
-                <line x1="58" y1="50" x2="58" y2="80" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
-                <line x1="65" y1="42" x2="65" y2="80" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
-                <line x1="72" y1="48" x2="72" y2="80" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
-                <!-- Book Stack Center -->
-                <rect x="100" y="115" width="130" height="20" rx="4" fill="#f59e0b"/>
-                <rect x="105" y="95" width="120" height="20" rx="4" fill="#3b82f6"/>
-                <rect x="110" y="75" width="110" height="20" rx="4" fill="#10b981"/>
-                <polygon points="150,55 190,65 150,75 110,65" fill="#1e293b"/>
-                <!-- Globe Right -->
-                <circle cx="210" cy="65" r="30" fill="#38bdf8"/>
-                <path d="M195 55 Q210 65 225 55 M190 70 Q210 75 230 70 M200 45 Q210 65 210 85" stroke="#ffffff" stroke-width="2.5" fill="none"/>
-                <path d="M210 95 L210 115 M195 115 L225 115" stroke="#b45309" stroke-width="3.5" stroke-linecap="round"/>
-                <!-- Plant Far Right -->
-                <rect x="270" y="95" width="30" height="40" rx="6" fill="#1e3a8a"/>
-                <path d="M285 95 Q265 60 285 50 Q305 60 285 95" fill="#22c55e"/>
-                <path d="M285 75 Q310 50 300 40 Q280 60 285 75" fill="#4ade80"/>
-                <defs>
-                  <radialGradient id="globeGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(210 70) rotate(90) scale(60)">
-                    <stop stop-color="#ffffff"/>
-                    <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
-                  </radialGradient>
-                </defs>
-              </svg>
+        <!-- ==========================================
+             A. ADMIN HOME OVERVIEW (HERO + 6 TILES)
+             When any tile is clicked, this WHOLE section hides!
+        =========================================== -->
+        <div id="adminHomeTilesView">
+          
+          <!-- 3D HERO BANNER CARD -->
+          <div class="admin-3d-banner-card">
+            <div class="banner-inner-content">
+              <div class="banner-3d-art">
+                <svg viewBox="0 0 360 160" class="banner-svg-art" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="210" cy="70" r="50" fill="url(#globeGlow)" opacity="0.3"/>
+                  <path d="M20 145 L340 145" stroke="#93c5fd" stroke-width="4" stroke-linecap="round"/>
+                  <rect x="50" y="80" width="30" height="55" rx="6" fill="#1d4ed8"/>
+                  <line x1="58" y1="50" x2="58" y2="80" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="65" y1="42" x2="65" y2="80" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="72" y1="48" x2="72" y2="80" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+                  <rect x="100" y="115" width="130" height="20" rx="4" fill="#f59e0b"/>
+                  <rect x="105" y="95" width="120" height="20" rx="4" fill="#3b82f6"/>
+                  <rect x="110" y="75" width="110" height="20" rx="4" fill="#10b981"/>
+                  <polygon points="150,55 190,65 150,75 110,65" fill="#1e293b"/>
+                  <circle cx="210" cy="65" r="30" fill="#38bdf8"/>
+                  <path d="M195 55 Q210 65 225 55 M190 70 Q210 75 230 70 M200 45 Q210 65 210 85" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+                  <path d="M210 95 L210 115 M195 115 L225 115" stroke="#b45309" stroke-width="3.5" stroke-linecap="round"/>
+                  <rect x="270" y="95" width="30" height="40" rx="6" fill="#1e3a8a"/>
+                  <path d="M285 95 Q265 60 285 50 Q305 60 285 95" fill="#22c55e"/>
+                  <path d="M285 75 Q310 50 300 40 Q280 60 285 75" fill="#4ade80"/>
+                  <defs>
+                    <radialGradient id="globeGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(210 70) rotate(90) scale(60)">
+                      <stop stop-color="#ffffff"/>
+                      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 6 VIVID COLORFUL GRID TILES (Akka Fakkii 2ffaatti - 2x3 Grid) -->
-        <div class="admin-vivid-tiles-grid">
-          
-          <!-- 1. Barumsaa (Bright Blue) -->
-          <button type="button" class="admin-vivid-tile tile-blue" onclick="openAdminPanel('lessons')">
-            <div class="tile-icon-wrap">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
-            </div>
-            <span class="tile-label">Barumsaa</span>
-          </button>
+          <!-- 6 VIVID COLORFUL GRID TILES (2x3) -->
+          <div class="admin-vivid-tiles-grid">
+            <button type="button" class="admin-vivid-tile tile-blue" onclick="openAdminPanel('lessons')">
+              <div class="tile-icon-wrap">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+              </div>
+              <span class="tile-label">Barumsaa</span>
+            </button>
 
-          <!-- 2. Qormaata (Vibrant Purple) -->
-          <button type="button" class="admin-vivid-tile tile-purple" onclick="openAdminPanel('exams')">
-            <div class="tile-icon-wrap">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-            </div>
-            <span class="tile-label">Qormaata</span>
-          </button>
+            <button type="button" class="admin-vivid-tile tile-purple" onclick="openAdminPanel('exams')">
+              <div class="tile-icon-wrap">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+              </div>
+              <span class="tile-label">Qormaata</span>
+            </button>
 
-          <!-- 3. Barataa (Emerald Green) -->
-          <button type="button" class="admin-vivid-tile tile-green" onclick="openAdminPanel('students')">
-            <div class="tile-icon-wrap">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-            </div>
-            <span class="tile-label">Barataa</span>
-          </button>
+            <button type="button" class="admin-vivid-tile tile-green" onclick="openAdminPanel('students')">
+              <div class="tile-icon-wrap">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+              </div>
+              <span class="tile-label">Barataa</span>
+            </button>
 
-          <!-- 4. Qabxii (Golden Amber) -->
-          <button type="button" class="admin-vivid-tile tile-amber" onclick="openAdminPanel('results')">
-            <div class="tile-icon-wrap">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-            </div>
-            <span class="tile-label">Qabxii</span>
-          </button>
+            <button type="button" class="admin-vivid-tile tile-amber" onclick="openAdminPanel('results')">
+              <div class="tile-icon-wrap">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+              </div>
+              <span class="tile-label">Qabxii</span>
+            </button>
 
-          <!-- 5. Yaadaa (Bright Pink) -->
-          <button type="button" class="admin-vivid-tile tile-pink" onclick="openAdminPanel('feedbacks')">
-            <div class="tile-icon-wrap">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-            </div>
-            <span class="tile-label">Yaadaa</span>
-          </button>
+            <button type="button" class="admin-vivid-tile tile-pink" onclick="openAdminPanel('feedbacks')">
+              <div class="tile-icon-wrap">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+              </div>
+              <span class="tile-label">Yaadaa</span>
+            </button>
 
-          <!-- 6. Beeksisaa (Teal / Cyan) -->
-          <button type="button" class="admin-vivid-tile tile-teal" onclick="openAdminPanel('announcements')">
-            <div class="tile-icon-wrap">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-            </div>
-            <span class="tile-label">Beeksisaa</span>
-          </button>
+            <button type="button" class="admin-vivid-tile tile-teal" onclick="openAdminPanel('announcements')">
+              <div class="tile-icon-wrap">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+              </div>
+              <span class="tile-label">Beeksisaa</span>
+            </button>
+          </div>
 
         </div>
 
-        <!-- ==================== ADMIN PANELS (DATA & MANAGEMENT) ==================== -->
+        <!-- ==========================================
+             B. SPECIFIC ADMIN PANELS (ONLY ONE SHOWS AT A TIME)
+        =========================================== -->
 
-        <!-- 👥 BARATTOOTA PANEL -->
-        <div id="adminStudentsPanel" class="admin-content-panel">
+        <!-- 👥 1. BARATTOOTA PANEL -->
+        <div id="adminStudentsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
             <h3>👥 Barattoota Galmaa'an</h3>
           </div>
           <div id="adminStudentsList"></div>
         </div>
 
-        <!-- 📊 QABXII PANEL -->
+        <!-- 📊 2. QABXII PANEL -->
         <div id="adminResultsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
             <h3>📊 Qabxii Barattootaa</h3>
           </div>
           <div class="table-wrapper-vivid">
@@ -517,9 +515,10 @@
           <div id="adminResultDetails"></div>
         </div>
 
-        <!-- 📖 BARNOOTA PANEL -->
+        <!-- 📖 3. BARNOOTA PANEL -->
         <div id="adminLessonsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
             <h3>📖 Barnoota Qindeessi</h3>
           </div>
           <div class="admin-panel-card">
@@ -533,12 +532,14 @@
           <div id="adminLessonsList"></div>
         </div>
 
-        <!-- 📝 QORMAATA PANEL -->
+        <!-- 📝 4. QORMAATA PANEL (Includes BULK PASTE, MANUAL & AI) -->
         <div id="adminExamsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
             <h3>📝 Qormaata Qindeessi</h3>
           </div>
 
+          <!-- Uumi Qormaata -->
           <div class="admin-panel-card">
             <h4 style="margin-bottom:10px;">➕ Qormaata Uumi</h4>
             <input id="examTitleInput" type="text" placeholder="Mata-duree qormaataa">
@@ -593,7 +594,24 @@
             <button type="button" class="primary-btn-vivid" onclick="createExam()">➕ Qormaata Uumi</button>
           </div>
 
-          <!-- AI SECTION -->
+          <!-- ⭐ 1. BULK PASTE QUESTIONS (BULK.JS RESTORED) ⭐ -->
+          <div class="admin-panel-card" style="border-left: 5px solid #0284c7;">
+            <h4 style="color:#0284c7; margin-bottom:8px;">📋 Gaaffilee Hedduu Bakka Tokkotti Paste Godhi (Bulk Paste)</h4>
+            <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
+              Gaaffilee hedduu Word ykn bakka biraatii copy gootee asitti paste gochuun yeroo tokkotti galchuu dandeessa.
+            </p>
+            <label>Qormaata Filadhu</label>
+            <select id="bulkExamSelect"><option value="">Qormaata filadhu</option></select>
+            
+            <label>Gaaffilee asitti Paste godhi:</label>
+            <textarea id="bulkQuestionsInput" rows="8" placeholder="Fakkeenya bifa kanaan paste godhi:&#10;&#10;1. Magaala guddoon Oromiyaa kami?&#10;A. Adaamaa&#10;B. Finfinnee&#10;C. Jimma&#10;D. Dirree Dhawaa&#10;Answer: B&#10;&#10;2. Gaaffii lammaffaa...&#10;A. ...&#10;B. ...&#10;C. ...&#10;D. ...&#10;Answer: A"></textarea>
+            
+            <button type="button" class="primary-btn-vivid" onclick="bulkInsertQuestions()" style="background:#0284c7;">
+              📥 Gaaffilee Hunda Galchi (Bulk Save)
+            </button>
+          </div>
+
+          <!-- 2. AI SECTION -->
           <div class="admin-panel-card" style="border-left: 5px solid #9333ea;">
             <h4 style="color:#9333ea; margin-bottom:10px;">🤖 AI'n Gaaffii Uumi</h4>
             <label>Qormaata</label>
@@ -617,7 +635,7 @@
             <div id="aiQuestionMessage" class="message"></div>
           </div>
 
-          <!-- MANUAL QUESTION SECTION -->
+          <!-- 3. MANUAL QUESTION SECTION -->
           <div class="admin-panel-card">
             <h4 style="margin-bottom:10px;">✍️ Gaaffii Tokko Tokkoon Dabali</h4>
             <select id="questionExamSelect"><option value="">Qormaata filadhu</option></select>
@@ -646,9 +664,10 @@
           </div>
         </div>
 
-        <!-- 📢 BEEKSIISA PANEL -->
+        <!-- 📢 5. BEEKSIISA PANEL -->
         <div id="adminAnnouncementsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
             <h3>📢 Beeksisa Maxxansi</h3>
           </div>
           <div class="admin-panel-card">
@@ -661,9 +680,10 @@
           <div id="adminAnnouncementsList"></div>
         </div>
 
-        <!-- 💬 YAADAA PANEL -->
+        <!-- 💬 6. YAADAA PANEL -->
         <div id="adminFeedbacksPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
             <h3>💬 Yaada Barattootaa</h3>
           </div>
           <div id="adminFeedbacksList"></div>
@@ -671,9 +691,9 @@
 
       </div>
 
-      <!-- ADMIN BOTTOM APP NAVIGATION BAR (Akka Fakkii 2ffaatti) -->
+      <!-- ADMIN BOTTOM NAVIGATION BAR (7 Tabs) -->
       <nav class="admin-bottom-appbar">
-        <button id="adminTabHome" type="button" class="admin-tab active" onclick="scrollAdminToTop()">
+        <button id="adminTabHome" type="button" class="admin-tab active" onclick="showAdminHomeView()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
           <span>Seeni</span>
         </button>
@@ -740,11 +760,35 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
-  <!-- Seamless Bridge Helper: Hooks native app.js without touching logic -->
+  <!-- SCREEN SWITCH, PHOTO UPLOAD & BULK PASTE LOGIC -->
   <script>
-    // Overriding openAdminPanel to smoothly activate Vivid Tiles and Bottom bar in Admin View
+    // 1. ADMIN HOME VIEW: Shows 3D Banner & 6 Vivid Tiles, Hides all other panels!
+    function showAdminHomeView() {
+      const homeTiles = document.getElementById("adminHomeTilesView");
+      if (homeTiles) homeTiles.style.display = "block";
+
+      const panels = [
+        "adminStudentsPanel", "adminResultsPanel", "adminLessonsPanel", 
+        "adminExamsPanel", "adminAnnouncementsPanel", "adminFeedbacksPanel"
+      ];
+      panels.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+      });
+
+      document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+      document.getElementById("adminTabHome")?.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // 2. OPEN SPECIFIC ADMIN PANEL: Hides 3D Banner & 6 Tiles completely, shows ONLY clicked panel!
     const originalOpenAdminPanel = window.openAdminPanel;
     window.openAdminPanel = async function(panel) {
+      // HIDE the Home Tiles & Banner View!
+      const homeTiles = document.getElementById("adminHomeTilesView");
+      if (homeTiles) homeTiles.style.display = "none";
+
+      // Hide all panels
       const panels = [
         "adminStudentsPanel", "adminResultsPanel", "adminLessonsPanel", 
         "adminExamsPanel", "adminAnnouncementsPanel", "adminFeedbacksPanel"
@@ -765,11 +809,9 @@
       const targetEl = document.getElementById(targetMap[panel]);
       if (targetEl) {
         targetEl.style.display = "block";
-        // Smooth scroll to the management panel
-        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
-      // Update Bottom Tab in Admin UI
+      // Update Bottom Tab highlight in Admin UI
       const tabMap = {
         students: "adminTabStudents",
         results: "adminTabResults",
@@ -783,7 +825,9 @@
         document.getElementById(tabMap[panel])?.classList.add("active");
       }
 
-      // Execute native function hooks in app.js
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // Run Native app.js data loaders
       if (panel === "students" || panel === "results" || panel === "lessons" || panel === "exams") {
         if (typeof originalOpenAdminPanel === "function") {
           await originalOpenAdminPanel(panel);
@@ -795,21 +839,110 @@
       }
     };
 
-    function scrollAdminToTop() {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
-      document.getElementById("adminTabHome")?.classList.add("active");
-    }
+    // 3. ADMIN AVATAR PHOTO PICKER (From Mobile Gallery)
+    function handleAdminAvatarUpload(input) {
+      const file = input?.files?.[0];
+      if (!file) return;
 
-    function toggleAdminMenuDrawer() {
-      alert("Admin Menu: Akkaadaamii Oromiyaa Dashboard");
-    }
-
-    function navTo(pageId) {
-      if (typeof showPage === "function") {
-        showPage(pageId);
+      if (file.size > 8 * 1024 * 1024) {
+        alert("Suuraan filatame 8MB ol ta'uu hin qabu.");
+        return;
       }
-      
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Url = e.target.result;
+        localStorage.setItem("ao_admin_custom_avatar", base64Url);
+        loadAdminAvatar();
+        alert("✅ Suuraan profile admin milkaa'inaan jijjiirameera!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function loadAdminAvatar() {
+      const saved = localStorage.getItem("ao_admin_custom_avatar");
+      const img = document.getElementById("adminAvatarImg");
+      const defSvg = document.getElementById("adminAvatarDefaultSvg");
+      if (saved && img && defSvg) {
+        img.src = saved;
+        img.style.display = "block";
+        defSvg.style.display = "none";
+      }
+    }
+    document.addEventListener("DOMContentLoaded", loadAdminAvatar);
+
+    // 4. ⭐ BULK QUESTIONS PARSER & INSERTION (BULK.JS INTEGRATION) ⭐
+    async function bulkInsertQuestions() {
+      const examSelect = document.getElementById("bulkExamSelect");
+      const examId = examSelect?.value;
+      const text = document.getElementById("bulkQuestionsInput")?.value.trim();
+
+      if (!examId) {
+        alert("Mee dura qormaata gaaffilee kana itti dabaluu barbaaddu filadhaa!");
+        return;
+      }
+      if (!text) {
+        alert("Gaaffilee paste gochuu qabdu!");
+        return;
+      }
+
+      // Parse questions from pasted raw text block
+      const blocks = text.split(/\n\s*\n+/);
+      const parsedQuestions = [];
+
+      for (const block of blocks) {
+        const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+        if (lines.length < 5) continue; // Must have question + 4 options + answer
+
+        let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, ""); // remove "1." or "1)"
+        let optA = "", optB = "", optC = "", optD = "", correct = "A";
+
+        lines.slice(1).forEach(line => {
+          if (/^A[\.\)\-]/i.test(line)) optA = line.replace(/^A[\.\)\-]\s*/i, "");
+          else if (/^B[\.\)\-]/i.test(line)) optB = line.replace(/^B[\.\)\-]\s*/i, "");
+          else if (/^C[\.\)\-]/i.test(line)) optC = line.replace(/^C[\.\)\-]\s*/i, "");
+          else if (/^D[\.\)\-]/i.test(line)) optD = line.replace(/^D[\.\)\-]\s*/i, "");
+          else if (/^(Ans|Answer|Deebii)[\s:\-]/i.test(line)) {
+            const match = line.match(/[A-D]/i);
+            if (match) correct = match[0].toUpperCase();
+          }
+        });
+
+        if (questionText && optA && optB && optC && optD) {
+          parsedQuestions.push({
+            exam_id: examId,
+            question: questionText,
+            option_a: optA,
+            option_b: optB,
+            option_c: optC,
+            option_d: optD,
+            correct_answer: correct,
+            source_type: "bulk"
+          });
+        }
+      }
+
+      if (!parsedQuestions.length) {
+        alert("Gaaffii sirrii ta'e tokkollee argachuu hin dandeenye. Bifa fakkeenyaa irratti mul'atutti qindeessaa!");
+        return;
+      }
+
+      try {
+        const { error } = await db.from("questions").insert(parsedQuestions);
+        if (error) throw error;
+
+        alert(`✅ Gaaffilee ${parsedQuestions.length} milkaa'inaan qormaata keessa galaniiru!`);
+        document.getElementById("bulkQuestionsInput").value = "";
+        if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
+        if (typeof loadAdminExams === "function") await loadAdminExams();
+      } catch (err) {
+        alert("Dogoggora galchuu: " + (err.message || err));
+      }
+    }
+
+    // Student Navigation Bridge
+    function navTo(pageId) {
+      if (typeof showPage === "function") showPage(pageId);
       document.querySelectorAll(".bottom-tab-item").forEach(b => b.classList.remove("active"));
       const map = {
         studentHomePage: "navTabHome",
@@ -819,14 +952,10 @@
         feedbackPage: "navTabFeedback",
         announcementsPage: "navTabAnnounce"
       };
-      if (map[pageId]) {
-        document.getElementById(map[pageId])?.classList.add("active");
-      }
+      if (map[pageId]) document.getElementById(map[pageId])?.classList.add("active");
 
       const bNav = document.getElementById("studentBottomNav");
-      if (bNav && currentStudent) {
-        bNav.style.display = "flex";
-      }
+      if (bNav && currentStudent) bNav.style.display = "flex";
 
       if (pageId === "studentHomePage" && typeof loadStudentHome === "function") loadStudentHome();
       if (pageId === "studentLessonsPage" && typeof loadStudentLessons === "function") loadStudentLessons();
@@ -836,26 +965,20 @@
       if (pageId === "announcementsPage") loadStudentAnnouncements();
     }
 
-    // Helper functions for Feedbacks / Announcements
     async function loadStudentFeedbacks() {
       const container = document.getElementById("studentFeedbackList");
       if (!container || !currentStudent) return;
       try {
-        const { data, error } = await db.from("feedbacks").select("*").eq("student_id", currentStudent.id).order("created_at", { ascending: false });
-        if (error || !data?.length) {
-          container.innerHTML = `<div class="empty-state">💬 Yaanni tokko illee hin jiru. Yaada kee olkaa'i!</div>`;
-          return;
-        }
+        const { data } = await db.from("feedbacks").select("*").eq("student_id", currentStudent.id).order("created_at", { ascending: false });
+        if (!data?.length) { container.innerHTML = `<div class="empty-state">💬 Yaanni tokko illee hin jiru. Yaada kee olkaa'i!</div>`; return; }
         container.innerHTML = data.map(f => `
           <div class="item-card" style="flex-direction:column; align-items:stretch;">
             <strong>👤 ${escapeHtml(f.student_name)} (Ati):</strong>
             <p style="margin-top:4px; font-size:13px; color:#475569;">${escapeHtml(f.message)}</p>
-            ${f.admin_reply ? `<div style="background:#e3f2fd; border-left:4px solid #1565C0; padding:10px; border-radius:10px; margin-top:8px;"><strong>⚙️ Deebii Admin:</strong><p style="margin-top:2px; font-size:12px;">${escapeHtml(f.admin_reply)}</p></div>` : `<small style="color:#94a3b8; display:block; margin-top:6px;">⏳ Deebii eegaa jira...</small>`}
+            ${f.admin_reply ? `<div style="background:#e3f2fd; border-left:4px solid #1565C0; padding:10px; border-radius:10px; margin-top:8px; font-size:12px;"><strong>⚙️ Deebii Admin:</strong><p style="margin-top:2px;">${escapeHtml(f.admin_reply)}</p></div>` : `<small style="color:#94a3b8; display:block; margin-top:6px;">⏳ Deebii eegaa jira...</small>`}
           </div>
         `).join("");
-      } catch (e) {
-        container.innerHTML = `<div class="empty-state">💬 Yaada kee barreessiitii nuuf ergi.</div>`;
-      }
+      } catch (e) {}
     }
 
     async function sendStudentFeedback() {
@@ -864,18 +987,11 @@
       const message = input?.value.trim() || "";
       if (!message) { alert("Yaada kee barreessi."); return; }
       try {
-        const { error } = await db.from("feedbacks").insert({
-          student_id: currentStudent.id,
-          student_name: currentStudent.name,
-          message: message
-        });
-        if (error) { alert(error.message); return; }
+        await db.from("feedbacks").insert({ student_id: currentStudent.id, student_name: currentStudent.name, message });
         input.value = "";
         alert("✅ Yaanni kee milkaa'inaan ergameera!");
         loadStudentFeedbacks();
-      } catch (e) {
-        alert("Dogoggorri uumame.");
-      }
+      } catch (e) {}
     }
 
     async function loadStudentAnnouncements() {
@@ -883,10 +999,7 @@
       if (!container) return;
       try {
         const { data } = await db.from("announcements").select("*").order("created_at", { ascending: false });
-        if (!data?.length) {
-          container.innerHTML = `<div class="empty-state">📢 Beeksisi haaraa hin jiru.</div>`;
-          return;
-        }
+        if (!data?.length) { container.innerHTML = `<div class="empty-state">📢 Beeksisi haaraa hin jiru.</div>`; return; }
         container.innerHTML = data.map(a => `
           <article class="item-card" style="border-left: 5px solid #f57c00;">
             <div class="item-icon">📢</div>
@@ -897,9 +1010,7 @@
             </div>
           </article>
         `).join("");
-      } catch (e) {
-        container.innerHTML = `<div class="empty-state">📢 Beeksisi hin jiru.</div>`;
-      }
+      } catch (e) {}
     }
 
     async function loadAdminAnnouncements() {
@@ -907,16 +1018,10 @@
       if (!container) return;
       try {
         const { data } = await db.from("announcements").select("*").order("created_at", { ascending: false });
-        if (!data?.length) {
-          container.innerHTML = `<div class="empty-state">📢 Beeksisi haaraa hin jiru.</div>`;
-          return;
-        }
+        if (!data?.length) { container.innerHTML = `<div class="empty-state">📢 Beeksisi haaraa hin jiru.</div>`; return; }
         container.innerHTML = data.map(a => `
           <div class="admin-list-item">
-            <div class="item-main">
-              <h3>${escapeHtml(a.title)}</h3>
-              <p>${escapeHtml(a.content)}</p>
-            </div>
+            <div class="item-main"><h3>${escapeHtml(a.title)}</h3><p>${escapeHtml(a.content)}</p></div>
             <button type="button" class="danger-small-btn" onclick="deleteAnnouncement('${a.id}')">Haqi</button>
           </div>
         `).join("");
@@ -949,10 +1054,7 @@
       if (!container) return;
       try {
         const { data } = await db.from("feedbacks").select("*").order("created_at", { ascending: false });
-        if (!data?.length) {
-          container.innerHTML = `<div class="empty-state">💬 Yaanni tokko illee hin jiru.</div>`;
-          return;
-        }
+        if (!data?.length) { container.innerHTML = `<div class="empty-state">💬 Yaanni tokko illee hin jiru.</div>`; return; }
         container.innerHTML = data.map(f => `
           <div class="admin-list-item" style="flex-direction:column; align-items:stretch; gap:10px;">
             <div class="item-main">
