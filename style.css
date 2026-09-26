@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - MODERN APP UI (style.css)
-   100% Matching Mobile Design Mockups
+   100% Synced With Original App.js + 7 Bottom Tabs
 ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -47,7 +47,7 @@ body {
   max-width: 480px;
   margin: 0 auto;
   padding: 16px;
-  padding-bottom: 95px; /* space for fixed bottom nav */
+  padding-bottom: 95px;
 }
 
 /* Page Transitions */
@@ -90,11 +90,11 @@ body {
 }
 
 .splash-logo-circle {
-  width: 140px;
-  height: 140px;
+  width: 130px;
+  height: 130px;
   background: #ffffff;
   border-radius: 50%;
-  margin: 40px auto 24px auto;
+  margin: 40px auto 20px auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,16 +102,15 @@ body {
 }
 
 .splash-logo-img {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
 }
 
 .splash-title {
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: 800;
   margin-bottom: 8px;
-  letter-spacing: -0.02em;
 }
 
 .splash-subtitle {
@@ -121,10 +120,10 @@ body {
 }
 
 .splash-quote {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-style: italic;
-  opacity: 0.8;
-  background: rgba(255,255,255,0.1);
+  opacity: 0.85;
+  background: rgba(255,255,255,0.12);
   padding: 10px 16px;
   border-radius: var(--radius-md);
   display: inline-block;
@@ -149,7 +148,7 @@ body {
 }
 
 /* =========================================================
-   2. LOGIN PAGE (SUURAA 2FFAA)
+   2. LOGIN PAGE
 ========================================================= */
 .login-wrapper {
   display: flex;
@@ -168,12 +167,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.brand-logo-small img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
 }
 
 .brand-title {
@@ -217,7 +210,6 @@ body {
   border: 1px solid var(--border-color);
   cursor: pointer;
   margin-top: 12px;
-  transition: transform 0.1s ease;
 }
 
 .google-login-btn {
@@ -233,7 +225,7 @@ body {
 }
 
 /* =========================================================
-   3. STUDENT DASHBOARD (SUURAA 3FFAA)
+   3. STUDENT DASHBOARD
 ========================================================= */
 .app-header, .admin-header {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
@@ -251,15 +243,6 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.header-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ffffff;
-  cursor: pointer;
 }
 
 .user-greeting h2 {
@@ -283,7 +266,6 @@ body {
   cursor: pointer;
 }
 
-/* App Banner Card (Suuraa 3ffaa) */
 .app-banner-card {
   background: linear-gradient(135deg, #1E88E5, #1565C0);
   color: white;
@@ -316,17 +298,16 @@ body {
 }
 
 .banner-icon {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   background: rgba(255,255,255,0.2);
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Main Dashboard Grid (4 Cards - Suuraa 3ffaa) */
 .student-menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -344,10 +325,8 @@ body {
   align-items: flex-start;
   gap: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
 .card-icon {
@@ -375,17 +354,11 @@ body {
   font-weight: 700;
 }
 
-.menu-card small {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
 .menu-card:active {
   transform: scale(0.97);
   border-color: var(--primary);
 }
 
-/* Progress Bars Section */
 .content-section {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -401,93 +374,8 @@ body {
   margin-bottom: 12px;
 }
 
-.section-title-row h3 {
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.section-title-row a {
-  font-size: 0.75rem;
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.progress-item {
-  margin-bottom: 10px;
-}
-
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  margin-bottom: 4px;
-  font-weight: 600;
-}
-
-.progress-bar-bg {
-  width: 100%;
-  height: 8px;
-  background: #f1f5f9;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-}
-
 /* =========================================================
-   4. CATEGORY PILLS BAR (SUURAA 4FFAA & 5FFAA)
-========================================================= */
-.top-nav-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.top-nav-bar h2 {
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
-.category-pills-bar {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  margin-bottom: 14px;
-  scrollbar-width: none;
-}
-
-.category-pills-bar::-webkit-scrollbar {
-  display: none;
-}
-
-.pill {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-muted);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.pill.active {
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(21,101,192,0.3);
-}
-
-/* =========================================================
-   CARDS (LESSONS, EXAMS, RESULTS)
+   CARDS & ITEMS
 ========================================================= */
 .item-card, .exam-card, .result-card, .admin-list-item {
   background: var(--card-bg);
@@ -577,7 +465,6 @@ body {
   font-weight: 700;
   font-size: 0.88rem;
   cursor: pointer;
-  transition: background 0.2s ease;
 }
 
 .primary-btn:hover {
@@ -588,6 +475,26 @@ body {
   padding: 6px 12px;
   font-size: 0.78rem;
   border-radius: var(--radius-sm);
+}
+
+.danger-small-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 12px;
 }
 
 input, select, textarea {
@@ -608,37 +515,43 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* =========================================================
-   FEEDBACK CHAT (SUURAA 8FFAA)
+   EXAM QUESTION UI
 ========================================================= */
-.feedback-input-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 16px;
+.exam-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
 }
 
-.feedback-bubble {
+.timer-box {
+  background: #fef3c7;
+  color: #b45309;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.answer-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
+  padding: 12px;
   border-radius: var(--radius-md);
-  padding: 14px;
-  margin-bottom: 10px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
 }
 
-.admin-reply-box {
-  background: var(--primary-light);
-  border-left: 3px solid var(--primary);
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 6px;
-  font-size: 0.82rem;
+.answer-option input[type="radio"] {
+  width: auto;
+  margin: 0;
 }
 
 /* =========================================================
-   FIXED MOBILE BOTTOM NAVIGATION BAR
+   FIXED MOBILE BOTTOM BAR (7 TABS ELEGANT)
 ========================================================= */
 .mobile-bottom-bar {
   position: fixed;
@@ -650,8 +563,9 @@ input:focus, select:focus, textarea:focus {
   background: #ffffff;
   border-top: 1px solid var(--border-color);
   display: flex;
-  justify-content: space-around;
-  padding: 8px 4px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 2px;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
   z-index: 1000;
 }
@@ -664,16 +578,16 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   justify-content: center;
   flex: 1;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   cursor: pointer;
   font-weight: 600;
-  padding: 4px 0;
+  padding: 2px 0;
   transition: color 0.15s ease;
 }
 
 .bottom-tab-item .tab-icon {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   margin-bottom: 2px;
 }
 
@@ -681,17 +595,13 @@ input:focus, select:focus, textarea:focus {
   color: var(--primary);
 }
 
-.bottom-tab-item.active .tab-icon {
-  transform: translateY(-2px);
-}
-
 /* =========================================================
-   ADMIN DASHBOARD STYLES
+   ADMIN DASHBOARD
 ========================================================= */
 .admin-menu {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 16px;
 }
 
@@ -699,7 +609,7 @@ input:focus, select:focus, textarea:focus {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 10px 6px;
+  padding: 10px 4px;
   text-align: center;
   cursor: pointer;
   font-size: 0.75rem;
