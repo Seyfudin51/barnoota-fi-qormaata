@@ -13,7 +13,7 @@
 <body>
 
   <!-- =====================================================
-       1. START / SPLASH SCREEN (SUURAA 1FFAA)
+       1. START / SPLASH SCREEN
   ====================================================== -->
   <section id="splashPage" class="page active">
     <div class="splash-wrapper">
@@ -26,7 +26,7 @@
         <p class="splash-quote">"Barnoonni ijoo, Milkaa'inni danda'ama!"</p>
       </div>
       <div class="splash-footer">
-        <button type="button" class="splash-start-btn" onclick="startAppFromSplash()">
+        <button type="button" class="splash-start-btn" onclick="showPublicLoginPage()">
           Jalqabi →
         </button>
       </div>
@@ -34,7 +34,7 @@
   </section>
 
   <!-- =====================================================
-       2. LOGIN PAGE (SUURAA 2FFAA)
+       2. ROLE / LOGIN PAGE
   ====================================================== -->
   <section id="rolePage" class="page">
     <div class="login-wrapper">
@@ -46,7 +46,7 @@
         <div class="brand-subtitle">Baga nagaan dhuftan!</div>
       </div>
 
-      <!-- IN-APP BROWSER (TELEGRAM/FACEBOOK) WARNING -->
+      <!-- IN-APP BROWSER WARNING -->
       <div id="webviewWarning" style="display:none; background:#fee2e2; color:#b91c1c; padding:12px; margin: 10px 0; border-radius:12px; font-size:13px; text-align:center; font-weight:bold; border: 1px solid #fca5a5;">
         ⚠️ Google Account bilbila kee irratti akka filatamuuf gubbaa mirgaatiin tuqiitii <strong>"Open in Chrome"</strong> filadhu!
       </div>
@@ -82,7 +82,7 @@
   </section>
 
   <!-- =====================================================
-       3. STUDENT DASHBOARD (SUURAA 3FFAA)
+       3. STUDENT HOME / DASHBOARD
   ====================================================== -->
   <section id="studentHomePage" class="page">
     <div class="page-container">
@@ -90,7 +90,7 @@
       <!-- Top Header -->
       <header class="app-header">
         <div class="user-greeting">
-          <img id="homeUserAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" class="header-avatar" alt="Avatar" onclick="switchStudentScreen('profilePage'); loadProfile();">
+          <div style="width:40px; height:40px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🎓</div>
           <div>
             <h2 id="studentWelcomeName">Barataa</h2>
             <p id="studentHomeStatusBadge">Dashboard</p>
@@ -106,119 +106,83 @@
           <p>Barnoota • Qormaata • Qabxii</p>
           <small>"Barnootni ijoo milkaa'inaa ti!"</small>
         </div>
-        <div class="banner-icon">🎓</div>
+        <div class="banner-icon">🚀</div>
       </div>
 
-      <!-- Main Dashboard Grid (4 Grid Buttons - Suuraa 3ffaa) -->
+      <!-- Main Dashboard Grid -->
       <div class="student-menu-grid">
-        <button type="button" class="menu-card card-blue" onclick="switchStudentScreen('studentLessonsPage'); loadStudentLessons();">
+        <button type="button" class="menu-card card-blue" onclick="showPage('studentLessonsPage'); loadStudentLessons();">
           <span class="card-icon">📖</span>
           <strong>Barnoota</strong>
-          <small id="lessonCountBadge">Barnoota jira</small>
         </button>
 
-        <button type="button" class="menu-card card-purple" onclick="switchStudentScreen('examListPage'); loadExams();">
+        <button type="button" class="menu-card card-purple" onclick="showPage('examListPage'); loadExams();">
           <span class="card-icon">📝</span>
           <strong>Qormaata</strong>
-          <small id="examCountBadge">Qormaata jira</small>
         </button>
 
-        <button type="button" class="menu-card card-green" onclick="switchStudentScreen('scorePage'); showScore();">
+        <button type="button" class="menu-card card-green" onclick="showPage('scorePage'); showScore();">
           <span class="card-icon">🏆</span>
           <strong>Qabxii</strong>
-          <small>Hiika kee</small>
         </button>
 
-        <button type="button" class="menu-card card-orange" onclick="switchStudentScreen('announcementsPage'); loadAnnouncements();">
+        <button type="button" class="menu-card card-orange" onclick="showPage('announcementsPage'); loadAnnouncements();">
           <span class="card-icon">📢</span>
           <strong>Beeksisaa</strong>
-          <small>Ogeeyyii haaraa</small>
+        </button>
+
+        <button type="button" class="menu-card card-pink" onclick="showPage('feedbackPage'); loadFeedbacks();">
+          <span class="card-icon">💬</span>
+          <strong>Yaadaa</strong>
+        </button>
+
+        <button type="button" class="menu-card card-teal" onclick="showPage('profilePage'); loadProfile();">
+          <span class="card-icon">👤</span>
+          <strong>Profile</strong>
         </button>
       </div>
 
-      <!-- Hordoffii Barnoota koo (Progress Bars) -->
+      <!-- Content Section -->
       <div class="content-section">
         <div class="section-title-row">
-          <h3>📊 Hordoffii Barnoota koo</h3>
-          <a href="javascript:void(0)" onclick="switchStudentScreen('scorePage'); showScore();">Hunda ilaali ></a>
+          <h3>📚 Barnoota</h3>
         </div>
-        <div id="studentHomeProgressList">
-          <div class="progress-item">
-            <div class="progress-label"><span>📖 Aqeedhaa</span> <strong>73%</strong></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:73%; background:#1565C0;"></div></div>
-          </div>
-          <div class="progress-item">
-            <div class="progress-label"><span>📖 Fiqh</span> <strong>60%</strong></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:60%; background:#7B1FA2;"></div></div>
-          </div>
-        </div>
+        <div id="studentLessons"></div>
       </div>
 
     </div>
   </section>
 
   <!-- =====================================================
-       4. BARNOOTA / BARUMSAA PAGE (SUURAA 4FFAA)
-  ====================================================== -->
-  <section id="studentLessonsPage" class="page">
-    <div class="page-container">
-      <div class="top-nav-bar">
-        <h2>📖 Barumsaa</h2>
-      </div>
-
-      <!-- Category Filter Pills (Suuraa 4ffaa) -->
-      <div id="lessonCategoryFilter" class="category-pills-bar">
-        <button type="button" class="pill active" onclick="filterLessonsByCategory('Hunda', this)">Hunda</button>
-        <button type="button" class="pill" onclick="filterLessonsByCategory('Aqeedhaa', this)">Aqeedhaa</button>
-        <button type="button" class="pill" onclick="filterLessonsByCategory('Fiqh', this)">Fiqh</button>
-        <button type="button" class="pill" onclick="filterLessonsByCategory('Seenaa', this)">Seenaa</button>
-        <button type="button" class="pill" onclick="filterLessonsByCategory('Teeknoolojii', this)">Teeknoolojii</button>
-      </div>
-
-      <div id="studentLessons"></div>
-    </div>
-  </section>
-
-  <!-- =====================================================
-       5. LESSON DETAIL PAGE
+       4. LESSON DETAIL PAGE
   ====================================================== -->
   <section id="lessonDetailPage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
-        <button type="button" class="back-btn" onclick="switchStudentScreen('studentLessonsPage')">← Duubatti</button>
+        <button type="button" class="back-btn" onclick="showPage('studentHomePage')">← Duubatti</button>
         <h2>Barnoota Dubbisi</h2>
       </div>
       <div class="content-card">
         <h1 id="lessonDetailTitle">Barnoota</h1>
-        <div id="lessonDetailMeta" class="meta-tag"></div>
         <div id="lessonDetailContent"></div>
       </div>
     </div>
   </section>
 
   <!-- =====================================================
-       6. QORMAATA PAGE (SUURAA 5FFAA)
+       5. EXAM LIST PAGE
   ====================================================== -->
   <section id="examListPage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
         <h2>📝 Qormaata</h2>
       </div>
-
-      <!-- Category Filter Pills -->
-      <div id="examCategoryFilter" class="category-pills-bar">
-        <button type="button" class="pill active" onclick="filterExamsByCategory('Hunda', this)">Hunda</button>
-        <button type="button" class="pill" onclick="filterExamsByCategory('Dura', this)">Dura</button>
-        <button type="button" class="pill" onclick="filterExamsByCategory('Ergaa', this)">Ergaa</button>
-        <button type="button" class="pill" onclick="filterExamsByCategory('Xumura', this)">Xumura</button>
-      </div>
-
       <div id="studentExams"></div>
     </div>
   </section>
 
   <!-- =====================================================
-       7. EXAM TAKING PAGE
+       6. EXAM TAKING PAGE
   ====================================================== -->
   <section id="examPage" class="page">
     <div class="exam-wrapper">
@@ -250,7 +214,7 @@
   </section>
 
   <!-- =====================================================
-       8. SUBMIT CONFIRM PAGE
+       7. SUBMIT CONFIRM PAGE
   ====================================================== -->
   <section id="submitConfirmPage" class="page">
     <div class="center-card">
@@ -265,25 +229,26 @@
   </section>
 
   <!-- =====================================================
-       9. QABXII PAGE (SUURAA 7FFAA)
+       8. SCORE & LEADERBOARD PAGE
   ====================================================== -->
   <section id="scorePage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
-        <h2>🏆 Qabxii</h2>
+        <h2>🏆 Qabxii Koo</h2>
       </div>
 
       <div id="studentScore" style="margin-bottom: 20px;"></div>
 
-      <!-- LEADERBOARD / SADARKAA (SUURAA 7FFAA) -->
+      <!-- LEADERBOARD -->
       <div id="studentLeaderboardSection" style="display:none; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-        <h2 style="margin-top:0; font-size: 1.15rem; color: #1565C0;">🏆 Sadarkaa Barattootaa (Leaderboard)</h2>
-        <p style="color:#64748b; font-size:12px; margin-bottom: 12px;">Giddu-galeessa qabxii irratti hundaa'ee kan qindaa'e.</p>
+        <h2 style="margin-top:0; font-size: 1.15rem; color: #1565C0;">🥇 Sadarkaa Barattootaa (Leaderboard)</h2>
+        <p style="color:#64748b; font-size:12px; margin-bottom: 12px;">Qabxii giddu-galeessaa irratti hundaa'ee kan qindaa'e.</p>
         <table id="studentLeaderboardTable" style="width:100%; border-collapse:collapse;">
           <thead>
             <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; font-size: 13px; color: #475569;">
               <th style="padding: 8px;">Sadarkaa</th>
               <th style="padding: 8px;">Barataa</th>
+              <th style="padding: 8px; text-align: right;">Average</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -293,34 +258,33 @@
   </section>
 
   <!-- =====================================================
-       10. YAADAA CHAT PAGE (SUURAA 8FFAA)
+       9. YAADAA / FEEDBACK CHAT PAGE
   ====================================================== -->
   <section id="feedbackPage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
-        <h2>💬 Yaadaa</h2>
+        <h2>💬 Kuusaa Yaadaa</h2>
       </div>
 
-      <!-- Feedback Send Input Card -->
-      <div class="feedback-input-card">
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Yaada kennuu dandeessu. Yaada kee nuuf barreessi...</p>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="feedbackMessageInput" placeholder="Yaada kee asitti barreessi..." style="margin: 0; flex: 1;">
-          <button type="button" class="primary-btn" onclick="sendStudentFeedback()" style="padding: 10px 18px; margin: 0; background:#1565C0;">
+      <div class="form-card" style="margin-bottom:16px;">
+        <p style="font-size:13px; color:#64748b; margin-bottom:8px;">Yaada, gaaffii ykn komii qabdan asitti ergaa:</p>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="feedbackMessageInput" placeholder="Yaada kee asitti barreessi..." style="margin:0; flex:1;">
+          <button type="button" class="primary-btn" onclick="sendStudentFeedback()" style="padding:10px 16px; margin:0;">
             ➤
           </button>
         </div>
       </div>
 
-      <div class="section-title-row" style="margin-top: 16px;">
-        <h3>💬 Yaadaa bal'aa</h3>
+      <div class="section-title-row">
+        <h3>💬 Yaada Keessan & Deebii Admin</h3>
       </div>
       <div id="studentFeedbackList"></div>
     </div>
   </section>
 
   <!-- =====================================================
-       11. BEEKSIISA PAGE
+       10. BEEKSIISA PAGE
   ====================================================== -->
   <section id="announcementsPage" class="page">
     <div class="page-container">
@@ -332,7 +296,7 @@
   </section>
 
   <!-- =====================================================
-       12. PROFILE PAGE
+       11. PROFILE PAGE
   ====================================================== -->
   <section id="profilePage" class="page">
     <div class="page-container">
@@ -340,50 +304,27 @@
         <h2>👤 Profile Koo</h2>
       </div>
 
-      <div class="form-card" style="text-align: center;">
-        <div style="position: relative; width: 110px; height: 110px; margin: 15px auto 20px auto;">
-          <img
-            id="profileImageDisplay"
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
-            style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #1565C0; background: #f1f5f9; display: block;"
-            alt="Profile"
-          />
-          <label
-            for="profileImageInput"
-            style="position: absolute; bottom: 0; right: 0; background: #1565C0; color: white; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.25); border: 2px solid #ffffff; margin: 0;"
-          >
-            📷
-          </label>
-          <input
-            id="profileImageInput"
-            type="file"
-            accept="image/*"
-            style="display: none;"
-            onchange="handleProfileImageUpload(event)"
-          >
-        </div>
+      <div class="form-card">
+        <label style="font-weight: bold; margin-bottom: 5px; display: block;">Maqaa</label>
+        <input id="profileNameInput" type="text" placeholder="Maqaa kee galchi">
 
-        <div style="text-align: left; width: 100%;">
-          <label style="font-weight: bold; margin-bottom: 5px; display: block;">Maqaa</label>
-          <input id="profileNameInput" type="text" placeholder="Maqaa kee galchi">
+        <p style="margin: 12px 0;"><strong>Student ID:</strong> <span id="profileCode">-</span></p>
+        <p style="margin: 12px 0;"><strong>Activation Code:</strong> <span id="profileActivationCode">-</span></p>
+        <p style="margin: 12px 0;"><strong>Status:</strong> <span id="profileStatus">-</span></p>
 
-          <p style="margin: 8px 0;"><strong>Account:</strong> <span id="profileCode">-</span></p>
-          <p style="margin: 8px 0;"><strong>Status:</strong> <span id="profileStatus">-</span></p>
-
-          <button type="button" class="primary-btn" onclick="saveProfile()" style="width: 100%; margin-top: 15px;">
-            💾 Olkaa'i (Save)
-          </button>
-        </div>
+        <button type="button" class="primary-btn" onclick="saveProfile()" style="width: 100%; margin-top: 15px;">
+          💾 Olkaa'i (Save)
+        </button>
       </div>
     </div>
   </section>
 
   <!-- =====================================================
-       13. ADMIN LOGIN
+       12. ADMIN LOGIN PAGE
   ====================================================== -->
   <section id="adminLoginPage" class="page">
     <div class="page-container">
-      <button type="button" class="back-btn" onclick="switchStudentScreen('rolePage')">← Duubatti</button>
+      <button type="button" class="back-btn" onclick="showPublicLoginPage()">← Duubatti</button>
       <div class="form-card">
         <h2>⚙️ Admin Login</h2>
         <label>Username</label>
@@ -397,7 +338,7 @@
   </section>
 
   <!-- =====================================================
-       14. ADMIN DASHBOARD
+       13. ADMIN DASHBOARD PAGE
   ====================================================== -->
   <section id="adminDashboardPage" class="page">
     <div class="admin-container">
@@ -436,16 +377,14 @@
       </div>
 
       <div id="adminResultsPanel" class="admin-panel">
-        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-          <h2>📊 Qabxii Barattootaa</h2>
-          <button type="button" class="small-btn" onclick="exportResultsToCSV()" style="background:#10b981; color:white;">📥 Export CSV/Excel</button>
-        </div>
+        <div class="panel-title"><h2>📊 Qabxii Barattootaa</h2></div>
         <div class="table-wrapper">
           <table id="adminResultsTable">
             <thead></thead>
             <tbody></tbody>
           </table>
         </div>
+        <div id="adminResultDetails"></div>
       </div>
 
       <div id="adminLessonsPanel" class="admin-panel">
@@ -453,8 +392,6 @@
         <div class="admin-form">
           <label>Mata-duree Barnootaa</label>
           <input id="lessonTitleInput" type="text" placeholder="Fkn: Seensa Barnootaa">
-          <label>Subject / Gosa Barnootaa</label>
-          <input id="lessonSubjectInput" type="text" placeholder="Fkn: Aqeedhaa, Fiqh, Afaan Oromoo...">
           <label>Qabiyyee Barnootaa</label>
           <textarea id="lessonContentInput" placeholder="Qabiyyee barnootaa asitti barreessi..."></textarea>
           <button type="button" class="primary-btn" onclick="createLesson()">➕ Barnoota Dabali</button>
@@ -468,7 +405,6 @@
         <div class="admin-form exam-create-form">
           <h3>➕ Qormaata Uumi</h3>
           <input id="examTitleInput" type="text" placeholder="Mata-duree qormaataa">
-          <input id="examSubjectInput" type="text" placeholder="Subject / Gosa Barnootaa (Fkn: Saayinsii, Fiqh...)">
           <textarea id="examDescriptionInput" placeholder="Ibsa qormaataa"></textarea>
 
           <div class="form-grid">
@@ -544,18 +480,6 @@
         </div>
 
         <div class="admin-form">
-          <h3>📋 Gaaffii Hedduu Walitti (Bulk) Galchi</h3>
-          <select id="bulkExamSelect"><option value="">Qormaata filadhu</option></select>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 6px;">
-            <label style="margin:0; font-weight: bold;">Paste gochuuf:</label>
-            <button type="button" class="secondary-btn" onclick="pasteClipboardToBulk()" style="padding: 6px 14px; font-size: 13px;">📋 Paste</button>
-          </div>
-          <textarea id="bulkQuestionsInput" rows="8" placeholder="Asiitti gaaffilee kee hunda copy-paste godhi"></textarea>
-          <button type="button" class="primary-btn" onclick="createBulkQuestions()">📥 Gaaffilee Hedduu Galchi</button>
-          <div id="bulkMessage" class="message"></div>
-        </div>
-
-        <div class="admin-form">
           <h3>✍️ Gaaffii Tokko Tokkoon Dabali</h3>
           <select id="questionExamSelect"><option value="">Qormaata filadhu</option></select>
           <textarea id="questionTextInput" placeholder="Gaaffii"></textarea>
@@ -604,44 +528,42 @@
   </section>
 
   <!-- =====================================================
-       15. MOBILE BOTTOM NAVIGATION BAR (FIXED BOTTOM AT ALL TIMES FOR STUDENTS)
+       14. MOBILE BOTTOM NAVIGATION (BARATTOOTAAF - 7 TABS)
   ====================================================== -->
   <nav id="studentBottomNav" class="mobile-bottom-bar" style="display:none;">
-    <button id="navTabHome" type="button" class="bottom-tab-item active" onclick="switchStudentScreen('studentHomePage', this)">
+    <button id="navTabHome" type="button" class="bottom-tab-item active" onclick="showPage('studentHomePage'); loadStudentHome();">
       <span class="tab-icon">🏠</span>
       <span class="tab-label">Seeni</span>
     </button>
-
-    <button id="navTabLessons" type="button" class="bottom-tab-item" onclick="switchStudentScreen('studentLessonsPage', this); loadStudentLessons();">
+    <button id="navTabLessons" type="button" class="bottom-tab-item" onclick="showPage('studentHomePage'); loadStudentLessons();">
       <span class="tab-icon">📖</span>
       <span class="tab-label">Barumsaa</span>
     </button>
-
-    <button id="navTabExams" type="button" class="bottom-tab-item" onclick="switchStudentScreen('examListPage', this); loadExams();">
+    <button id="navTabExams" type="button" class="bottom-tab-item" onclick="showPage('examListPage'); loadExams();">
       <span class="tab-icon">📝</span>
       <span class="tab-label">Qormaata</span>
     </button>
-
-    <button id="navTabScore" type="button" class="bottom-tab-item" onclick="switchStudentScreen('scorePage', this); showScore();">
+    <button id="navTabScore" type="button" class="bottom-tab-item" onclick="showPage('scorePage'); showScore();">
       <span class="tab-icon">🏆</span>
       <span class="tab-label">Qabxii</span>
     </button>
-
-    <button id="navTabFeedback" type="button" class="bottom-tab-item" onclick="switchStudentScreen('feedbackPage', this); loadFeedbacks();">
+    <button id="navTabFeedback" type="button" class="bottom-tab-item" onclick="showPage('feedbackPage'); loadFeedbacks();">
       <span class="tab-icon">💬</span>
       <span class="tab-label">Yaadaa</span>
     </button>
-
-    <button id="navTabAnnounce" type="button" class="bottom-tab-item" onclick="switchStudentScreen('announcementsPage', this); loadAnnouncements();">
+    <button id="navTabAnnounce" type="button" class="bottom-tab-item" onclick="showPage('announcementsPage'); loadAnnouncements();">
       <span class="tab-icon">📢</span>
       <span class="tab-label">Beeksisa</span>
+    </button>
+    <button id="navTabProfile" type="button" class="bottom-tab-item" onclick="showPage('profilePage'); loadProfile();">
+      <span class="tab-icon">👤</span>
+      <span class="tab-label">Profile</span>
     </button>
   </nav>
 
   <!-- SUPABASE & SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
-  <script src="bulk.js"></script>
 
 </body>
 </html>
