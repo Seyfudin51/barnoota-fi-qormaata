@@ -8,12 +8,29 @@
   <title>Akkaadaamii Oromiyaa</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Mandatory display for splashPage until user taps Jalqabi */
+    #splashPage {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 999999 !important;
+      background: linear-gradient(135deg, #094080, #0d59b2) !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+  </style>
 </head>
 
 <body>
 
   <!-- =====================================================
-       1. START / SPLASH SCREEN (MANDATORY GATEWAY)
+       1. START / SPLASH SCREEN (DIRQAMA FUULA JALQABAA TAA'A)
   ====================================================== -->
   <section id="splashPage" class="page active">
     <div class="splash-wrapper">
@@ -26,7 +43,7 @@
         <p class="splash-quote">"Barnoonni ijoo, Milkaa'inni danda'ama!"</p>
       </div>
       <div class="splash-footer">
-        <button type="button" class="splash-start-btn" onclick="startAppFlow()">
+        <button id="mainStartButton" type="button" class="splash-start-btn" onclick="goToLoginPage()">
           Jalqabi →
         </button>
       </div>
@@ -51,7 +68,7 @@
         <h2>Baga Nagaan Dhuftan!</h2>
         <p class="login-description">Barnoota dubbisuu, qormaata fudhachuu fi to'achuuf Google ykn Telegram fayyadamaa.</p>
 
-        <!-- GOOGLE LOGIN (BARATAA FI ADMINI HUNDAAF) -->
+        <!-- GOOGLE LOGIN -->
         <button id="googleLoginButton" type="button" class="google-login-btn" onclick="googleLogin()">
           <svg width="22" height="22" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.93-4.18 2.93-7.4z"/>
@@ -378,7 +395,7 @@
   </section>
 
   <!-- =====================================================
-       13. ADMIN DASHBOARD (ACCESSED AUTOMATICALLY VIA GOOGLE AUTH)
+       13. ADMIN DASHBOARD (ACCESSED VIA GOOGLE AUTH)
   ====================================================== -->
   <section id="adminDashboardPage" class="page">
     <div class="admin-app-wrapper">
@@ -761,26 +778,48 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
-  <!-- SCREEN SWITCH, PHOTO UPLOAD, STUDENT PROFILE & BULK LOGIC -->
+  <!-- PREVENT AUTOMATIC BYPASS OF SPLASH SCREEN & ENSURE JALQABI FLOW -->
   <script>
-    // 0. ENFORCE SPLASH SCREEN FLOW & UNIFIED GOOGLE ROLE DETECTION
-    function startAppFlow() {
-      // Check if user is already logged in as Admin or Student
+    // 1. LOCKED FIRST SCREEN: Enforces user MUST click Jalqabi!
+    let splashPassed = false;
+
+    // Override any automatic showPage or session redirects from app.js on page load
+    const nativeShowPage = window.showPage;
+    window.showPage = function(pageId) {
+      if (!splashPassed && pageId !== "splashPage") {
+        // Suppress automatic background redirects until user taps Jalqabi
+        return;
+      }
+      if (typeof nativeShowPage === "function") {
+        nativeShowPage(pageId);
+      } else {
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        document.getElementById(pageId)?.classList.add("active");
+      }
+    };
+
+    // When the user taps the Jalqabi button:
+    function goToLoginPage() {
+      splashPassed = true;
+      const splash = document.getElementById("splashPage");
+      if (splash) {
+        splash.style.setProperty("display", "none", "important");
+        splash.classList.remove("active");
+      }
+
+      // Check if user is already logged in
       if (typeof currentAdmin !== "undefined" && currentAdmin) {
         showAdminDashboardDirect();
       } else if (typeof currentStudent !== "undefined" && currentStudent) {
         navTo("studentHomePage");
       } else {
-        if (typeof showPublicLoginPage === "function") {
-          showPublicLoginPage();
-        } else {
-          document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-          document.getElementById("rolePage")?.classList.add("active");
-        }
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        const role = document.getElementById("rolePage");
+        if (role) role.classList.add("active");
+        if (typeof showPublicLoginPage === "function") showPublicLoginPage();
       }
     }
 
-    // Direct helper to show admin dashboard
     function showAdminDashboardDirect() {
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
       const adminDash = document.getElementById("adminDashboardPage");
@@ -792,7 +831,7 @@
       if (sNav) sNav.style.display = "none";
     }
 
-    // 1. ADMIN HOME VIEW
+    // 2. ADMIN HOME VIEW
     function showAdminHomeView() {
       const homeTiles = document.getElementById("adminHomeTilesView");
       if (homeTiles) homeTiles.style.display = "block";
@@ -811,7 +850,7 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // 2. OPEN SPECIFIC ADMIN PANEL
+    // 3. OPEN SPECIFIC ADMIN PANEL
     const originalOpenAdminPanel = window.openAdminPanel;
     window.openAdminPanel = async function(panel) {
       const homeTiles = document.getElementById("adminHomeTilesView");
@@ -863,7 +902,7 @@
       }
     };
 
-    // 3. ADMIN AVATAR PHOTO PICKER
+    // 4. ADMIN AVATAR PHOTO PICKER
     function handleAdminAvatarUpload(input) {
       const file = input?.files?.[0];
       if (!file) return;
@@ -890,7 +929,7 @@
       }
     }
 
-    // 4. STUDENT AVATAR UPLOAD (PHOTO GALLERY)
+    // 5. STUDENT AVATAR UPLOAD (PHOTO GALLERY)
     function handleStudentAvatarUpload(input) {
       const file = input?.files?.[0];
       if (!file) return;
@@ -928,7 +967,7 @@
       }
     }
 
-    // 5. STUDENT FULL PROFILE SAVE
+    // 6. STUDENT FULL PROFILE SAVE
     async function saveStudentFullProfile() {
       const name = document.getElementById("profileNameInput")?.value.trim();
       const email = document.getElementById("profileEmailInput")?.value.trim();
@@ -952,7 +991,7 @@
       }
     }
 
-    // 6. BEAUTIFIED ADMIN STUDENT CARDS
+    // 7. BEAUTIFIED ADMIN STUDENT CARDS
     async function loadAdminStudentsEnhanced() {
       const container = document.getElementById("adminStudentsList");
       if (!container) return;
@@ -1018,7 +1057,7 @@
       } catch(e) { alert("Dogoggora: " + e.message); }
     }
 
-    // 7. BEAUTIFIED ADMIN RESULTS TABLE & CARDS
+    // 8. BEAUTIFIED ADMIN RESULTS TABLE & CARDS
     async function loadAdminResultsEnhanced() {
       const table = document.getElementById("adminResultsTable");
       if (!table) return;
@@ -1069,7 +1108,7 @@
       }
     }
 
-    // 8. BULK QUESTIONS INSERTION
+    // 9. BULK QUESTIONS INSERTION
     async function bulkInsertQuestions() {
       const examSelect = document.getElementById("bulkExamSelect");
       const examId = examSelect?.value;
