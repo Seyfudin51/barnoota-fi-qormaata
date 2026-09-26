@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - MODERN APP UI (style.css)
-   100% Synced With Original App.js
+   100% Synced With Original App.js + Premium Admin Overhaul
 ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -12,16 +12,19 @@
   --accent-orange: #f97316;
   --accent-green: #10b981;
   --accent-purple: #7B1FA2;
-  --bg-main: #f4f8fc;
+  --accent-pink: #ec4899;
+  --bg-main: #f8fafc;
   --card-bg: #ffffff;
   --text-dark: #0f172a;
   --text-muted: #64748b;
   --border-color: #e2e8f0;
-  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-lg: 18px;
   --radius-md: 14px;
   --radius-sm: 8px;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 15px rgba(21,101,192,0.08);
+  --shadow-card: 0 10px 25px -4px rgba(15, 23, 42, 0.05), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
 }
 
 * {
@@ -37,8 +40,44 @@ body {
   color: var(--text-dark);
   line-height: 1.5;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   min-height: 100vh;
+}
+
+/* =========================================================
+   0. TOP BRAND BAR (SUURAA GUBBAA AKKAADAAMII OROMIYAA)
+========================================================= */
+.app-top-brand-bar {
+  width: 100%;
+  max-width: 480px;
+  background: #111827;
+  color: #ffffff;
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.brand-bar-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.brand-bar-logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.brand-bar-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Page Container Limit */
@@ -154,7 +193,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 90vh;
+  min-height: 85vh;
   text-align: center;
 }
 
@@ -184,8 +223,8 @@ body {
 .login-card, .form-card, .center-card {
   background: var(--card-bg);
   padding: 24px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
   border: 1px solid var(--border-color);
   margin-top: 16px;
   text-align: left;
@@ -236,11 +275,11 @@ body {
 /* =========================================================
    3. STUDENT DASHBOARD (SUURAA 3FFAA)
 ========================================================= */
-.app-header, .admin-header {
+.app-header {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
   color: #ffffff;
-  padding: 18px;
-  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  border-radius: var(--radius-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -255,12 +294,12 @@ body {
 }
 
 .user-greeting h2 {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
 }
 
 .user-greeting p {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   opacity: 0.9;
 }
 
@@ -268,18 +307,19 @@ body {
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
   border: none;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.75rem;
+  font-weight: 700;
+  font-size: 0.78rem;
   cursor: pointer;
+  backdrop-filter: blur(4px);
 }
 
 .app-banner-card {
   background: linear-gradient(135deg, #1E88E5, #1565C0);
   color: white;
-  padding: 18px;
-  border-radius: var(--radius-lg);
+  padding: 22px 20px;
+  border-radius: var(--radius-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -288,29 +328,29 @@ body {
 }
 
 .banner-text h3 {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 800;
 }
 
 .banner-text p {
-  font-size: 0.8rem;
-  opacity: 0.9;
+  font-size: 0.85rem;
+  opacity: 0.95;
   margin-top: 2px;
 }
 
 .banner-text small {
-  font-size: 0.7rem;
-  opacity: 0.8;
+  font-size: 0.72rem;
+  opacity: 0.85;
   font-style: italic;
   display: block;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .banner-icon {
   font-size: 2.2rem;
-  background: rgba(255,255,255,0.2);
-  width: 52px;
-  height: 52px;
+  background: rgba(255,255,255,0.22);
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -327,23 +367,23 @@ body {
 .menu-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 18px 14px;
+  border-radius: var(--radius-xl);
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   transition: all 0.2s ease;
 }
 
 .card-icon {
   font-size: 1.8rem;
   background: var(--primary-light);
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -358,7 +398,7 @@ body {
 .card-teal .card-icon { background: #E0F2F1; color: #00695C; }
 
 .menu-card strong {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   color: var(--text-dark);
   font-weight: 700;
 }
@@ -376,40 +416,41 @@ body {
 .content-section {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 16px;
+  border-radius: var(--radius-xl);
+  padding: 18px;
   margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
 }
 
 .section-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 /* =========================================================
    4. CARDS & ITEMS (BARNOOTA, QORMAATA, ETC.)
 ========================================================= */
-.item-card, .exam-card, .result-card, .admin-list-item {
+.item-card, .exam-card, .result-card {
   background: var(--card-bg);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 14px;
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
   position: relative;
 }
 
 .item-icon {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   background: var(--primary-light);
   color: var(--primary);
-  padding: 10px;
-  border-radius: var(--radius-sm);
+  padding: 12px;
+  border-radius: var(--radius-md);
 }
 
 .item-main {
@@ -417,54 +458,36 @@ body {
 }
 
 .item-main h4, .exam-card h3, .result-card h3 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-dark);
 }
 
 .item-main p, .exam-card p, .result-card p {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   margin-top: 4px;
 }
 
 .exam-badge {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  font-size: 0.68rem;
+  top: 16px;
+  right: 16px;
+  font-size: 0.7rem;
   font-weight: 800;
   background: var(--primary-light);
   color: var(--primary);
-  padding: 3px 8px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
 .exam-meta {
   display: flex;
-  gap: 12px;
-  font-size: 0.75rem;
+  gap: 14px;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  margin: 8px 0;
+  margin: 10px 0;
   font-weight: 600;
-}
-
-.status {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.status.active {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.status.blocked {
-  background: #fee2e2;
-  color: #b91c1c;
 }
 
 /* =========================================================
@@ -486,8 +509,8 @@ body {
 }
 
 .small-btn {
-  padding: 6px 12px;
-  font-size: 0.78rem;
+  padding: 7px 14px;
+  font-size: 0.8rem;
   border-radius: var(--radius-sm);
 }
 
@@ -495,9 +518,9 @@ body {
   background: #ef4444;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: var(--radius-sm);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   cursor: pointer;
 }
 
@@ -506,17 +529,17 @@ body {
   border: none;
   color: var(--primary);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   cursor: pointer;
   margin-bottom: 12px;
 }
 
 input, select, textarea {
   width: 100%;
-  padding: 12px;
+  padding: 12px 14px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   margin-top: 6px;
   margin-bottom: 12px;
   background: #ffffff;
@@ -525,7 +548,7 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+  box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
 }
 
 /* =========================================================
@@ -553,7 +576,7 @@ input:focus, select:focus, textarea:focus {
   gap: 12px;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
   margin-bottom: 8px;
   cursor: pointer;
@@ -579,7 +602,7 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 4px;
+  padding: 8px 6px;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
   z-index: 1000;
 }
@@ -610,52 +633,356 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* =========================================================
-   8. ADMIN DASHBOARD
+   8. ⭐ PREMIUM ADMIN DASHBOARD OVERHAUL (SUURAA HAARAA) ⭐
 ========================================================= */
-.admin-menu {
+
+/* Admin Banner Top Card */
+.admin-header-card {
+  background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+  color: #ffffff;
+  padding: 22px 20px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 25px rgba(21, 101, 192, 0.25);
+}
+
+.admin-header-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-avatar-glow {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.admin-header-card h1 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.admin-subtext-white {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-top: 3px;
+}
+
+.admin-logout-pill {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+
+.admin-logout-pill:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Compact 2-Row 3-Column Admin Grid Buttons */
+.admin-menu-compact-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.admin-menu-btn {
-  background: var(--card-bg);
+.admin-compact-card {
+  background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 10px 4px;
-  text-align: center;
+  border-radius: var(--radius-lg);
+  padding: 12px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.admin-menu-btn.active-menu {
+.admin-card-icon {
+  font-size: 1.15rem;
+}
+
+.admin-compact-card strong {
+  font-size: 0.8rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.admin-compact-card.active-menu {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.3);
+}
+
+.admin-compact-card.active-menu strong {
+  color: #ffffff;
+}
+
+.admin-compact-card:active {
+  transform: scale(0.96);
+}
+
+/* Panel Headers */
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  margin-top: 6px;
+}
+
+.panel-title-row .panel-emoji {
+  font-size: 1.5rem;
+}
+
+.panel-title-row h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.4px;
+}
+
+/* =========================================================
+   ⭐ ADMIN STUDENT CARDS & LIST ITEMS (MATCHING IMAGE) ⭐
+========================================================= */
+.admin-list-item, .admin-list-item-premium {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 20px 18px;
+  margin-bottom: 14px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-list-item:active, .admin-list-item-premium:active {
+  transform: scale(0.99);
+}
+
+.item-main, .item-main-premium {
+  flex: 1;
+}
+
+.admin-list-item h3, .admin-list-item-premium h3 {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+
+.admin-list-item p, .admin-list-item-premium p {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.admin-list-item p strong, .admin-list-item-premium p strong {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* Status Pill with Green/Red Dot */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.status.active {
+  background: #e6f9ed;
+  color: #16a34a;
+}
+
+.status.blocked {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Admin Action Buttons (Cufi & Haqi) */
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Blue "🔒 Cufi" / "🔓 Bani" Button */
+.admin-actions .small-btn, .small-btn-premium {
+  background: #1565C0;
+  color: #ffffff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(21, 101, 192, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.admin-actions .small-btn:active, .small-btn-premium:active {
+  transform: scale(0.94);
+  background: #0D47A1;
+}
+
+/* Red "🗑️ Haqi" Button */
+.admin-actions .danger-small-btn, .danger-small-btn-premium {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.admin-actions .danger-small-btn:active, .danger-small-btn-premium:active {
+  transform: scale(0.94);
+  background: #dc2626;
+}
+
+/* =========================================================
+   ⭐ ADMIN FORMS & TABLES ⭐
+========================================================= */
+.admin-form-premium {
+  background: #ffffff;
+  padding: 22px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-color);
+  margin-bottom: 20px;
+}
+
+.admin-form-premium h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.form-grid-premium {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.primary-btn-premium {
   background: var(--primary);
   color: #ffffff;
-  border-color: var(--primary);
-}
-
-.table-wrapper {
-  overflow-x: auto;
-  background: white;
+  border: none;
+  width: 100%;
+  padding: 14px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.25);
+  margin-top: 10px;
 }
 
-table {
+.ai-box-premium {
+  border-left: 5px solid #7B1FA2;
+}
+
+.ai-btn-premium {
+  background: linear-gradient(135deg, #8E24AA, #6A1B9A);
+  color: #ffffff;
+  border: none;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(106, 27, 154, 0.25);
+  margin-top: 10px;
+}
+
+.option-grid-premium {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.table-wrapper-premium {
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+}
+
+.premium-admin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
 }
 
-th, td {
-  padding: 10px;
+.premium-admin-table th, .premium-admin-table td {
+  padding: 14px 12px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
 }
 
-th {
-  background: #f1f5f9;
+.premium-admin-table th {
+  background: #f8fafc;
+  color: #475569;
   font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: 1px dashed var(--border-color);
+  margin: 10px 0;
 }
