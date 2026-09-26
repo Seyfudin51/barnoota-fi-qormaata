@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - MODERN APP UI (style.css)
-   100% Matching Image 2 (Fakkii Lammaffaa) - Vivid & Beautiful
+   100% Matching Image 2 - Vivid, Clean Navigation, No Overlaps
 ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -27,6 +27,7 @@
   --radius-xl: 22px;
   --radius-lg: 16px;
   --radius-md: 12px;
+  --radius-sm: 8px;
   --shadow-tile: 0 8px 20px -3px rgba(0, 0, 0, 0.12), 0 3px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
@@ -240,7 +241,7 @@ body {
 }
 
 /* =========================================================
-   3. STUDENT DASHBOARD (ORIGINAL PRESERVED)
+   3. STUDENT DASHBOARD (PRESERVED)
 ========================================================= */
 .app-header {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary-royal));
@@ -390,7 +391,7 @@ body {
 }
 
 /* =========================================================
-   ⭐ 4. ADMIN DASHBOARD PAGE (FAKKII 2FFAA 100% IDENTICAL) ⭐
+   ⭐ 4. ADMIN DASHBOARD (FAKKII 2FFAA CLEAN REPLICA) ⭐
 ========================================================= */
 
 .admin-app-wrapper {
@@ -427,20 +428,31 @@ body {
   gap: 12px;
 }
 
+/* ADMIN AVATAR PILL WITH GALLERY UPLOAD */
 .admin-avatar-pill {
   display: flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.15s ease;
+}
+
+.admin-avatar-pill:active {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .admin-avatar-circle {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
@@ -479,7 +491,7 @@ body {
   padding: 16px;
 }
 
-/* 3D BANNER CARD (Globe, Books, Plant Illustration) */
+/* 3D HERO BANNER CARD (Globe, Books, Plant Illustration) */
 .admin-3d-banner-card {
   width: 100%;
   background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 60%, #38bdf8 100%);
@@ -578,7 +590,27 @@ body {
   background: linear-gradient(135deg, #06b6d4, #22d3ee);
 }
 
-/* ADMIN BOTTOM NAVIGATION BAR (7 Tabs - Clean Minimal White) */
+/* BACK BUTTON FOR ADMIN PANELS */
+.admin-panel-back-btn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: var(--primary-royal);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.admin-panel-back-btn:active {
+  background: #e2e8f0;
+}
+
+/* ADMIN BOTTOM NAVIGATION BAR (7 Tabs) */
 .admin-bottom-appbar {
   position: fixed;
   bottom: 0;
@@ -621,9 +653,7 @@ body {
   color: #0d59b2;
 }
 
-/* =========================================================
-   ADMIN DATA PANELS (Clean Cards for Admin Features)
-========================================================= */
+/* ADMIN DATA PANELS */
 .admin-content-panel {
   background: #ffffff;
   border-radius: 20px;
