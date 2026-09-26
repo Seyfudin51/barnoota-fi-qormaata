@@ -34,22 +34,22 @@
   </section>
 
   <!-- =====================================================
-       2. ROLE / LOGIN PAGE
+       2. ROLE / LOGIN PAGE (CLEAN, BEAUTIFUL & ORGANIZED)
   ====================================================== -->
   <section id="rolePage" class="page">
     <div class="login-wrapper">
-      <div class="brand-area">
-        <div class="brand-logo-small">
-          <img src="192.png" alt="Logo" onerror="this.style.display='none'">
+      <div class="login-clean-header">
+        <div class="login-logo-circle">
+          <img src="192.png" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ffffff\'><path d=\'M12 3L1 9l11 6 9-4.91V17h2V9L12 3z\'/></svg>'">
         </div>
-        <div class="brand-title">🎓 Akkaadaamii Oromiyaa</div>
-        <div class="brand-subtitle">Baga nagaan dhuftan!</div>
+        <h1 class="login-app-title">Akkaadaamii Oromiyaa</h1>
+        <p class="login-app-subtitle">Barnoota fi Qormaata</p>
       </div>
 
-      <div class="login-card">
-        <div class="login-icon">🔐</div>
-        <h2>Seensa Akkaadaamii</h2>
-        <p class="login-description">Barnoota fi qormaata argachuuf seenaa.</p>
+      <div class="login-card-modern">
+        <div class="login-card-badge">🔐 Seensa</div>
+        <h2>Baga Nagaan Dhuftan!</h2>
+        <p class="login-description">Barnoota dubbisuu fi qormaata fudhachuuf akkaataa mijatuun seenaa.</p>
 
         <!-- GOOGLE LOGIN -->
         <button id="googleLoginButton" type="button" class="google-login-btn" onclick="googleLogin()">
@@ -101,6 +101,8 @@
         <h2>📝 Barataa Haaraa Galmeessi</h2>
         <label>Maqaa Guutuu</label>
         <input id="nameInput" type="text" placeholder="Maqaa kee guutuu galchi">
+        <label>Email (Yoo qabaatte)</label>
+        <input id="studentEmailInput" type="email" placeholder="email@gmail.com">
         <button type="button" class="primary-btn" onclick="studentRegister()" style="background:#10b981;">Galmaa'i</button>
         <div id="studentLoginMessage" class="message"></div>
       </div>
@@ -108,13 +110,16 @@
   </section>
 
   <!-- =====================================================
-       3. STUDENT HOME / DASHBOARD
+       3. STUDENT HOME / DASHBOARD (VIVID BUTTONS & GORGEOUS BANNER)
   ====================================================== -->
   <section id="studentHomePage" class="page">
     <div class="page-container">
       <header class="app-header">
-        <div class="user-greeting">
-          <div style="width:40px; height:40px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🎓</div>
+        <div class="user-greeting" onclick="navTo('profilePage')" style="cursor:pointer;">
+          <div class="student-header-avatar" id="studentHomeAvatarWrap">
+            <img id="studentHomeAvatarImg" src="" alt="Avatar" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+            <span id="studentHomeAvatarFallback">🎓</span>
+          </div>
           <div>
             <h2 id="studentWelcomeName">Barataa</h2>
             <p id="studentHomeStatusBadge">Dashboard</p>
@@ -123,50 +128,75 @@
         <button type="button" class="logout-btn" onclick="studentLogout()">Ba'i</button>
       </header>
 
-      <div class="app-banner-card">
-        <div class="banner-text">
-          <h3>App Kiyya</h3>
-          <p id="studentHomeMessage">Barnoota • Qormaata • Qabxii</p>
-          <small>"Barnootni ijoo milkaa'inaa ti!"</small>
+      <!-- ARTISTIC EDUCATION BANNER (MATCHING THE THEME) -->
+      <div class="student-hero-banner">
+        <div class="hero-banner-content">
+          <div class="hero-banner-text">
+            <span class="hero-badge">Barnoota Qulqulluu</span>
+            <h3>Akkaadaamii Oromiyaa</h3>
+            <p id="studentHomeMessage">Barnoota dubbisi, qormaata fudhadhu, qabxii kee to'adhu!</p>
+            <small>"Barnootni ijoo milkaa'inaa ti!"</small>
+          </div>
+          <div class="hero-banner-art">
+            <svg viewBox="0 0 140 120" class="hero-svg">
+              <circle cx="70" cy="60" r="45" fill="rgba(255,255,255,0.15)"/>
+              <path d="M70 25 L105 45 L70 65 L35 45 Z" fill="#ffffff"/>
+              <polygon points="45,55 45,75 70,90 95,75 95,55 70,70" fill="rgba(255,255,255,0.85)"/>
+              <path d="M100 48 L110 54 L110 78 L100 72 Z" fill="#facc15"/>
+              <circle cx="70" cy="100" r="4" fill="#38bdf8"/>
+            </svg>
+          </div>
         </div>
-        <div class="banner-icon">🚀</div>
       </div>
 
+      <!-- 6 VIVID COLORFUL GRID BUTTONS FOR STUDENTS (IDENTICAL TO ADMIN THEME) -->
       <div class="student-menu-grid">
-        <button type="button" class="menu-card card-blue" onclick="navTo('studentLessonsPage')">
-          <span class="card-icon">📖</span>
-          <strong>Barnoota</strong>
-          <small>Dubbisi</small>
+        <button type="button" class="student-vivid-tile tile-blue" onclick="navTo('studentLessonsPage')">
+          <div class="tile-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+          </div>
+          <strong class="tile-title">Barnoota</strong>
+          <small class="tile-sub">Dubbisi</small>
         </button>
 
-        <button type="button" class="menu-card card-purple" onclick="navTo('examListPage')">
-          <span class="card-icon">📝</span>
-          <strong>Qormaata</strong>
-          <small>Qo'adhu</small>
+        <button type="button" class="student-vivid-tile tile-purple" onclick="navTo('examListPage')">
+          <div class="tile-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <strong class="tile-title">Qormaata</strong>
+          <small class="tile-sub">Qo'adhu</small>
         </button>
 
-        <button type="button" class="menu-card card-green" onclick="navTo('scorePage')">
-          <span class="card-icon">🏆</span>
-          <strong>Qabxii</strong>
-          <small>Ilaali</small>
+        <button type="button" class="student-vivid-tile tile-green" onclick="navTo('scorePage')">
+          <div class="tile-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+          </div>
+          <strong class="tile-title">Qabxii</strong>
+          <small class="tile-sub">Ilaali</small>
         </button>
 
-        <button type="button" class="menu-card card-orange" onclick="navTo('announcementsPage')">
-          <span class="card-icon">📢</span>
-          <strong>Beeksisaa</strong>
-          <small>Oduu haaraa</small>
+        <button type="button" class="student-vivid-tile tile-amber" onclick="navTo('announcementsPage')">
+          <div class="tile-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          </div>
+          <strong class="tile-title">Beeksisaa</strong>
+          <small class="tile-sub">Oduu haaraa</small>
         </button>
 
-        <button type="button" class="menu-card card-pink" onclick="navTo('feedbackPage')">
-          <span class="card-icon">💬</span>
-          <strong>Yaadaa</strong>
-          <small>Nuuf ergi</small>
+        <button type="button" class="student-vivid-tile tile-pink" onclick="navTo('feedbackPage')">
+          <div class="tile-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+          </div>
+          <strong class="tile-title">Yaadaa</strong>
+          <small class="tile-sub">Nuuf ergi</small>
         </button>
 
-        <button type="button" class="menu-card card-teal" onclick="navTo('profilePage')">
-          <span class="card-icon">👤</span>
-          <strong>Profile</strong>
-          <small>Kee</small>
+        <button type="button" class="student-vivid-tile tile-teal" onclick="navTo('profilePage')">
+          <div class="tile-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <strong class="tile-title">Profile</strong>
+          <small class="tile-sub">Kee</small>
         </button>
       </div>
 
@@ -329,20 +359,55 @@
   </section>
 
   <!-- =====================================================
-       12. PROFILE PAGE (BARATAA)
+       12. PROFILE PAGE (BARATAA - COMPLETE WITH PHOTO & EDIT)
   ====================================================== -->
   <section id="profilePage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
+        <button type="button" class="back-btn" onclick="navTo('studentHomePage')">← Duubatti</button>
         <h2>👤 Profile Koo</h2>
       </div>
-      <div class="form-card">
-        <label style="font-weight: bold; margin-bottom: 5px; display: block;">Maqaa</label>
-        <input id="profileNameInput" type="text" placeholder="Maqaa kee galchi">
-        <p style="margin: 12px 0;"><strong>Student ID:</strong> <span id="profileCode">-</span></p>
-        <p style="margin: 12px 0;"><strong>Activation Code:</strong> <span id="profileActivationCode">-</span></p>
-        <p style="margin: 12px 0;"><strong>Status:</strong> <span id="profileStatus">-</span></p>
-        <button type="button" class="primary-btn" onclick="saveProfile()" style="width: 100%; margin-top: 15px;">💾 Olkaa'i (Save)</button>
+
+      <div class="profile-card-modern">
+        <!-- Photo Upload from Gallery -->
+        <div class="profile-avatar-wrapper" onclick="document.getElementById('studentAvatarFileInput').click()" title="Suuraa galarii irraa filadhu">
+          <div class="profile-avatar-circle" id="studentAvatarDisplay">
+            <img id="studentAvatarImg" src="" alt="Profile" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+            <span id="studentAvatarFallbackSvg" style="font-size: 2.5rem;">👨‍🎓</span>
+          </div>
+          <div class="avatar-camera-badge">📷</div>
+        </div>
+        <input type="file" id="studentAvatarFileInput" accept="image/*" style="display:none;" onchange="handleStudentAvatarUpload(this)">
+        <p style="text-align:center; font-size:12px; color:#64748b; margin-top:6px; margin-bottom:16px;">Suuraa jijjiiruuf tuqi</p>
+
+        <!-- Edit Profile Form -->
+        <div class="profile-info-group">
+          <label>Maqaa Guutuu</label>
+          <input id="profileNameInput" type="text" placeholder="Maqaa kee galchi">
+
+          <label>Email</label>
+          <input id="profileEmailInput" type="email" placeholder="Email kee galchi">
+        </div>
+
+        <div class="profile-meta-grid">
+          <div class="profile-meta-box">
+            <span class="meta-label">Student ID</span>
+            <strong id="profileCode" class="meta-value">-</strong>
+          </div>
+          <div class="profile-meta-box">
+            <span class="meta-label">Activation Code</span>
+            <strong id="profileActivationCode" class="meta-value">-</strong>
+          </div>
+        </div>
+
+        <div class="profile-status-bar">
+          <span>Haala Galmee (Status):</span>
+          <span id="profileStatus" class="status active">-</span>
+        </div>
+
+        <button type="button" class="primary-btn-vivid" onclick="saveStudentFullProfile()" style="margin-top:16px;">
+          💾 Olkaa'i (Save Profile)
+        </button>
       </div>
     </div>
   </section>
@@ -366,12 +431,12 @@
   </section>
 
   <!-- =====================================================
-       14. ⭐ ADMIN DASHBOARD (FAKKII 2FFAA & CLEAN SCREEN SWITCH) ⭐
+       14. ADMIN DASHBOARD
   ====================================================== -->
   <section id="adminDashboardPage" class="page">
     <div class="admin-app-wrapper">
 
-      <!-- TOP CURVED APP BAR (Akka Fakkii 2ffaatti) -->
+      <!-- TOP CURVED APP BAR -->
       <header class="admin-top-appbar">
         <div class="admin-topbar-left">
           <button type="button" class="admin-icon-btn" onclick="showAdminHomeView()" title="Menu">
@@ -404,7 +469,6 @@
 
         <!-- ==========================================
              A. ADMIN HOME OVERVIEW (HERO + 6 TILES)
-             When any tile is clicked, this WHOLE section hides!
         =========================================== -->
         <div id="adminHomeTilesView">
           
@@ -488,10 +552,10 @@
         </div>
 
         <!-- ==========================================
-             B. SPECIFIC ADMIN PANELS (ONLY ONE SHOWS AT A TIME)
+             B. SPECIFIC ADMIN PANELS
         =========================================== -->
 
-        <!-- 👥 1. BARATTOOTA PANEL -->
+        <!-- 👥 1. BARATTOOTA PANEL (ADMIN ENHANCED PROFILE VIEW) -->
         <div id="adminStudentsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
@@ -532,7 +596,7 @@
           <div id="adminLessonsList"></div>
         </div>
 
-        <!-- 📝 4. QORMAATA PANEL (Includes BULK PASTE, MANUAL & AI) -->
+        <!-- 📝 4. QORMAATA PANEL -->
         <div id="adminExamsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
@@ -594,7 +658,7 @@
             <button type="button" class="primary-btn-vivid" onclick="createExam()">➕ Qormaata Uumi</button>
           </div>
 
-          <!-- ⭐ 1. BULK PASTE QUESTIONS (BULK.JS RESTORED) ⭐ -->
+          <!-- BULK PASTE QUESTIONS -->
           <div class="admin-panel-card" style="border-left: 5px solid #0284c7;">
             <h4 style="color:#0284c7; margin-bottom:8px;">📋 Gaaffilee Hedduu Bakka Tokkotti Paste Godhi (Bulk Paste)</h4>
             <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
@@ -611,7 +675,7 @@
             </button>
           </div>
 
-          <!-- 2. AI SECTION -->
+          <!-- AI SECTION -->
           <div class="admin-panel-card" style="border-left: 5px solid #9333ea;">
             <h4 style="color:#9333ea; margin-bottom:10px;">🤖 AI'n Gaaffii Uumi</h4>
             <label>Qormaata</label>
@@ -635,7 +699,7 @@
             <div id="aiQuestionMessage" class="message"></div>
           </div>
 
-          <!-- 3. MANUAL QUESTION SECTION -->
+          <!-- MANUAL QUESTION SECTION -->
           <div class="admin-panel-card">
             <h4 style="margin-bottom:10px;">✍️ Gaaffii Tokko Tokkoon Dabali</h4>
             <select id="questionExamSelect"><option value="">Qormaata filadhu</option></select>
@@ -706,15 +770,15 @@
           <span>Qormaata</span>
         </button>
         <button id="adminTabStudents" type="button" class="admin-tab" onclick="openAdminPanel('students')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
           <span>Barataa</span>
         </button>
         <button id="adminTabResults" type="button" class="admin-tab" onclick="openAdminPanel('results')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
           <span>Qabxii</span>
         </button>
         <button id="adminTabFeedbacks" type="button" class="admin-tab" onclick="openAdminPanel('feedbacks')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
           <span>Yaadaa</span>
         </button>
         <button id="adminTabAnnounce" type="button" class="admin-tab" onclick="openAdminPanel('announcements')">
@@ -760,9 +824,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
-  <!-- SCREEN SWITCH, PHOTO UPLOAD & BULK PASTE LOGIC -->
+  <!-- SCREEN SWITCH, PHOTO UPLOAD, STUDENT PROFILE & BULK LOGIC -->
   <script>
-    // 1. ADMIN HOME VIEW: Shows 3D Banner & 6 Vivid Tiles, Hides all other panels!
+    // 1. ADMIN HOME VIEW
     function showAdminHomeView() {
       const homeTiles = document.getElementById("adminHomeTilesView");
       if (homeTiles) homeTiles.style.display = "block";
@@ -781,14 +845,12 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // 2. OPEN SPECIFIC ADMIN PANEL: Hides 3D Banner & 6 Tiles completely, shows ONLY clicked panel!
+    // 2. OPEN SPECIFIC ADMIN PANEL
     const originalOpenAdminPanel = window.openAdminPanel;
     window.openAdminPanel = async function(panel) {
-      // HIDE the Home Tiles & Banner View!
       const homeTiles = document.getElementById("adminHomeTilesView");
       if (homeTiles) homeTiles.style.display = "none";
 
-      // Hide all panels
       const panels = [
         "adminStudentsPanel", "adminResultsPanel", "adminLessonsPanel", 
         "adminExamsPanel", "adminAnnouncementsPanel", "adminFeedbacksPanel"
@@ -807,11 +869,8 @@
         feedbacks: "adminFeedbacksPanel"
       };
       const targetEl = document.getElementById(targetMap[panel]);
-      if (targetEl) {
-        targetEl.style.display = "block";
-      }
+      if (targetEl) targetEl.style.display = "block";
 
-      // Update Bottom Tab highlight in Admin UI
       const tabMap = {
         students: "adminTabStudents",
         results: "adminTabResults",
@@ -821,17 +880,14 @@
         feedbacks: "adminTabFeedbacks"
       };
       document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
-      if (tabMap[panel]) {
-        document.getElementById(tabMap[panel])?.classList.add("active");
-      }
+      if (tabMap[panel]) document.getElementById(tabMap[panel])?.classList.add("active");
 
       window.scrollTo({ top: 0, behavior: "smooth" });
 
-      // Run Native app.js data loaders
-      if (panel === "students" || panel === "results" || panel === "lessons" || panel === "exams") {
-        if (typeof originalOpenAdminPanel === "function") {
-          await originalOpenAdminPanel(panel);
-        }
+      if (panel === "students") {
+        await loadAdminStudentsEnhanced();
+      } else if (panel === "results" || panel === "lessons" || panel === "exams") {
+        if (typeof originalOpenAdminPanel === "function") await originalOpenAdminPanel(panel);
       } else if (panel === "announcements") {
         await loadAdminAnnouncements();
       } else if (panel === "feedbacks") {
@@ -839,15 +895,11 @@
       }
     };
 
-    // 3. ADMIN AVATAR PHOTO PICKER (From Mobile Gallery)
+    // 3. ADMIN AVATAR PHOTO PICKER
     function handleAdminAvatarUpload(input) {
       const file = input?.files?.[0];
       if (!file) return;
-
-      if (file.size > 8 * 1024 * 1024) {
-        alert("Suuraan filatame 8MB ol ta'uu hin qabu.");
-        return;
-      }
+      if (file.size > 8 * 1024 * 1024) { alert("Suuraan filatame 8MB ol ta'uu hin qabu."); return; }
 
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -869,32 +921,143 @@
         defSvg.style.display = "none";
       }
     }
-    document.addEventListener("DOMContentLoaded", loadAdminAvatar);
 
-    // 4. ⭐ BULK QUESTIONS PARSER & INSERTION (BULK.JS INTEGRATION) ⭐
+    // 4. STUDENT AVATAR UPLOAD (PHOTO GALLERY)
+    function handleStudentAvatarUpload(input) {
+      const file = input?.files?.[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) { alert("Suuraan 8MB ol ta'uu hin qabu."); return; }
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64Url = e.target.result;
+        localStorage.setItem("ao_student_avatar_" + (currentStudent?.id || "guest"), base64Url);
+        displayStudentAvatar(base64Url);
+
+        if (currentStudent && typeof db !== "undefined") {
+          try {
+            await db.from("students").update({ avatar_url: base64Url }).eq("id", currentStudent.id);
+          } catch(err) {
+            console.log("Avatar save to DB optional: ", err);
+          }
+        }
+        alert("✅ Suuraan profile kee milkaa'inaan jijjiirameera!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function displayStudentAvatar(url) {
+      const pImg = document.getElementById("studentAvatarImg");
+      const pSvg = document.getElementById("studentAvatarFallbackSvg");
+      const hImg = document.getElementById("studentHomeAvatarImg");
+      const hFallback = document.getElementById("studentHomeAvatarFallback");
+
+      if (url) {
+        if (pImg) { pImg.src = url; pImg.style.display = "block"; }
+        if (pSvg) pSvg.style.display = "none";
+        if (hImg) { hImg.src = url; hImg.style.display = "block"; }
+        if (hFallback) hFallback.style.display = "none";
+      }
+    }
+
+    // 5. STUDENT FULL PROFILE SAVE (Name, Email, Photo)
+    async function saveStudentFullProfile() {
+      const name = document.getElementById("profileNameInput")?.value.trim();
+      const email = document.getElementById("profileEmailInput")?.value.trim();
+
+      if (!name) { alert("Maqaa kee guuti."); return; }
+
+      if (currentStudent) {
+        currentStudent.name = name;
+        if (email) currentStudent.email = email;
+        const wName = document.getElementById("studentWelcomeName");
+        if (wName) wName.textContent = name;
+
+        try {
+          if (typeof db !== "undefined") {
+            await db.from("students").update({ name: name, email: email }).eq("id", currentStudent.id);
+          }
+          alert("✅ Profile kee milkaa'inaan haaromeera!");
+        } catch(e) {
+          alert("Haaromfameera (Local)");
+        }
+      } else if (typeof saveProfile === "function") {
+        saveProfile();
+      }
+    }
+
+    // 6. ADMIN VIEWING ENHANCED STUDENT PROFILES (ID, Activation Code, Email, Photo, Status)
+    async function loadAdminStudentsEnhanced() {
+      const container = document.getElementById("adminStudentsList");
+      if (!container) return;
+      try {
+        const { data, error } = await db.from("students").select("*").order("created_at", { ascending: false });
+        if (error) throw error;
+        if (!data?.length) { container.innerHTML = `<div class="empty-state">👨‍🎓 Barataan galmaa'e tokkollee hin jiru.</div>`; return; }
+
+        container.innerHTML = data.map(s => {
+          const avatarSrc = s.avatar_url || localStorage.getItem("ao_student_avatar_" + s.id) || "";
+          return `
+            <div class="admin-student-card">
+              <div class="student-card-top">
+                <div class="student-card-avatar">
+                  ${avatarSrc ? `<img src="${avatarSrc}" alt="Avatar">` : `<span>🎓</span>`}
+                </div>
+                <div class="student-card-main-info">
+                  <h4>${escapeHtml(s.name || "Barataa")}</h4>
+                  <p class="student-email">${escapeHtml(s.email || "Email hin galchine")}</p>
+                </div>
+                <span class="status ${s.status === 'blocked' ? 'blocked' : 'active'}">${s.status || 'active'}</span>
+              </div>
+              
+              <div class="student-detail-badges">
+                <div class="detail-badge">
+                  <small>Student ID:</small>
+                  <strong>${escapeHtml(s.student_id || s.code || s.id?.substring(0,8) || "-")}</strong>
+                </div>
+                <div class="detail-badge">
+                  <small>Activation Code:</small>
+                  <strong style="color:#0284c7;">${escapeHtml(s.activation_code || s.code || "-")}</strong>
+                </div>
+              </div>
+
+              <div class="student-card-actions">
+                ${s.status === 'blocked' ? 
+                  `<button class="small-btn" style="background:#16a34a;" onclick="toggleStudentStatus('${s.id}', 'active')">Eeyyami (Unblock)</button>` : 
+                  `<button class="danger-small-btn" onclick="toggleStudentStatus('${s.id}', 'blocked')">Dhowwi (Block)</button>`}
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (err) {
+        if (typeof loadAdminStudents === "function") await loadAdminStudents();
+      }
+    }
+
+    async function toggleStudentStatus(id, newStatus) {
+      try {
+        await db.from("students").update({ status: newStatus }).eq("id", id);
+        await loadAdminStudentsEnhanced();
+      } catch(e) { alert("Dogoggora: " + e.message); }
+    }
+
+    // 7. BULK QUESTIONS INSERTION
     async function bulkInsertQuestions() {
       const examSelect = document.getElementById("bulkExamSelect");
       const examId = examSelect?.value;
       const text = document.getElementById("bulkQuestionsInput")?.value.trim();
 
-      if (!examId) {
-        alert("Mee dura qormaata gaaffilee kana itti dabaluu barbaaddu filadhaa!");
-        return;
-      }
-      if (!text) {
-        alert("Gaaffilee paste gochuu qabdu!");
-        return;
-      }
+      if (!examId) { alert("Mee dura qormaata gaaffilee kana itti dabaluu barbaaddu filadhaa!"); return; }
+      if (!text) { alert("Gaaffilee paste gochuu qabdu!"); return; }
 
-      // Parse questions from pasted raw text block
       const blocks = text.split(/\n\s*\n+/);
       const parsedQuestions = [];
 
       for (const block of blocks) {
         const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
-        if (lines.length < 5) continue; // Must have question + 4 options + answer
+        if (lines.length < 5) continue;
 
-        let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, ""); // remove "1." or "1)"
+        let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, "");
         let optA = "", optB = "", optC = "", optD = "", correct = "A";
 
         lines.slice(1).forEach(line => {
@@ -930,14 +1093,11 @@
       try {
         const { error } = await db.from("questions").insert(parsedQuestions);
         if (error) throw error;
-
         alert(`✅ Gaaffilee ${parsedQuestions.length} milkaa'inaan qormaata keessa galaniiru!`);
         document.getElementById("bulkQuestionsInput").value = "";
         if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
         if (typeof loadAdminExams === "function") await loadAdminExams();
-      } catch (err) {
-        alert("Dogoggora galchuu: " + (err.message || err));
-      }
+      } catch (err) { alert("Dogoggora galchuu: " + (err.message || err)); }
     }
 
     // Student Navigation Bridge
@@ -963,6 +1123,10 @@
       if (pageId === "scorePage" && typeof showScore === "function") showScore();
       if (pageId === "feedbackPage") loadStudentFeedbacks();
       if (pageId === "announcementsPage") loadStudentAnnouncements();
+      if (pageId === "profilePage") {
+        const savedAvatar = localStorage.getItem("ao_student_avatar_" + (currentStudent?.id || "guest"));
+        if (savedAvatar) displayStudentAvatar(savedAvatar);
+      }
     }
 
     async function loadStudentFeedbacks() {
@@ -1081,6 +1245,10 @@
         await loadAdminFeedbacks();
       } catch (e) {}
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadAdminAvatar();
+    });
   </script>
 
 </body>
