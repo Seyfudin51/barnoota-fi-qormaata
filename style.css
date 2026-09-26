@@ -74,7 +74,7 @@ body {
 }
 
 /* =========================================================
-   1. SPLASH SCREEN
+   1. SPLASH SCREEN (MANDATORY FIRST GATEWAY)
 ========================================================= */
 #splashPage.page.active {
   display: flex;
@@ -155,7 +155,7 @@ body {
 }
 
 /* =========================================================
-   2. REFINED LOGIN PAGE (NO OVERLAPS, PURE MODERN)
+   2. REFINED LOGIN PAGE (CLEAN, NO OVERLAPS)
 ========================================================= */
 .login-wrapper {
   display: flex;
@@ -278,18 +278,8 @@ body {
   font-size: 1.1rem;
 }
 
-.text-link-btn {
-  background: none;
-  border: none;
-  color: var(--primary-royal);
-  font-weight: 700;
-  font-size: 0.88rem;
-  cursor: pointer;
-  padding: 6px;
-}
-
 /* =========================================================
-   3. STUDENT DASHBOARD (VIVID BUTTONS & GORGEOUS BANNER)
+   3. STUDENT DASHBOARD (VIVID BUTTONS & BANNER)
 ========================================================= */
 .app-header {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary-royal));
@@ -343,7 +333,6 @@ body {
   cursor: pointer;
 }
 
-/* STUDENT HERO BANNER */
 .student-hero-banner {
   background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 60%, #38bdf8 100%);
   color: #ffffff;
@@ -407,7 +396,6 @@ body {
   height: 100%;
 }
 
-/* 6 VIVID COLORFUL GRID TILES FOR STUDENT (EQUAL TO ADMIN) */
 .student-menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -455,30 +443,13 @@ body {
   opacity: 0.9;
 }
 
-/* Color Gradients (Used by both Admin & Student) */
-.tile-blue {
-  background: linear-gradient(135deg, #0284c7, #38bdf8);
-}
-
-.tile-purple {
-  background: linear-gradient(135deg, #8b5cf6, #c084fc);
-}
-
-.tile-green {
-  background: linear-gradient(135deg, #16a34a, #4ade80);
-}
-
-.tile-amber {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-}
-
-.tile-pink {
-  background: linear-gradient(135deg, #f43f5e, #fb7185);
-}
-
-.tile-teal {
-  background: linear-gradient(135deg, #06b6d4, #22d3ee);
-}
+/* Gradients */
+.tile-blue { background: linear-gradient(135deg, #0284c7, #38bdf8); }
+.tile-purple { background: linear-gradient(135deg, #8b5cf6, #c084fc); }
+.tile-green { background: linear-gradient(135deg, #16a34a, #4ade80); }
+.tile-amber { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.tile-pink { background: linear-gradient(135deg, #f43f5e, #fb7185); }
+.tile-teal { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
 
 .content-section {
   background: var(--card-bg);
@@ -496,179 +467,366 @@ body {
 }
 
 /* =========================================================
-   4. STUDENT PROFILE ENHANCED PAGE
+   4. ⭐ BEAUTIFIED ADMIN REGISTERED STUDENTS (FIX PHOTO 1) ⭐
 ========================================================= */
-.profile-card-modern {
+.admin-student-card-modern {
   background: #ffffff;
-  border-radius: 24px;
-  padding: 24px 20px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.profile-avatar-wrapper {
-  position: relative;
-  width: 96px;
-  height: 96px;
-  margin: 0 auto;
-  cursor: pointer;
-}
-
-.profile-avatar-circle {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #e0f2fe;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid #0284c7;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
-}
-
-.avatar-camera-badge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: #0d59b2;
-  color: white;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  border: 2px solid white;
-}
-
-.profile-info-group {
-  margin-bottom: 14px;
-}
-
-.profile-meta-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 14px;
-  margin-bottom: 14px;
-}
-
-.profile-meta-box {
-  background: #f8fafc;
-  padding: 12px;
-  border-radius: 14px;
+  border-radius: 20px;
+  padding: 16px 18px;
   border: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-}
-
-.meta-label {
-  font-size: 0.72rem;
-  color: #64748b;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.meta-value {
-  font-size: 0.92rem;
-  color: #0f172a;
-}
-
-.profile-status-bar {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  margin-bottom: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f1f5f9;
-  padding: 12px 14px;
-  border-radius: 14px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  gap: 14px;
+  transition: transform 0.15s ease;
 }
 
-/* =========================================================
-   5. ADMIN ENHANCED STUDENT LIST VIEW (IMAGE 4 SYNC)
-========================================================= */
-.admin-student-card {
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 16px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 14px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+.admin-student-card-modern:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
 }
 
-.student-card-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.student-card-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: #e2e8f0;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  flex-shrink: 0;
-}
-
-.student-card-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.student-card-main-info {
+.card-left-info {
   flex: 1;
 }
 
-.student-card-main-info h4 {
-  font-size: 1rem;
+.student-name-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.student-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.meta-tag {
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.meta-tag strong {
+  color: #0f172a;
+}
+
+.meta-tag .code-highlight {
+  color: #0284c7;
+  letter-spacing: 0.5px;
+}
+
+.student-created-time {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.student-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-active {
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+}
+
+.dot-blocked {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.status-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.card-right-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-action-lock, .btn-action-unlock, .btn-action-delete {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-action-lock {
+  background: #0d59b2;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(13, 89, 178, 0.2);
+}
+
+.btn-action-unlock {
+  background: #16a34a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.2);
+}
+
+.btn-action-delete {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.btn-action-lock:active, .btn-action-unlock:active, .btn-action-delete:active {
+  transform: scale(0.95);
+}
+
+/* =========================================================
+   5. ⭐ BEAUTIFIED RESULTS TABLE & CARDS (FIX PHOTO 2 & 3) ⭐
+========================================================= */
+.table-wrapper-vivid {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.modern-results-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.84rem;
+}
+
+.modern-results-table thead tr {
+  background: #f8fafc;
+}
+
+.modern-results-table th {
+  padding: 14px 12px;
+  font-weight: 700;
+  color: #475569;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.modern-results-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.modern-results-table tr:last-child td {
+  border-bottom: none;
+}
+
+.modern-results-table tr:hover {
+  background: #f8fafc;
+}
+
+.id-pill {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.76rem;
+}
+
+.score-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.score-badge.pass {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.score-badge.fail {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.btn-detail-view {
+  background: linear-gradient(135deg, #0d59b2, #0284c7);
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(13, 89, 178, 0.2);
+}
+
+.btn-detail-view:active {
+  transform: scale(0.95);
+}
+
+/* =========================================================
+   6. ⭐ BEAUTIFIED EXAM TAKING & OPTIONS UI ⭐
+========================================================= */
+.exam-wrapper {
+  padding-bottom: 60px;
+}
+
+.exam-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  background: #ffffff;
+  padding: 14px 18px;
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  border: 1px solid var(--border-color);
+}
+
+.exam-topbar h2 {
+  font-size: 1.15rem;
   font-weight: 800;
   color: #0f172a;
 }
 
-.student-email {
-  font-size: 0.76rem;
-  color: #64748b;
+.exam-badge-num {
+  background: #e0f2fe;
+  color: #0284c7;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-left: 6px;
 }
 
-.student-detail-badges {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  background: #f8fafc;
-  padding: 10px 12px;
+.timer-box {
+  background: #fef3c7;
+  color: #b45309;
+  padding: 6px 12px;
   border-radius: 12px;
-  margin-bottom: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid #fde68a;
 }
 
-.detail-badge small {
-  display: block;
-  font-size: 0.68rem;
+.exam-card {
+  background: #ffffff;
+  padding: 24px 20px;
+  border-radius: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  border: 1px solid var(--border-color);
+}
+
+.question-label {
   color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
 }
 
-.detail-badge strong {
-  font-size: 0.84rem;
-  color: #1e293b;
+#questionText {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.45;
+  margin-bottom: 20px;
 }
 
-.student-card-actions {
+.exam-options-container {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Option Button Aesthetic */
+.option-btn, .answer-option {
+  width: 100%;
+  text-align: left;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.15s ease;
+}
+
+.option-btn:hover, .answer-option:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.option-btn.selected, .answer-option.selected {
+  background: #eff6ff;
+  border-color: #0d59b2;
+  color: #0d59b2;
+  box-shadow: 0 4px 12px rgba(13, 89, 178, 0.12);
+}
+
+.opt-prefix {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.option-btn.selected .opt-prefix, .answer-option.selected .opt-prefix {
+  background: #0d59b2;
+  color: #ffffff;
+}
+
+.exam-navigation {
+  display: flex;
+  gap: 10px;
 }
 
 /* =========================================================
-   6. ADMIN DASHBOARD STYLES (PRESERVED IMAGE 2 ACCURACY)
+   7. ADMIN DASHBOARD & PANELS
 ========================================================= */
 .admin-app-wrapper {
   width: 100%;
@@ -714,10 +872,6 @@ body {
   transition: background 0.15s ease;
 }
 
-.admin-avatar-pill:active {
-  background: rgba(255, 255, 255, 0.3);
-}
-
 .admin-avatar-circle {
   width: 36px;
   height: 36px;
@@ -754,10 +908,6 @@ body {
   padding: 4px;
   opacity: 0.92;
   transition: opacity 0.15s ease;
-}
-
-.admin-icon-btn:active {
-  opacity: 0.6;
 }
 
 .admin-main-body {
@@ -851,10 +1001,6 @@ body {
   margin-bottom: 8px;
 }
 
-.admin-panel-back-btn:active {
-  background: #e2e8f0;
-}
-
 .admin-bottom-appbar {
   position: fixed;
   bottom: 0;
@@ -889,13 +1035,8 @@ body {
   transition: color 0.15s ease;
 }
 
-.admin-tab svg {
-  fill: currentColor;
-}
-
-.admin-tab.active {
-  color: #0d59b2;
-}
+.admin-tab svg { fill: currentColor; }
+.admin-tab.active { color: #0d59b2; }
 
 .admin-content-panel {
   background: #ffffff;
@@ -939,19 +1080,6 @@ body {
   gap: 12px;
 }
 
-.admin-list-item h3 {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 6px;
-}
-
-.admin-list-item p {
-  font-size: 0.85rem;
-  color: #64748b;
-  line-height: 1.5;
-}
-
 .primary-btn-vivid {
   background: #0d59b2;
   color: #ffffff;
@@ -978,44 +1106,16 @@ body {
   margin-top: 10px;
 }
 
-.form-grid-vivid {
+.form-grid-vivid, .option-grid-vivid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
-.option-grid-vivid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.table-wrapper-vivid {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.84rem;
-}
-
-th, td {
-  padding: 12px 10px;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-th {
-  background: #f8fafc;
-  font-weight: 700;
-  color: #475569;
-}
-
 /* =========================================================
-   7. COMMON FORM & BUTTON COMPONENTS
+   8. COMMON CONTROLS
 ========================================================= */
-.primary-btn, .submit-btn, .small-btn, .ai-btn {
+.primary-btn, .submit-btn, .small-btn {
   background: var(--primary-royal);
   color: #ffffff;
   border: none;
@@ -1024,16 +1124,6 @@ th {
   font-weight: 700;
   font-size: 0.88rem;
   cursor: pointer;
-}
-
-.primary-btn:hover {
-  background: var(--primary-dark);
-}
-
-.small-btn {
-  padding: 6px 12px;
-  font-size: 0.78rem;
-  border-radius: var(--radius-sm);
 }
 
 .danger-small-btn {
@@ -1123,15 +1213,8 @@ input:focus, select:focus, textarea:focus {
   font-weight: 700;
 }
 
-.status.active {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.status.blocked {
-  background: #fee2e2;
-  color: #b91c1c;
-}
+.status.active { background: #dcfce7; color: #15803d; }
+.status.blocked { background: #fee2e2; color: #b91c1c; }
 
 .empty-state {
   text-align: center;
