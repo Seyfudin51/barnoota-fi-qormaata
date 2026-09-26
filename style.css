@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - MODERN APP UI (style.css)
-   100% Synced With Original App.js + 7 Bottom Tabs
+   100% Synced With Original App.js
 ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -148,7 +148,7 @@ body {
 }
 
 /* =========================================================
-   2. LOGIN PAGE
+   2. LOGIN PAGE (SUURAA 2FFAA)
 ========================================================= */
 .login-wrapper {
   display: flex;
@@ -224,8 +224,17 @@ body {
   border: none;
 }
 
+.text-link-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 /* =========================================================
-   3. STUDENT DASHBOARD
+   3. STUDENT DASHBOARD (SUURAA 3FFAA)
 ========================================================= */
 .app-header, .admin-header {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
@@ -323,7 +332,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
@@ -354,6 +363,11 @@ body {
   font-weight: 700;
 }
 
+.menu-card small {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
 .menu-card:active {
   transform: scale(0.97);
   border-color: var(--primary);
@@ -375,7 +389,7 @@ body {
 }
 
 /* =========================================================
-   CARDS & ITEMS
+   4. CARDS & ITEMS (BARNOOTA, QORMAATA, ETC.)
 ========================================================= */
 .item-card, .exam-card, .result-card, .admin-list-item {
   background: var(--card-bg);
@@ -454,7 +468,7 @@ body {
 }
 
 /* =========================================================
-   BUTTONS & INPUTS
+   5. BUTTONS & INPUTS
 ========================================================= */
 .primary-btn, .submit-btn, .small-btn, .ai-btn {
   background: var(--primary);
@@ -515,7 +529,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* =========================================================
-   EXAM QUESTION UI
+   6. EXAM QUESTION UI
 ========================================================= */
 .exam-topbar {
   display: flex;
@@ -551,7 +565,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* =========================================================
-   FIXED MOBILE BOTTOM BAR (7 TABS ELEGANT)
+   7. FIXED MOBILE BOTTOM BAR (JALA BILBILAA)
 ========================================================= */
 .mobile-bottom-bar {
   position: fixed;
@@ -565,7 +579,7 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 2px;
+  padding: 8px 4px;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
   z-index: 1000;
 }
@@ -578,7 +592,7 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   justify-content: center;
   flex: 1;
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   cursor: pointer;
   font-weight: 600;
@@ -587,7 +601,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .bottom-tab-item .tab-icon {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   margin-bottom: 2px;
 }
 
@@ -596,7 +610,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* =========================================================
-   ADMIN DASHBOARD
+   8. ADMIN DASHBOARD
 ========================================================= */
 .admin-menu {
   display: grid;
