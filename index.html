@@ -13,13 +13,23 @@
 <body>
 
   <!-- =====================================================
-       1. START / SPLASH SCREEN (SUURAA 1FFAA)
+       0. GLOBAL APP TOP BRAND BAR (SUURAA GUBBAA)
+  ====================================================== -->
+  <div class="app-top-brand-bar">
+    <span class="brand-bar-title">Akkaadaamii Oromiyaa</span>
+    <div class="brand-bar-logo-container">
+      <img src="192.png" alt="Logo" class="brand-bar-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ffffff\'><path d=\'M12 3L1 9l11 6 9-4.91V17h2V9L12 3z\'/></svg>'">
+    </div>
+  </div>
+
+  <!-- =====================================================
+       1. START / SPLASH SCREEN
   ====================================================== -->
   <section id="splashPage" class="page active">
     <div class="splash-wrapper">
       <div class="splash-content">
         <div class="splash-logo-circle">
-          <img src="192.png" alt="Logo" class="splash-logo-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%231565C0\'><path d=\'M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 13.47L12 18.13l8.55-4.66V17L12 21.66 3.45 17v-3.53z\'/></svg>'">
+          <img src="192.png" alt="Logo" class="splash-logo-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%231565C0\'><path d=\'M12 3L1 9l11 6 9-4.91V17h2V9L12 3z\'/></svg>'">
         </div>
         <h1 class="splash-title">Akkaadaamii Oromiyaa</h1>
         <p class="splash-subtitle">Barnoota • Qormaata • Qabxii</p>
@@ -34,7 +44,7 @@
   </section>
 
   <!-- =====================================================
-       2. ROLE / LOGIN PAGE (SUURAA 2FFAA)
+       2. ROLE / LOGIN PAGE
   ====================================================== -->
   <section id="rolePage" class="page">
     <div class="login-wrapper">
@@ -113,7 +123,7 @@
   </section>
 
   <!-- =====================================================
-       3. STUDENT HOME / DASHBOARD (SUURAA 3FFAA)
+       3. STUDENT HOME / DASHBOARD
   ====================================================== -->
   <section id="studentHomePage" class="page">
     <div class="page-container">
@@ -140,7 +150,7 @@
         <div class="banner-icon">🚀</div>
       </div>
 
-      <!-- Main Dashboard Grid (Quick Navigation) -->
+      <!-- Main Dashboard Grid -->
       <div class="student-menu-grid">
         <button type="button" class="menu-card card-blue" onclick="navTo('studentLessonsPage')">
           <span class="card-icon">📖</span>
@@ -192,15 +202,13 @@
   </section>
 
   <!-- =====================================================
-       4. LESSONS LIST PAGE (SUURAA 4FFAA - BARNOOTA)
+       4. LESSONS LIST PAGE
   ====================================================== -->
   <section id="studentLessonsPage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
         <h2>📖 Barnoota</h2>
       </div>
-
-      <!-- Lesson List Target Container (app.js loadStudentLessons writes here) -->
       <div id="studentLessons"></div>
     </div>
   </section>
@@ -222,15 +230,13 @@
   </section>
 
   <!-- =====================================================
-       6. EXAM LIST PAGE (SUURAA 5FFAA - QORMAATA)
+       6. EXAM LIST PAGE
   ====================================================== -->
   <section id="examListPage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
         <h2>📝 Qormaata</h2>
       </div>
-
-      <!-- Exam List Target Container (app.js loadExams writes here) -->
       <div id="studentExams"></div>
     </div>
   </section>
@@ -283,15 +289,13 @@
   </section>
 
   <!-- =====================================================
-       9. SCORE & LEADERBOARD PAGE (SUURAA 7FFAA - QABXII)
+       9. SCORE & LEADERBOARD PAGE
   ====================================================== -->
   <section id="scorePage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
         <h2>🏆 Qabxii Koo</h2>
       </div>
-
-      <!-- Student Scores Target Container -->
       <div id="studentScore" style="margin-bottom: 20px;"></div>
 
       <!-- LEADERBOARD TARGET CONTAINER -->
@@ -313,7 +317,7 @@
   </section>
 
   <!-- =====================================================
-       10. YAADAA / FEEDBACK PAGE (SUURAA 8FFAA)
+       10. YAADAA / FEEDBACK PAGE
   ====================================================== -->
   <section id="feedbackPage" class="page">
     <div class="page-container">
@@ -393,48 +397,70 @@
   </section>
 
   <!-- =====================================================
-       14. ADMIN DASHBOARD PAGE
+       14. ADMIN DASHBOARD PAGE (HIGHLY PREMIUM COMPACT GRID)
   ====================================================== -->
   <section id="adminDashboardPage" class="page">
     <div class="admin-container">
-      <header class="admin-header">
-        <div>
-          <h1>⚙️ Admin Dashboard</h1>
-          <p>Akkaadaamii Oromiyaa</p>
+      
+      <!-- Premium Header Banner Matching App UI -->
+      <header class="admin-header-card">
+        <div class="admin-header-main">
+          <div class="admin-avatar-glow">⚙️</div>
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p class="admin-subtext-white">Akkaadaamii Oromiyaa</p>
+          </div>
         </div>
-        <button type="button" class="logout-btn" onclick="adminLogout()">Ba'i</button>
+        <button type="button" class="admin-logout-pill" onclick="adminLogout()">Ba'i</button>
       </header>
 
-      <div class="admin-menu">
-        <button type="button" class="admin-menu-btn active-menu" onclick="openAdminPanel('students')">
-          <span>👥</span><small>Barattoota</small>
+      <!-- Compact 2-Row Admin Grid (Premium Redesign) -->
+      <div class="admin-menu-compact-grid">
+        <button type="button" class="admin-compact-card btn-blue active-menu" onclick="openAdminPanel('students')">
+          <span class="admin-card-icon">👥</span>
+          <strong>Barattoota</strong>
         </button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('results')">
-          <span>📊</span><small>Qabxii</small>
+        <button type="button" class="admin-compact-card btn-green" onclick="openAdminPanel('results')">
+          <span class="admin-card-icon">📊</span>
+          <strong>Qabxii</strong>
         </button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('lessons')">
-          <span>📖</span><small>Barnoota</small>
+        <button type="button" class="admin-compact-card btn-teal" onclick="openAdminPanel('lessons')">
+          <span class="admin-card-icon">📖</span>
+          <strong>Barnoota</strong>
         </button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('exams')">
-          <span>📝</span><small>Qormaata</small>
+        <button type="button" class="admin-compact-card btn-indigo" onclick="openAdminPanel('exams')">
+          <span class="admin-card-icon">📝</span>
+          <strong>Qormaata</strong>
         </button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('announcements')">
-          <span>📢</span><small>Beeksisa</small>
+        <button type="button" class="admin-compact-card btn-orange" onclick="openAdminPanel('announcements')">
+          <span class="admin-card-icon">📢</span>
+          <strong>Beeksisa</strong>
         </button>
-        <button type="button" class="admin-menu-btn" onclick="openAdminPanel('feedbacks')">
-          <span>💬</span><small>Yaadaa</small>
+        <button type="button" class="admin-compact-card btn-pink" onclick="openAdminPanel('feedbacks')">
+          <span class="admin-card-icon">💬</span>
+          <strong>Yaadaa</strong>
         </button>
       </div>
 
+      <!-- ==================== PANELS ==================== -->
+
+      <!-- 👥 BARATTOOTA PANEL -->
       <div id="adminStudentsPanel" class="admin-panel active">
-        <div class="panel-title"><h2>👥 Barattoota</h2></div>
-        <div id="adminStudentsList"></div>
+        <div class="panel-title-row">
+          <span class="panel-emoji">👥</span>
+          <h2>Barattoota</h2>
+        </div>
+        <div id="adminStudentsList" class="premium-admin-list"></div>
       </div>
 
-      <div id="adminResultsPanel" class="admin-panel">
-        <div class="panel-title"><h2>📊 Qabxii Barattootaa</h2></div>
-        <div class="table-wrapper">
-          <table id="adminResultsTable">
+      <!-- 📊 QABXII PANEL -->
+      <div id="adminResultsPanel" class="admin-panel" style="display:none;">
+        <div class="panel-title-row">
+          <span class="panel-emoji">📊</span>
+          <h2>Qabxii Barattootaa</h2>
+        </div>
+        <div class="table-wrapper-premium">
+          <table id="adminResultsTable" class="premium-admin-table">
             <thead></thead>
             <tbody></tbody>
           </table>
@@ -442,27 +468,36 @@
         <div id="adminResultDetails"></div>
       </div>
 
-      <div id="adminLessonsPanel" class="admin-panel">
-        <div class="panel-title"><h2>📖 Barnoota Qindeessi</h2></div>
-        <div class="admin-form">
+      <!-- 📖 BARNOOTA PANEL -->
+      <div id="adminLessonsPanel" class="admin-panel" style="display:none;">
+        <div class="panel-title-row">
+          <span class="panel-emoji">📖</span>
+          <h2>Barnoota Qindeessi</h2>
+        </div>
+        <div class="admin-form-premium">
+          <h3>➕ Barnoota Haaraa Dabali</h3>
           <label>Mata-duree Barnootaa</label>
           <input id="lessonTitleInput" type="text" placeholder="Fkn: Seensa Barnootaa">
           <label>Qabiyyee Barnootaa</label>
           <textarea id="lessonContentInput" placeholder="Qabiyyee barnootaa asitti barreessi..."></textarea>
-          <button type="button" class="primary-btn" onclick="createLesson()">➕ Barnoota Dabali</button>
+          <button type="button" class="primary-btn-premium" onclick="createLesson()">➕ Barnoota Dabali</button>
         </div>
-        <div id="adminLessonsList"></div>
+        <div id="adminLessonsList" class="premium-admin-list"></div>
       </div>
 
-      <div id="adminExamsPanel" class="admin-panel">
-        <div class="panel-title"><h2>📝 Qormaata Qindeessi</h2></div>
+      <!-- 📝 QORMAATA PANEL -->
+      <div id="adminExamsPanel" class="admin-panel" style="display:none;">
+        <div class="panel-title-row">
+          <span class="panel-emoji">📝</span>
+          <h2>Qormaata Qindeessi</h2>
+        </div>
 
-        <div class="admin-form exam-create-form">
+        <div class="admin-form-premium">
           <h3>➕ Qormaata Uumi</h3>
           <input id="examTitleInput" type="text" placeholder="Mata-duree qormaataa">
           <textarea id="examDescriptionInput" placeholder="Ibsa qormaataa"></textarea>
 
-          <div class="form-grid">
+          <div class="form-grid-premium">
             <div>
               <label>Gaaffii meeqa?</label>
               <select id="examQuestionLimitInput">
@@ -501,17 +536,18 @@
             </div>
           </div>
 
-          <div class="form-grid">
+          <div class="form-grid-premium">
             <div><label>Guyyaa jalqabaa</label><input id="examStartDateInput" type="date"></div>
             <div><label>Guyyaa xumuraa</label><input id="examEndDateInput" type="date"></div>
             <div><label>Saa'a jalqabaa</label><input id="examStartTimeInput" type="time"></div>
             <div><label>Saa'a xumuraa</label><input id="examEndTimeInput" type="time"></div>
           </div>
 
-          <button type="button" class="primary-btn" onclick="createExam()">➕ Qormaata Uumi</button>
+          <button type="button" class="primary-btn-premium" onclick="createExam()">➕ Qormaata Uumi</button>
         </div>
 
-        <div class="admin-form ai-box">
+        <!-- AI SECTION -->
+        <div class="admin-form-premium ai-box-premium">
           <h3>🤖 AI'n Gaaffii Uumi</h3>
           <label>Qormaata</label>
           <select id="aiQuestionExamSelect"><option value="">Qormaata filadhu</option></select>
@@ -530,15 +566,16 @@
           <select id="aiQuestionCount">
             <option value="5">5</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option><option value="75">75</option><option value="100">100</option>
           </select>
-          <button id="generateAIQuestionsButton" type="button" class="ai-btn" onclick="generateAIQuestions()">🤖 Gaaffii AI Uumi</button>
+          <button id="generateAIQuestionsButton" type="button" class="ai-btn-premium" onclick="generateAIQuestions()">🤖 Gaaffii AI Uumi</button>
           <div id="aiQuestionMessage" class="message"></div>
         </div>
 
-        <div class="admin-form">
+        <!-- MANUAL QUESTION SECTION -->
+        <div class="admin-form-premium">
           <h3>✍️ Gaaffii Tokko Tokkoon Dabali</h3>
           <select id="questionExamSelect"><option value="">Qormaata filadhu</option></select>
           <textarea id="questionTextInput" placeholder="Gaaffii"></textarea>
-          <div class="option-grid">
+          <div class="option-grid-premium">
             <input id="optionAInput" type="text" placeholder="A">
             <input id="optionBInput" type="text" placeholder="B">
             <input id="optionCInput" type="text" placeholder="C">
@@ -548,42 +585,50 @@
             <option value="">Deebii sirrii filadhu</option>
             <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
           </select>
-          <button type="button" class="primary-btn" onclick="createQuestion()">➕ Gaaffii Dabali</button>
+          <button type="button" class="primary-btn-premium" onclick="createQuestion()">➕ Gaaffii Dabali</button>
         </div>
 
-        <div class="admin-subsection">
+        <div class="admin-subsection-premium">
           <h3>📝 Qormaatawwan</h3>
-          <div id="adminExamsList"></div>
+          <div id="adminExamsList" class="premium-admin-list"></div>
         </div>
 
-        <div class="admin-subsection">
+        <div class="admin-subsection-premium">
           <h3>❓ Gaaffilee</h3>
-          <div id="adminQuestionsList"></div>
+          <div id="adminQuestionsList" class="premium-admin-list"></div>
         </div>
       </div>
 
+      <!-- 📢 BEEKSIISA PANEL -->
       <div id="adminAnnouncementsPanel" class="admin-panel" style="display:none;">
-        <div class="panel-title"><h2>📢 Beeksisa Maxxansi</h2></div>
-        <div class="admin-form">
+        <div class="panel-title-row">
+          <span class="panel-emoji">📢</span>
+          <h2>Beeksisa Maxxansi</h2>
+        </div>
+        <div class="admin-form-premium">
           <label>Mata-duree Beeksisaa</label>
           <input id="announcementTitleInput" type="text" placeholder="Fkn: Qormaata Isa Dhumaa">
           <label>Ibsa Beeksisaa</label>
           <textarea id="announcementContentInput" placeholder="Beeksisa kee asitti barreessi..."></textarea>
-          <button type="button" class="primary-btn" onclick="createAnnouncement()" style="background:#f57c00;">📢 Maxxansi</button>
+          <button type="button" class="primary-btn-premium" onclick="createAnnouncement()" style="background:#f57c00;">📢 Maxxansi</button>
         </div>
-        <div id="adminAnnouncementsList"></div>
+        <div id="adminAnnouncementsList" class="premium-admin-list"></div>
       </div>
 
+      <!-- 💬 YAADAA PANEL -->
       <div id="adminFeedbacksPanel" class="admin-panel" style="display:none;">
-        <div class="panel-title"><h2>💬 Yaada Barattootaa</h2></div>
-        <div id="adminFeedbacksList"></div>
+        <div class="panel-title-row">
+          <span class="panel-emoji">💬</span>
+          <h2>Yaada Barattootaa</h2>
+        </div>
+        <div id="adminFeedbacksList" class="premium-admin-list"></div>
       </div>
 
     </div>
   </section>
 
   <!-- =====================================================
-       15. MOBILE BOTTOM NAVIGATION (FIXED JALA BILBILAA - 6 TABS)
+       15. MOBILE BOTTOM NAVIGATION (BARATTOOTAAF)
   ====================================================== -->
   <nav id="studentBottomNav" class="mobile-bottom-bar" style="display:none;">
     <button id="navTabHome" type="button" class="bottom-tab-item active" onclick="navTo('studentHomePage')">
@@ -616,13 +661,64 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
-  <!-- Bridge Helper for Bottom Tabs Navigation (Clean screen switching) -->
+  <!-- Bridge Helper for Seamless Overrides & Tab Transitions -->
   <script>
+    // Overriding openAdminPanel dynamically to load Beeksisa and Yaadaa panels elegantly
+    const originalOpenAdminPanel = window.openAdminPanel;
+    window.openAdminPanel = async function(panel) {
+      // Hide all panels
+      const panels = [
+        "adminStudentsPanel", "adminResultsPanel", "adminLessonsPanel", 
+        "adminExamsPanel", "adminAnnouncementsPanel", "adminFeedbacksPanel"
+      ];
+      panels.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+      });
+
+      // Update active state in compact menu grid
+      document.querySelectorAll(".admin-compact-card").forEach(c => c.classList.remove("active-menu"));
+      const btnIndexMap = {
+        students: 0, results: 1, lessons: 2, exams: 3, announcements: 4, feedbacks: 5
+      };
+      const idx = btnIndexMap[panel];
+      const buttons = document.querySelectorAll(".admin-compact-card");
+      if (buttons[idx]) {
+        buttons[idx].classList.add("active-menu");
+      }
+
+      // Show the selected panel
+      const targetMap = {
+        students: "adminStudentsPanel",
+        results: "adminResultsPanel",
+        lessons: "adminLessonsPanel",
+        exams: "adminExamsPanel",
+        announcements: "adminAnnouncementsPanel",
+        feedbacks: "adminFeedbacksPanel"
+      };
+      const targetId = targetMap[panel];
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.style.display = "block";
+      }
+
+      // Execute original script hooks for native tabs
+      if (panel === "students" || panel === "results" || panel === "lessons" || panel === "exams") {
+        if (typeof originalOpenAdminPanel === "function") {
+          await originalOpenAdminPanel(panel);
+        }
+      } else if (panel === "announcements") {
+        await loadAdminAnnouncements();
+      } else if (panel === "feedbacks") {
+        await loadAdminFeedbacks();
+      }
+    };
+
     function navTo(pageId) {
       if (typeof showPage === "function") {
         showPage(pageId);
       }
-      // Update active state on bottom navigation
+      
       document.querySelectorAll(".bottom-tab-item").forEach(b => b.classList.remove("active"));
       const map = {
         studentHomePage: "navTabHome",
@@ -636,13 +732,11 @@
         document.getElementById(map[pageId])?.classList.add("active");
       }
 
-      // Show bottom navigation bar when navigating within student screens
       const bNav = document.getElementById("studentBottomNav");
       if (bNav && currentStudent) {
         bNav.style.display = "flex";
       }
 
-      // Trigger data loading functions already inside app.js
       if (pageId === "studentHomePage" && typeof loadStudentHome === "function") loadStudentHome();
       if (pageId === "studentLessonsPage" && typeof loadStudentLessons === "function") loadStudentLessons();
       if (pageId === "examListPage" && typeof loadExams === "function") loadExams();
@@ -651,7 +745,7 @@
       if (pageId === "announcementsPage") loadStudentAnnouncements();
     }
 
-    // Helper functions for Announcements & Feedbacks without touching app.js
+    // Helper functions for Feedbacks / Announcements (Untouched app.js integration)
     async function loadStudentFeedbacks() {
       const container = document.getElementById("studentFeedbackList");
       if (!container || !currentStudent) return;
@@ -662,10 +756,10 @@
           return;
         }
         container.innerHTML = data.map(f => `
-          <div class="item-card" style="flex-direction:column; align-items:stretch;">
+          <div class="item-card" style="flex-direction:column; align-items:stretch; border-radius:18px;">
             <strong>👤 ${escapeHtml(f.student_name)} (Ati):</strong>
-            <p style="margin-top:4px;">${escapeHtml(f.message)}</p>
-            ${f.admin_reply ? `<div style="background:#e3f2fd; border-left:3px solid #1565C0; padding:8px; border-radius:6px; margin-top:8px;"><strong>⚙️ Deebii Admin:</strong><p style="margin-top:2px;">${escapeHtml(f.admin_reply)}</p></div>` : `<small style="color:#94a3b8; display:block; margin-top:6px;">⏳ Deebii eegaa jira...</small>`}
+            <p style="margin-top:4px; font-size:13px; color:#475569;">${escapeHtml(f.message)}</p>
+            ${f.admin_reply ? `<div style="background:#e3f2fd; border-left:4px solid #1565C0; padding:10px; border-radius:10px; margin-top:8px;"><strong>⚙️ Deebii Admin:</strong><p style="margin-top:2px; font-size:12px;">${escapeHtml(f.admin_reply)}</p></div>` : `<small style="color:#94a3b8; display:block; margin-top:6px;">⏳ Deebii eegaa jira...</small>`}
           </div>
         `).join("");
       } catch (e) {
@@ -703,11 +797,11 @@
           return;
         }
         container.innerHTML = data.map(a => `
-          <article class="item-card" style="border-left: 4px solid #f57c00;">
+          <article class="item-card" style="border-left: 5px solid #f57c00; border-radius:18px;">
             <div class="item-icon">📢</div>
             <div class="item-main">
               <h4>${escapeHtml(a.title)}</h4>
-              <p>${escapeHtml(a.content)}</p>
+              <p style="font-size:13px; color:#475569; margin-top:4px;">${escapeHtml(a.content)}</p>
               <small style="color:#94a3b8; display:block; margin-top:6px;">Guyyaa: ${new Date(a.created_at).toLocaleDateString()}</small>
             </div>
           </article>
@@ -715,6 +809,86 @@
       } catch (e) {
         container.innerHTML = `<div class="empty-state">📢 Beeksisi hin jiru.</div>`;
       }
+    }
+
+    // Admin Panel Announcements loading
+    async function loadAdminAnnouncements() {
+      const container = document.getElementById("adminAnnouncementsList");
+      if (!container) return;
+      try {
+        const { data } = await db.from("announcements").select("*").order("created_at", { ascending: false });
+        if (!data?.length) {
+          container.innerHTML = `<div class="empty-state">📢 Beeksisi haaraa hin jiru.</div>`;
+          return;
+        }
+        container.innerHTML = data.map(a => `
+          <div class="admin-list-item-premium">
+            <div class="item-main-premium">
+              <h3>${escapeHtml(a.title)}</h3>
+              <p>${escapeHtml(a.content)}</p>
+            </div>
+            <button type="button" class="danger-small-btn-premium" onclick="deleteAnnouncement('${a.id}')">Haqi</button>
+          </div>
+        `).join("");
+      } catch (e) {}
+    }
+
+    async function createAnnouncement() {
+      const title = document.getElementById("announcementTitleInput").value.trim();
+      const content = document.getElementById("announcementContentInput").value.trim();
+      if (!title || !content) { alert("Mata-duree fi ibsa guuti."); return; }
+      try {
+        await db.from("announcements").insert({ title, content });
+        document.getElementById("announcementTitleInput").value = "";
+        document.getElementById("announcementContentInput").value = "";
+        await loadAdminAnnouncements();
+        alert("📢 Beeksisi maxxanfameera!");
+      } catch (e) {}
+    }
+
+    async function deleteAnnouncement(id) {
+      if (!confirm("Haqsuu mirkaneessi?")) return;
+      try {
+        await db.from("announcements").delete().eq("id", id);
+        await loadAdminAnnouncements();
+      } catch (e) {}
+    }
+
+    // Admin Panel Feedbacks loading
+    async function loadAdminFeedbacks() {
+      const container = document.getElementById("adminFeedbacksList");
+      if (!container) return;
+      try {
+        const { data } = await db.from("feedbacks").select("*").order("created_at", { ascending: false });
+        if (!data?.length) {
+          container.innerHTML = `<div class="empty-state">💬 Yaanni tokko illee hin jiru.</div>`;
+          return;
+        }
+        container.innerHTML = data.map(f => `
+          <div class="admin-list-item-premium" style="flex-direction:column; align-items:stretch; gap:12px;">
+            <div class="item-main-premium">
+              <h3 style="color:var(--primary); font-size:15px;">👤 ${escapeHtml(f.student_name)}</h3>
+              <p style="margin-top:6px; color:#334155; font-size:13px;"><strong>Yaada:</strong> ${escapeHtml(f.message)}</p>
+              ${f.admin_reply ? `<div style="background:#e3f2fd; border-left:4px solid #1565C0; padding:10px; border-radius:10px; margin-top:8px; font-size:12.5px;"><strong>Deebii Kennifte:</strong> ${escapeHtml(f.admin_reply)}</div>` : ''}
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="replyInput_${f.id}" placeholder="Deebii barreessi..." style="margin:0; flex:1; padding:10px; border-radius:10px; font-size:13px;">
+              <button type="button" class="small-btn-premium" onclick="sendAdminReply('${f.id}')" style="background:#1565C0; color:white; padding:10px 16px; border-radius:10px; font-size:12.5px;">Deebii Ergi</button>
+            </div>
+          </div>
+        `).join("");
+      } catch (e) {}
+    }
+
+    async function sendAdminReply(id) {
+      const input = document.getElementById(`replyInput_${id}`);
+      const reply = input?.value.trim() || "";
+      if (!reply) { alert("Deebii barreessi."); return; }
+      try {
+        await db.from("feedbacks").update({ admin_reply: reply }).eq("id", id);
+        alert("Deebiin ergameera!");
+        await loadAdminFeedbacks();
+      } catch (e) {}
     }
   </script>
 
