@@ -935,6 +935,101 @@
     </button>
   </nav>
 
+  <!-- =====================================================
+       📝 MODERN HIGH-FIDELITY EXAM EDIT MODAL
+  ====================================================== -->
+  <div id="examEditModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); z-index:9999999; justify-content:center; align-items:center; backdrop-filter:blur(4px); padding:20px; box-sizing:border-box;">
+    <div style="background:#ffffff; width:100%; max-width:500px; border-radius:16px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.15); max-height:90vh; overflow-y:auto; box-sizing:border-box; position:relative;">
+      <h3 style="margin-top:0; color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:12px; font-size:1.15rem; display:flex; justify-content:space-between; align-items:center;">
+        <span style="display:flex; align-items:center; gap:6px;">📝 Qormaata Sirreessi</span>
+        <button type="button" onclick="closeEditExamModal()" style="background:none; border:none; font-size:24px; color:#94a3b8; cursor:pointer;">&times;</button>
+      </h3>
+      
+      <input type="hidden" id="editExamId">
+      
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+        <div>
+          <label style="font-weight:700; font-size:12.5px; color:#334155; display:block; margin-bottom:4px;">Mata-duree Qormaataa</label>
+          <input id="editExamTitle" type="text" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font-size:14px;">
+        </div>
+        
+        <div>
+          <label style="font-weight:700; font-size:12.5px; color:#334155; display:block; margin-bottom:4px;">Ibsa Qormaataa</label>
+          <textarea id="editExamDescription" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; height:70px; font-size:14px;"></textarea>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Gaaffii meeqa?</label>
+            <select id="editExamQuestionLimit" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; font-size:13.5px;">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+              <option value="75">75</option>
+              <option value="100">100</option>
+              <option value="0">Hunda</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Attempt meeqa?</label>
+            <select id="editExamAttemptLimit" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; font-size:13.5px;">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Yeroo (daqiiqaa)</label>
+            <input id="editExamDuration" type="number" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font-size:13.5px;">
+          </div>
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Final?</label>
+            <select id="editExamFinal" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; font-size:13.5px;">
+              <option value="false">Lakki</option>
+              <option value="true">Eyyee</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Guyyaa jalqabaa</label>
+            <input id="editExamStartDate" type="date" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font-size:13.5px;">
+          </div>
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Guyyaa xumuraa</label>
+            <input id="editExamEndDate" type="date" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font-size:13.5px;">
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Saa'a jalqabaa</label>
+            <input id="editExamStartTime" type="time" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font-size:13.5px;">
+          </div>
+          <div>
+            <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Saa'a xumuraa</label>
+            <input id="editExamEndTime" type="time" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font-size:13.5px;">
+          </div>
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px; border-top:1px solid #e2e8f0; padding-top:14px;">
+          <button type="button" onclick="closeEditExamModal()" style="padding:10px 16px; background:#e2e8f0; border:none; border-radius:8px; font-weight:bold; color:#475569; cursor:pointer;">Haqi</button>
+          <button type="button" onclick="saveEditedExam()" style="padding:10px 20px; background:linear-gradient(135deg, #094080, #0d59b2); border:none; border-radius:8px; font-weight:bold; color:#fff; cursor:pointer;">💾 Olkaa'i</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SUPABASE & APP SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
@@ -1261,8 +1356,8 @@
         await window.loadAdminResultsImage1Matrix();
       } else if (panel === "exams") {
         window.switchExamSubTab("create");
-        if (typeof loadAdminExams === "function") await loadAdminExams();
-        if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
+        await window.loadAdminExams();
+        await window.loadAdminQuestions();
       } else if (panel === "lessons") {
         if (typeof originalOpenAdminPanel === "function") await originalOpenAdminPanel(panel);
       } else if (panel === "announcements") {
@@ -1275,7 +1370,7 @@
     // =========================================================
     // 🌟 PERFECT EXAM SUB-TAB SWITCHING (CLEAN & ISOLATED)
     // =========================================================
-    window.switchExamSubTab = function(tab) {
+    window.switchExamSubTab = async function(tab) {
       const views = {
         create: document.getElementById("examSubViewCreate"),
         exams: document.getElementById("examSubViewExams"),
@@ -1287,7 +1382,6 @@
         questions: document.getElementById("examSubTabQuestions")
       };
 
-      // Exclusively display the chosen view and hide the other two completely
       Object.keys(views).forEach(key => {
         if (views[key]) {
           views[key].style.display = (key === tab) ? "block" : "none";
@@ -1298,25 +1392,248 @@
       });
 
       if (tab === "exams") {
-        if (typeof loadAdminExams === "function") loadAdminExams();
+        await window.loadAdminExams();
       } else if (tab === "questions") {
-        if (typeof loadAdminQuestions === "function") loadAdminQuestions();
+        await window.loadAdminQuestions();
+      }
+    };
+
+    // =========================================================
+    // Global Safe escapeHtml
+    // =========================================================
+    window.escapeHtml = function(text) {
+      if (!text) return "";
+      return text.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    };
+
+    // =========================================================
+    // 🛠️ EXAM CONTROL ACTIONS: 100% WORKING BACKEND INTERFACES
+    // =========================================================
+    window.loadAdminExams = async function() {
+      const container = document.getElementById("adminExamsList");
+      if (!container) return;
+      try {
+        const { data: exams, error } = await db.from("exams").select("*").order("created_at", { ascending: false });
+        if (error) throw error;
+        
+        // Also populate select lists cleanly
+        const bulkSelect = document.getElementById("bulkExamSelect");
+        const manualSelect = document.getElementById("questionExamSelect");
+        const aiSelect = document.getElementById("aiQuestionExamSelect");
+        const selects = [bulkSelect, manualSelect, aiSelect];
+        selects.forEach(sel => {
+          if (sel) {
+            sel.innerHTML = `<option value="">Qormaata filadhu</option>` + 
+              (exams || []).map(ex => `<option value="${ex.id}">${escapeHtml(ex.title)}</option>`).join("");
+          }
+        });
+
+        if (!exams || !exams.length) {
+          container.innerHTML = `<div class="empty-state">📝 Qormaanni uumame hin jiru.</div>`;
+          return;
+        }
+
+        container.innerHTML = exams.map(ex => {
+          const isClosed = ex.status === "closed" || ex.is_active === false;
+          const isLbOpen = ex.leaderboard_status === "open" || ex.leaderboard_open === true;
+
+          return `
+            <div class="modern-card" style="margin-bottom:16px; border-left:5px solid ${isClosed ? '#f59e0b' : '#0d59b2'}; background:#ffffff; padding:18px; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+              <h3 style="margin:0; font-size:16px; color:#0f172a;">${escapeHtml(ex.title)}</h3>
+              <p style="margin:4px 0 10px 0; font-size:13px; color:#475569; line-height:1.4;">${escapeHtml(ex.description || "")}</p>
+              
+              <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:12px; color:#64748b; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                <span>❓ <strong>Gaaffii:</strong> ${ex.question_limit || "Hunda"}</span>
+                <span>🔢 <strong>Attempt:</strong> ${ex.attempt_limit || 1}</span>
+                <span>⏱️ <strong>Yeroo:</strong> ${ex.duration || 30} min</span>
+                <span>📅 <strong>Guyyaa:</strong> ${ex.start_date || "-"} to ${ex.end_date || "-"}</span>
+                <span>⏰ <strong>Saa'a:</strong> ${ex.start_time || "-"} to ${ex.end_time || "-"}</span>
+                <span>🟢 <strong>Haala:</strong> <strong style="color:${isClosed ? '#ef4444' : '#10b981'};">${isClosed ? 'Cufameera' : 'Active'}</strong></span>
+              </div>
+
+              <!-- HIGH-FIDELITY ACTION GRID -->
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button type="button" class="primary-btn" onclick="toggleExamStatus('${ex.id}', ${isClosed})" style="background:${isClosed ? '#10b981' : '#f59e0b'}; padding:8px 14px; font-size:12px; border-radius:8px; font-weight:700; cursor:pointer; margin:0; border:none; color:#fff;">
+                  ${isClosed ? '🔓 Bani' : '⏸️ Cufi'}
+                </button>
+                <button type="button" class="primary-btn" onclick="toggleExamLeaderboard('${ex.id}', ${isLbOpen})" style="background:#8b5cf6; padding:8px 14px; font-size:12px; border-radius:8px; font-weight:700; cursor:pointer; margin:0; border:none; color:#fff;">
+                  🏆 Leaderboard ${isLbOpen ? '🔒 Cufi' : '🔓 Bani'}
+                </button>
+                <button type="button" class="primary-btn" onclick="openEditExamModal('${ex.id}')" style="background:#0284c7; padding:8px 14px; font-size:12px; border-radius:8px; font-weight:700; cursor:pointer; margin:0; border:none; color:#fff;">
+                  ✏️ Sirreessi
+                </button>
+                <button type="button" class="primary-btn" onclick="deleteExamAdmin('${ex.id}')" style="background:#ef4444; padding:8px 14px; font-size:12px; border-radius:8px; font-weight:700; cursor:pointer; margin:0; border:none; color:#fff;">
+                  🗑️ Haqi
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state" style="color:#ef4444;">Dogoggora qormaata fiduu: ${err.message}</div>`;
+      }
+    };
+
+    window.toggleExamStatus = async function(id, shouldOpen) {
+      try {
+        const newStatus = shouldOpen ? "active" : "closed";
+        const { error } = await db.from("exams").update({ status: newStatus, is_active: shouldOpen }).eq("id", id);
+        if (error) throw error;
+        alert(`✅ Haalli qormaataa milkaa'inaan jijjiirameera!`);
+        await window.loadAdminExams();
+      } catch(e) {
+        alert("Error: " + e.message);
+      }
+    };
+
+    window.toggleExamLeaderboard = async function(id, shouldClose) {
+      try {
+        const { error } = await db.from("exams").update({ leaderboard_status: shouldClose ? "closed" : "open", leaderboard_open: !shouldClose }).eq("id", id);
+        if (error) throw error;
+        alert(`✅ Haalli leaderboard milkaa'inaan jijjiirameera!`);
+        await window.loadAdminExams();
+      } catch(e) {
+        alert("Error: " + e.message);
+      }
+    };
+
+    window.deleteExamAdmin = async function(id) {
+      if (!confirm("⚠️ Qormaata kana haqsuun gaaffilee isaa hundaa wajjin balleessa. Haqsuu kee mirkaneessitaa?")) return;
+      try {
+        const { error } = await db.from("exams").delete().eq("id", id);
+        if (error) throw error;
+        alert("✅ Qormaanni milkaa'inaan haqiameera!");
+        await window.loadAdminExams();
+      } catch(e) {
+        alert("Error: " + e.message);
+      }
+    };
+
+    // =========================================================
+    // EXAM EDIT MODAL LOGIC - SUPPORT FOR ALL FIELDS (DATES/TIMES)
+    // =========================================================
+    window.openEditExamModal = async function(id) {
+      try {
+        const { data, error } = await db.from("exams").select("*").eq("id", id).single();
+        if (error) throw error;
+        
+        document.getElementById("editExamId").value = data.id;
+        document.getElementById("editExamTitle").value = data.title || "";
+        document.getElementById("editExamDescription").value = data.description || "";
+        document.getElementById("editExamQuestionLimit").value = data.question_limit || "0";
+        document.getElementById("editExamAttemptLimit").value = data.attempt_limit || "1";
+        document.getElementById("editExamDuration").value = data.duration || "30";
+        document.getElementById("editExamFinal").value = (data.is_final ?? data.final ?? false).toString();
+        document.getElementById("editExamStartDate").value = data.start_date || "";
+        document.getElementById("editExamEndDate").value = data.end_date || "";
+        document.getElementById("editExamStartTime").value = data.start_time || "";
+        document.getElementById("editExamEndTime").value = data.end_time || "";
+        
+        document.getElementById("examEditModal").style.display = "flex";
+      } catch(e) {
+        alert("Qormaata fiduun hin danda'amne: " + e.message);
+      }
+    };
+
+    window.closeEditExamModal = function() {
+      document.getElementById("examEditModal").style.display = "none";
+    };
+
+    window.saveEditedExam = async function() {
+      const id = document.getElementById("editExamId").value;
+      const title = document.getElementById("editExamTitle").value.trim();
+      const description = document.getElementById("editExamDescription").value.trim();
+      const question_limit = Number(document.getElementById("editExamQuestionLimit").value);
+      const attempt_limit = Number(document.getElementById("editExamAttemptLimit").value);
+      const duration = Number(document.getElementById("editExamDuration").value);
+      const is_final = document.getElementById("editExamFinal").value === "true";
+      const start_date = document.getElementById("editExamStartDate").value;
+      const end_date = document.getElementById("editExamEndDate").value;
+      const start_time = document.getElementById("editExamStartTime").value;
+      const end_time = document.getElementById("editExamEndTime").value;
+
+      if (!title) { alert("Mata-duree qormaataa guuti!"); return; }
+
+      try {
+        const { error } = await db.from("exams").update({
+          title,
+          description,
+          question_limit,
+          attempt_limit,
+          duration,
+          is_final,
+          final: is_final,
+          start_date,
+          end_date,
+          start_time,
+          end_time
+        }).eq("id", id);
+
+        if (error) throw error;
+        alert("✅ Qormaanni kee milkaa'inaan sirreeffameera!");
+        window.closeEditExamModal();
+        await window.loadAdminExams();
+      } catch(e) {
+        alert("Error saving exam: " + e.message);
+      }
+    };
+
+    // =========================================================
+    // QUESTIONS LIST LOADER (SUB-TAB 3)
+    // =========================================================
+    window.loadAdminQuestions = async function() {
+      const container = document.getElementById("adminQuestionsList");
+      if (!container) return;
+      try {
+        const { data: questions, error } = await db.from("questions").select("*").order("created_at", { ascending: false });
+        if (error) throw error;
+        if (!questions || !questions.length) {
+          container.innerHTML = `<div class="empty-state">❓ Gaaffilee uumaman hin jiran.</div>`;
+          return;
+        }
+
+        container.innerHTML = questions.map((q, idx) => `
+          <div class="modern-card" style="margin-bottom:12px; background:#ffffff; padding:16px; border-radius:12px; box-shadow:0 1px 6px rgba(0,0,0,0.04);">
+            <div style="font-size:11.5px; color:#0d59b2; font-weight:bold; margin-bottom:4px;">GAAFFII ${idx + 1}</div>
+            <p style="margin:0 0 10px 0; font-size:14px; color:#0f172a; font-weight:700;">${escapeHtml(q.question)}</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; color:#475569; margin-bottom:8px;">
+              <span><strong>A.</strong> ${escapeHtml(q.option_a || "-")}</span>
+              <span><strong>B.</strong> ${escapeHtml(q.option_b || "-")}</span>
+              <span><strong>C.</strong> ${escapeHtml(q.option_c || "-")}</span>
+              <span><strong>D.</strong> ${escapeHtml(q.option_d || "-")}</span>
+            </div>
+            <div style="font-size:13px; color:#10b981; font-weight:bold; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:8px;">
+              <span>✅ Deebii: ${escapeHtml(q.correct_answer || q.answer || "A")}</span>
+              <button type="button" onclick="deleteQuestionAdmin('${q.id}')" style="background:#ef4444; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:bold; cursor:pointer;">🗑️ Haqi</button>
+            </div>
+          </div>
+        `).join("");
+      } catch(err) {
+        container.innerHTML = `<div class="empty-state">Dogoggora gaaffilee: ${err.message}</div>`;
+      }
+    };
+
+    window.deleteQuestionAdmin = async function(id) {
+      if (!confirm("Gaaffii kana haqsuu kee mirkaneessitaa?")) return;
+      try {
+        const { error } = await db.from("questions").delete().eq("id", id);
+        if (error) throw error;
+        alert("✅ Gaaffiin milkaa'inaan haqiameera!");
+        await window.loadAdminQuestions();
+      } catch(e) {
+        alert("Error: " + e.message);
       }
     };
 
     // =========================================================
     // EXPORTED ADMIN FUNCTIONS (STUDENTS & RESULTS MATRIX)
     // =========================================================
-    const avatarListColors = [
-      { bg: "#3b82f6", emoji: "👨‍🎓" },
-      { bg: "#ec4899", emoji: "👩‍🎓" },
-      { bg: "#10b981", emoji: "🧑‍🎓" },
-      { bg: "#8b5cf6", emoji: "🧕" },
-      { bg: "#f59e0b", emoji: "🧔" },
-      { bg: "#06b6d4", emoji: "👧" },
-      { bg: "#6366f1", emoji: "👦" }
-    ];
-
     window.loadAdminStudentsImage2Layout = async function() {
       try {
         const { data, error } = await db.from("students").select("*");
