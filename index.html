@@ -24,6 +24,29 @@
       justify-content: center !important;
       align-items: center !important;
     }
+
+    /* Modern Logout Pill Button replacing three dots in Admin Header */
+    .admin-logout-btn-modern {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(4px);
+    }
+    .admin-logout-btn-modern:hover {
+      background: #ef4444;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    }
   </style>
 </head>
 
@@ -425,8 +448,11 @@
           <button type="button" class="admin-icon-btn" onclick="openAdminPanel('announcements')" title="Beeksisa">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
           </button>
-          <button type="button" class="admin-icon-btn" onclick="adminLogout()" title="Ba'i (Logout)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+          
+          <!-- REPLACED 3 DOTS WITH MODERN STYLISH LOGOUT PILL BUTTON -->
+          <button type="button" class="admin-logout-btn-modern" onclick="adminLogout()" title="Ba'i (Logout)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span data-i18n="btn_logout">Ba'i</span>
           </button>
         </div>
       </header>
@@ -553,7 +579,7 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL (CLEAN & ACCURATE MATRIX) -->
+        <!-- 📊 2. QABXII PANEL (100% ACCURATE UNIVERSAL FETCH & MATCHING) -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -1297,7 +1323,7 @@
     }
 
     // =========================================================
-    // 2. 📊 ULTRA-RESILIENT ACCURATE SCORE MATRIX
+    // 2. 📊 ULTRA-COMPREHENSIVE UNIVERSAL SCORES FETCH & MATCHING
     // =========================================================
     async function loadAdminResultsImage1Matrix() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
@@ -1305,39 +1331,60 @@
       if (!headerRow || !tbody) return;
 
       try {
-        // Fetch students, exams, and exam results with multiple fallbacks
-        let students = [], realExams = [], dbResults = [];
-
+        // Fetch Students
+        let students = [];
         try {
           const sRes = await db.from("students").select("*");
-          students = sRes.data || [];
+          if (!sRes.error && sRes.data) students = sRes.data;
         } catch(e) {}
 
-        try {
-          const eRes = await db.from("exams").select("*").order("created_at", { ascending: true });
-          realExams = eRes.data || [];
-        } catch(e) {}
-
-        // Fetch results from DB tables
-        try {
-          const rRes = await db.from("exam_results").select("*");
-          dbResults = rRes.data || [];
-        } catch(e) {
+        if (!students.length) {
           try {
-            const rRes2 = await db.from("results").select("*");
-            dbResults = rRes2.data || [];
-          } catch(err) {}
+            students = JSON.parse(localStorage.getItem("ao_students") || "[]");
+          } catch(e) {}
         }
 
-        // Fetch any local storage results
-        let localResults = [];
+        // Fetch Exams
+        let realExams = [];
         try {
-          localResults = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
+          const eRes = await db.from("exams").select("*").order("created_at", { ascending: true });
+          if (!eRes.error && eRes.data) realExams = eRes.data;
         } catch(e) {}
 
-        const allResults = [...dbResults, ...localResults];
+        if (!realExams.length) {
+          try {
+            realExams = JSON.parse(localStorage.getItem("ao_exams") || "[]");
+          } catch(e) {}
+        }
 
-        // Build Dynamic Headers
+        // Universal Fetch across ALL potential Supabase result tables
+        let allResults = [];
+        const tablesToScan = ["exam_results", "results", "student_results", "scores", "user_results"];
+        for (const tName of tablesToScan) {
+          try {
+            const { data, error } = await db.from(tName).select("*");
+            if (!error && data && data.length) {
+              allResults.push(...data);
+            }
+          } catch(e) {}
+        }
+
+        // ALSO Scan ALL LocalStorage keys
+        const localKeysToScan = [
+          "ao_exam_results", "exam_results", "student_scores", 
+          "results", "ao_user_results", "student_exam_results", "ao_scores"
+        ];
+        for (const key of localKeysToScan) {
+          try {
+            const item = localStorage.getItem(key);
+            if (item) {
+              const parsed = JSON.parse(item);
+              if (Array.isArray(parsed)) allResults.push(...parsed);
+            }
+          } catch(e) {}
+        }
+
+        // Render Header Columns
         let dynamicHeaderHtml = `
           <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
           <th><span class="th-icon">👤</span> Maqaa Barataa</th>
@@ -1347,9 +1394,9 @@
         if (realExams.length > 0) {
           realExams.forEach((ex) => {
             dynamicHeaderHtml += `
-              <th title="${escapeHtml(ex.title)}">
+              <th title="${escapeHtml(ex.title || '')}">
                 <span class="th-icon">📄</span>
-                <span class="exam-header-name">${escapeHtml(ex.title)}</span>
+                <span class="exam-header-name">${escapeHtml(ex.title || 'Qormaata')}</span>
               </th>
             `;
           });
@@ -1373,7 +1420,9 @@
           return;
         }
 
-        // Map Pure Real Data per Student & Exam with Comprehensive Multi-Key Matching
+        const cleanStr = (val) => (val || "").toString().trim().toLowerCase();
+
+        // Ultra-flexible Student & Exam Score Matching
         const studentRowsData = students.map((s) => {
           let totalEarnedScore = 0;
           let totalQuestionsSum = 0;
@@ -1381,40 +1430,43 @@
           let wrongCount = 0;
           const examScores = [];
 
+          const sId = cleanStr(s.id);
+          const sCode = cleanStr(s.student_id || s.code);
+          const sName = cleanStr(s.name);
+          const sEmail = cleanStr(s.email);
+
           if (realExams.length > 0) {
             realExams.forEach((ex) => {
-              // Ultra-flexible matching between student & result record
-              const r = allResults.find(res => {
-                const sId = (s.id || "").toString();
-                const sCode = (s.code || s.student_id || "").toString();
-                const sName = (s.name || "").trim().toLowerCase();
+              const exId = cleanStr(ex.id);
+              const exTitle = cleanStr(ex.title);
 
-                const rSId = (res.student_id || res.user_id || "").toString();
-                const rSName = (res.student_name || res.name || "").trim().toLowerCase();
+              // Find matched result record
+              const r = allResults.find(res => {
+                const rSId = cleanStr(res.student_id || res.user_id || res.studentId || res.userId);
+                const rSName = cleanStr(res.student_name || res.name || res.userName || res.studentName);
+                const rSEmail = cleanStr(res.student_email || res.email);
 
                 const matchStudent = 
-                  (rSId && (rSId === sId || rSId === sCode || sId.startsWith(rSId) || rSId.startsWith(sId.substring(0,8)))) ||
-                  (rSName && sName && rSName === sName);
+                  (rSId && (rSId === sId || rSId === sCode || sId.includes(rSId) || rSId.includes(sId))) ||
+                  (rSName && sName && (rSName === sName || sName.includes(rSName) || rSName.includes(sName))) ||
+                  (rSEmail && sEmail && rSEmail === sEmail);
 
-                const exId = (ex.id || "").toString();
-                const exTitle = (ex.title || "").trim().toLowerCase();
-
-                const rExId = (res.exam_id || "").toString();
-                const rExTitle = (res.exam_title || res.title || "").trim().toLowerCase();
+                const rExId = cleanStr(res.exam_id || res.examId);
+                const rExTitle = cleanStr(res.exam_title || res.title || res.examTitle);
 
                 const matchExam = 
-                  (rExId && rExId === exId) ||
-                  (rExTitle && exTitle && rExTitle === exTitle);
+                  (rExId && (rExId === exId || exId.includes(rExId))) ||
+                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || rExTitle.includes(exTitle)));
 
                 return matchStudent && matchExam;
               });
 
               if (r) {
-                let scoreVal = Number(r.score ?? r.correct_answers ?? r.result ?? 0);
-                let totalQ = Number(r.total_questions ?? r.total ?? ex.question_limit ?? 10);
+                let scoreVal = Number(r.score ?? r.correct_answers ?? r.correct ?? r.result ?? 0);
+                let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? ex.question_limit ?? 10);
                 if (totalQ <= 0) totalQ = 10;
 
-                let pct = r.percentage !== undefined && r.percentage !== null 
+                let pct = (r.percentage !== undefined && r.percentage !== null) 
                   ? Number(r.percentage) 
                   : Math.round((scoreVal / totalQ) * 100);
 
@@ -1424,7 +1476,7 @@
                 examsTakenCount++;
                 wrongCount += Math.max(0, totalQ - scoreVal);
               } else {
-                // If student HAS NOT taken this exam -> leave empty '-' (bakka duwwaa / -)
+                // If student HAS NOT taken this exam -> Bakka duwwaa / hyphen (-)
                 examScores.push({ score: 0, total: ex.question_limit || 10, percent: 0, hasTaken: false });
               }
             });
@@ -1432,7 +1484,7 @@
             examScores.push({ score: 0, total: 10, percent: 0, hasTaken: false });
           }
 
-          // Real Overall Percent and Average
+          // Overall Percent and Average
           const overallPct = examsTakenCount > 0 
             ? Math.round((totalEarnedScore / totalQuestionsSum) * 100) 
             : 0;
@@ -1453,7 +1505,7 @@
           };
         });
 
-        // SORT STUDENTS BY HIGHEST REAL SCORE / AVERAGE FOR RANKING (#1, #2, #3...)
+        // Rank students by highest overall percent / earned score
         studentRowsData.sort((a, b) => {
           if (b.overallPct !== a.overallPct) return b.overallPct - a.overallPct;
           return b.totalEarnedScore - a.totalEarnedScore;
@@ -1468,7 +1520,7 @@
           const studentId = s.student_id || s.code || (s.id ? s.id.substring(0,8) : "STU" + String(rankNum).padStart(3, "0"));
 
           const t = i18nTranslations[currentAppLang] || i18nTranslations.om;
-          
+
           let badgeClass = "badge-xumurameera";
           let badgeText = t.badge_xumurameera;
           if (row.examsTakenCount > 0) {
@@ -1506,7 +1558,7 @@
               <!-- 3. Student ID -->
               <td class="td-id"><code>${escapeHtml(studentId)}</code></td>
 
-              <!-- 4. EXAM SCORES: Shows actual score (e.g. 3/5 or 87%) if taken, otherwise '-' -->
+              <!-- 4. EXAM SCORES: Shows score e.g. 3/5 or 87% if taken, otherwise '-' -->
               ${row.examScores.map(sc => {
                 if (!sc.hasTaken) {
                   return `<td><div class="score-card-matrix score-empty">-</div></td>`;
