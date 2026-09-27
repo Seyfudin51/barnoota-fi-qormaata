@@ -25,27 +25,26 @@
       align-items: center !important;
     }
 
-    /* Modern Logout Pill Button replacing three dots in Admin Header */
-    .admin-logout-btn-modern {
+    /* Elegant, Sleek Admin Logout Button inside Bottom Bar / Right Header */
+    .admin-logout-pill-vivid {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      padding: 6px 14px;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #ffffff;
+      border: none;
+      padding: 7px 16px;
       border-radius: 20px;
       font-weight: 700;
       font-size: 12.5px;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      backdrop-filter: blur(4px);
+      box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
+      transition: all 0.25s ease;
     }
-    .admin-logout-btn-modern:hover {
-      background: #ef4444;
-      color: #ffffff;
+    .admin-logout-pill-vivid:hover {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+      box-shadow: 0 5px 14px rgba(239, 68, 68, 0.5);
     }
   </style>
 </head>
@@ -364,7 +363,7 @@
   </section>
 
   <!-- =====================================================
-       12. PROFILE PAGE
+       12. PROFILE PAGE (ELEGANT, COMPACT AVATAR & AUTO-FILLED REAL DATA)
   ====================================================== -->
   <section id="profilePage" class="page">
     <div class="page-container">
@@ -373,41 +372,51 @@
         <h2 data-i18n="my_profile">👤 Profile Koo</h2>
       </div>
 
-      <div class="profile-card-modern">
-        <div class="profile-avatar-wrapper" onclick="document.getElementById('studentAvatarFileInput').click()" title="Suuraa galarii irraa filadhu">
-          <div class="profile-avatar-circle" id="studentAvatarDisplay">
-            <img id="studentAvatarImg" src="" alt="Profile" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
-            <span id="studentAvatarFallbackSvg" style="font-size: 2.5rem;">👨‍🎓</span>
+      <div class="profile-card-modern" style="max-width: 480px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+        
+        <!-- COMPACT ELEGANT AVATAR -->
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+          <div class="profile-avatar-wrapper" onclick="document.getElementById('studentAvatarFileInput').click()" title="Suuraa jijjiiruuf tuqi" style="cursor: pointer; position: relative; width: 90px; height: 90px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #0d59b2; overflow: hidden; background: #f1f5f9;">
+            <div id="studentAvatarDisplay" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+              <img id="studentAvatarImg" src="" alt="Profile" style="display:none; width:100%; height:100%; object-fit:cover;">
+              <span id="studentAvatarFallbackSvg" style="font-size: 2.2rem;">👨‍🎓</span>
+            </div>
+            <div class="avatar-camera-badge" style="position: absolute; bottom: 2px; right: 2px; background: #0d59b2; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid #fff;">📷</div>
           </div>
-          <div class="avatar-camera-badge">📷</div>
-        </div>
-        <input type="file" id="studentAvatarFileInput" accept="image/*" style="display:none;" onchange="handleStudentAvatarUpload(this)">
-        <p style="text-align:center; font-size:12px; color:#64748b; margin-top:6px; margin-bottom:16px;" data-i18n="tap_change_photo">Suuraa jijjiiruuf tuqi</p>
-
-        <div class="profile-info-group">
-          <label data-i18n="label_fullname">Maqaa Guutuu</label>
-          <input id="profileNameInput" type="text" placeholder="Maqaa kee galchi">
-          <label>Email</label>
-          <input id="profileEmailInput" type="email" placeholder="Email kee galchi">
+          <input type="file" id="studentAvatarFileInput" accept="image/*" style="display:none;" onchange="handleStudentAvatarUpload(this)">
+          <p style="text-align:center; font-size:11.5px; color:#64748b; margin-top:6px; margin-bottom:0;" data-i18n="tap_change_photo">Suuraa jijjiiruuf tuqi</p>
         </div>
 
-        <div class="profile-meta-grid">
-          <div class="profile-meta-box">
-            <span class="meta-label">Student ID</span>
-            <strong id="profileCode" class="meta-value">-</strong>
+        <!-- PROFILE EDITABLE FIELDS (Name & Email can be edited/saved) -->
+        <div class="profile-info-group" style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <label style="font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 4px; display: block;" data-i18n="label_fullname">Maqaa Guutuu</label>
+            <input id="profileNameInput" type="text" placeholder="Maqaa kee galchi" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13.5px;">
           </div>
-          <div class="profile-meta-box">
-            <span class="meta-label">Activation Code</span>
-            <strong id="profileActivationCode" class="meta-value">-</strong>
+          <div>
+            <label style="font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 4px; display: block;">Email</label>
+            <input id="profileEmailInput" type="email" placeholder="Email kee galchi" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13.5px;">
           </div>
         </div>
 
-        <div class="profile-status-bar">
-          <span data-i18n="label_status">Haala Galmee (Status):</span>
-          <span id="profileStatus" class="status active">-</span>
+        <!-- AUTOMATICALLY FILLED METADATA (ID & Activation Code & Status) -->
+        <div class="profile-meta-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
+          <div class="profile-meta-box" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+            <span class="meta-label" style="font-size:11px; color:#64748b; display:block;">Student ID</span>
+            <strong id="profileCode" class="meta-value" style="font-size:13px; color:#0f172a;">-</strong>
+          </div>
+          <div class="profile-meta-box" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+            <span class="meta-label" style="font-size:11px; color:#64748b; display:block;">Activation Code</span>
+            <strong id="profileActivationCode" class="meta-value" style="font-size:13px; color:#0f172a;">-</strong>
+          </div>
         </div>
 
-        <button type="button" class="primary-btn-vivid" onclick="saveStudentFullProfile()" style="margin-top:16px;">
+        <div class="profile-status-bar" style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="font-size:12px; font-weight:600; color:#475569;" data-i18n="label_status">Haala Galmee (Status):</span>
+          <span id="profileStatus" class="status active" style="font-size:12px; font-weight:700; color:#10b981;">Active</span>
+        </div>
+
+        <button type="button" class="primary-btn-vivid" onclick="saveStudentFullProfile()" style="width:100%; margin-top:18px; padding:12px; background:linear-gradient(135deg, #094080, #0d59b2); color:#fff; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
           <span data-i18n="btn_save_profile">💾 Olkaa'i (Save Profile)</span>
         </button>
       </div>
@@ -420,7 +429,7 @@
   <section id="adminDashboardPage" class="page">
     <div class="admin-app-wrapper">
 
-      <!-- TOP CURVED APP BAR -->
+      <!-- TOP CURVED APP BAR WITH ELEGANT LOGOUT BUTTON -->
       <header class="admin-top-appbar">
         <div class="admin-topbar-left">
           <button type="button" class="admin-icon-btn" onclick="showAdminHomeView()" title="Menu">
@@ -437,7 +446,7 @@
           <input type="file" id="adminAvatarFileInput" accept="image/*" style="display:none;" onchange="handleAdminAvatarUpload(this)">
         </div>
 
-        <div class="admin-topbar-right">
+        <div class="admin-topbar-right" style="display:flex; align-items:center; gap:8px;">
           <!-- Language Switcher in Admin Header -->
           <div class="lang-selector-pill admin-header-lang">
             <button type="button" class="lang-btn-mini" onclick="switchLanguage('om')">OM</button>
@@ -449,9 +458,9 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
           </button>
           
-          <!-- REPLACED 3 DOTS WITH MODERN STYLISH LOGOUT PILL BUTTON -->
-          <button type="button" class="admin-logout-btn-modern" onclick="adminLogout()" title="Ba'i (Logout)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <!-- ELEGANT STYLISH LOGOUT BUTTON -->
+          <button type="button" class="admin-logout-pill-vivid" onclick="adminLogout()" title="Ba'i (Logout)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             <span data-i18n="btn_logout">Ba'i</span>
           </button>
         </div>
@@ -1331,7 +1340,6 @@
       if (!headerRow || !tbody) return;
 
       try {
-        // Fetch Students
         let students = [];
         try {
           const sRes = await db.from("students").select("*");
@@ -1344,7 +1352,6 @@
           } catch(e) {}
         }
 
-        // Fetch Exams
         let realExams = [];
         try {
           const eRes = await db.from("exams").select("*").order("created_at", { ascending: true });
@@ -1357,7 +1364,6 @@
           } catch(e) {}
         }
 
-        // Universal Fetch across ALL potential Supabase result tables
         let allResults = [];
         const tablesToScan = ["exam_results", "results", "student_results", "scores", "user_results"];
         for (const tName of tablesToScan) {
@@ -1369,7 +1375,6 @@
           } catch(e) {}
         }
 
-        // ALSO Scan ALL LocalStorage keys
         const localKeysToScan = [
           "ao_exam_results", "exam_results", "student_scores", 
           "results", "ao_user_results", "student_exam_results", "ao_scores"
@@ -1384,7 +1389,6 @@
           } catch(e) {}
         }
 
-        // Render Header Columns
         let dynamicHeaderHtml = `
           <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
           <th><span class="th-icon">👤</span> Maqaa Barataa</th>
@@ -1422,7 +1426,6 @@
 
         const cleanStr = (val) => (val || "").toString().trim().toLowerCase();
 
-        // Ultra-flexible Student & Exam Score Matching
         const studentRowsData = students.map((s) => {
           let totalEarnedScore = 0;
           let totalQuestionsSum = 0;
@@ -1440,7 +1443,6 @@
               const exId = cleanStr(ex.id);
               const exTitle = cleanStr(ex.title);
 
-              // Find matched result record
               const r = allResults.find(res => {
                 const rSId = cleanStr(res.student_id || res.user_id || res.studentId || res.userId);
                 const rSName = cleanStr(res.student_name || res.name || res.userName || res.studentName);
@@ -1456,7 +1458,7 @@
 
                 const matchExam = 
                   (rExId && (rExId === exId || exId.includes(rExId))) ||
-                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || rExTitle.includes(exTitle)));
+                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || exTitle.includes(rExTitle)));
 
                 return matchStudent && matchExam;
               });
@@ -1476,7 +1478,6 @@
                 examsTakenCount++;
                 wrongCount += Math.max(0, totalQ - scoreVal);
               } else {
-                // If student HAS NOT taken this exam -> Bakka duwwaa / hyphen (-)
                 examScores.push({ score: 0, total: ex.question_limit || 10, percent: 0, hasTaken: false });
               }
             });
@@ -1484,7 +1485,6 @@
             examScores.push({ score: 0, total: 10, percent: 0, hasTaken: false });
           }
 
-          // Overall Percent and Average
           const overallPct = examsTakenCount > 0 
             ? Math.round((totalEarnedScore / totalQuestionsSum) * 100) 
             : 0;
@@ -1505,15 +1505,13 @@
           };
         });
 
-        // Rank students by highest overall percent / earned score
         studentRowsData.sort((a, b) => {
           if (b.overallPct !== a.overallPct) return b.overallPct - a.overallPct;
           return b.totalEarnedScore - a.totalEarnedScore;
         });
 
-        // Render sorted rows
         tbody.innerHTML = studentRowsData.map((row, index) => {
-          const rankNum = index + 1; // Rank 1, 2, 3...
+          const rankNum = index + 1;
           const s = row.student;
           const avIdx = rankNum % avatarListColors.length;
           const av = avatarListColors[avIdx];
@@ -1542,10 +1540,7 @@
 
           return `
             <tr>
-              <!-- 1. Rank 1, 2, 3... -->
               <td class="td-num"><strong>${rankNum}</strong></td>
-
-              <!-- 2. Student Profile -->
               <td class="td-student-name">
                 <div class="name-with-avatar">
                   <div class="mini-avatar" style="background: ${av.bg};">
@@ -1554,11 +1549,7 @@
                   <span>${escapeHtml(s.name || "Barataa")}</span>
                 </div>
               </td>
-
-              <!-- 3. Student ID -->
               <td class="td-id"><code>${escapeHtml(studentId)}</code></td>
-
-              <!-- 4. EXAM SCORES: Shows score e.g. 3/5 or 87% if taken, otherwise '-' -->
               ${row.examScores.map(sc => {
                 if (!sc.hasTaken) {
                   return `<td><div class="score-card-matrix score-empty">-</div></td>`;
@@ -1569,32 +1560,16 @@
 
                 return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${sc.score}/${sc.total} (${sc.percent}%)</div></td>`;
               }).join("")}
-
-              <!-- 5. Overall Percent -->
-              <td>
-                <span class="pct-circle-badge ${pctBadgeColor}">${row.examsTakenCount > 0 ? row.overallPct + '%' : '0%'}</span>
-              </td>
-
-              <!-- 6. Total Score Fraction -->
+              <td><span class="pct-circle-badge ${pctBadgeColor}">${row.examsTakenCount > 0 ? row.overallPct + '%' : '0%'}</span></td>
               <td class="td-fraction">
                 <div class="score-fraction-wrap">
                   <span class="frac-text">${row.totalEarnedScore}/${row.totalQuestionsSum || 0}</span>
                   <div class="frac-bar"><div class="frac-fill" style="width: ${Math.min(100, row.overallPct)}%;"></div></div>
                 </div>
               </td>
-
-              <!-- 7. Average Score -->
               <td class="td-avg"><strong>${row.examsTakenCount > 0 ? row.overallPct.toFixed(1) : '0.0'}</strong></td>
-
-              <!-- 8. Status Rank Badge -->
-              <td>
-                <span class="matrix-status-badge ${badgeClass}">${badgeText}</span>
-              </td>
-
-              <!-- 9. Wrong Count -->
+              <td><span class="matrix-status-badge ${badgeClass}">${badgeText}</span></td>
               <td class="td-wrong-count">${row.examsTakenCount > 0 ? row.wrongCount : '-'}</td>
-
-              <!-- 10. Action Button -->
               <td>
                 <button type="button" class="btn-matrix-action" onclick="viewStudentFullDetails('${s.id}')">
                   ${t.btn_view || 'Ilalii'}
@@ -1685,6 +1660,28 @@
       }
     }
 
+    // =========================================================
+    // POPULATE & UPDATE PROFILE AUTOMATICALLY WITH REAL DATA
+    // =========================================================
+    function loadStudentProfileData() {
+      if (typeof currentStudent === "undefined" || !currentStudent) return;
+      
+      const nameInput = document.getElementById("profileNameInput");
+      const emailInput = document.getElementById("profileEmailInput");
+      const codeEl = document.getElementById("profileCode");
+      const actEl = document.getElementById("profileActivationCode");
+      const statusEl = document.getElementById("profileStatus");
+
+      if (nameInput) nameInput.value = currentStudent.name || "";
+      if (emailInput) emailInput.value = currentStudent.email || "";
+      if (codeEl) codeEl.textContent = currentStudent.student_id || currentStudent.code || "-";
+      if (actEl) actEl.textContent = currentStudent.activation_code || currentStudent.code || "-";
+      if (statusEl) statusEl.textContent = currentStudent.status || "active";
+
+      const savedAvatar = localStorage.getItem("ao_student_avatar_" + currentStudent.id) || currentStudent.avatar_url;
+      if (savedAvatar) displayStudentAvatar(savedAvatar);
+    }
+
     async function saveStudentFullProfile() {
       const name = document.getElementById("profileNameInput")?.value.trim();
       const email = document.getElementById("profileEmailInput")?.value.trim();
@@ -1768,8 +1765,7 @@
       if (pageId === "examListPage" && typeof loadExams === "function") loadExams();
       if (pageId === "scorePage" && typeof showScore === "function") showScore();
       if (pageId === "profilePage") {
-        const savedAvatar = localStorage.getItem("ao_student_avatar_" + (currentStudent?.id || "guest"));
-        if (savedAvatar) displayStudentAvatar(savedAvatar);
+        loadStudentProfileData();
       }
     }
 
