@@ -553,25 +553,13 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL (PURE REAL DATA MATCHING MATRIX + DYNAMIC RANKING 1, 2, 3...) -->
+        <!-- 📊 2. QABXII PANEL (CLEAN & ACCURATE MATRIX) -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
           </div>
 
-          <!-- Hero Banner Matching Image 1 -->
-          <div class="banner-results-top">
-            <div class="banner-results-content">
-              <h2 data-i18n="results_banner_title">Qormaata Barataa</h2>
-              <h3 data-i18n="results_banner_sub">Dhibbaa Ol Ittin Toohatan</h3>
-              <p data-i18n="results_banner_quote">Barnoonni milkaa'ina keetiif bu'uuraadha!</p>
-            </div>
-            <div class="banner-results-art">
-              <span style="font-size: 2.5rem;">🎓📖✨</span>
-            </div>
-          </div>
-
-          <!-- Table Container with Horizontal Scroll Matching Image 1 with Dynamic Real Headers -->
+          <!-- Table Container with Horizontal Scroll -->
           <div class="results-matrix-table-wrap">
             <table class="results-matrix-table" id="adminResultsMatrixTable">
               <thead>
@@ -580,12 +568,12 @@
                 </tr>
               </thead>
               <tbody id="adminResultsMatrixBody">
-                <!-- Dynamically Rendered via JS Sorted by Real Highest Average Score -->
+                <!-- Dynamically Rendered via JS -->
               </tbody>
             </table>
           </div>
 
-          <!-- Bottom Summary Bar Matching Image 1 -->
+          <!-- Bottom Summary Bar -->
           <div class="results-matrix-footer">
             <span data-i18n="matrix_footer_text1">📖 Hojii keessan milkaa'ina qaba!</span>
             <button type="button" class="btn-matrix-footer-action" onclick="showAdminHomeView()" data-i18n="btn_view">📑 Ilaalii</button>
@@ -1309,7 +1297,7 @@
     }
 
     // =========================================================
-    // 2. 📊 PURE REAL DATA MATRIX + DYNAMIC RANKING (#1, #2, #3...)
+    // 2. 📊 ULTRA-RESILIENT ACCURATE SCORE MATRIX
     // =========================================================
     async function loadAdminResultsImage1Matrix() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
@@ -1317,18 +1305,31 @@
       if (!headerRow || !tbody) return;
 
       try {
-        // 1. Fetch REAL students, REAL exams, and REAL exam_results from DB
-        const [studentsRes, examsRes, resultsRes] = await Promise.all([
-          db.from("students").select("*"),
-          db.from("exams").select("*").order("created_at", { ascending: true }),
-          db.from("exam_results").select("*")
-        ]);
+        // Fetch students, exams, and exam results with multiple fallbacks
+        let students = [], realExams = [], dbResults = [];
 
-        const students = studentsRes.data || [];
-        const realExams = examsRes.data || [];
-        const dbResults = resultsRes.data || [];
+        try {
+          const sRes = await db.from("students").select("*");
+          students = sRes.data || [];
+        } catch(e) {}
 
-        // Fetch any local storage exam results
+        try {
+          const eRes = await db.from("exams").select("*").order("created_at", { ascending: true });
+          realExams = eRes.data || [];
+        } catch(e) {}
+
+        // Fetch results from DB tables
+        try {
+          const rRes = await db.from("exam_results").select("*");
+          dbResults = rRes.data || [];
+        } catch(e) {
+          try {
+            const rRes2 = await db.from("results").select("*");
+            dbResults = rRes2.data || [];
+          } catch(err) {}
+        }
+
+        // Fetch any local storage results
         let localResults = [];
         try {
           localResults = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
@@ -1336,7 +1337,7 @@
 
         const allResults = [...dbResults, ...localResults];
 
-        // Build Dynamic Headers for Matrix Table based on Real Admin Exams
+        // Build Dynamic Headers
         let dynamicHeaderHtml = `
           <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
           <th><span class="th-icon">👤</span> Maqaa Barataa</th>
@@ -1353,7 +1354,7 @@
             `;
           });
         } else {
-          dynamicHeaderHtml += `<th><span class="th-icon">📄</span> Qormaata (Hin uumamne)</th>`;
+          dynamicHeaderHtml += `<th><span class="th-icon">📄</span> Qormaata</th>`;
         }
 
         dynamicHeaderHtml += `
@@ -1372,7 +1373,7 @@
           return;
         }
 
-        // Map Pure Real Data per Student & Exam
+        // Map Pure Real Data per Student & Exam with Comprehensive Multi-Key Matching
         const studentRowsData = students.map((s) => {
           let totalEarnedScore = 0;
           let totalQuestionsSum = 0;
@@ -1382,23 +1383,35 @@
 
           if (realExams.length > 0) {
             realExams.forEach((ex) => {
-              // Exact resilient match against student ID/code/name and exam ID/title
+              // Ultra-flexible matching between student & result record
               const r = allResults.find(res => {
+                const sId = (s.id || "").toString();
+                const sCode = (s.code || s.student_id || "").toString();
+                const sName = (s.name || "").trim().toLowerCase();
+
+                const rSId = (res.student_id || res.user_id || "").toString();
+                const rSName = (res.student_name || res.name || "").trim().toLowerCase();
+
                 const matchStudent = 
-                  (res.student_id && (res.student_id === s.id || res.student_id === s.student_id || res.student_id === s.code)) ||
-                  (res.user_id && (res.user_id === s.id || res.user_id === s.student_id)) ||
-                  (res.student_name && s.name && res.student_name.trim().toLowerCase() === s.name.trim().toLowerCase());
+                  (rSId && (rSId === sId || rSId === sCode || sId.startsWith(rSId) || rSId.startsWith(sId.substring(0,8)))) ||
+                  (rSName && sName && rSName === sName);
+
+                const exId = (ex.id || "").toString();
+                const exTitle = (ex.title || "").trim().toLowerCase();
+
+                const rExId = (res.exam_id || "").toString();
+                const rExTitle = (res.exam_title || res.title || "").trim().toLowerCase();
 
                 const matchExam = 
-                  (res.exam_id && res.exam_id === ex.id) ||
-                  (res.exam_title && ex.title && res.exam_title.trim().toLowerCase() === ex.title.trim().toLowerCase());
+                  (rExId && rExId === exId) ||
+                  (rExTitle && exTitle && rExTitle === exTitle);
 
                 return matchStudent && matchExam;
               });
 
               if (r) {
-                let scoreVal = Number(r.score ?? r.correct_answers ?? 0);
-                let totalQ = Number(r.total_questions ?? ex.question_limit ?? 10);
+                let scoreVal = Number(r.score ?? r.correct_answers ?? r.result ?? 0);
+                let totalQ = Number(r.total_questions ?? r.total ?? ex.question_limit ?? 10);
                 if (totalQ <= 0) totalQ = 10;
 
                 let pct = r.percentage !== undefined && r.percentage !== null 
@@ -1411,10 +1424,12 @@
                 examsTakenCount++;
                 wrongCount += Math.max(0, totalQ - scoreVal);
               } else {
-                // Pure Real Data: If student hasn't taken exam, display hyphen (-)
+                // If student HAS NOT taken this exam -> leave empty '-' (bakka duwwaa / -)
                 examScores.push({ score: 0, total: ex.question_limit || 10, percent: 0, hasTaken: false });
               }
             });
+          } else {
+            examScores.push({ score: 0, total: 10, percent: 0, hasTaken: false });
           }
 
           // Real Overall Percent and Average
@@ -1438,20 +1453,19 @@
           };
         });
 
-        // REAL AUTOMATIC RANKING SORTING (1, 2, 3...)
-        // Students with highest real average / overall percentage ranked first!
+        // SORT STUDENTS BY HIGHEST REAL SCORE / AVERAGE FOR RANKING (#1, #2, #3...)
         studentRowsData.sort((a, b) => {
           if (b.overallPct !== a.overallPct) return b.overallPct - a.overallPct;
           return b.totalEarnedScore - a.totalEarnedScore;
         });
 
-        // Render sorted rows with Rank 1, 2, 3...
+        // Render sorted rows
         tbody.innerHTML = studentRowsData.map((row, index) => {
-          const rankNum = index + 1; // Real Rank 1, 2, 3...
+          const rankNum = index + 1; // Rank 1, 2, 3...
           const s = row.student;
           const avIdx = rankNum % avatarListColors.length;
           const av = avatarListColors[avIdx];
-          const studentId = s.student_id || s.id?.substring(0,8) || "STU" + String(rankNum).padStart(3, "0");
+          const studentId = s.student_id || s.code || (s.id ? s.id.substring(0,8) : "STU" + String(rankNum).padStart(3, "0"));
 
           const t = i18nTranslations[currentAppLang] || i18nTranslations.om;
           
@@ -1476,7 +1490,7 @@
 
           return `
             <tr>
-              <!-- 1. REAL RANK 1, 2, 3... BASED ON HIGHEST REAL AVERAGE -->
+              <!-- 1. Rank 1, 2, 3... -->
               <td class="td-num"><strong>${rankNum}</strong></td>
 
               <!-- 2. Student Profile -->
@@ -1492,7 +1506,7 @@
               <!-- 3. Student ID -->
               <td class="td-id"><code>${escapeHtml(studentId)}</code></td>
 
-              <!-- 4. REAL EXAM SCORES (e.g. 3/5 or 87% or -) -->
+              <!-- 4. EXAM SCORES: Shows actual score (e.g. 3/5 or 87%) if taken, otherwise '-' -->
               ${row.examScores.map(sc => {
                 if (!sc.hasTaken) {
                   return `<td><div class="score-card-matrix score-empty">-</div></td>`;
@@ -1504,14 +1518,12 @@
                 return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${sc.score}/${sc.total} (${sc.percent}%)</div></td>`;
               }).join("")}
 
-              ${realExams.length === 0 ? `<td><div class="score-card-matrix score-empty">-</div></td>` : ''}
-
               <!-- 5. Overall Percent -->
               <td>
                 <span class="pct-circle-badge ${pctBadgeColor}">${row.examsTakenCount > 0 ? row.overallPct + '%' : '0%'}</span>
               </td>
 
-              <!-- 6. Total Fraction e.g. 66/75 -->
+              <!-- 6. Total Score Fraction -->
               <td class="td-fraction">
                 <div class="score-fraction-wrap">
                   <span class="frac-text">${row.totalEarnedScore}/${row.totalQuestionsSum || 0}</span>
@@ -1541,7 +1553,7 @@
         }).join("");
 
       } catch (err) {
-        console.error("Matrix load error:", err);
+        console.error("Matrix error:", err);
       }
     }
 
