@@ -46,6 +46,57 @@
       transform: translateY(-1px);
       box-shadow: 0 5px 14px rgba(239, 68, 68, 0.5);
     }
+
+    /* Option selection styling for exam */
+    .exam-option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .exam-option-item:hover {
+      border-color: #0d59b2;
+      background: #f0f7ff;
+    }
+    .exam-option-item.selected {
+      border-color: #0d59b2 !important;
+      background: #e0edff !important;
+      box-shadow: 0 2px 8px rgba(13, 89, 178, 0.15);
+    }
+    .exam-option-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .exam-option-item.selected .exam-option-radio {
+      border-color: #0d59b2;
+      background: #0d59b2;
+    }
+    .exam-option-item.selected .exam-option-radio::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+    }
+    .exam-option-text {
+      font-size: 15px;
+      color: #1e293b;
+      line-height: 1.4;
+      font-weight: 500;
+    }
   </style>
 </head>
 
@@ -193,7 +244,7 @@
         </button>
 
         <button type="button" class="student-vivid-tile tile-teal" onclick="navTo('profilePage')">
-          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
           <strong class="tile-title" data-i18n="tab_profile">Profile</strong>
           <small class="tile-sub" data-i18n="sub_yours">Kee</small>
         </button>
@@ -239,27 +290,32 @@
   </section>
 
   <!-- =====================================================
-       7. EXAM TAKING PAGE
+       7. EXAM TAKING PAGE (ENHANCED LIVE TAKER)
   ====================================================== -->
   <section id="examPage" class="page">
     <div class="exam-wrapper">
-      <div class="exam-topbar">
+      <div class="exam-topbar" style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:14px 18px; border-radius:14px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
         <div>
-          <h2 id="examTitle">Qormaata</h2>
-          <span id="questionNumber" class="exam-badge-num">1/1</span>
+          <h2 id="examTitle" style="margin:0; font-size:1.1rem; color:#0f172a;">Qormaata</h2>
+          <span id="questionNumber" class="exam-badge-num" style="display:inline-block; margin-top:4px; font-weight:bold; color:#0d59b2; font-size:13px;">1/1</span>
         </div>
-        <div class="timer-box">⏱️ <strong id="examTimerValue">00:00</strong></div>
+        <div class="timer-box" style="background:#fef3c7; color:#b45309; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:13px;">
+          ⏱️ <strong id="examTimerValue">00:00</strong>
+        </div>
       </div>
 
-      <div class="exam-card">
-        <div class="question-label" data-i18n="question_label">Gaaffii</div>
-        <h2 id="questionText">Gaaffii</h2>
+      <div class="exam-card" style="background:#ffffff; padding:20px; border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+        <div class="question-label" style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:6px;" data-i18n="question_label">Gaaffii</div>
+        <h2 id="questionText" style="font-size:1.15rem; color:#0f172a; margin-top:0; margin-bottom:18px; line-height:1.45;">Gaaffii</h2>
         <div id="answersContainer" class="exam-options-container"></div>
-        <div class="exam-navigation">
-          <button id="nextQuestionButton" type="button" class="primary-btn-vivid" onclick="nextQuestion()">
+        <div class="exam-navigation" style="display:flex; justify-content:space-between; margin-top:20px; gap:10px;">
+          <button id="prevQuestionButton" type="button" class="secondary-btn" onclick="prevQuestionExam()" style="display:none; padding:10px 18px; border-radius:10px; cursor:pointer;">
+            ← Duraa
+          </button>
+          <button id="nextQuestionButton" type="button" class="primary-btn-vivid" onclick="nextQuestionExam()" style="margin-left:auto; padding:10px 20px; background:#0d59b2; color:#fff; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
             <span data-i18n="btn_continue">Itti fufi →</span>
           </button>
-          <button id="submitExamButton" type="button" class="submit-btn" onclick="requestSubmitExam()" style="display:none;">
+          <button id="submitExamButton" type="button" class="submit-btn" onclick="requestSubmitExam()" style="display:none; margin-left:auto; padding:10px 20px; background:#10b981; color:#fff; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
             <span data-i18n="btn_submit_exam">Submit Qormaata</span>
           </button>
         </div>
@@ -271,13 +327,13 @@
        8. SUBMIT CONFIRM PAGE
   ====================================================== -->
   <section id="submitConfirmPage" class="page">
-    <div class="center-card">
-      <div class="big-icon">⚠️</div>
-      <h2 data-i18n="submit_exam_title">Qormaata Submit</h2>
-      <p id="submitWarningMessage" data-i18n="submit_warning">Gaaffii hunda xumurteettaa?</p>
-      <div class="confirm-buttons">
-        <button type="button" class="primary-btn" onclick="confirmSubmitExam(true)" data-i18n="btn_yes">Eyyee</button>
-        <button type="button" class="secondary-btn" onclick="confirmSubmitExam(false)" data-i18n="btn_no">Hin xumirree</button>
+    <div class="center-card" style="max-width:400px; margin:40px auto; background:#fff; padding:24px; border-radius:16px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+      <div class="big-icon" style="font-size:3rem; margin-bottom:10px;">⚠️</div>
+      <h2 data-i18n="submit_exam_title" style="margin-top:0; color:#0f172a;">Qormaata Submit</h2>
+      <p id="submitWarningMessage" data-i18n="submit_warning" style="color:#64748b; font-size:13.5px; line-height:1.5;">Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?</p>
+      <div class="confirm-buttons" style="display:flex; justify-content:center; gap:12px; margin-top:20px;">
+        <button type="button" class="primary-btn" onclick="confirmSubmitExam(true)" data-i18n="btn_yes" style="padding:10px 24px; background:#0d59b2; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Eyyee</button>
+        <button type="button" class="secondary-btn" onclick="confirmSubmitExam(false)" data-i18n="btn_no" style="padding:10px 20px; background:#e2e8f0; color:#334155; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Hin xumirree</button>
       </div>
     </div>
   </section>
@@ -335,7 +391,7 @@
   </section>
 
   <!-- =====================================================
-       12. PROFILE PAGE (100% ACCURATE REAL EMAIL & ID POPULATION)
+       12. PROFILE PAGE
   ====================================================== -->
   <section id="profilePage" class="page">
     <div class="page-container">
@@ -346,7 +402,6 @@
 
       <div class="profile-card-modern" style="max-width: 480px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
         
-        <!-- COMPACT ELEGANT AVATAR -->
         <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
           <div class="profile-avatar-wrapper" onclick="document.getElementById('studentAvatarFileInput').click()" title="Suuraa jijjiiruuf tuqi" style="cursor: pointer; position: relative; width: 90px; height: 90px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #0d59b2; overflow: hidden; background: #f1f5f9;">
             <div id="studentAvatarDisplay" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
@@ -359,7 +414,6 @@
           <p style="text-align:center; font-size:11.5px; color:#64748b; margin-top:6px; margin-bottom:0;" data-i18n="tap_change_photo">Suuraa jijjiiruuf tuqi</p>
         </div>
 
-        <!-- PROFILE EDITABLE FIELDS (Name & Email automatically filled from Google / Telegram / Login data) -->
         <div class="profile-info-group" style="display:flex; flex-direction:column; gap:12px;">
           <div>
             <label style="font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 4px; display: block;" data-i18n="label_fullname">Maqaa Guutuu</label>
@@ -371,7 +425,6 @@
           </div>
         </div>
 
-        <!-- AUTOMATICALLY FILLED METADATA (ID & Activation Code & Status) -->
         <div class="profile-meta-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
           <div class="profile-meta-box" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
             <span class="meta-label" style="font-size:11px; color:#64748b; display:block;">Student ID</span>
@@ -514,7 +567,6 @@
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
           </div>
 
-          <!-- Hero Banner Matching Image 2 -->
           <div class="banner-students-top">
             <div class="banner-top-badge">
               <span class="banner-badge-icon">👥</span>
@@ -528,14 +580,12 @@
             </div>
           </div>
 
-          <!-- Controls: Search + Alphabetical Sorting (A-Z / Z-A) -->
           <div class="students-control-row">
             <div class="search-input-box-enhanced">
               <span class="search-icon-svg">🔍</span>
               <input type="text" id="adminStudentSearchInput" placeholder="Maqaa barataa barbaadi..." oninput="filterAdminStudents(this.value)">
             </div>
 
-            <!-- Sorting Dropdown -->
             <div class="sort-select-wrapper">
               <label class="sort-label">🔡 Tartiba:</label>
               <select id="adminStudentSortSelect" onchange="sortAdminStudents(this.value)">
@@ -547,10 +597,8 @@
             </div>
           </div>
 
-          <!-- 3-Column / Responsive Modern Grid Matching Image 2 -->
           <div id="adminStudentsGridContainer" class="students-photo-grid"></div>
 
-          <!-- Pagination Bar Matching Image 2 -->
           <div class="pagination-bar-modern">
             <button type="button" class="page-arrow" onclick="changeStudentPage(-1)">‹</button>
             <div id="studentPaginationNumbers" class="page-numbers-wrap">
@@ -566,21 +614,15 @@
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
           </div>
 
-          <!-- Table Container with Horizontal Scroll -->
           <div class="results-matrix-table-wrap">
             <table class="results-matrix-table" id="adminResultsMatrixTable">
               <thead>
-                <tr id="adminResultsMatrixHeaderRow">
-                  <!-- Dynamically Rendered via JS with Real Exam Titles -->
-                </tr>
+                <tr id="adminResultsMatrixHeaderRow"></tr>
               </thead>
-              <tbody id="adminResultsMatrixBody">
-                <!-- Dynamically Rendered via JS -->
-              </tbody>
+              <tbody id="adminResultsMatrixBody"></tbody>
             </table>
           </div>
 
-          <!-- Bottom Summary Bar -->
           <div class="results-matrix-footer">
             <span data-i18n="matrix_footer_text1">📖 Hojii keessan milkaa'ina qaba!</span>
             <button type="button" class="btn-matrix-footer-action" onclick="showAdminHomeView()" data-i18n="btn_view">📑 Ilaalii</button>
@@ -669,19 +711,19 @@
             <button type="button" class="primary-btn-vivid" onclick="createExam()">➕ Qormaata Uumi</button>
           </div>
 
-          <!-- BULK PASTE QUESTIONS -->
+          <!-- UNIVERSAL FLEXIBLE BULK PASTE (Supports 2, 3, 4, 5 options) -->
           <div class="admin-panel-card" style="border-left: 5px solid #0284c7;">
             <h4 style="color:#0284c7; margin-bottom:8px;">📋 Gaaffilee Hedduu Bakka Tokkotti Paste Godhi (Bulk Paste)</h4>
             <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
-              Gaaffilee hedduu Word ykn bakka biraatii copy gootee asitti paste gochuun yeroo tokkotti galchuu dandeessa.
+              Gaaffilee hedduu Word ykn bakka biraatii copy gootee asitti paste gochuun yeroo tokkotti galchuu dandeessa. (Filannoowwan A, B, C qofa ykn A, B, C, D hunda ni simata).
             </p>
             <label>Qormaata Filadhu</label>
             <select id="bulkExamSelect"><option value="">Qormaata filadhu</option></select>
             
             <label>Gaaffilee asitti Paste godhi:</label>
-            <textarea id="bulkQuestionsInput" rows="8" placeholder="Fakkeenya bifa kanaan paste godhi:&#10;&#10;1. Magaala guddoon Oromiyaa kami?&#10;A. Adaamaa&#10;B. Finfinnee&#10;C. Jimma&#10;D. Dirree Dhawaa&#10;Answer: B&#10;&#10;2. Gaaffii lammaffaa...&#10;A. ...&#10;B. ...&#10;C. ...&#10;D. ...&#10;Answer: A"></textarea>
+            <textarea id="bulkQuestionsInput" rows="8" placeholder="Fakkeenya bifa kanaan paste godhi:&#10;&#10;1. Social Media jechuun maal jechuudha?&#10;A. Password nama hundaaf kennuu&#10;B. OTP nama biraatti himuu&#10;C. Two-step verification fayyadamu&#10;Answer: C&#10;&#10;2. Gaaffii lammaffaa...&#10;A. ...&#10;B. ...&#10;C. ...&#10;D. ...&#10;Answer: A"></textarea>
             
-            <button type="button" class="primary-btn-vivid" onclick="bulkInsertQuestions()" style="background:#0284c7;">
+            <button type="button" class="primary-btn-vivid" onclick="bulkInsertQuestionsUniversal()" style="background:#0284c7;">
               📥 Gaaffilee Hunda Galchi (Bulk Save)
             </button>
           </div>
@@ -839,7 +881,6 @@
        15. MULTILINGUAL DICTIONARY & COMPREHENSIVE SCRIPT
   ====================================================== -->
   <script>
-    // MULTILINGUAL DICTIONARY (OM, AM, EN)
     const i18nTranslations = {
       om: {
         app_title: "Akkaadaamii Oromiyaa",
@@ -874,7 +915,7 @@
         btn_continue: "Itti fufi →",
         btn_submit_exam: "Submit Qormaata",
         submit_exam_title: "Qormaata Submit",
-        submit_warning: "Gaaffii hunda xumurteettaa?",
+        submit_warning: "Gaaffii hunda xumurteettaa? Qormaata submit gochuu barbaaddaa?",
         btn_yes: "Eyyee",
         btn_no: "Hin xumirree",
         my_score: "🏆 Qabxii Koo",
@@ -1425,8 +1466,8 @@
 
               if (r) {
                 let scoreVal = Number(r.score ?? r.correct_answers ?? r.correct ?? r.result ?? 0);
-                let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? ex.question_limit ?? 10);
-                if (totalQ <= 0) totalQ = 10;
+                let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? ex.question_limit ?? 5);
+                if (totalQ <= 0) totalQ = 5;
 
                 let pct = (r.percentage !== undefined && r.percentage !== null) 
                   ? Number(r.percentage) 
@@ -1438,11 +1479,11 @@
                 examsTakenCount++;
                 wrongCount += Math.max(0, totalQ - scoreVal);
               } else {
-                examScores.push({ score: 0, total: ex.question_limit || 10, percent: 0, hasTaken: false });
+                examScores.push({ score: 0, total: ex.question_limit || 5, percent: 0, hasTaken: false });
               }
             });
           } else {
-            examScores.push({ score: 0, total: 10, percent: 0, hasTaken: false });
+            examScores.push({ score: 0, total: 5, percent: 0, hasTaken: false });
           }
 
           const overallPct = examsTakenCount > 0 
@@ -1641,13 +1682,11 @@
       const actEl = document.getElementById("profileActivationCode");
       const statusEl = document.getElementById("profileStatus");
 
-      // Extract Email from student object OR logged in session OR localStorage
       let realEmail = "";
       if (st && st.email) realEmail = st.email;
       if (!realEmail) realEmail = localStorage.getItem("ao_user_email") || "";
       if (!realEmail && st && st.google_email) realEmail = st.google_email;
 
-      // Extract Student ID with guaranteed fallback
       let realStudentId = "";
       if (st) {
         realStudentId = st.student_id || st.code || st.activation_code;
@@ -1664,7 +1703,6 @@
         realStudentId = savedId;
       }
 
-      // Extract Activation Code with fallback
       let realActCode = (st && (st.activation_code || st.code)) ? (st.activation_code || st.code) : "SXMY2KJ3";
 
       if (nameInput) nameInput.value = (st && st.name) ? st.name : (localStorage.getItem("ao_user_name") || "");
@@ -1706,50 +1744,292 @@
       }
     }
 
-    // Bulk Questions
-    async function bulkInsertQuestions() {
+    // =========================================================
+    // 3. 🎯 UNIVERSAL BULK INSERT & EXAM TAKER WITH EXACT SCORING
+    // =========================================================
+    
+    // Universal Bulk Parser for 2, 3, 4, or 5 options
+    async function bulkInsertQuestionsUniversal() {
       const examSelect = document.getElementById("bulkExamSelect");
       const examId = examSelect?.value;
       const text = document.getElementById("bulkQuestionsInput")?.value.trim();
       if (!examId) { alert("Mee dura qormaata gaaffilee kana itti dabaluu barbaaddu filadhaa!"); return; }
       if (!text) { alert("Gaaffilee paste gochuu qabdu!"); return; }
 
-      const blocks = text.split(/\n\s*\n+/);
+      // Split questions by question numbers e.g. "1.", "2)", "3-", etc. or double newlines
+      let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
+      if (rawBlocks.length <= 1) {
+        rawBlocks = text.split(/\n\s*\n+/);
+      }
+
       const parsedQuestions = [];
-      for (const block of blocks) {
+
+      for (const block of rawBlocks) {
         const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
-        if (lines.length < 5) continue;
-        let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, "");
-        let optA = "", optB = "", optC = "", optD = "", correct = "A";
-        lines.slice(1).forEach(line => {
-          if (/^A[\.\)\-]/i.test(line)) optA = line.replace(/^A[\.\)\-]/i, "");
-          else if (/^B[\.\)\-]/i.test(line)) optB = line.replace(/^B[\.\)\-]/i, "");
-          else if (/^C[\.\)\-]/i.test(line)) optC = line.replace(/^C[\.\)\-]/i, "");
-          else if (/^D[\.\)\-]/i.test(line)) optD = line.replace(/^D[\.\)\-]/i, "");
-          else if (/^(Ans|Answer|Deebii)[\s:\-]/i.test(line)) {
+        if (lines.length < 3) continue; // At least question + 2 options
+
+        let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, "").trim();
+        let optA = "", optB = "", optC = "", optD = "", correct = "";
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i];
+          if (/^A[\.\)\-\:\s]/i.test(line)) {
+            optA = line.replace(/^A[\.\)\-\:\s]+/i, "").trim();
+          } else if (/^B[\.\)\-\:\s]/i.test(line)) {
+            optB = line.replace(/^B[\.\)\-\:\s]+/i, "").trim();
+          } else if (/^C[\.\)\-\:\s]/i.test(line)) {
+            optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
+          } else if (/^D[\.\)\-\:\s]/i.test(line)) {
+            optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
+          } else if (/^(Ans|Answer|Deebii|Correct)[\s:\-]/i.test(line)) {
             const match = line.match(/[A-D]/i);
             if (match) correct = match[0].toUpperCase();
           }
-        });
-        if (questionText && optA && optB && optC && optD) {
+        }
+
+        // If no Answer line found, default to A or search in last line
+        if (!correct) {
+          const lastLine = lines[lines.length - 1];
+          const m = lastLine.match(/[A-D]/i);
+          correct = m ? m[0].toUpperCase() : "A";
+        }
+
+        // Only need questionText and at least optA and optB! (optC and optD optional)
+        if (questionText && optA && optB) {
           parsedQuestions.push({
-            exam_id: examId, question: questionText,
-            option_a: optA, option_b: optB, option_c: optC, option_d: optD,
-            correct_answer: correct, source_type: "bulk"
+            exam_id: examId,
+            question: questionText,
+            option_a: optA,
+            option_b: optB,
+            option_c: optC || "-",
+            option_d: optD || "-",
+            correct_answer: correct || "A",
+            source_type: "bulk"
           });
         }
       }
+
       if (!parsedQuestions.length) {
         alert("Gaaffii sirrii ta'e tokkollee argachuu hin dandeenye. Bifa fakkeenyaa irratti mul'atutti qindeessaa!");
         return;
       }
+
       try {
         const { error } = await db.from("questions").insert(parsedQuestions);
         if (error) throw error;
-        alert(`✅ Gaaffilee ${parsedQuestions.length} milkaa'inaan qormaata keessa galaniiru!`);
+        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi milkaa'inaan qormaata keessa galaniiru!`);
         document.getElementById("bulkQuestionsInput").value = "";
         if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
-      } catch (err) { alert("Dogoggora: " + err.message); }
+      } catch (err) {
+        alert("Dogoggora: " + err.message);
+      }
+    }
+
+    // Universal Exam Session State
+    let activeExamData = null;
+    let activeExamQuestionsList = [];
+    let activeQuestionIndex = 0;
+    let studentUserAnswers = {};
+    let activeExamTimerInterval = null;
+    let activeExamSecondsRemaining = 0;
+
+    // Start Exam with 100% Guaranteed Question Count & Options
+    window.startExam = async function(examId) {
+      studentUserAnswers = {};
+      activeQuestionIndex = 0;
+
+      try {
+        // Fetch Exam
+        const { data: examData } = await db.from("exams").select("*").eq("id", examId).single();
+        activeExamData = examData;
+
+        // Fetch All Questions for this exam
+        const { data: questions, error } = await db.from("questions").select("*").eq("exam_id", examId);
+        if (error || !questions || !questions.length) {
+          alert("Qormaanni kun gaaffilee hin qabu.");
+          return;
+        }
+
+        // Respect question limit if set, else take ALL
+        const limit = Number(activeExamData?.question_limit || 0);
+        if (limit > 0 && questions.length > limit) {
+          activeExamQuestionsList = questions.slice(0, limit);
+        } else {
+          activeExamQuestionsList = questions;
+        }
+
+        // Setup Timer
+        const durationMin = Number(activeExamData?.duration || 30);
+        activeExamSecondsRemaining = durationMin * 60;
+        clearInterval(activeExamTimerInterval);
+        activeExamTimerInterval = setInterval(updateExamLiveTimer, 1000);
+
+        // Show Exam Page
+        navTo("examPage");
+        renderCurrentExamQuestion();
+
+      } catch (err) {
+        console.error(err);
+        alert("Qormaata jalqabuu irratti dogoggorri uumame.");
+      }
+    };
+
+    function updateExamLiveTimer() {
+      if (activeExamSecondsRemaining <= 0) {
+        clearInterval(activeExamTimerInterval);
+        alert("⏱️ Yeroon dhumateera! Qormaanni keessan submit ta'a.");
+        submitActiveExamNow();
+        return;
+      }
+      activeExamSecondsRemaining--;
+      const mins = Math.floor(activeExamSecondsRemaining / 60);
+      const secs = activeExamSecondsRemaining % 60;
+      const timerEl = document.getElementById("examTimerValue");
+      if (timerEl) {
+        timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+    }
+
+    function renderCurrentExamQuestion() {
+      if (!activeExamQuestionsList.length) return;
+      const q = activeExamQuestionsList[activeQuestionIndex];
+      const totalQ = activeExamQuestionsList.length;
+
+      const titleEl = document.getElementById("examTitle");
+      const numEl = document.getElementById("questionNumber");
+      const textEl = document.getElementById("questionText");
+      const container = document.getElementById("answersContainer");
+      const nextBtn = document.getElementById("nextQuestionButton");
+      const prevBtn = document.getElementById("prevQuestionButton");
+      const submitBtn = document.getElementById("submitExamButton");
+
+      if (titleEl) titleEl.textContent = activeExamData?.title || "Qormaata";
+      if (numEl) numEl.textContent = `${activeQuestionIndex + 1}/${totalQ}`;
+      if (textEl) textEl.textContent = q.question;
+
+      // Available options array (skip '-' or empty)
+      const options = [];
+      if (q.option_a && q.option_a !== "-") options.push({ key: "A", text: q.option_a });
+      if (q.option_b && q.option_b !== "-") options.push({ key: "B", text: q.option_b });
+      if (q.option_c && q.option_c !== "-") options.push({ key: "C", text: q.option_c });
+      if (q.option_d && q.option_d !== "-") options.push({ key: "D", text: q.option_d });
+
+      const currentSelectedKey = studentUserAnswers[activeQuestionIndex];
+
+      if (container) {
+        container.innerHTML = options.map(opt => {
+          const isSelected = currentSelectedKey === opt.key;
+          return `
+            <div class="exam-option-item ${isSelected ? 'selected' : ''}" onclick="selectExamOption('${opt.key}')">
+              <div class="exam-option-radio"></div>
+              <div class="exam-option-text">
+                <strong>${opt.key}.</strong> ${escapeHtml(opt.text)}
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      if (prevBtn) prevBtn.style.display = activeQuestionIndex > 0 ? "inline-block" : "none";
+      if (activeQuestionIndex === totalQ - 1) {
+        if (nextBtn) nextBtn.style.display = "none";
+        if (submitBtn) submitBtn.style.display = "inline-block";
+      } else {
+        if (nextBtn) nextBtn.style.display = "inline-block";
+        if (submitBtn) submitBtn.style.display = "none";
+      }
+    }
+
+    function selectExamOption(key) {
+      studentUserAnswers[activeQuestionIndex] = key.toUpperCase().trim();
+      renderCurrentExamQuestion();
+    }
+
+    function nextQuestionExam() {
+      if (activeQuestionIndex < activeExamQuestionsList.length - 1) {
+        activeQuestionIndex++;
+        renderCurrentExamQuestion();
+      }
+    }
+
+    function prevQuestionExam() {
+      if (activeQuestionIndex > 0) {
+        activeQuestionIndex--;
+        renderCurrentExamQuestion();
+      }
+    }
+
+    function requestSubmitExam() {
+      navTo("submitConfirmPage");
+    }
+
+    function confirmSubmitExam(isYes) {
+      if (isYes) {
+        submitActiveExamNow();
+      } else {
+        navTo("examPage");
+      }
+    }
+
+    // 100% ACCURATE SCORE EVALUATION & DATABASE STORAGE
+    async function submitActiveExamNow() {
+      clearInterval(activeExamTimerInterval);
+      const totalQ = activeExamQuestionsList.length;
+      let correctCount = 0;
+
+      activeExamQuestionsList.forEach((q, idx) => {
+        const studentAns = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
+        
+        // Extract correct letter cleanly from "A", "Answer: A", "A. Text", etc.
+        let rawCorrect = (q.correct_answer || q.answer || "A").toString().trim().toUpperCase();
+        const match = rawCorrect.match(/[A-D]/);
+        const expectedLetter = match ? match[0] : "A";
+
+        if (studentAns === expectedLetter) {
+          correctCount++;
+        }
+      });
+
+      const percentage = totalQ > 0 ? Math.round((correctCount / totalQ) * 100) : 0;
+
+      // Prepare student identity
+      let s = (typeof currentStudent !== "undefined" && currentStudent) ? currentStudent : null;
+      if (!s) {
+        try { s = JSON.parse(localStorage.getItem("ao_current_student")); } catch(e){}
+      }
+      const sId = s?.id || ("guest_" + Date.now());
+      const sName = s?.name || localStorage.getItem("ao_user_name") || "Barataa";
+      const sEmail = s?.email || localStorage.getItem("ao_user_email") || "";
+
+      const resultRecord = {
+        student_id: sId,
+        student_name: sName,
+        student_email: sEmail,
+        exam_id: activeExamData?.id || "exam",
+        exam_title: activeExamData?.title || "Qormaata",
+        score: correctCount,
+        total_questions: totalQ,
+        percentage: percentage,
+        created_at: new Date().toISOString()
+      };
+
+      // Save to Supabase (all known tables for resilience)
+      try {
+        await db.from("exam_results").insert([resultRecord]);
+      } catch(e) {
+        try { await db.from("results").insert([resultRecord]); } catch(e2){}
+      }
+
+      // Save to LocalStorage
+      try {
+        const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
+        localList.push(resultRecord);
+        localStorage.setItem("ao_exam_results", JSON.stringify(localList));
+      } catch(e){}
+
+      // Alert & Route to Score Page
+      alert(`🎉 Qormaanni xumurameera!\n\nQabxii: ${correctCount}/${totalQ}\nDhibbeentaa: ${percentage}%`);
+      navTo("scorePage");
     }
 
     function navTo(pageId) {
