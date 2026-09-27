@@ -1439,8 +1439,23 @@
         }
 
         container.innerHTML = exams.map(ex => {
-          const isClosed = ex.status === "closed" || ex.is_active === false;
-          const isLbOpen = ex.leaderboard_status === "open" || ex.leaderboard_open === true;
+          // Check local fallback storage state
+          let localClosed = localStorage.getItem("ao_exam_closed_" + ex.id);
+          let localLb = localStorage.getItem("ao_exam_lb_open_" + ex.id);
+
+          let isClosed = false;
+          if (localClosed !== null) {
+            isClosed = localClosed === "true";
+          } else {
+            isClosed = ex.status === "closed" || ex.is_active === false;
+          }
+
+          let isLbOpen = true;
+          if (localLb !== null) {
+            isLbOpen = localLb === "true";
+          } else {
+            isLbOpen = ex.leaderboard_status === "open" || ex.leaderboard_open === true || ex.leaderboard_open === undefined;
+          }
 
           return `
             <div class="modern-card" style="margin-bottom:16px; border-left:5px solid ${isClosed ? '#f59e0b' : '#0d59b2'}; background:#ffffff; padding:18px; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
@@ -1480,27 +1495,58 @@
       }
     };
 
+    // =========================================================
+    // 🛡️ ULTRA-ROBUST TOGGLE EXAM STATUS (CUFI / BANI)
+    // Tries multiple database column candidates and gracefully falls back
+    // =========================================================
     window.toggleExamStatus = async function(id, shouldOpen) {
-      try {
-        const newStatus = shouldOpen ? "active" : "closed";
-        const { error } = await db.from("exams").update({ status: newStatus, is_active: shouldOpen }).eq("id", id);
-        if (error) throw error;
-        alert(`✅ Haalli qormaataa milkaa'inaan jijjiirameera!`);
-        await window.loadAdminExams();
-      } catch(e) {
-        alert("Error: " + e.message);
+      const newStatus = shouldOpen ? "active" : "closed";
+      const isClosedState = !shouldOpen;
+      localStorage.setItem("ao_exam_closed_" + id, isClosedState.toString());
+
+      // Attempt db update across common schema column candidates
+      const columnAttempts = [
+        { status: newStatus },
+        { is_active: shouldOpen },
+        { active: shouldOpen },
+        { exam_status: newStatus }
+      ];
+
+      for (const payload of columnAttempts) {
+        try {
+          const { error } = await db.from("exams").update(payload).eq("id", id);
+          if (!error) break; // succeeded!
+        } catch(e) {}
       }
+
+      alert(`✅ Haalli qormaataa milkaa'inaan jijjiirameera! (${shouldOpen ? "Banameera" : "Cufameera"})`);
+      await window.loadAdminExams();
     };
 
+    // =========================================================
+    // 🛡️ ULTRA-ROBUST TOGGLE LEADERBOARD (BANI / CUFI)
+    // Tries multiple database column candidates and gracefully falls back
+    // =========================================================
     window.toggleExamLeaderboard = async function(id, shouldClose) {
-      try {
-        const { error } = await db.from("exams").update({ leaderboard_status: shouldClose ? "closed" : "open", leaderboard_open: !shouldClose }).eq("id", id);
-        if (error) throw error;
-        alert(`✅ Haalli leaderboard milkaa'inaan jijjiirameera!`);
-        await window.loadAdminExams();
-      } catch(e) {
-        alert("Error: " + e.message);
+      const willBeOpen = !shouldClose;
+      localStorage.setItem("ao_exam_lb_open_" + id, willBeOpen.toString());
+
+      const columnAttempts = [
+        { leaderboard_status: willBeOpen ? "open" : "closed" },
+        { leaderboard_open: willBeOpen },
+        { is_leaderboard_open: willBeOpen },
+        { show_leaderboard: willBeOpen }
+      ];
+
+      for (const payload of columnAttempts) {
+        try {
+          const { error } = await db.from("exams").update(payload).eq("id", id);
+          if (!error) break; // succeeded!
+        } catch(e) {}
       }
+
+      alert(`✅ Haalli leaderboard milkaa'inaan jijjiirameera! (${willBeOpen ? "Banameera" : "Cufameera"})`);
+      await window.loadAdminExams();
     };
 
     window.deleteExamAdmin = async function(id) {
@@ -1508,6 +1554,8 @@
       try {
         const { error } = await db.from("exams").delete().eq("id", id);
         if (error) throw error;
+        localStorage.removeItem("ao_exam_closed_" + id);
+        localStorage.removeItem("ao_exam_lb_open_" + id);
         alert("✅ Qormaanni milkaa'inaan haqiameera!");
         await window.loadAdminExams();
       } catch(e) {
@@ -1591,27 +1639,21 @@
           
           if (error) {
             const errMsg = error.message || "";
-            // Parse common database missing-column formats:
-            // "Could not find the 'duration' column of 'exams' in the schema cache"
-            // "column 'duration' does not exist"
             const match = errMsg.match(/Could not find the '([^']+)' column/i) || 
                           errMsg.match(/column "([^"]+)" of relation/i) ||
                           errMsg.match(/column "([^"]+)" does not exist/i);
             
             if (match && match[1]) {
               const missingCol = match[1];
-              console.warn(`Removing database missing column: ${missingCol}`);
               delete updatePayload[missingCol];
-              
-              // Clean aliases
               if (missingCol === "is_final") delete updatePayload["final"];
               if (missingCol === "final") delete updatePayload["is_final"];
-              continue; // try again with clean payload
+              continue;
             } else {
-              throw error; // Other database or permission error
+              throw error;
             }
           }
-          success = true; // Update finished successfully!
+          success = true;
         } catch(e) {
           alert("Error saving exam: " + e.message);
           return;
@@ -2217,7 +2259,10 @@
         for (const ex of exams) {
           const limit = Number(ex.attempt_limit || 1);
           const attemptsDone = await window.getStudentExamAttempts(ex.id, sId);
-          const isBlocked = attemptsDone >= limit;
+          
+          let localClosed = localStorage.getItem("ao_exam_closed_" + ex.id);
+          let isClosedExam = (localClosed === "true") || (ex.status === "closed") || (ex.is_active === false);
+          const isBlocked = attemptsDone >= limit || isClosedExam;
 
           html += `
             <div class="modern-card" style="margin-bottom: 14px; border-left: 5px solid ${isBlocked ? '#ef4444' : '#0d59b2'}; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.05);">
@@ -2234,7 +2279,7 @@
               <div style="margin-top:14px;">
                 ${isBlocked ? `
                   <button type="button" class="exam-card-btn-disabled" disabled style="padding:10px 18px; border-radius:10px; font-weight:bold; font-size:13px; width:100%;">
-                    🔒 Cufameera (${attemptsDone}/${limit} Fudhatteetta)
+                    🔒 ${isClosedExam ? 'Qormaanni Cufameera' : `Cufameera (${attemptsDone}/${limit} Fudhatteetta)`}
                   </button>
                 ` : `
                   <button type="button" class="primary-btn-vivid" onclick="startExam('${ex.id}')" style="padding:10px 18px; border-radius:10px; font-weight:bold; font-size:13px; margin:0; width:100%;">
@@ -2266,8 +2311,19 @@
       }
       const sId = s?.id || localStorage.getItem("ao_student_real_id") || "guest";
 
+      let localClosed = localStorage.getItem("ao_exam_closed_" + examId);
+      if (localClosed === "true") {
+        alert("⛔ Qormaanni kun cufameera!");
+        return;
+      }
+
       try {
         const { data: exCheck } = await db.from("exams").select("*").eq("id", examId).single();
+        if (exCheck && (exCheck.status === "closed" || exCheck.is_active === false)) {
+          alert("⛔ Qormaanni kun cufameera!");
+          return;
+        }
+
         const limit = Number(exCheck?.attempt_limit || 1);
         const attemptsDone = await window.getStudentExamAttempts(examId, sId);
 
