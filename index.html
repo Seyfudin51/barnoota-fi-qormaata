@@ -528,7 +528,7 @@
               <input type="text" id="adminStudentSearchInput" placeholder="Maqaa barataa barbaadi..." oninput="filterAdminStudents(this.value)">
             </div>
 
-            <!-- Sorting Dropdown: A-Z, Z-A, Haaraa (Date) -->
+            <!-- Sorting Dropdown -->
             <div class="sort-select-wrapper">
               <label class="sort-label">🔡 Tartiba:</label>
               <select id="adminStudentSortSelect" onchange="sortAdminStudents(this.value)">
@@ -553,7 +553,7 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL (DYNAMIC REAL EXAMS + AUTO RANK 1, 2, 3 BY REAL AVERAGE) -->
+        <!-- 📊 2. QABXII PANEL (ULTRA-RESILIENT REAL-TIME DATA MATCHING MATRIX) -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -1210,7 +1210,6 @@
         const { data, error } = await db.from("students").select("*");
         if (error) throw error;
         allAdminStudentsData = data || [];
-        // Default sort A-Z
         sortAdminStudents(document.getElementById("adminStudentSortSelect")?.value || "name_asc");
       } catch (err) {
         if (typeof loadAdminStudents === "function") await loadAdminStudents();
@@ -1313,7 +1312,7 @@
     }
 
     // =========================================================
-    // 2. DYNAMIC REAL EXAM MATRIX TABLE & REAL RANKING (1, 2, 3...)
+    // 2. 📊 ULTRA-RESILIENT DYNAMIC EXAM MATRIX DATA-FLOW MATCHING
     // =========================================================
     async function loadAdminResultsImage1Matrix() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
@@ -1321,18 +1320,18 @@
       if (!headerRow || !tbody) return;
 
       try {
-        // Fetch Real Students, Real Exams from Admin, and Real Results
+        // Fetch students, exams, and exam results with resilient outer tables
         const [studentsRes, examsRes, resultsRes] = await Promise.all([
           db.from("students").select("*"),
           db.from("exams").select("*").order("created_at", { ascending: true }),
-          db.from("exam_results").select("*").order("created_at", { ascending: false })
+          db.from("exam_results").select("*, students(*), exams(*)").order("created_at", { ascending: false })
         ]);
 
         const students = studentsRes.data || [];
         const realExams = examsRes.data || [];
         const results = resultsRes.data || [];
 
-        // BUILD DYNAMIC HEADER MATCHING REAL EXAMS CREATED BY ADMIN
+        // Build Dynamic Headers reflecting real exams created by admin
         let dynamicHeaderHtml = `
           <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
           <th><span class="th-icon">👤</span> Maqaa Barataa</th>
@@ -1340,7 +1339,7 @@
         `;
 
         if (realExams.length > 0) {
-          realExams.forEach((ex, i) => {
+          realExams.forEach((ex) => {
             dynamicHeaderHtml += `
               <th title="${escapeHtml(ex.title)}">
                 <span class="th-icon">📄</span>
@@ -1368,14 +1367,7 @@
           return;
         }
 
-        // Map Results per student & exam
-        const resultMap = {};
-        results.forEach(r => {
-          if (!resultMap[r.student_id]) resultMap[r.student_id] = {};
-          resultMap[r.student_id][r.exam_id] = r;
-        });
-
-        // Compute real stats per student
+        // Map results with ultra-resilient matching against ID, UUID, Title, and code nested layers
         const studentRowsData = students.map((s) => {
           let totalEarnedScore = 0;
           let totalQuestionsSum = 0;
@@ -1384,52 +1376,71 @@
           const examScores = [];
 
           realExams.forEach((ex) => {
-            const r = resultMap[s.id] && resultMap[s.id][ex.id];
+            // High durability match algorithm - prevents score disappearance!
+            const r = results.find(res => {
+              // Match Student ID / UUID or Code inside nesting
+              const sMatch = (res.student_id && (res.student_id === s.id || res.student_id === s.student_id || res.student_id === s.code)) ||
+                             (res.students && (res.students.id === s.id || res.students.student_id === s.student_id || res.students.code === s.code));
+
+              // Match Exam ID or Title inside nesting
+              const eMatch = (res.exam_id && res.exam_id === ex.id) ||
+                             (res.exams && res.exams.id === ex.id) ||
+                             (res.exam_title && ex.title && res.exam_title.trim().toLowerCase() === ex.title.trim().toLowerCase()) ||
+                             (res.exams && res.exams.title && ex.title && res.exams.title.trim().toLowerCase() === ex.title.trim().toLowerCase());
+
+              return sMatch && eMatch;
+            });
+
             if (r) {
-              const sc = r.score !== undefined ? r.score : 0;
-              const tq = r.total_questions || 10;
-              const pct = Math.round((sc / tq) * 100) || r.percentage || 0;
-              examScores.push({ score: sc, total: tq, percent: pct });
-              totalEarnedScore += sc;
-              totalQuestionsSum += tq;
+              let scoreVal = 0;
+              if (r.score !== undefined && r.score !== null) scoreVal = Number(r.score);
+              else if (r.correct_answers !== undefined && r.correct_answers !== null) scoreVal = Number(r.correct_answers);
+
+              let totalQ = 10;
+              if (r.total_questions !== undefined && r.total_questions !== null && Number(r.total_questions) > 0) totalQ = Number(r.total_questions);
+              else if (ex.question_limit !== undefined && ex.question_limit !== null && Number(ex.question_limit) > 0) totalQ = Number(ex.question_limit);
+
+              let pct = 0;
+              if (r.percentage !== undefined && r.percentage !== null) pct = Number(r.percentage);
+              else pct = Math.round((scoreVal / totalQ) * 100) || 0;
+
+              examScores.push({ score: scoreVal, total: totalQ, percent: pct });
+              totalEarnedScore += scoreVal;
+              totalQuestionsSum += totalQ;
               examsTakenCount++;
-              wrongCount += Math.max(0, tq - sc);
+              wrongCount += Math.max(0, totalQ - scoreVal);
             } else {
               examScores.push(null);
             }
           });
 
           const overallPct = examsTakenCount > 0 
-            ? Math.round((totalEarnedScore / totalQuestionsSum) * 100) 
+            ? Math.round((totalEarnedScore / (totalQuestionsSum || 1)) * 100) 
             : 0;
-          const avgScoreVal = examsTakenCount > 0 
-            ? (overallPct).toFixed(1) 
-            : "0.0";
 
           return {
             student: s,
             examScores,
             totalEarnedScore,
-            totalQuestionsSum: totalQuestionsSum || 50,
+            totalQuestionsSum: totalQuestionsSum || (examsTakenCount * 10 || 10),
             examsTakenCount,
             wrongCount,
             overallPct,
-            avgScoreVal: parseFloat(avgScoreVal)
+            avgScoreVal: overallPct
           };
         });
 
-        // AUTOMATIC SORTING BY REAL HIGHEST AVERAGE GRADE -> RANK 1, 2, 3...
-        studentRowsData.sort((a, b) => b.avgScoreVal - a.avgScoreVal || b.totalEarnedScore - a.totalEarnedScore);
+        // AUTOMATIC RANKING SORTING (1, 2, 3...) BY ACTUAL HIGHEST GRADE
+        studentRowsData.sort((a, b) => b.avgScoreVal - a.avgScoreVal);
 
-        // Render sorted rows with rank 1, 2, 3...
+        // Render sorted rows with dynamic rankings
         tbody.innerHTML = studentRowsData.map((row, index) => {
-          const rankNum = index + 1; // Real Rank based on actual score!
+          const rankNum = index + 1;
           const s = row.student;
           const avIdx = rankNum % avatarListColors.length;
           const av = avatarListColors[avIdx];
           const studentId = s.student_id || s.id?.substring(0,8) || "STU" + String(rankNum).padStart(3, "0");
 
-          // Determine status text & badge based on language
           const t = i18nTranslations[currentAppLang] || i18nTranslations.om;
           let badgeClass = "badge-xumurameera";
           let badgeText = t.badge_xumurameera;
@@ -1450,10 +1461,10 @@
 
           return `
             <tr>
-              <!-- 1. Real Rank # Number -->
+              <!-- Real Rank Bubble -->
               <td class="td-num"><strong>${rankNum}</strong></td>
 
-              <!-- 2. Student Name with Avatar -->
+              <!-- Student Profile -->
               <td class="td-student-name">
                 <div class="name-with-avatar">
                   <div class="mini-avatar" style="background: ${av.bg};">
@@ -1463,10 +1474,10 @@
                 </div>
               </td>
 
-              <!-- 3. Student ID -->
+              <!-- ID -->
               <td class="td-id"><code>${escapeHtml(studentId)}</code></td>
 
-              <!-- Dynamic Real Exam Columns with Actual Data -->
+              <!-- Dynamic Real Exams with Actual Score Values -->
               ${row.examScores.map(sc => {
                 if (!sc) {
                   return `<td><div class="score-card-matrix score-empty">-</div></td>`;
@@ -1475,17 +1486,17 @@
                 let cClass = "score-card-green";
                 if (p < 75) cClass = "score-card-yellow";
                 if (p < 60) cClass = "score-card-pink";
-                return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${p}</div></td>`;
+                return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${p}%</div></td>`;
               }).join("")}
 
               ${realExams.length === 0 ? `<td><div class="score-card-matrix score-empty">-</div></td>` : ''}
 
-              <!-- Total % Bubble -->
+              <!-- Overall Percent -->
               <td>
                 <span class="pct-circle-badge ${pctBadgeColor}">${row.overallPct}%</span>
               </td>
 
-              <!-- Fraction Progress Bar e.g. 50/75 -->
+              <!-- Score ratio progress bar -->
               <td class="td-fraction">
                 <div class="score-fraction-wrap">
                   <span class="frac-text">${row.totalEarnedScore}/${row.totalQuestionsSum}</span>
@@ -1493,18 +1504,18 @@
                 </div>
               </td>
 
-              <!-- Real Average -->
+              <!-- Average grade -->
               <td class="td-avg"><strong>${row.avgScoreVal.toFixed(1)}</strong></td>
 
-              <!-- Status Rank Badge -->
+              <!-- Status Rank -->
               <td>
                 <span class="matrix-status-badge ${badgeClass}">${badgeText}</span>
               </td>
 
-              <!-- Wrong Count -->
+              <!-- Inaccurate/Wrong Count -->
               <td class="td-wrong-count">${row.examsTakenCount > 0 ? row.wrongCount : '-'}</td>
 
-              <!-- Action Detail Button -->
+              <!-- Deep Supervision action -->
               <td>
                 <button type="button" class="btn-matrix-action" onclick="viewStudentFullDetails('${s.id}')">
                   ${t.btn_view || 'Ilalii'}
