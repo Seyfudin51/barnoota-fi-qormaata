@@ -553,7 +553,7 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL (ALWAYS DYNAMIC & ALWAYS POPULATED SCORE MATRIX) -->
+        <!-- 📊 2. QABXII PANEL (PURE REAL DATA MATCHING MATRIX + DYNAMIC RANKING 1, 2, 3...) -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -1308,19 +1308,8 @@
       renderAdminStudentsGrid(filtered);
     }
 
-    // Helper: Deterministic Hash for baseline realistic scores if student hasn't taken a particular exam yet
-    function getDeterministicScoreForStudent(studentId, examIndex) {
-      let hash = 0;
-      const str = (studentId || "student") + "_" + examIndex;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const score = Math.abs(hash % 36) + 60; // Returns realistic scores between 60% and 95%
-      return Math.min(100, Math.max(55, score));
-    }
-
     // =========================================================
-    // 2. 📊 ULTRA-RESILIENT MATRIX (REAL SCORES + ZERO EMPTY HYPHENS)
+    // 2. 📊 PURE REAL DATA MATRIX + DYNAMIC RANKING (#1, #2, #3...)
     // =========================================================
     async function loadAdminResultsImage1Matrix() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
@@ -1328,7 +1317,7 @@
       if (!headerRow || !tbody) return;
 
       try {
-        // Fetch students, exams, and exam results with simple queries
+        // 1. Fetch REAL students, REAL exams, and REAL exam_results from DB
         const [studentsRes, examsRes, resultsRes] = await Promise.all([
           db.from("students").select("*"),
           db.from("exams").select("*").order("created_at", { ascending: true }),
@@ -1339,7 +1328,7 @@
         const realExams = examsRes.data || [];
         const dbResults = resultsRes.data || [];
 
-        // Also fetch any local cache or student exam history
+        // Fetch any local storage exam results
         let localResults = [];
         try {
           localResults = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
@@ -1347,7 +1336,7 @@
 
         const allResults = [...dbResults, ...localResults];
 
-        // Build Headers matching real exam titles created by admin
+        // Build Dynamic Headers for Matrix Table based on Real Admin Exams
         let dynamicHeaderHtml = `
           <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
           <th><span class="th-icon">👤</span> Maqaa Barataa</th>
@@ -1364,12 +1353,7 @@
             `;
           });
         } else {
-          // Default 3 standard exam columns if no exams created yet
-          dynamicHeaderHtml += `
-            <th><span class="th-icon">📄</span> Qormaata 1</th>
-            <th><span class="th-icon">📄</span> Qormaata 2</th>
-            <th><span class="th-icon">📄</span> Qormaata 3</th>
-          `;
+          dynamicHeaderHtml += `<th><span class="th-icon">📄</span> Qormaata (Hin uumamne)</th>`;
         }
 
         dynamicHeaderHtml += `
@@ -1384,11 +1368,11 @@
         headerRow.innerHTML = dynamicHeaderHtml;
 
         if (!students.length) {
-          tbody.innerHTML = `<tr><td colspan="${(realExams.length || 3) + 9}" class="empty-state">Barattoonni hin jiran.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="${(realExams.length || 1) + 9}" class="empty-state">Barattoonni galmaa'an hin jiran.</td></tr>`;
           return;
         }
 
-        // Map scores for each student across all exams
+        // Map Pure Real Data per Student & Exam
         const studentRowsData = students.map((s) => {
           let totalEarnedScore = 0;
           let totalQuestionsSum = 0;
@@ -1396,90 +1380,94 @@
           let wrongCount = 0;
           const examScores = [];
 
-          const activeExamsList = realExams.length > 0 ? realExams : [{ id: "ex1", title: "Qormaata 1" }, { id: "ex2", title: "Qormaata 2" }, { id: "ex3", title: "Qormaata 3" }];
+          if (realExams.length > 0) {
+            realExams.forEach((ex) => {
+              // Exact resilient match against student ID/code/name and exam ID/title
+              const r = allResults.find(res => {
+                const matchStudent = 
+                  (res.student_id && (res.student_id === s.id || res.student_id === s.student_id || res.student_id === s.code)) ||
+                  (res.user_id && (res.user_id === s.id || res.user_id === s.student_id)) ||
+                  (res.student_name && s.name && res.student_name.trim().toLowerCase() === s.name.trim().toLowerCase());
 
-          activeExamsList.forEach((ex, examIdx) => {
-            // Find matched result entry for student 's' and exam 'ex'
-            const r = allResults.find(res => {
-              const sMatch = (res.student_id && (res.student_id === s.id || res.student_id === s.student_id || res.student_id === s.code)) ||
-                             (res.user_id && res.user_id === s.id) ||
-                             (res.student_name && s.name && res.student_name.trim().toLowerCase() === s.name.trim().toLowerCase());
+                const matchExam = 
+                  (res.exam_id && res.exam_id === ex.id) ||
+                  (res.exam_title && ex.title && res.exam_title.trim().toLowerCase() === ex.title.trim().toLowerCase());
 
-              const eMatch = (res.exam_id && res.exam_id === ex.id) ||
-                             (res.exam_title && ex.title && res.exam_title.trim().toLowerCase() === ex.title.trim().toLowerCase());
+                return matchStudent && matchExam;
+              });
 
-              return sMatch && eMatch;
+              if (r) {
+                let scoreVal = Number(r.score ?? r.correct_answers ?? 0);
+                let totalQ = Number(r.total_questions ?? ex.question_limit ?? 10);
+                if (totalQ <= 0) totalQ = 10;
+
+                let pct = r.percentage !== undefined && r.percentage !== null 
+                  ? Number(r.percentage) 
+                  : Math.round((scoreVal / totalQ) * 100);
+
+                examScores.push({ score: scoreVal, total: totalQ, percent: pct, hasTaken: true });
+                totalEarnedScore += scoreVal;
+                totalQuestionsSum += totalQ;
+                examsTakenCount++;
+                wrongCount += Math.max(0, totalQ - scoreVal);
+              } else {
+                // Pure Real Data: If student hasn't taken exam, display hyphen (-)
+                examScores.push({ score: 0, total: ex.question_limit || 10, percent: 0, hasTaken: false });
+              }
             });
+          }
 
-            if (r) {
-              let scoreVal = 0;
-              if (r.score !== undefined && r.score !== null) scoreVal = Number(r.score);
-              else if (r.correct_answers !== undefined && r.correct_answers !== null) scoreVal = Number(r.correct_answers);
+          // Real Overall Percent and Average
+          const overallPct = examsTakenCount > 0 
+            ? Math.round((totalEarnedScore / totalQuestionsSum) * 100) 
+            : 0;
 
-              let totalQ = 10;
-              if (r.total_questions !== undefined && r.total_questions !== null && Number(r.total_questions) > 0) totalQ = Number(r.total_questions);
-              else if (ex.question_limit !== undefined && ex.question_limit !== null && Number(ex.question_limit) > 0) totalQ = Number(ex.question_limit);
-
-              let pct = 0;
-              if (r.percentage !== undefined && r.percentage !== null) pct = Number(r.percentage);
-              else pct = Math.round((scoreVal / totalQ) * 100) || 0;
-
-              examScores.push({ score: scoreVal, total: totalQ, percent: pct, isReal: true });
-              totalEarnedScore += scoreVal;
-              totalQuestionsSum += totalQ;
-              examsTakenCount++;
-              wrongCount += Math.max(0, totalQ - scoreVal);
-            } else {
-              // Populate realistic baseline percentage so table NEVER shows blank hyphens (-)
-              const pct = getDeterministicScoreForStudent(s.id || s.student_id || s.name, examIdx);
-              const totalQ = ex.question_limit || 15;
-              const scoreVal = Math.round((pct / 100) * totalQ);
-
-              examScores.push({ score: scoreVal, total: totalQ, percent: pct, isReal: false });
-              totalEarnedScore += scoreVal;
-              totalQuestionsSum += totalQ;
-              examsTakenCount++;
-              wrongCount += Math.max(0, totalQ - scoreVal);
-            }
-          });
-
-          const overallPct = Math.round((totalEarnedScore / (totalQuestionsSum || 1)) * 100);
+          const avgScoreVal = examsTakenCount > 0 
+            ? (totalEarnedScore / examsTakenCount) 
+            : 0;
 
           return {
             student: s,
             examScores,
             totalEarnedScore,
-            totalQuestionsSum: totalQuestionsSum || 75,
+            totalQuestionsSum,
             examsTakenCount,
             wrongCount,
             overallPct,
-            avgScoreVal: overallPct
+            avgScoreVal
           };
         });
 
-        // AUTOMATIC RANKING SORTING (1, 2, 3...) BY ACTUAL HIGHEST GRADE
-        studentRowsData.sort((a, b) => b.avgScoreVal - a.avgScoreVal);
+        // REAL AUTOMATIC RANKING SORTING (1, 2, 3...)
+        // Students with highest real average / overall percentage ranked first!
+        studentRowsData.sort((a, b) => {
+          if (b.overallPct !== a.overallPct) return b.overallPct - a.overallPct;
+          return b.totalEarnedScore - a.totalEarnedScore;
+        });
 
-        // Render sorted rows with dynamic rankings
+        // Render sorted rows with Rank 1, 2, 3...
         tbody.innerHTML = studentRowsData.map((row, index) => {
-          const rankNum = index + 1;
+          const rankNum = index + 1; // Real Rank 1, 2, 3...
           const s = row.student;
           const avIdx = rankNum % avatarListColors.length;
           const av = avatarListColors[avIdx];
           const studentId = s.student_id || s.id?.substring(0,8) || "STU" + String(rankNum).padStart(3, "0");
 
           const t = i18nTranslations[currentAppLang] || i18nTranslations.om;
+          
           let badgeClass = "badge-xumurameera";
           let badgeText = t.badge_xumurameera;
-          if (row.overallPct >= 80) {
-            badgeClass = "badge-olaanaa";
-            badgeText = t.badge_olaanaa;
-          } else if (row.overallPct >= 65) {
-            badgeClass = "badge-gaarii";
-            badgeText = t.badge_gaarii;
-          } else if (row.overallPct >= 50) {
-            badgeClass = "badge-jijjiiraa";
-            badgeText = t.badge_jijjiiraa;
+          if (row.examsTakenCount > 0) {
+            if (row.overallPct >= 80) {
+              badgeClass = "badge-olaanaa";
+              badgeText = t.badge_olaanaa;
+            } else if (row.overallPct >= 65) {
+              badgeClass = "badge-gaarii";
+              badgeText = t.badge_gaarii;
+            } else if (row.overallPct >= 50) {
+              badgeClass = "badge-jijjiiraa";
+              badgeText = t.badge_jijjiiraa;
+            }
           }
 
           let pctBadgeColor = "pct-green";
@@ -1488,10 +1476,10 @@
 
           return `
             <tr>
-              <!-- Real Rank Bubble -->
+              <!-- 1. REAL RANK 1, 2, 3... BASED ON HIGHEST REAL AVERAGE -->
               <td class="td-num"><strong>${rankNum}</strong></td>
 
-              <!-- Student Profile -->
+              <!-- 2. Student Profile -->
               <td class="td-student-name">
                 <div class="name-with-avatar">
                   <div class="mini-avatar" style="background: ${av.bg};">
@@ -1501,43 +1489,48 @@
                 </div>
               </td>
 
-              <!-- ID -->
+              <!-- 3. Student ID -->
               <td class="td-id"><code>${escapeHtml(studentId)}</code></td>
 
-              <!-- Dynamic Exam Cards - Guutummaatti Qabxiin Isaanii Mul'ata -->
+              <!-- 4. REAL EXAM SCORES (e.g. 3/5 or 87% or -) -->
               ${row.examScores.map(sc => {
-                const p = sc.percent;
+                if (!sc.hasTaken) {
+                  return `<td><div class="score-card-matrix score-empty">-</div></td>`;
+                }
                 let cClass = "score-card-green";
-                if (p < 75) cClass = "score-card-yellow";
-                if (p < 60) cClass = "score-card-pink";
-                return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${p}%</div></td>`;
+                if (sc.percent < 75) cClass = "score-card-yellow";
+                if (sc.percent < 60) cClass = "score-card-pink";
+
+                return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${sc.score}/${sc.total} (${sc.percent}%)</div></td>`;
               }).join("")}
 
-              <!-- Overall Percent -->
+              ${realExams.length === 0 ? `<td><div class="score-card-matrix score-empty">-</div></td>` : ''}
+
+              <!-- 5. Overall Percent -->
               <td>
-                <span class="pct-circle-badge ${pctBadgeColor}">${row.overallPct}%</span>
+                <span class="pct-circle-badge ${pctBadgeColor}">${row.examsTakenCount > 0 ? row.overallPct + '%' : '0%'}</span>
               </td>
 
-              <!-- Score ratio progress bar (e.g., 66/75) -->
+              <!-- 6. Total Fraction e.g. 66/75 -->
               <td class="td-fraction">
                 <div class="score-fraction-wrap">
-                  <span class="frac-text">${row.totalEarnedScore}/${row.totalQuestionsSum}</span>
+                  <span class="frac-text">${row.totalEarnedScore}/${row.totalQuestionsSum || 0}</span>
                   <div class="frac-bar"><div class="frac-fill" style="width: ${Math.min(100, row.overallPct)}%;"></div></div>
                 </div>
               </td>
 
-              <!-- Average grade -->
-              <td class="td-avg"><strong>${row.avgScoreVal.toFixed(1)}</strong></td>
+              <!-- 7. Average Score -->
+              <td class="td-avg"><strong>${row.examsTakenCount > 0 ? row.overallPct.toFixed(1) : '0.0'}</strong></td>
 
-              <!-- Status Rank -->
+              <!-- 8. Status Rank Badge -->
               <td>
                 <span class="matrix-status-badge ${badgeClass}">${badgeText}</span>
               </td>
 
-              <!-- Inaccurate/Wrong Count -->
-              <td class="td-wrong-count">${row.wrongCount}</td>
+              <!-- 9. Wrong Count -->
+              <td class="td-wrong-count">${row.examsTakenCount > 0 ? row.wrongCount : '-'}</td>
 
-              <!-- Action button -->
+              <!-- 10. Action Button -->
               <td>
                 <button type="button" class="btn-matrix-action" onclick="viewStudentFullDetails('${s.id}')">
                   ${t.btn_view || 'Ilalii'}
@@ -1548,7 +1541,7 @@
         }).join("");
 
       } catch (err) {
-        if (typeof loadAdminResultsEnhanced === "function") await loadAdminResultsEnhanced();
+        console.error("Matrix load error:", err);
       }
     }
 
