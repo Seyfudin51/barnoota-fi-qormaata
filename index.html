@@ -30,43 +30,62 @@
 <body>
 
   <!-- =====================================================
-       1. START / SPLASH SCREEN (MANDATORY GATEWAY)
+       1. START / SPLASH SCREEN (MANDATORY GATEWAY + LANGUAGE)
   ====================================================== -->
   <section id="splashPage" class="page active">
     <div class="splash-wrapper">
+      
+      <!-- Top Language Selector -->
+      <div class="lang-selector-pill splash-lang-top">
+        <span class="lang-globe-icon">🌐</span>
+        <button type="button" class="lang-btn active" data-lang="om" onclick="switchLanguage('om')">Oromoo</button>
+        <button type="button" class="lang-btn" data-lang="am" onclick="switchLanguage('am')">አማርኛ</button>
+        <button type="button" class="lang-btn" data-lang="en" onclick="switchLanguage('en')">English</button>
+      </div>
+
       <div class="splash-content">
         <div class="splash-logo-circle">
           <img src="192.png" alt="Logo" class="splash-logo-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%230d59b2\'><path d=\'M12 3L1 9l11 6 9-4.91V17h2V9L12 3z\'/></svg>'">
         </div>
-        <h1 class="splash-title">Akkaadaamii Oromiyaa</h1>
-        <p class="splash-subtitle">Barnoota • Qormaata • Qabxii</p>
-        <p class="splash-quote">"Barnoonni ijoo, Milkaa'inni danda'ama!"</p>
+        <h1 class="splash-title" data-i18n="app_title">Akkaadaamii Oromiyaa</h1>
+        <p class="splash-subtitle" data-i18n="app_subtitle">Barnoota • Qormaata • Qabxii</p>
+        <p class="splash-quote" data-i18n="splash_quote">"Barnoonni ijoo, Milkaa'inni danda'ama!"</p>
       </div>
+
       <div class="splash-footer">
         <button id="mainStartButton" type="button" class="splash-start-btn" onclick="goToLoginPage()">
-          Jalqabi →
+          <span data-i18n="btn_start">Jalqabi →</span>
         </button>
       </div>
     </div>
   </section>
 
   <!-- =====================================================
-       2. UNIFIED MODERN LOGIN PAGE (GOOGLE & TELEGRAM ONLY)
+       2. UNIFIED MODERN LOGIN PAGE (GOOGLE & TELEGRAM)
   ====================================================== -->
   <section id="rolePage" class="page">
     <div class="login-wrapper">
+
+      <!-- Language selector -->
+      <div class="lang-selector-pill top-center-lang">
+        <span class="lang-globe-icon">🌐</span>
+        <button type="button" class="lang-btn" data-lang="om" onclick="switchLanguage('om')">Oromoo</button>
+        <button type="button" class="lang-btn" data-lang="am" onclick="switchLanguage('am')">አማርኛ</button>
+        <button type="button" class="lang-btn" data-lang="en" onclick="switchLanguage('en')">English</button>
+      </div>
+
       <div class="login-clean-header">
         <div class="login-logo-circle">
           <img src="192.png" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ffffff\'><path d=\'M12 3L1 9l11 6 9-4.91V17h2V9L12 3z\'/></svg>'">
         </div>
-        <h1 class="login-app-title">Akkaadaamii Oromiyaa</h1>
-        <p class="login-app-subtitle">Barnoota fi Qormaata</p>
+        <h1 class="login-app-title" data-i18n="app_title">Akkaadaamii Oromiyaa</h1>
+        <p class="login-app-subtitle" data-i18n="app_subtitle">Barnoota fi Qormaata</p>
       </div>
 
       <div class="login-card-modern">
-        <div class="login-card-badge">🔐 Seensa Qulqulluu</div>
-        <h2>Baga Nagaan Dhuftan!</h2>
-        <p class="login-description">Barnoota dubbisuu, qormaata fudhachuu fi to'achuuf Google ykn Telegram fayyadamaa.</p>
+        <div class="login-card-badge" data-i18n="login_badge">🔐 Seensa Qulqulluu</div>
+        <h2 data-i18n="login_welcome">Baga Nagaan Dhuftan!</h2>
+        <p class="login-description" data-i18n="login_desc">Barnoota dubbisuu, qormaata fudhachuu fi to'achuuf Google ykn Telegram fayyadamaa.</p>
 
         <!-- GOOGLE LOGIN -->
         <button id="googleLoginButton" type="button" class="google-login-btn" onclick="googleLogin()">
@@ -76,16 +95,16 @@
             <path fill="#FBBC05" d="M6.53 13.57A5.86 5.86 0 0 1 6.22 12c0-.55.11-1.09.31-1.57V7.91H3.28A9.5 9.5 0 0 0 2.25 12c0 1.47.35 2.86 1.03 4.09l3.25-2.52z"/>
             <path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.45 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.41l3.25 2.52C7.3 8.11 9.46 6.39 12 6.39z"/>
           </svg>
-          <span id="googleLoginText">Login with Google</span>
+          <span id="googleLoginText" data-i18n="btn_login_google">Login with Google</span>
         </button>
 
         <!-- TELEGRAM LOGIN -->
         <button id="telegramLoginButton" type="button" class="telegram-login-btn" onclick="telegramLogin()">
           <span class="telegram-icon">➤</span>
-          <span>Login with Telegram</span>
+          <span data-i18n="btn_login_telegram">Login with Telegram</span>
         </button>
 
-        <p style="margin-top: 20px; font-size: 11.5px; color: #94a3b8; line-height: 1.4;">
+        <p style="margin-top: 20px; font-size: 11.5px; color: #94a3b8; line-height: 1.4;" data-i18n="login_role_notice">
           🛡️ E-mail keessan irratti hundaa'uun sirnichi ofumaan sadarkaa keessan (Barataa ykn Admin) adda baasa.
         </p>
       </div>
@@ -93,7 +112,7 @@
   </section>
 
   <!-- =====================================================
-       3. STUDENT HOME / DASHBOARD (VIVID BUTTONS & BANNER)
+       3. STUDENT HOME / DASHBOARD
   ====================================================== -->
   <section id="studentHomePage" class="page">
     <div class="page-container">
@@ -108,17 +127,25 @@
             <p id="studentHomeStatusBadge">Dashboard</p>
           </div>
         </div>
-        <button type="button" class="logout-btn" onclick="studentLogout()">Ba'i</button>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="lang-selector-pill header-lang-pill">
+            <button type="button" class="lang-btn-mini" onclick="switchLanguage('om')">OM</button>
+            <button type="button" class="lang-btn-mini" onclick="switchLanguage('am')">AM</button>
+            <button type="button" class="lang-btn-mini" onclick="switchLanguage('en')">EN</button>
+          </div>
+          <button type="button" class="logout-btn" onclick="studentLogout()" data-i18n="btn_logout">Ba'i</button>
+        </div>
       </header>
 
       <!-- ARTISTIC EDUCATION BANNER -->
       <div class="student-hero-banner">
         <div class="hero-banner-content">
           <div class="hero-banner-text">
-            <span class="hero-badge">Barnoota Qulqulluu</span>
-            <h3>Akkaadaamii Oromiyaa</h3>
-            <p id="studentHomeMessage">Barnoota dubbisi, qormaata fudhadhu, qabxii kee to'adhu!</p>
-            <small>"Barnootni ijoo milkaa'inaa ti!"</small>
+            <span class="hero-badge" data-i18n="banner_badge">Barnoota Qulqulluu</span>
+            <h3 data-i18n="app_title">Akkaadaamii Oromiyaa</h3>
+            <p id="studentHomeMessage" data-i18n="banner_desc">Barnoota dubbisi, qormaata fudhadhu, qabxii kee to'adhu!</p>
+            <small data-i18n="banner_quote">"Barnootni ijoo milkaa'inaa ti!"</small>
           </div>
           <div class="hero-banner-art">
             <svg viewBox="0 0 140 120" class="hero-svg">
@@ -132,61 +159,49 @@
         </div>
       </div>
 
-      <!-- 6 VIVID COLORFUL GRID BUTTONS FOR STUDENTS -->
+      <!-- 6 VIVID COLORFUL GRID BUTTONS -->
       <div class="student-menu-grid">
         <button type="button" class="student-vivid-tile tile-blue" onclick="navTo('studentLessonsPage')">
-          <div class="tile-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
-          </div>
-          <strong class="tile-title">Barnoota</strong>
-          <small class="tile-sub">Dubbisi</small>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg></div>
+          <strong class="tile-title" data-i18n="tab_lessons">Barnoota</strong>
+          <small class="tile-sub" data-i18n="sub_read">Dubbisi</small>
         </button>
 
         <button type="button" class="student-vivid-tile tile-purple" onclick="navTo('examListPage')">
-          <div class="tile-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-          </div>
-          <strong class="tile-title">Qormaata</strong>
-          <small class="tile-sub">Qo'adhu</small>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+          <strong class="tile-title" data-i18n="tab_exams">Qormaata</strong>
+          <small class="tile-sub" data-i18n="sub_study">Qo'adhu</small>
         </button>
 
         <button type="button" class="student-vivid-tile tile-green" onclick="navTo('scorePage')">
-          <div class="tile-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-          </div>
-          <strong class="tile-title">Qabxii</strong>
-          <small class="tile-sub">Ilaali</small>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg></div>
+          <strong class="tile-title" data-i18n="tab_score">Qabxii</strong>
+          <small class="tile-sub" data-i18n="sub_view">Ilaali</small>
         </button>
 
         <button type="button" class="student-vivid-tile tile-amber" onclick="navTo('announcementsPage')">
-          <div class="tile-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-          </div>
-          <strong class="tile-title">Beeksisaa</strong>
-          <small class="tile-sub">Oduu haaraa</small>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+          <strong class="tile-title" data-i18n="tab_announcements">Beeksisaa</strong>
+          <small class="tile-sub" data-i18n="sub_news">Oduu haaraa</small>
         </button>
 
         <button type="button" class="student-vivid-tile tile-pink" onclick="navTo('feedbackPage')">
-          <div class="tile-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-          </div>
-          <strong class="tile-title">Yaadaa</strong>
-          <small class="tile-sub">Nuuf ergi</small>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></div>
+          <strong class="tile-title" data-i18n="tab_feedbacks">Yaadaa</strong>
+          <small class="tile-sub" data-i18n="sub_send">Nuuf ergi</small>
         </button>
 
         <button type="button" class="student-vivid-tile tile-teal" onclick="navTo('profilePage')">
-          <div class="tile-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-          </div>
-          <strong class="tile-title">Profile</strong>
-          <small class="tile-sub">Kee</small>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+          <strong class="tile-title" data-i18n="tab_profile">Profile</strong>
+          <small class="tile-sub" data-i18n="sub_yours">Kee</small>
         </button>
       </div>
 
       <div class="content-section">
         <div class="section-title-row">
-          <h3>📚 Barnoota Dhiyoo</h3>
-          <a href="javascript:void(0)" onclick="navTo('studentLessonsPage')" style="color:var(--primary); font-size:12px; font-weight:bold; text-decoration:none;">Hunda ilaali &gt;</a>
+          <h3 data-i18n="recent_lessons">📚 Barnoota Dhiyoo</h3>
+          <a href="javascript:void(0)" onclick="navTo('studentLessonsPage')" style="color:var(--primary); font-size:12px; font-weight:bold; text-decoration:none;" data-i18n="view_all">Hunda ilaali &gt;</a>
         </div>
         <div id="studentHomeLessonsPreview"></div>
       </div>
@@ -194,13 +209,11 @@
   </section>
 
   <!-- =====================================================
-       4. LESSONS LIST PAGE (BARATAA)
+       4. LESSONS LIST PAGE
   ====================================================== -->
   <section id="studentLessonsPage" class="page">
     <div class="page-container">
-      <div class="top-nav-bar">
-        <h2>📖 Barnoota</h2>
-      </div>
+      <div class="top-nav-bar"><h2 data-i18n="tab_lessons">📖 Barnoota</h2></div>
       <div id="studentLessons"></div>
     </div>
   </section>
@@ -211,8 +224,8 @@
   <section id="lessonDetailPage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
-        <button type="button" class="back-btn" onclick="navTo('studentLessonsPage')">← Duubatti</button>
-        <h2>Barnoota Dubbisi</h2>
+        <button type="button" class="back-btn" onclick="navTo('studentLessonsPage')" data-i18n="btn_back">← Duubatti</button>
+        <h2 data-i18n="read_lesson">Barnoota Dubbisi</h2>
       </div>
       <div class="content-card">
         <h1 id="lessonDetailTitle">Barnoota</h1>
@@ -222,13 +235,11 @@
   </section>
 
   <!-- =====================================================
-       6. EXAM LIST PAGE (BARATAA)
+       6. EXAM LIST PAGE
   ====================================================== -->
   <section id="examListPage" class="page">
     <div class="page-container">
-      <div class="top-nav-bar">
-        <h2>📝 Qormaata</h2>
-      </div>
+      <div class="top-nav-bar"><h2 data-i18n="tab_exams">📝 Qormaata</h2></div>
       <div id="studentExams"></div>
     </div>
   </section>
@@ -243,23 +254,19 @@
           <h2 id="examTitle">Qormaata</h2>
           <span id="questionNumber" class="exam-badge-num">1/1</span>
         </div>
-        <div class="timer-box">
-          ⏱️ <strong id="examTimerValue">00:00</strong>
-        </div>
+        <div class="timer-box">⏱️ <strong id="examTimerValue">00:00</strong></div>
       </div>
 
       <div class="exam-card">
-        <div class="question-label">Gaaffii</div>
+        <div class="question-label" data-i18n="question_label">Gaaffii</div>
         <h2 id="questionText">Gaaffii</h2>
-        
         <div id="answersContainer" class="exam-options-container"></div>
-
         <div class="exam-navigation">
           <button id="nextQuestionButton" type="button" class="primary-btn-vivid" onclick="nextQuestion()">
-            Itti fufi →
+            <span data-i18n="btn_continue">Itti fufi →</span>
           </button>
           <button id="submitExamButton" type="button" class="submit-btn" onclick="requestSubmitExam()" style="display:none;">
-            Submit Qormaata
+            <span data-i18n="btn_submit_exam">Submit Qormaata</span>
           </button>
         </div>
       </div>
@@ -272,34 +279,31 @@
   <section id="submitConfirmPage" class="page">
     <div class="center-card">
       <div class="big-icon">⚠️</div>
-      <h2>Qormaata Submit</h2>
-      <p id="submitWarningMessage">Gaaffii hunda xumurteettaa?</p>
+      <h2 data-i18n="submit_exam_title">Qormaata Submit</h2>
+      <p id="submitWarningMessage" data-i18n="submit_warning">Gaaffii hunda xumurteettaa?</p>
       <div class="confirm-buttons">
-        <button type="button" class="primary-btn" onclick="confirmSubmitExam(true)">Eyyee</button>
-        <button type="button" class="secondary-btn" onclick="confirmSubmitExam(false)">Hin xumirree</button>
+        <button type="button" class="primary-btn" onclick="confirmSubmitExam(true)" data-i18n="btn_yes">Eyyee</button>
+        <button type="button" class="secondary-btn" onclick="confirmSubmitExam(false)" data-i18n="btn_no">Hin xumirree</button>
       </div>
     </div>
   </section>
 
   <!-- =====================================================
-       9. SCORE & LEADERBOARD PAGE (BARATAA)
+       9. SCORE & LEADERBOARD PAGE
   ====================================================== -->
   <section id="scorePage" class="page">
     <div class="page-container">
-      <div class="top-nav-bar">
-        <h2>🏆 Qabxii Koo</h2>
-      </div>
+      <div class="top-nav-bar"><h2 data-i18n="my_score">🏆 Qabxii Koo</h2></div>
       <div id="studentScore" style="margin-bottom: 20px;"></div>
-
       <div id="studentLeaderboardSection" style="display:none; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-        <h2 style="margin-top:0; font-size: 1.15rem; color: #1565C0;">🥇 Sadarkaa Barattootaa (Leaderboard)</h2>
-        <p style="color:#64748b; font-size:12px; margin-bottom: 12px;">Qabxii giddu-galeessaa irratti hundaa'ee kan qindaa'e.</p>
+        <h2 style="margin-top:0; font-size: 1.15rem; color: #1565C0;" data-i18n="leaderboard_title">🥇 Sadarkaa Barattootaa (Leaderboard)</h2>
+        <p style="color:#64748b; font-size:12px; margin-bottom: 12px;" data-i18n="leaderboard_sub">Qabxii giddu-galeessaa irratti hundaa'ee kan qindaa'e.</p>
         <table id="studentLeaderboardTable" style="width:100%; border-collapse:collapse;">
           <thead>
             <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; font-size: 13px; color: #475569;">
-              <th style="padding: 8px;">Sadarkaa</th>
-              <th style="padding: 8px;">Barataa</th>
-              <th style="padding: 8px; text-align: right;">Average</th>
+              <th style="padding: 8px;" data-i18n="col_rank">Sadarkaa</th>
+              <th style="padding: 8px;" data-i18n="col_student">Barataa</th>
+              <th style="padding: 8px; text-align: right;" data-i18n="col_avg">Average</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -309,47 +313,41 @@
   </section>
 
   <!-- =====================================================
-       10. YAADAA PAGE (BARATAA)
+       10. YAADAA PAGE
   ====================================================== -->
   <section id="feedbackPage" class="page">
     <div class="page-container">
-      <div class="top-nav-bar">
-        <h2>💬 Kuusaa Yaadaa</h2>
-      </div>
+      <div class="top-nav-bar"><h2 data-i18n="tab_feedbacks">💬 Kuusaa Yaadaa</h2></div>
       <div class="form-card" style="margin-bottom:16px;">
-        <p style="font-size:13px; color:#64748b; margin-bottom:8px;">Yaada, gaaffii ykn komii qabdan asitti nuuf ergaa:</p>
+        <p style="font-size:13px; color:#64748b; margin-bottom:8px;" data-i18n="feedback_prompt">Yaada, gaaffii ykn komii qabdan asitti nuuf ergaa:</p>
         <div style="display:flex; gap:8px;">
           <input type="text" id="feedbackMessageInput" placeholder="Yaada kee asitti barreessi..." style="margin:0; flex:1;">
           <button type="button" class="primary-btn" onclick="sendStudentFeedback()" style="padding:10px 16px; margin:0;">➤</button>
         </div>
       </div>
-      <div class="section-title-row">
-        <h3>💬 Yaada Keessan &amp; Deebii Admin</h3>
-      </div>
+      <div class="section-title-row"><h3 data-i18n="feedback_list_title">💬 Yaada Keessan &amp; Deebii Admin</h3></div>
       <div id="studentFeedbackList"></div>
     </div>
   </section>
 
   <!-- =====================================================
-       11. BEEKSIISA PAGE (BARATAA)
+       11. BEEKSIISA PAGE
   ====================================================== -->
   <section id="announcementsPage" class="page">
     <div class="page-container">
-      <div class="top-nav-bar">
-        <h2>📢 Beeksisaa</h2>
-      </div>
+      <div class="top-nav-bar"><h2 data-i18n="tab_announcements">📢 Beeksisaa</h2></div>
       <div id="studentAnnouncementsList"></div>
     </div>
   </section>
 
   <!-- =====================================================
-       12. PROFILE PAGE (BARATAA)
+       12. PROFILE PAGE
   ====================================================== -->
   <section id="profilePage" class="page">
     <div class="page-container">
       <div class="top-nav-bar">
-        <button type="button" class="back-btn" onclick="navTo('studentHomePage')">← Duubatti</button>
-        <h2>👤 Profile Koo</h2>
+        <button type="button" class="back-btn" onclick="navTo('studentHomePage')" data-i18n="btn_back">← Duubatti</button>
+        <h2 data-i18n="my_profile">👤 Profile Koo</h2>
       </div>
 
       <div class="profile-card-modern">
@@ -361,12 +359,11 @@
           <div class="avatar-camera-badge">📷</div>
         </div>
         <input type="file" id="studentAvatarFileInput" accept="image/*" style="display:none;" onchange="handleStudentAvatarUpload(this)">
-        <p style="text-align:center; font-size:12px; color:#64748b; margin-top:6px; margin-bottom:16px;">Suuraa jijjiiruuf tuqi</p>
+        <p style="text-align:center; font-size:12px; color:#64748b; margin-top:6px; margin-bottom:16px;" data-i18n="tap_change_photo">Suuraa jijjiiruuf tuqi</p>
 
         <div class="profile-info-group">
-          <label>Maqaa Guutuu</label>
+          <label data-i18n="label_fullname">Maqaa Guutuu</label>
           <input id="profileNameInput" type="text" placeholder="Maqaa kee galchi">
-
           <label>Email</label>
           <input id="profileEmailInput" type="email" placeholder="Email kee galchi">
         </div>
@@ -383,12 +380,12 @@
         </div>
 
         <div class="profile-status-bar">
-          <span>Haala Galmee (Status):</span>
+          <span data-i18n="label_status">Haala Galmee (Status):</span>
           <span id="profileStatus" class="status active">-</span>
         </div>
 
         <button type="button" class="primary-btn-vivid" onclick="saveStudentFullProfile()" style="margin-top:16px;">
-          💾 Olkaa'i (Save Profile)
+          <span data-i18n="btn_save_profile">💾 Olkaa'i (Save Profile)</span>
         </button>
       </div>
     </div>
@@ -407,7 +404,7 @@
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
           
-          <div class="admin-avatar-pill" onclick="document.getElementById('adminAvatarFileInput').click()" title="Suuraa galarii irraa jijjiiri">
+          <div class="admin-avatar-pill" onclick="document.getElementById('adminAvatarFileInput').click()" title="Suuraa jijjiiri">
             <div class="admin-avatar-circle" id="adminAvatarContainer">
               <img id="adminAvatarImg" src="" alt="Admin" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
               <svg id="adminAvatarDefaultSvg" width="18" height="18" viewBox="0 0 24 24" fill="#0d59b2"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -418,6 +415,13 @@
         </div>
 
         <div class="admin-topbar-right">
+          <!-- Language Switcher in Admin Header -->
+          <div class="lang-selector-pill admin-header-lang">
+            <button type="button" class="lang-btn-mini" onclick="switchLanguage('om')">OM</button>
+            <button type="button" class="lang-btn-mini" onclick="switchLanguage('am')">AM</button>
+            <button type="button" class="lang-btn-mini" onclick="switchLanguage('en')">EN</button>
+          </div>
+
           <button type="button" class="admin-icon-btn" onclick="openAdminPanel('announcements')" title="Beeksisa">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
           </button>
@@ -464,55 +468,43 @@
 
           <div class="admin-vivid-tiles-grid">
             <button type="button" class="admin-vivid-tile tile-blue" onclick="openAdminPanel('lessons')">
-              <div class="tile-icon-wrap">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
-              </div>
-              <span class="tile-label">Barumsaa</span>
+              <div class="tile-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg></div>
+              <span class="tile-label" data-i18n="tab_lessons">Barumsaa</span>
             </button>
 
             <button type="button" class="admin-vivid-tile tile-purple" onclick="openAdminPanel('exams')">
-              <div class="tile-icon-wrap">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-              </div>
-              <span class="tile-label">Qormaata</span>
+              <div class="tile-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+              <span class="tile-label" data-i18n="tab_exams">Qormaata</span>
             </button>
 
             <button type="button" class="admin-vivid-tile tile-green" onclick="openAdminPanel('students')">
-              <div class="tile-icon-wrap">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-              </div>
-              <span class="tile-label">Barataa</span>
+              <div class="tile-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+              <span class="tile-label" data-i18n="tab_students">Barataa</span>
             </button>
 
             <button type="button" class="admin-vivid-tile tile-amber" onclick="openAdminPanel('results')">
-              <div class="tile-icon-wrap">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-              </div>
-              <span class="tile-label">Qabxii</span>
+              <div class="tile-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg></div>
+              <span class="tile-label" data-i18n="tab_score">Qabxii</span>
             </button>
 
             <button type="button" class="admin-vivid-tile tile-pink" onclick="openAdminPanel('feedbacks')">
-              <div class="tile-icon-wrap">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-              </div>
-              <span class="tile-label">Yaadaa</span>
+              <div class="tile-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></div>
+              <span class="tile-label" data-i18n="tab_feedbacks">Yaadaa</span>
             </button>
 
             <button type="button" class="admin-vivid-tile tile-teal" onclick="openAdminPanel('announcements')">
-              <div class="tile-icon-wrap">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-              </div>
-              <span class="tile-label">Beeksisaa</span>
+              <div class="tile-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+              <span class="tile-label" data-i18n="tab_announcements">Beeksisaa</span>
             </button>
           </div>
         </div>
 
         <!-- B. SPECIFIC ADMIN PANELS -->
 
-        <!-- 👥 1. BARATTOOTA PANEL (MATCHING IMAGE 2 DESIGN EXACTLY) -->
+        <!-- 👥 1. BARATTOOTA PANEL (WITH A-Z / Z-A SORTING & SEARCH) -->
         <div id="adminStudentsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
-            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
           </div>
 
           <!-- Hero Banner Matching Image 2 -->
@@ -520,8 +512,8 @@
             <div class="banner-top-badge">
               <span class="banner-badge-icon">👥</span>
               <div>
-                <h2>Barattoota Listii Isaani</h2>
-                <p>Barattoota hundi akka armaan gadiitti argamu.</p>
+                <h2 data-i18n="students_list_title">Barattoota Listii Isaani</h2>
+                <p data-i18n="students_list_desc">Barattoota hundi akka armaan gadiitti argamu.</p>
               </div>
             </div>
             <div class="banner-top-right-decor">
@@ -529,15 +521,23 @@
             </div>
           </div>
 
-          <!-- Search Box Matching Image 2 -->
-          <div class="search-bar-modern-wrap">
-            <div class="search-input-box">
+          <!-- Controls: Search + Alphabetical Sorting (A-Z / Z-A) -->
+          <div class="students-control-row">
+            <div class="search-input-box-enhanced">
               <span class="search-icon-svg">🔍</span>
               <input type="text" id="adminStudentSearchInput" placeholder="Maqaa barataa barbaadi..." oninput="filterAdminStudents(this.value)">
             </div>
-            <button type="button" class="btn-search-blue" onclick="filterAdminStudents(document.getElementById('adminStudentSearchInput').value)">
-              🔍 Barbaadi
-            </button>
+
+            <!-- Sorting Dropdown: A-Z, Z-A, Haaraa (Date) -->
+            <div class="sort-select-wrapper">
+              <label class="sort-label">🔡 Tartiba:</label>
+              <select id="adminStudentSortSelect" onchange="sortAdminStudents(this.value)">
+                <option value="name_asc">A - Z (Alfaa-beetii)</option>
+                <option value="name_desc">Z - A (Alfaa-beetii)</option>
+                <option value="date_desc">Haaraa (Dhiyoo)</option>
+                <option value="date_asc">Waggaa (Duraanii)</option>
+              </select>
+            </div>
           </div>
 
           <!-- 3-Column / Responsive Modern Grid Matching Image 2 -->
@@ -553,54 +553,43 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL (MATCHING IMAGE 1 COMPREHENSIVE MATRIX TABLE) -->
+        <!-- 📊 2. QABXII PANEL (DYNAMIC REAL EXAMS + AUTO RANK 1, 2, 3 BY REAL AVERAGE) -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
-            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
           </div>
 
           <!-- Hero Banner Matching Image 1 -->
           <div class="banner-results-top">
             <div class="banner-results-content">
-              <h2>Qormaata Barataa</h2>
-              <h3>Dhibbaa Ol Ittin Toohatan</h3>
-              <p>Barnoonni milkaa'ina keetiif bu'uuraadha!</p>
+              <h2 data-i18n="results_banner_title">Qormaata Barataa</h2>
+              <h3 data-i18n="results_banner_sub">Dhibbaa Ol Ittin Toohatan</h3>
+              <p data-i18n="results_banner_quote">Barnoonni milkaa'ina keetiif bu'uuraadha!</p>
             </div>
             <div class="banner-results-art">
               <span style="font-size: 2.5rem;">🎓📖✨</span>
             </div>
           </div>
 
-          <!-- Table Container with Horizontal Scroll Matching Image 1 -->
+          <!-- Table Container with Horizontal Scroll Matching Image 1 with Dynamic Real Headers -->
           <div class="results-matrix-table-wrap">
             <table class="results-matrix-table" id="adminResultsMatrixTable">
               <thead>
-                <tr>
-                  <th style="width: 40px;"><span class="th-icon">👥</span> #</th>
-                  <th><span class="th-icon">👤</span> Maqaa Barataa</th>
-                  <th><span class="th-icon">🪪</span> Id Barataa</th>
-                  <th><span class="th-icon">📄</span> Qormaata 1</th>
-                  <th><span class="th-icon">📄</span> Qormaata 2</th>
-                  <th><span class="th-icon">📄</span> Qormaata 3</th>
-                  <th><span class="th-icon">📄</span> Qormaata 4</th>
-                  <th><span class="th-icon">📄</span> Qormaata 5</th>
-                  <th><span class="th-icon">%</span> %</th>
-                  <th><span class="th-icon">🎯</span> Qabxii</th>
-                  <th><span class="th-icon">📊</span> Avregii</th>
-                  <th><span class="th-icon">⚙️</span> Sadarkaa</th>
-                  <th><span class="th-icon">❓</span> Gaaffii Argateef Dhabee</th>
-                  <th>Ilaalii</th>
+                <tr id="adminResultsMatrixHeaderRow">
+                  <!-- Dynamically Rendered via JS with Real Exam Titles -->
                 </tr>
               </thead>
-              <tbody id="adminResultsMatrixBody"></tbody>
+              <tbody id="adminResultsMatrixBody">
+                <!-- Dynamically Rendered via JS Sorted by Real Highest Average Score -->
+              </tbody>
             </table>
           </div>
 
           <!-- Bottom Summary Bar Matching Image 1 -->
           <div class="results-matrix-footer">
-            <span>📖 Hojii keessan milkaa'ina qaba!</span>
-            <button type="button" class="btn-matrix-footer-action" onclick="showAdminHomeView()">📑 Ilaalii</button>
-            <span>📈 Barnoonni milkaa'inaati!</span>
+            <span data-i18n="matrix_footer_text1">📖 Hojii keessan milkaa'ina qaba!</span>
+            <button type="button" class="btn-matrix-footer-action" onclick="showAdminHomeView()" data-i18n="btn_view">📑 Ilaalii</button>
+            <span data-i18n="matrix_footer_text2">📈 Barnoonni milkaa'inaati!</span>
           </div>
 
           <div id="adminResultDetails"></div>
@@ -609,8 +598,8 @@
         <!-- 📖 3. BARNOOTA PANEL -->
         <div id="adminLessonsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
-            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
-            <h3>📖 Barnoota Qindeessi</h3>
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
+            <h3 data-i18n="tab_lessons">📖 Barnoota Qindeessi</h3>
           </div>
           <div class="admin-panel-card">
             <h4 style="margin-bottom:10px;">➕ Barnoota Haaraa Dabali</h4>
@@ -626,8 +615,8 @@
         <!-- 📝 4. QORMAATA PANEL -->
         <div id="adminExamsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
-            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
-            <h3>📝 Qormaata Qindeessi</h3>
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
+            <h3 data-i18n="tab_exams">📝 Qormaata Qindeessi</h3>
           </div>
 
           <!-- Uumi Qormaata -->
@@ -758,8 +747,8 @@
         <!-- 📢 5. BEEKSIISA PANEL -->
         <div id="adminAnnouncementsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
-            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
-            <h3>📢 Beeksisa Maxxansi</h3>
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
+            <h3 data-i18n="tab_announcements">📢 Beeksisa Maxxansi</h3>
           </div>
           <div class="admin-panel-card">
             <label>Mata-duree Beeksisaa</label>
@@ -774,8 +763,8 @@
         <!-- 💬 6. YAADAA PANEL -->
         <div id="adminFeedbacksPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
-            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()">← Duubatti</button>
-            <h3>💬 Yaada Barattootaa</h3>
+            <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
+            <h3 data-i18n="tab_feedbacks">💬 Yaada Barattootaa</h3>
           </div>
           <div id="adminFeedbacksList"></div>
         </div>
@@ -786,31 +775,31 @@
       <nav class="admin-bottom-appbar">
         <button id="adminTabHome" type="button" class="admin-tab active" onclick="showAdminHomeView()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-          <span>Seeni</span>
+          <span data-i18n="nav_home">Seeni</span>
         </button>
         <button id="adminTabLessons" type="button" class="admin-tab" onclick="openAdminPanel('lessons')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.2 0-2 .8-2 2v16c0 1.2.8 2 2 2h12c1.2 0 2-.8 2-2V4c0-1.2-.8-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
-          <span>Barumsaa</span>
+          <span data-i18n="tab_lessons">Barumsaa</span>
         </button>
         <button id="adminTabExams" type="button" class="admin-tab" onclick="openAdminPanel('exams')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-          <span>Qormaata</span>
+          <span data-i18n="tab_exams">Qormaata</span>
         </button>
         <button id="adminTabStudents" type="button" class="admin-tab" onclick="openAdminPanel('students')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-          <span>Barataa</span>
+          <span data-i18n="tab_students">Barataa</span>
         </button>
         <button id="adminTabResults" type="button" class="admin-tab" onclick="openAdminPanel('results')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-          <span>Qabxii</span>
+          <span data-i18n="tab_score">Qabxii</span>
         </button>
         <button id="adminTabFeedbacks" type="button" class="admin-tab" onclick="openAdminPanel('feedbacks')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-          <span>Yaadaa</span>
+          <span data-i18n="tab_feedbacks">Yaadaa</span>
         </button>
         <button id="adminTabAnnounce" type="button" class="admin-tab" onclick="openAdminPanel('announcements')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-          <span>Beeksisa</span>
+          <span data-i18n="tab_announcements">Beeksisa</span>
         </button>
       </nav>
 
@@ -823,47 +812,278 @@
   <nav id="studentBottomNav" class="mobile-bottom-bar" style="display:none;">
     <button id="navTabHome" type="button" class="bottom-tab-item active" onclick="navTo('studentHomePage')">
       <span class="tab-icon">🏠</span>
-      <span class="tab-label">Seeni</span>
+      <span class="tab-label" data-i18n="nav_home">Seeni</span>
     </button>
     <button id="navTabLessons" type="button" class="bottom-tab-item" onclick="navTo('studentLessonsPage')">
       <span class="tab-icon">📖</span>
-      <span class="tab-label">Barumsaa</span>
+      <span class="tab-label" data-i18n="tab_lessons">Barumsaa</span>
     </button>
     <button id="navTabExams" type="button" class="bottom-tab-item" onclick="navTo('examListPage')">
       <span class="tab-icon">📝</span>
-      <span class="tab-label">Qormaata</span>
+      <span class="tab-label" data-i18n="tab_exams">Qormaata</span>
     </button>
     <button id="navTabScore" type="button" class="bottom-tab-item" onclick="navTo('scorePage')">
       <span class="tab-icon">🏆</span>
-      <span class="tab-label">Qabxii</span>
+      <span class="tab-label" data-i18n="tab_score">Qabxii</span>
     </button>
     <button id="navTabFeedback" type="button" class="bottom-tab-item" onclick="navTo('feedbackPage')">
       <span class="tab-icon">💬</span>
-      <span class="tab-label">Yaadaa</span>
+      <span class="tab-label" data-i18n="tab_feedbacks">Yaadaa</span>
     </button>
     <button id="navTabAnnounce" type="button" class="bottom-tab-item" onclick="navTo('announcementsPage')">
       <span class="tab-icon">📢</span>
-      <span class="tab-label">Beeksisa</span>
+      <span class="tab-label" data-i18n="tab_announcements">Beeksisa</span>
     </button>
   </nav>
 
-  <!-- SUPABASE & SCRIPTS -->
+  <!-- SUPABASE & APP SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
-  <!-- REFINED LOGIC MATCHING IMAGE 1 & 2 -->
+  <!-- =====================================================
+       15. MULTILINGUAL DICTIONARY & COMPREHENSIVE SCRIPT
+  ====================================================== -->
   <script>
+    // MULTILINGUAL DICTIONARY (OM, AM, EN)
+    const i18nTranslations = {
+      om: {
+        app_title: "Akkaadaamii Oromiyaa",
+        app_subtitle: "Barnoota • Qormaata • Qabxii",
+        splash_quote: "\"Barnoonni ijoo, Milkaa'inni danda'ama!\"",
+        btn_start: "Jalqabi →",
+        login_badge: "🔐 Seensa Qulqulluu",
+        login_welcome: "Baga Nagaan Dhuftan!",
+        login_desc: "Barnoota dubbisuu, qormaata fudhachuu fi to'achuuf Google ykn Telegram fayyadamaa.",
+        btn_login_google: "Login with Google",
+        btn_login_telegram: "Login with Telegram",
+        login_role_notice: "🛡️ E-mail keessan irratti hundaa'uun sirnichi ofumaan sadarkaa keessan (Barataa ykn Admin) adda baasa.",
+        btn_logout: "Ba'i",
+        banner_badge: "Barnoota Qulqulluu",
+        banner_desc: "Barnoota dubbisi, qormaata fudhadhu, qabxii kee to'adhu!",
+        banner_quote: "\"Barnootni ijoo milkaa'inaa ti!\"",
+        tab_lessons: "Barnoota",
+        sub_read: "Dubbisi",
+        tab_exams: "Qormaata",
+        sub_study: "Qo'adhu",
+        tab_score: "Qabxii",
+        sub_view: "Ilaali",
+        tab_announcements: "Beeksisaa",
+        sub_news: "Oduu haaraa",
+        tab_feedbacks: "Yaadaa",
+        sub_send: "Nuuf ergi",
+        tab_profile: "Profile",
+        sub_yours: "Kee",
+        tab_students: "Barataa",
+        nav_home: "Seeni",
+        recent_lessons: "📚 Barnoota Dhiyoo",
+        view_all: "Hunda ilaali >",
+        btn_back: "← Duubatti",
+        read_lesson: "Barnoota Dubbisi",
+        question_label: "Gaaffii",
+        btn_continue: "Itti fufi →",
+        btn_submit_exam: "Submit Qormaata",
+        submit_exam_title: "Qormaata Submit",
+        submit_warning: "Gaaffii hunda xumurteettaa?",
+        btn_yes: "Eyyee",
+        btn_no: "Hin xumirree",
+        my_score: "🏆 Qabxii Koo",
+        leaderboard_title: "🥇 Sadarkaa Barattootaa (Leaderboard)",
+        leaderboard_sub: "Qabxii giddu-galeessaa irratti hundaa'ee kan qindaa'e.",
+        col_rank: "Sadarkaa",
+        col_student: "Barataa",
+        col_avg: "Average",
+        feedback_prompt: "Yaada, gaaffii ykn komii qabdan asitti nuuf ergaa:",
+        feedback_list_title: "💬 Yaada Keessan & Deebii Admin",
+        my_profile: "👤 Profile Koo",
+        tap_change_photo: "Suuraa jijjiiruuf tuqi",
+        label_fullname: "Maqaa Guutuu",
+        label_status: "Haala Galmee (Status):",
+        btn_save_profile: "💾 Olkaa'i (Save Profile)",
+        students_list_title: "Barattoota Listii Isaani",
+        students_list_desc: "Barattoota hundi akka armaan gadiitti argamu.",
+        results_banner_title: "Qormaata Barataa",
+        results_banner_sub: "Dhibbaa Ol Ittin Toohatan",
+        results_banner_quote: "Barnoonni milkaa'ina keetiif bu'uuraadha!",
+        matrix_footer_text1: "📖 Hojii keessan milkaa'ina qaba!",
+        matrix_footer_text2: "📈 Barnoonni milkaa'inaati!",
+        btn_view: "Ilalii",
+        badge_olaanaa: "Ol'aanaa",
+        badge_gaarii: "Gaarii",
+        badge_jijjiiraa: "Jijjiiraa",
+        badge_xumurameera: "Xumurameera"
+      },
+      am: {
+        app_title: "ኦሮሚያ አካዳሚ",
+        app_subtitle: "ትምህርት • ፈተና • ውጤት",
+        splash_quote: "\"ትምህርት ቁልፍ ነው፣ ስኬት ይቻላል!\"",
+        btn_start: "ጀምር →",
+        login_badge: "🔐 ደህንነቱ የተጠበቀ መግቢያ",
+        login_welcome: "እንኳን በደህና መጡ!",
+        login_desc: "ትምህርቶችን ለማንበብ፣ ፈተና ለመውሰድና ለመቆጣጠር Google ወይም Telegram ይጠቀሙ።",
+        btn_login_google: "በ Google ይግቡ",
+        btn_login_telegram: "በ Telegram ይግቡ",
+        login_role_notice: "🛡️ በኢሜይልዎ መሠረት ስርዓቱ ተማሪ ወይም አስተዳዳሪ መሆንዎን በራሱ ይለያል።",
+        btn_logout: "ውጣ",
+        banner_badge: "ጥራት ያለው ትምህርት",
+        banner_desc: "ትምህርቶችን ያንብቡ፣ ፈተና ይውሰዱ፣ ውጤትዎን ይከታተሉ!",
+        banner_quote: "\"ትምህርት ለስኬት ቁልፍ ነው!\"",
+        tab_lessons: "ትምህርቶች",
+        sub_read: "አንብብ",
+        tab_exams: "ፈተናዎች",
+        sub_study: "ተለማመድ",
+        tab_score: "ውጤት",
+        sub_view: "ተመልከት",
+        tab_announcements: "ማስታወቂያ",
+        sub_news: "አዲስ ዜና",
+        tab_feedbacks: "አስተያየት",
+        sub_send: "ላክ",
+        tab_profile: "መገለጫ",
+        sub_yours: "የእርስዎ",
+        tab_students: "ተማሪዎች",
+        nav_home: "መነሻ",
+        recent_lessons: "📚 የቅርብ ትምህርቶች",
+        view_all: "ሁሉንም ተመልከት >",
+        btn_back: "← ተመለስ",
+        read_lesson: "ትምህርቱን ያንብቡ",
+        question_label: "ጥያቄ",
+        btn_continue: "ቀጥል →",
+        btn_submit_exam: "ፈተናውን አስረክብ",
+        submit_exam_title: "ፈተና ማስረከብ",
+        submit_warning: "ሁሉንም ጥያቄዎች ጨርሰዋል?",
+        btn_yes: "አዎ",
+        btn_no: "አልጨረስኩም",
+        my_score: "🏆 የእኔ ውጤት",
+        leaderboard_title: "🥇 የተማሪዎች ደረጃ (Leaderboard)",
+        leaderboard_sub: "በአማካይ ውጤት ላይ ተመስርቶ የተዘጋጀ።",
+        col_rank: "ደረጃ",
+        col_student: "ተማሪ",
+        col_avg: "አማካይ",
+        feedback_prompt: "አስተያየት፣ ጥያቄ ወይም ቅሬታ ካለዎት እዚህ ይጻፉልን፡",
+        feedback_list_title: "💬 የእርስዎ አስተያየት እና የአስተዳዳሪ ምላሽ",
+        my_profile: "👤 የእኔ መገለጫ",
+        tap_change_photo: "ፎቶ ለመቀየር ይንኩ",
+        label_fullname: "ሙሉ ስም",
+        label_status: "የምዝገባ ሁኔታ፡",
+        btn_save_profile: "💾 መዝግብ (Save Profile)",
+        students_list_title: "የተማሪዎች ዝርዝር",
+        students_list_desc: "ሁሉም ተማሪዎች ከዚህ በታች ይገኛሉ።",
+        results_banner_title: "የተማሪዎች ፈተና ውጤት",
+        results_banner_sub: "አስተዳዳሪዎች በቀላሉ የሚቆጣጠሩበት",
+        results_banner_quote: "ትምህርት ለስኬትዎ መሠረት ነው!",
+        matrix_footer_text1: "📖 ስራዎ ለስኬት የበቃ ነው!",
+        matrix_footer_text2: "📈 ትምህርት የስኬት መሰረት ነው!",
+        btn_view: "ተመልከት",
+        badge_olaanaa: "ከፍተኛ",
+        badge_gaarii: "ጥሩ",
+        badge_jijjiiraa: "መካከለኛ",
+        badge_xumurameera: "ዝቅተኛ"
+      },
+      en: {
+        app_title: "Oromia Academy",
+        app_subtitle: "Lessons • Exams • Results",
+        splash_quote: "\"Education is key, Success is possible!\"",
+        btn_start: "Get Started →",
+        login_badge: "🔐 Clean Authentication",
+        login_welcome: "Welcome!",
+        login_desc: "Use Google or Telegram to read lessons, take exams, and supervise results.",
+        btn_login_google: "Login with Google",
+        btn_login_telegram: "Login with Telegram",
+        login_role_notice: "🛡️ The system automatically detects your role (Student or Admin) based on your email.",
+        btn_logout: "Logout",
+        banner_badge: "Quality Education",
+        banner_desc: "Read lessons, take exams, and track your performance!",
+        banner_quote: "\"Education is the cornerstone of success!\"",
+        tab_lessons: "Lessons",
+        sub_read: "Read",
+        tab_exams: "Exams",
+        sub_study: "Study",
+        tab_score: "Results",
+        sub_view: "View",
+        tab_announcements: "Notices",
+        sub_news: "Updates",
+        tab_feedbacks: "Feedback",
+        sub_send: "Send",
+        tab_profile: "Profile",
+        sub_yours: "Yours",
+        tab_students: "Students",
+        nav_home: "Home",
+        recent_lessons: "📚 Recent Lessons",
+        view_all: "View All >",
+        btn_back: "← Back",
+        read_lesson: "Read Lesson",
+        question_label: "Question",
+        btn_continue: "Continue →",
+        btn_submit_exam: "Submit Exam",
+        submit_exam_title: "Submit Exam",
+        submit_warning: "Have you answered all questions?",
+        btn_yes: "Yes",
+        btn_no: "Not yet",
+        my_score: "🏆 My Results",
+        leaderboard_title: "🥇 Student Leaderboard",
+        leaderboard_sub: "Ranked based on overall average score.",
+        col_rank: "Rank",
+        col_student: "Student",
+        col_avg: "Average",
+        feedback_prompt: "Send us your thoughts, questions, or concerns:",
+        feedback_list_title: "💬 Your Messages & Admin Responses",
+        my_profile: "👤 My Profile",
+        tap_change_photo: "Tap to change photo",
+        label_fullname: "Full Name",
+        label_status: "Registration Status:",
+        btn_save_profile: "💾 Save Profile",
+        students_list_title: "Student Roster",
+        students_list_desc: "All enrolled students listed below.",
+        results_banner_title: "Student Exam Matrix",
+        results_banner_sub: "Comprehensive Supervision Dashboard",
+        results_banner_quote: "Education is the foundation of success!",
+        matrix_footer_text1: "📖 Your dedicated efforts bring success!",
+        matrix_footer_text2: "📈 Keep learning and excelling!",
+        btn_view: "View",
+        badge_olaanaa: "Excellent",
+        badge_gaarii: "Good",
+        badge_jijjiiraa: "Average",
+        badge_xumurameera: "Completed"
+      }
+    };
+
+    let currentAppLang = localStorage.getItem("ao_selected_lang") || "om";
+
+    function switchLanguage(lang) {
+      if (!i18nTranslations[lang]) return;
+      currentAppLang = lang;
+      localStorage.setItem("ao_selected_lang", lang);
+
+      // Update text nodes with data-i18n
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (i18nTranslations[lang][key]) {
+          el.textContent = i18nTranslations[lang][key];
+        }
+      });
+
+      // Update active state on language pills
+      document.querySelectorAll(".lang-btn").forEach(b => {
+        b.classList.toggle("active", b.getAttribute("data-lang") === lang);
+      });
+
+      // Re-render admin panels if opened
+      if (document.getElementById("adminStudentsPanel")?.style.display !== "none") {
+        renderAdminStudentsGrid(allAdminStudentsData);
+      }
+      if (document.getElementById("adminResultsPanel")?.style.display !== "none") {
+        loadAdminResultsImage1Matrix();
+      }
+    }
+
+    // SPLASH GATEWAY LOGIC
     let splashPassed = false;
     let allAdminStudentsData = [];
     let currentStudentPage = 1;
     const studentsPerPage = 30;
 
-    // Suppress automatic redirects from app.js until Jalqabi is pressed
     const nativeShowPage = window.showPage;
     window.showPage = function(pageId) {
-      if (!splashPassed && pageId !== "splashPage") {
-        return;
-      }
+      if (!splashPassed && pageId !== "splashPage") return;
       if (typeof nativeShowPage === "function") {
         nativeShowPage(pageId);
       } else {
@@ -972,7 +1192,9 @@
       }
     };
 
-    // Helper avatars generator for clean representation (Matching Image 2 style)
+    // =========================================================
+    // 1. BARATTOOTA LISTII ISAANI + A-Z / Z-A SORTING
+    // =========================================================
     const avatarListColors = [
       { bg: "#3b82f6", emoji: "👨‍🎓" },
       { bg: "#ec4899", emoji: "👩‍🎓" },
@@ -983,18 +1205,30 @@
       { bg: "#6366f1", emoji: "👦" }
     ];
 
-    // =========================================================
-    // 1. BARATTOOTA LISTII ISAANI (MATCHING IMAGE 2 EXACTLY)
-    // =========================================================
     async function loadAdminStudentsImage2Layout() {
       try {
-        const { data, error } = await db.from("students").select("*").order("created_at", { ascending: true });
+        const { data, error } = await db.from("students").select("*");
         if (error) throw error;
         allAdminStudentsData = data || [];
-        renderAdminStudentsGrid(allAdminStudentsData);
+        // Default sort A-Z
+        sortAdminStudents(document.getElementById("adminStudentSortSelect")?.value || "name_asc");
       } catch (err) {
         if (typeof loadAdminStudents === "function") await loadAdminStudents();
       }
+    }
+
+    function sortAdminStudents(sortType) {
+      if (sortType === "name_asc") {
+        allAdminStudentsData.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      } else if (sortType === "name_desc") {
+        allAdminStudentsData.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+      } else if (sortType === "date_desc") {
+        allAdminStudentsData.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      } else if (sortType === "date_asc") {
+        allAdminStudentsData.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+      }
+      currentStudentPage = 1;
+      renderAdminStudentsGrid(allAdminStudentsData);
     }
 
     function renderAdminStudentsGrid(list) {
@@ -1017,8 +1251,6 @@
         const avIdx = globalNum % avatarListColors.length;
         const av = avatarListColors[avIdx];
         const isBlocked = s.status === "blocked";
-        const codeVal = s.activation_code || s.code || "-";
-        const idVal = s.student_id || s.id?.substring(0,8) || "STU" + String(globalNum).padStart(3, "0");
 
         return `
           <div class="student-photo-card ${isBlocked ? 'is-blocked-card' : ''}">
@@ -1043,14 +1275,12 @@
         `;
       }).join("");
 
-      // Render Pagination
       renderPaginationControls(totalPages);
     }
 
     function renderPaginationControls(totalPages) {
       const paginationWrap = document.getElementById("studentPaginationNumbers");
       if (!paginationWrap) return;
-
       let html = "";
       for (let i = 1; i <= totalPages; i++) {
         html += `<button type="button" class="page-num ${i === currentStudentPage ? 'active' : ''}" onclick="goToStudentPage(${i})">${i}</button>`;
@@ -1083,99 +1313,145 @@
     }
 
     // =========================================================
-    // 2. QORMAATA BARATAA MATRIX TABLE (MATCHING IMAGE 1 EXACTLY)
+    // 2. DYNAMIC REAL EXAM MATRIX TABLE & REAL RANKING (1, 2, 3...)
     // =========================================================
     async function loadAdminResultsImage1Matrix() {
+      const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
       const tbody = document.getElementById("adminResultsMatrixBody");
-      if (!tbody) return;
+      if (!headerRow || !tbody) return;
 
       try {
+        // Fetch Real Students, Real Exams from Admin, and Real Results
         const [studentsRes, examsRes, resultsRes] = await Promise.all([
-          db.from("students").select("*").order("created_at", { ascending: true }),
+          db.from("students").select("*"),
           db.from("exams").select("*").order("created_at", { ascending: true }),
           db.from("exam_results").select("*").order("created_at", { ascending: false })
         ]);
 
         const students = studentsRes.data || [];
-        const exams = examsRes.data || [];
+        const realExams = examsRes.data || [];
         const results = resultsRes.data || [];
 
+        // BUILD DYNAMIC HEADER MATCHING REAL EXAMS CREATED BY ADMIN
+        let dynamicHeaderHtml = `
+          <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
+          <th><span class="th-icon">👤</span> Maqaa Barataa</th>
+          <th><span class="th-icon">🪪</span> Id Barataa</th>
+        `;
+
+        if (realExams.length > 0) {
+          realExams.forEach((ex, i) => {
+            dynamicHeaderHtml += `
+              <th title="${escapeHtml(ex.title)}">
+                <span class="th-icon">📄</span>
+                <span class="exam-header-name">${escapeHtml(ex.title)}</span>
+              </th>
+            `;
+          });
+        } else {
+          dynamicHeaderHtml += `<th><span class="th-icon">📄</span> Qormaata</th>`;
+        }
+
+        dynamicHeaderHtml += `
+          <th><span class="th-icon">%</span> %</th>
+          <th><span class="th-icon">🎯</span> Qabxii</th>
+          <th><span class="th-icon">📊</span> Avregii</th>
+          <th><span class="th-icon">⚙️</span> Sadarkaa</th>
+          <th><span class="th-icon">❓</span> Gaaffii Argateef Dhabee</th>
+          <th>Ilaalii</th>
+        `;
+
+        headerRow.innerHTML = dynamicHeaderHtml;
+
         if (!students.length) {
-          tbody.innerHTML = `<tr><td colspan="14" class="empty-state">Barattoonni hin jiran.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="${realExams.length + 9}" class="empty-state">Barattoonni hin jiran.</td></tr>`;
           return;
         }
 
-        // Map Results per student and exam
+        // Map Results per student & exam
         const resultMap = {};
         results.forEach(r => {
           if (!resultMap[r.student_id]) resultMap[r.student_id] = {};
           resultMap[r.student_id][r.exam_id] = r;
         });
 
-        tbody.innerHTML = students.map((s, index) => {
-          const num = index + 1;
-          const avIdx = num % avatarListColors.length;
-          const av = avatarListColors[avIdx];
-          const studentId = s.student_id || s.id?.substring(0,8) || "STU" + String(num).padStart(3, "0");
-
-          // Collect scores for up to 5 exams
-          const examScores = [];
-          let totalEarned = 0;
-          let totalQuestionsCount = 0;
+        // Compute real stats per student
+        const studentRowsData = students.map((s) => {
+          let totalEarnedScore = 0;
+          let totalQuestionsSum = 0;
           let examsTakenCount = 0;
           let wrongCount = 0;
+          const examScores = [];
 
-          // Check first 5 exams
-          for (let eIdx = 0; eIdx < 5; eIdx++) {
-            const ex = exams[eIdx];
-            if (ex && resultMap[s.id] && resultMap[s.id][ex.id]) {
-              const r = resultMap[s.id][ex.id];
-              const scoreVal = r.score !== undefined ? r.score : 0;
-              const totalQ = r.total_questions || 15;
-              const pct = Math.round((scoreVal / totalQ) * 100) || r.percentage || 0;
-              examScores.push({ score: scoreVal, total: totalQ, percent: pct });
-              totalEarned += scoreVal;
-              totalQuestionsCount += totalQ;
+          realExams.forEach((ex) => {
+            const r = resultMap[s.id] && resultMap[s.id][ex.id];
+            if (r) {
+              const sc = r.score !== undefined ? r.score : 0;
+              const tq = r.total_questions || 10;
+              const pct = Math.round((sc / tq) * 100) || r.percentage || 0;
+              examScores.push({ score: sc, total: tq, percent: pct });
+              totalEarnedScore += sc;
+              totalQuestionsSum += tq;
               examsTakenCount++;
-              wrongCount += Math.max(0, totalQ - scoreVal);
+              wrongCount += Math.max(0, tq - sc);
             } else {
               examScores.push(null);
             }
-          }
-
-          // If no questions count available default baseline
-          if (totalQuestionsCount === 0) totalQuestionsCount = 75;
+          });
 
           const overallPct = examsTakenCount > 0 
-            ? Math.round((totalEarned / (examsTakenCount * 15)) * 100) 
+            ? Math.round((totalEarnedScore / totalQuestionsSum) * 100) 
             : 0;
-          const averageVal = examsTakenCount > 0 
-            ? (totalEarned / examsTakenCount * (100/15)).toFixed(1) 
+          const avgScoreVal = examsTakenCount > 0 
+            ? (overallPct).toFixed(1) 
             : "0.0";
 
-          // Status Badge Color & Text matching Image 1
+          return {
+            student: s,
+            examScores,
+            totalEarnedScore,
+            totalQuestionsSum: totalQuestionsSum || 50,
+            examsTakenCount,
+            wrongCount,
+            overallPct,
+            avgScoreVal: parseFloat(avgScoreVal)
+          };
+        });
+
+        // AUTOMATIC SORTING BY REAL HIGHEST AVERAGE GRADE -> RANK 1, 2, 3...
+        studentRowsData.sort((a, b) => b.avgScoreVal - a.avgScoreVal || b.totalEarnedScore - a.totalEarnedScore);
+
+        // Render sorted rows with rank 1, 2, 3...
+        tbody.innerHTML = studentRowsData.map((row, index) => {
+          const rankNum = index + 1; // Real Rank based on actual score!
+          const s = row.student;
+          const avIdx = rankNum % avatarListColors.length;
+          const av = avatarListColors[avIdx];
+          const studentId = s.student_id || s.id?.substring(0,8) || "STU" + String(rankNum).padStart(3, "0");
+
+          // Determine status text & badge based on language
+          const t = i18nTranslations[currentAppLang] || i18nTranslations.om;
           let badgeClass = "badge-xumurameera";
-          let badgeText = "Xumurameera";
-          if (overallPct >= 80) {
+          let badgeText = t.badge_xumurameera;
+          if (row.overallPct >= 80) {
             badgeClass = "badge-olaanaa";
-            badgeText = "Ol'aanaa";
-          } else if (overallPct >= 65) {
+            badgeText = t.badge_olaanaa;
+          } else if (row.overallPct >= 65) {
             badgeClass = "badge-gaarii";
-            badgeText = "Gaarii";
-          } else if (overallPct >= 50) {
+            badgeText = t.badge_gaarii;
+          } else if (row.overallPct >= 50) {
             badgeClass = "badge-jijjiiraa";
-            badgeText = "Jijjiiraa";
+            badgeText = t.badge_jijjiiraa;
           }
 
-          // Percent badge color matching Image 1
           let pctBadgeColor = "pct-green";
-          if (overallPct < 60) pctBadgeColor = "pct-orange";
-          if (overallPct < 50) pctBadgeColor = "pct-yellow";
+          if (row.overallPct < 60) pctBadgeColor = "pct-orange";
+          if (row.overallPct < 50) pctBadgeColor = "pct-yellow";
 
           return `
             <tr>
-              <!-- 1. # Number -->
-              <td class="td-num"><strong>${num}</strong></td>
+              <!-- 1. Real Rank # Number -->
+              <td class="td-num"><strong>${rankNum}</strong></td>
 
               <!-- 2. Student Name with Avatar -->
               <td class="td-student-name">
@@ -1190,8 +1466,8 @@
               <!-- 3. Student ID -->
               <td class="td-id"><code>${escapeHtml(studentId)}</code></td>
 
-              <!-- 4-8. Qormaata 1 to 5 with Soft Color Cards matching Image 1 -->
-              ${examScores.map((sc, i) => {
+              <!-- Dynamic Real Exam Columns with Actual Data -->
+              ${row.examScores.map(sc => {
                 if (!sc) {
                   return `<td><div class="score-card-matrix score-empty">-</div></td>`;
                 }
@@ -1199,37 +1475,39 @@
                 let cClass = "score-card-green";
                 if (p < 75) cClass = "score-card-yellow";
                 if (p < 60) cClass = "score-card-pink";
-                return `<td><div class="score-card-matrix ${cClass}">${p}</div></td>`;
+                return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${p}</div></td>`;
               }).join("")}
 
-              <!-- 9. Total % Bubble -->
+              ${realExams.length === 0 ? `<td><div class="score-card-matrix score-empty">-</div></td>` : ''}
+
+              <!-- Total % Bubble -->
               <td>
-                <span class="pct-circle-badge ${pctBadgeColor}">${overallPct}%</span>
+                <span class="pct-circle-badge ${pctBadgeColor}">${row.overallPct}%</span>
               </td>
 
-              <!-- 10. Fraction Score Bar e.g. 50/75 -->
+              <!-- Fraction Progress Bar e.g. 50/75 -->
               <td class="td-fraction">
                 <div class="score-fraction-wrap">
-                  <span class="frac-text">${totalEarned}/${totalQuestionsCount}</span>
-                  <div class="frac-bar"><div class="frac-fill" style="width: ${Math.min(100, overallPct)}%;"></div></div>
+                  <span class="frac-text">${row.totalEarnedScore}/${row.totalQuestionsSum}</span>
+                  <div class="frac-bar"><div class="frac-fill" style="width: ${Math.min(100, row.overallPct)}%;"></div></div>
                 </div>
               </td>
 
-              <!-- 11. Average -->
-              <td class="td-avg"><strong>${averageVal}</strong></td>
+              <!-- Real Average -->
+              <td class="td-avg"><strong>${row.avgScoreVal.toFixed(1)}</strong></td>
 
-              <!-- 12. Sadarkaa Badge -->
+              <!-- Status Rank Badge -->
               <td>
                 <span class="matrix-status-badge ${badgeClass}">${badgeText}</span>
               </td>
 
-              <!-- 13. Gaaffii Argateef Dhabee -->
-              <td class="td-wrong-count">${wrongCount > 0 ? wrongCount : (examsTakenCount ? 0 : '-')}</td>
+              <!-- Wrong Count -->
+              <td class="td-wrong-count">${row.examsTakenCount > 0 ? row.wrongCount : '-'}</td>
 
-              <!-- 14. Action Button -->
+              <!-- Action Detail Button -->
               <td>
                 <button type="button" class="btn-matrix-action" onclick="viewStudentFullDetails('${s.id}')">
-                  Ilalii
+                  ${t.btn_view || 'Ilalii'}
                 </button>
               </td>
             </tr>
@@ -1407,6 +1685,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       loadAdminAvatar();
+      switchLanguage(currentAppLang);
     });
   </script>
 
