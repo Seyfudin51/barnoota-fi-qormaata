@@ -1,6 +1,6 @@
 /* =========================================================
    AKKAADAAMII OROMIYAA - app.js
-   Supabase version (Guutuu - Google Login, RLS, Bulk Paste &amp; Leaderboard)
+   Supabase version (Guutuu - Google Login, RLS, Bulk Paste & Leaderboard)
    ========================================================= */
 
 "use strict";
@@ -57,6 +57,7 @@ function truncate(value, length = 120) {
   return text.length > length ? text.slice(0, length) + "..." : text;
 }
 
+// Fixed HTML Entities
 function formatText(value) {
   return escapeHtml(value).replace(/\n/g, "<br>");
 }
@@ -4151,7 +4152,7 @@ async function deleteExam(
 
     if (attemptsError) throw attemptsError;
 
-    const { error: questionsError } = await db
+    const { error: questionsError = null } = await db
       .from("questions")
       .delete()
       .eq(
@@ -5084,6 +5085,13 @@ function initializeAuthListener() {
 ========================================================= */
 
 async function initializeApp() {
+  // Register Service Worker for Offline Cache smoothly (Osoo HTML hin tuqin)
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => console.log("Service Worker registered successfully."))
+      .catch((err) => console.error("Service Worker registration failed:", err));
+  }
+
   initializeAuthListener();
 
   changeAIQuestionSource();
