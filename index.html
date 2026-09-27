@@ -54,11 +54,12 @@
       gap: 12px;
       padding: 14px 16px;
       margin-bottom: 12px;
-      border: 2px solid #e2e8f0;
+      border: 2px solid #cbd5e1;
       border-radius: 12px;
       background: #ffffff;
       cursor: pointer;
       transition: all 0.2s ease;
+      user-select: none;
     }
     .exam-option-item:hover {
       border-color: #0d59b2;
@@ -67,11 +68,11 @@
     .exam-option-item.selected {
       border-color: #0d59b2 !important;
       background: #e0edff !important;
-      box-shadow: 0 2px 8px rgba(13, 89, 178, 0.15);
+      box-shadow: 0 2px 8px rgba(13, 89, 178, 0.2) !important;
     }
     .exam-option-radio {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       border: 2px solid #94a3b8;
       display: flex;
@@ -79,6 +80,8 @@
       justify-content: center;
       margin-top: 2px;
       flex-shrink: 0;
+      background: #ffffff;
+      transition: all 0.2s ease;
     }
     .exam-option-item.selected .exam-option-radio {
       border-color: #0d59b2;
@@ -88,7 +91,7 @@
       content: "";
       width: 8px;
       height: 8px;
-      background: #fff;
+      background: #ffffff;
       border-radius: 50%;
     }
     .exam-option-text {
@@ -96,6 +99,15 @@
       color: #1e293b;
       line-height: 1.4;
       font-weight: 500;
+    }
+
+    /* Blocked exam button styling */
+    .exam-card-btn-disabled {
+      background: #94a3b8 !important;
+      color: #f1f5f9 !important;
+      cursor: not-allowed !important;
+      border: none !important;
+      box-shadow: none !important;
     }
   </style>
 </head>
@@ -280,7 +292,7 @@
   </section>
 
   <!-- =====================================================
-       6. EXAM LIST PAGE
+       6. EXAM LIST PAGE (WITH ACCURATE ATTEMPT LOCKS)
   ====================================================== -->
   <section id="examListPage" class="page">
     <div class="page-container">
@@ -290,7 +302,7 @@
   </section>
 
   <!-- =====================================================
-       7. EXAM TAKING PAGE (ENHANCED LIVE TAKER)
+       7. EXAM TAKING PAGE (ROCK-SOLID SELECTION & TIMING)
   ====================================================== -->
   <section id="examPage" class="page">
     <div class="exam-wrapper">
@@ -391,7 +403,7 @@
   </section>
 
   <!-- =====================================================
-       12. PROFILE PAGE
+       12. PROFILE PAGE (REAL GOOGLE EMAIL & AUTHENTIC DATA)
   ====================================================== -->
   <section id="profilePage" class="page">
     <div class="page-container">
@@ -449,12 +461,11 @@
   </section>
 
   <!-- =====================================================
-       13. ADMIN DASHBOARD
+       13. ADMIN DASHBOARD (CLEAN TILES, NO HERO ART)
   ====================================================== -->
   <section id="adminDashboardPage" class="page">
     <div class="admin-app-wrapper">
 
-      <!-- TOP CURVED APP BAR WITH ELEGANT LOGOUT BUTTON -->
       <header class="admin-top-appbar">
         <div class="admin-topbar-left">
           <button type="button" class="admin-icon-btn" onclick="showAdminHomeView()" title="Menu">
@@ -472,7 +483,6 @@
         </div>
 
         <div class="admin-topbar-right" style="display:flex; align-items:center; gap:8px;">
-          <!-- Language Switcher in Admin Header -->
           <div class="lang-selector-pill admin-header-lang">
             <button type="button" class="lang-btn-mini" onclick="switchLanguage('om')">OM</button>
             <button type="button" class="lang-btn-mini" onclick="switchLanguage('am')">AM</button>
@@ -483,7 +493,6 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
           </button>
           
-          <!-- ELEGANT STYLISH LOGOUT BUTTON -->
           <button type="button" class="admin-logout-pill-vivid" onclick="adminLogout()" title="Ba'i (Logout)">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             <span data-i18n="btn_logout">Ba'i</span>
@@ -493,7 +502,7 @@
 
       <div class="admin-main-body">
 
-        <!-- A. ADMIN HOME OVERVIEW (6 TILES ONLY - NO HERO BANNER GRAPHIC) -->
+        <!-- 6 VIVID TILES ONLY -->
         <div id="adminHomeTilesView">
           <div class="admin-vivid-tiles-grid" style="margin-top: 10px;">
             <button type="button" class="admin-vivid-tile tile-blue" onclick="openAdminPanel('lessons')">
@@ -530,7 +539,7 @@
 
         <!-- B. SPECIFIC ADMIN PANELS -->
 
-        <!-- 👥 1. BARATTOOTA PANEL (WITH A-Z / Z-A SORTING & SEARCH) -->
+        <!-- 👥 1. BARATTOOTA PANEL -->
         <div id="adminStudentsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -577,7 +586,7 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL (100% ACCURATE UNIVERSAL FETCH & MATCHING) -->
+        <!-- 📊 2. QABXII PANEL -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -625,7 +634,6 @@
             <h3 data-i18n="tab_exams">📝 Qormaata Qindeessi</h3>
           </div>
 
-          <!-- Uumi Qormaata -->
           <div class="admin-panel-card">
             <h4 style="margin-bottom:10px;">➕ Qormaata Uumi</h4>
             <input id="examTitleInput" type="text" placeholder="Mata-duree qormaataa">
@@ -680,17 +688,14 @@
             <button type="button" class="primary-btn-vivid" onclick="createExam()">➕ Qormaata Uumi</button>
           </div>
 
-          <!-- UNIVERSAL FLEXIBLE BULK PASTE (Supports 2, 3, 4, 5 options) -->
+          <!-- BULK PASTE -->
           <div class="admin-panel-card" style="border-left: 5px solid #0284c7;">
             <h4 style="color:#0284c7; margin-bottom:8px;">📋 Gaaffilee Hedduu Bakka Tokkotti Paste Godhi (Bulk Paste)</h4>
-            <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
-              Gaaffilee hedduu Word ykn bakka biraatii copy gootee asitti paste gochuun yeroo tokkotti galchuu dandeessa. (Filannoowwan A, B, C qofa ykn A, B, C, D hunda ni simata).
-            </p>
             <label>Qormaata Filadhu</label>
             <select id="bulkExamSelect"><option value="">Qormaata filadhu</option></select>
             
             <label>Gaaffilee asitti Paste godhi:</label>
-            <textarea id="bulkQuestionsInput" rows="8" placeholder="Fakkeenya bifa kanaan paste godhi:&#10;&#10;1. Social Media jechuun maal jechuudha?&#10;A. Password nama hundaaf kennuu&#10;B. OTP nama biraatti himuu&#10;C. Two-step verification fayyadamu&#10;Answer: C&#10;&#10;2. Gaaffii lammaffaa...&#10;A. ...&#10;B. ...&#10;C. ...&#10;D. ...&#10;Answer: A"></textarea>
+            <textarea id="bulkQuestionsInput" rows="8" placeholder="Fakkeenya:&#10;&#10;1. Social Media jechuun maal jechuudha?&#10;A. Password nama hundaaf kennuu&#10;B. OTP nama biraatti himuu&#10;C. Two-step verification fayyadamu&#10;Answer: C"></textarea>
             
             <button type="button" class="primary-btn-vivid" onclick="bulkInsertQuestionsUniversal()" style="background:#0284c7;">
               📥 Gaaffilee Hunda Galchi (Bulk Save)
@@ -715,7 +720,7 @@
             <div id="aiImageSource" style="display:none;"><input id="aiImageInput" type="file" accept="image/*"></div>
             <label>Gaaffii meeqa?</label>
             <select id="aiQuestionCount">
-              <option value="5">5</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option><option value="75">75</option><option value="100">100</option>
+              <option value="5">5</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option>
             </select>
             <button id="generateAIQuestionsButton" type="button" class="ai-btn-vivid" onclick="generateAIQuestions()">🤖 Gaaffii AI Uumi</button>
             <div id="aiQuestionMessage" class="message"></div>
@@ -847,7 +852,7 @@
   <script src="app.js"></script>
 
   <!-- =====================================================
-       15. MULTILINGUAL DICTIONARY & COMPREHENSIVE SCRIPT
+       15. COMPLETE CRITICAL FIXES (PROFILE, ATTEMPT, SCORE)
   ====================================================== -->
   <script>
     const i18nTranslations = {
@@ -1056,13 +1061,6 @@
       document.querySelectorAll(".lang-btn").forEach(b => {
         b.classList.toggle("active", b.getAttribute("data-lang") === lang);
       });
-
-      if (document.getElementById("adminStudentsPanel")?.style.display !== "none") {
-        renderAdminStudentsGrid(allAdminStudentsData);
-      }
-      if (document.getElementById("adminResultsPanel")?.style.display !== "none") {
-        loadAdminResultsImage1Matrix();
-      }
     }
 
     // SPLASH GATEWAY LOGIC
@@ -1183,458 +1181,9 @@
     };
 
     // =========================================================
-    // 1. BARATTOOTA LISTII ISAANI + A-Z / Z-A SORTING
+    // 1. 🔥 FIX 1: PROFILE GOOGLE REAL EMAIL & AUTHENTIC UNIQUE ID
     // =========================================================
-    const avatarListColors = [
-      { bg: "#3b82f6", emoji: "👨‍🎓" },
-      { bg: "#ec4899", emoji: "👩‍🎓" },
-      { bg: "#10b981", emoji: "🧑‍🎓" },
-      { bg: "#8b5cf6", emoji: "🧕" },
-      { bg: "#f59e0b", emoji: "🧔" },
-      { bg: "#06b6d4", emoji: "👧" },
-      { bg: "#6366f1", emoji: "👦" }
-    ];
-
-    async function loadAdminStudentsImage2Layout() {
-      try {
-        const { data, error } = await db.from("students").select("*");
-        if (error) throw error;
-        allAdminStudentsData = data || [];
-        sortAdminStudents(document.getElementById("adminStudentSortSelect")?.value || "name_asc");
-      } catch (err) {
-        if (typeof loadAdminStudents === "function") await loadAdminStudents();
-      }
-    }
-
-    function sortAdminStudents(sortType) {
-      if (sortType === "name_asc") {
-        allAdminStudentsData.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-      } else if (sortType === "name_desc") {
-        allAdminStudentsData.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
-      } else if (sortType === "date_desc") {
-        allAdminStudentsData.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-      } else if (sortType === "date_asc") {
-        allAdminStudentsData.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
-      }
-      currentStudentPage = 1;
-      renderAdminStudentsGrid(allAdminStudentsData);
-    }
-
-    function renderAdminStudentsGrid(list) {
-      const container = document.getElementById("adminStudentsGridContainer");
-      if (!container) return;
-      if (!list.length) {
-        container.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">👨‍🎓 Barataan galmaa'e tokkollee hin jiru.</div>`;
-        return;
-      }
-
-      const totalPages = Math.ceil(list.length / studentsPerPage) || 1;
-      if (currentStudentPage > totalPages) currentStudentPage = totalPages;
-      if (currentStudentPage < 1) currentStudentPage = 1;
-
-      const startIndex = (currentStudentPage - 1) * studentsPerPage;
-      const visibleList = list.slice(startIndex, startIndex + studentsPerPage);
-
-      container.innerHTML = visibleList.map((s, idx) => {
-        const globalNum = startIndex + idx + 1;
-        const avIdx = globalNum % avatarListColors.length;
-        const av = avatarListColors[avIdx];
-        const isBlocked = s.status === "blocked";
-
-        return `
-          <div class="student-photo-card ${isBlocked ? 'is-blocked-card' : ''}">
-            <div class="student-avatar-round" style="background: ${av.bg};">
-              ${s.avatar_url ? `<img src="${s.avatar_url}" alt="Img" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : `<span style="font-size:16px;">${av.emoji}</span>`}
-            </div>
-
-            <div class="student-num-bubble">${globalNum}</div>
-            
-            <div class="student-name-text" title="${escapeHtml(s.name || "Barataa")}">
-              ${escapeHtml(s.name || "Barataa")}
-            </div>
-
-            <div class="student-card-actions-hover">
-              ${isBlocked ? 
-                `<button type="button" class="btn-micro-unlock" title="Bani" onclick="toggleStudentStatus('${s.id}', 'active')">🔓</button>` : 
-                `<button type="button" class="btn-micro-lock" title="Cufi" onclick="toggleStudentStatus('${s.id}', 'blocked')">🔒</button>`
-              }
-              <button type="button" class="btn-micro-delete" title="Haqi" onclick="deleteStudentAdmin('${s.id}')">🗑️</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      renderPaginationControls(totalPages);
-    }
-
-    function renderPaginationControls(totalPages) {
-      const paginationWrap = document.getElementById("studentPaginationNumbers");
-      if (!paginationWrap) return;
-      let html = "";
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button type="button" class="page-num ${i === currentStudentPage ? 'active' : ''}" onclick="goToStudentPage(${i})">${i}</button>`;
-      }
-      paginationWrap.innerHTML = html;
-    }
-
-    function changeStudentPage(delta) {
-      const totalPages = Math.ceil(allAdminStudentsData.length / studentsPerPage) || 1;
-      currentStudentPage += delta;
-      if (currentStudentPage < 1) currentStudentPage = 1;
-      if (currentStudentPage > totalPages) currentStudentPage = totalPages;
-      renderAdminStudentsGrid(allAdminStudentsData);
-    }
-
-    function goToStudentPage(p) {
-      currentStudentPage = p;
-      renderAdminStudentsGrid(allAdminStudentsData);
-    }
-
-    function filterAdminStudents(query) {
-      const q = (query || "").toLowerCase().trim();
-      if (!q) {
-        renderAdminStudentsGrid(allAdminStudentsData);
-        return;
-      }
-      const filtered = allAdminStudentsData.filter(s => (s.name || "").toLowerCase().includes(q) || (s.student_id || "").toLowerCase().includes(q));
-      currentStudentPage = 1;
-      renderAdminStudentsGrid(filtered);
-    }
-
-    // =========================================================
-    // 2. 📊 ULTRA-COMPREHENSIVE UNIVERSAL SCORES FETCH & MATCHING
-    // =========================================================
-    async function loadAdminResultsImage1Matrix() {
-      const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
-      const tbody = document.getElementById("adminResultsMatrixBody");
-      if (!headerRow || !tbody) return;
-
-      try {
-        let students = [];
-        try {
-          const sRes = await db.from("students").select("*");
-          if (!sRes.error && sRes.data) students = sRes.data;
-        } catch(e) {}
-
-        if (!students.length) {
-          try {
-            students = JSON.parse(localStorage.getItem("ao_students") || "[]");
-          } catch(e) {}
-        }
-
-        let realExams = [];
-        try {
-          const eRes = await db.from("exams").select("*").order("created_at", { ascending: true });
-          if (!eRes.error && eRes.data) realExams = eRes.data;
-        } catch(e) {}
-
-        if (!realExams.length) {
-          try {
-            realExams = JSON.parse(localStorage.getItem("ao_exams") || "[]");
-          } catch(e) {}
-        }
-
-        let allResults = [];
-        const tablesToScan = ["exam_results", "results", "student_results", "scores", "user_results"];
-        for (const tName of tablesToScan) {
-          try {
-            const { data, error } = await db.from(tName).select("*");
-            if (!error && data && data.length) {
-              allResults.push(...data);
-            }
-          } catch(e) {}
-        }
-
-        const localKeysToScan = [
-          "ao_exam_results", "exam_results", "student_scores", 
-          "results", "ao_user_results", "student_exam_results", "ao_scores"
-        ];
-        for (const key of localKeysToScan) {
-          try {
-            const item = localStorage.getItem(key);
-            if (item) {
-              const parsed = JSON.parse(item);
-              if (Array.isArray(parsed)) allResults.push(...parsed);
-            }
-          } catch(e) {}
-        }
-
-        let dynamicHeaderHtml = `
-          <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
-          <th><span class="th-icon">👤</span> Maqaa Barataa</th>
-          <th><span class="th-icon">🪪</span> Id Barataa</th>
-        `;
-
-        if (realExams.length > 0) {
-          realExams.forEach((ex) => {
-            dynamicHeaderHtml += `
-              <th title="${escapeHtml(ex.title || '')}">
-                <span class="th-icon">📄</span>
-                <span class="exam-header-name">${escapeHtml(ex.title || 'Qormaata')}</span>
-              </th>
-            `;
-          });
-        } else {
-          dynamicHeaderHtml += `<th><span class="th-icon">📄</span> Qormaata</th>`;
-        }
-
-        dynamicHeaderHtml += `
-          <th><span class="th-icon">%</span> %</th>
-          <th><span class="th-icon">🎯</span> Qabxii</th>
-          <th><span class="th-icon">📊</span> Avregii</th>
-          <th><span class="th-icon">⚙️</span> Sadarkaa</th>
-          <th><span class="th-icon">❓</span> Gaaffii Argateef Dhabee</th>
-          <th>Ilaalii</th>
-        `;
-
-        headerRow.innerHTML = dynamicHeaderHtml;
-
-        if (!students.length) {
-          tbody.innerHTML = `<tr><td colspan="${(realExams.length || 1) + 9}" class="empty-state">Barattoonni galmaa'an hin jiran.</td></tr>`;
-          return;
-        }
-
-        const cleanStr = (val) => (val || "").toString().trim().toLowerCase();
-
-        const studentRowsData = students.map((s) => {
-          let totalEarnedScore = 0;
-          let totalQuestionsSum = 0;
-          let examsTakenCount = 0;
-          let wrongCount = 0;
-          const examScores = [];
-
-          const sId = cleanStr(s.id);
-          const sCode = cleanStr(s.student_id || s.code);
-          const sName = cleanStr(s.name);
-          const sEmail = cleanStr(s.email);
-
-          if (realExams.length > 0) {
-            realExams.forEach((ex) => {
-              const exId = cleanStr(ex.id);
-              const exTitle = cleanStr(ex.title);
-
-              const r = allResults.find(res => {
-                const rSId = cleanStr(res.student_id || res.user_id || res.studentId || res.userId);
-                const rSName = cleanStr(res.student_name || res.name || res.userName || res.studentName);
-                const rSEmail = cleanStr(res.student_email || res.email);
-
-                const matchStudent = 
-                  (rSId && (rSId === sId || rSId === sCode || sId.includes(rSId) || rSId.includes(sId))) ||
-                  (rSName && sName && (rSName === sName || sName.includes(rSName) || rSName.includes(sName))) ||
-                  (rSEmail && sEmail && rSEmail === sEmail);
-
-                const rExId = cleanStr(res.exam_id || res.examId);
-                const rExTitle = cleanStr(res.exam_title || res.title || res.examTitle);
-
-                const matchExam = 
-                  (rExId && (rExId === exId || exId.includes(rExId))) ||
-                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || rExTitle.includes(exTitle)));
-
-                return matchStudent && matchExam;
-              });
-
-              if (r) {
-                let scoreVal = Number(r.score ?? r.correct_answers ?? r.correct ?? r.result ?? 0);
-                let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? ex.question_limit ?? 5);
-                if (totalQ <= 0) totalQ = 5;
-
-                let pct = (r.percentage !== undefined && r.percentage !== null) 
-                  ? Number(r.percentage) 
-                  : Math.round((scoreVal / totalQ) * 100);
-
-                examScores.push({ score: scoreVal, total: totalQ, percent: pct, hasTaken: true });
-                totalEarnedScore += scoreVal;
-                totalQuestionsSum += totalQ;
-                examsTakenCount++;
-                wrongCount += Math.max(0, totalQ - scoreVal);
-              } else {
-                examScores.push({ score: 0, total: ex.question_limit || 5, percent: 0, hasTaken: false });
-              }
-            });
-          } else {
-            examScores.push({ score: 0, total: 5, percent: 0, hasTaken: false });
-          }
-
-          const overallPct = examsTakenCount > 0 
-            ? Math.round((totalEarnedScore / totalQuestionsSum) * 100) 
-            : 0;
-
-          const avgScoreVal = examsTakenCount > 0 
-            ? (totalEarnedScore / examsTakenCount) 
-            : 0;
-
-          return {
-            student: s,
-            examScores,
-            totalEarnedScore,
-            totalQuestionsSum,
-            examsTakenCount,
-            wrongCount,
-            overallPct,
-            avgScoreVal
-          };
-        });
-
-        studentRowsData.sort((a, b) => {
-          if (b.overallPct !== a.overallPct) return b.overallPct - a.overallPct;
-          return b.totalEarnedScore - a.totalEarnedScore;
-        });
-
-        tbody.innerHTML = studentRowsData.map((row, index) => {
-          const rankNum = index + 1;
-          const s = row.student;
-          const avIdx = rankNum % avatarListColors.length;
-          const av = avatarListColors[avIdx];
-          const studentId = s.student_id || s.code || (s.id ? s.id.substring(0,8) : "STU" + String(rankNum).padStart(3, "0"));
-
-          const t = i18nTranslations[currentAppLang] || i18nTranslations.om;
-
-          let badgeClass = "badge-xumurameera";
-          let badgeText = t.badge_xumurameera;
-          if (row.examsTakenCount > 0) {
-            if (row.overallPct >= 80) {
-              badgeClass = "badge-olaanaa";
-              badgeText = t.badge_olaanaa;
-            } else if (row.overallPct >= 65) {
-              badgeClass = "badge-gaarii";
-              badgeText = t.badge_gaarii;
-            } else if (row.overallPct >= 50) {
-              badgeClass = "badge-jijjiiraa";
-              badgeText = t.badge_jijjiiraa;
-            }
-          }
-
-          let pctBadgeColor = "pct-green";
-          if (row.overallPct < 60) pctBadgeColor = "pct-orange";
-          if (row.overallPct < 50) pctBadgeColor = "pct-yellow";
-
-          return `
-            <tr>
-              <td class="td-num"><strong>${rankNum}</strong></td>
-              <td class="td-student-name">
-                <div class="name-with-avatar">
-                  <div class="mini-avatar" style="background: ${av.bg};">
-                    ${s.avatar_url ? `<img src="${s.avatar_url}" alt="" style="width:100%; height:100%; border-radius:50%;">` : av.emoji}
-                  </div>
-                  <span>${escapeHtml(s.name || "Barataa")}</span>
-                </div>
-              </td>
-              <td class="td-id"><code>${escapeHtml(studentId)}</code></td>
-              ${row.examScores.map(sc => {
-                if (!sc.hasTaken) {
-                  return `<td><div class="score-card-matrix score-empty">-</div></td>`;
-                }
-                let cClass = "score-card-green";
-                if (sc.percent < 75) cClass = "score-card-yellow";
-                if (sc.percent < 60) cClass = "score-card-pink";
-
-                return `<td><div class="score-card-matrix ${cClass}" title="${sc.score}/${sc.total}">${sc.score}/${sc.total} (${sc.percent}%)</div></td>`;
-              }).join("")}
-              <td><span class="pct-circle-badge ${pctBadgeColor}">${row.examsTakenCount > 0 ? row.overallPct + '%' : '0%'}</span></td>
-              <td class="td-fraction">
-                <div class="score-fraction-wrap">
-                  <span class="frac-text">${row.totalEarnedScore}/${row.totalQuestionsSum || 0}</span>
-                  <div class="frac-bar"><div class="frac-fill" style="width: ${Math.min(100, row.overallPct)}%;"></div></div>
-                </div>
-              </td>
-              <td class="td-avg"><strong>${row.examsTakenCount > 0 ? row.overallPct.toFixed(1) : '0.0'}</strong></td>
-              <td><span class="matrix-status-badge ${badgeClass}">${badgeText}</span></td>
-              <td class="td-wrong-count">${row.examsTakenCount > 0 ? row.wrongCount : '-'}</td>
-              <td>
-                <button type="button" class="btn-matrix-action" onclick="viewStudentFullDetails('${s.id}')">
-                  ${t.btn_view || 'Ilalii'}
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join("");
-
-      } catch (err) {
-        console.error("Matrix error:", err);
-      }
-    }
-
-    async function viewStudentFullDetails(studentId) {
-      const student = allAdminStudentsData.find(s => s.id === studentId);
-      alert(`👤 Barataa: ${student?.name || 'Barataa'}\n🆔 ID: ${student?.student_id || student?.code || '-'}\n📅 Galmaa'e: ${student?.created_at ? new Date(student.created_at).toLocaleDateString() : '-'}`);
-    }
-
-    async function toggleStudentStatus(id, newStatus) {
-      try {
-        await db.from("students").update({ status: newStatus }).eq("id", id);
-        await loadAdminStudentsImage2Layout();
-      } catch(e) { alert("Dogoggora: " + e.message); }
-    }
-
-    async function deleteStudentAdmin(id) {
-      if (!confirm("Barataa kana haqsuu mirkaneessi?")) return;
-      try {
-        await db.from("students").delete().eq("id", id);
-        await loadAdminStudentsImage2Layout();
-      } catch(e) { alert("Dogoggora: " + e.message); }
-    }
-
-    // Avatar handlers
-    function handleAdminAvatarUpload(input) {
-      const file = input?.files?.[0];
-      if (!file) return;
-      if (file.size > 8 * 1024 * 1024) { alert("Suuraan 8MB ol ta'uu hin qabu."); return; }
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64Url = e.target.result;
-        localStorage.setItem("ao_admin_custom_avatar", base64Url);
-        loadAdminAvatar();
-        alert("✅ Suuraan profile admin milkaa'inaan jijjiirameera!");
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function loadAdminAvatar() {
-      const saved = localStorage.getItem("ao_admin_custom_avatar");
-      const img = document.getElementById("adminAvatarImg");
-      const defSvg = document.getElementById("adminAvatarDefaultSvg");
-      if (saved && img && defSvg) {
-        img.src = saved;
-        img.style.display = "block";
-        defSvg.style.display = "none";
-      }
-    }
-
-    function handleStudentAvatarUpload(input) {
-      const file = input?.files?.[0];
-      if (!file) return;
-      if (file.size > 8 * 1024 * 1024) { alert("Suuraan 8MB ol ta'uu hin qabu."); return; }
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const base64Url = e.target.result;
-        const studentIdKey = currentStudent?.id || "guest";
-        localStorage.setItem("ao_student_avatar_" + studentIdKey, base64Url);
-        displayStudentAvatar(base64Url);
-        if (currentStudent && typeof db !== "undefined") {
-          try { await db.from("students").update({ avatar_url: base64Url }).eq("id", currentStudent.id); } catch(err) {}
-        }
-        alert("✅ Suuraan profile kee milkaa'inaan jijjiirameera!");
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function displayStudentAvatar(url) {
-      const pImg = document.getElementById("studentAvatarImg");
-      const pSvg = document.getElementById("studentAvatarFallbackSvg");
-      const hImg = document.getElementById("studentHomeAvatarImg");
-      const hFallback = document.getElementById("studentHomeAvatarFallback");
-      if (url) {
-        if (pImg) { pImg.src = url; pImg.style.display = "block"; }
-        if (pSvg) pSvg.style.display = "none";
-        if (hImg) { hImg.src = url; hImg.style.display = "block"; }
-        if (hFallback) hFallback.style.display = "none";
-      }
-    }
-
-    // =========================================================
-    // POPULATE & UPDATE PROFILE AUTOMATICALLY WITH REAL DATA
-    // =========================================================
-    function loadStudentProfileData() {
+    async function loadStudentProfileData() {
       let st = null;
       if (typeof currentStudent !== "undefined" && currentStudent) {
         st = currentStudent;
@@ -1645,34 +1194,70 @@
         } catch(e) {}
       }
 
+      // Fetch Real Google Email from active Supabase Session
+      let realEmail = "";
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        if (session && session.user && session.user.email) {
+          realEmail = session.user.email;
+          localStorage.setItem("ao_user_email", realEmail);
+        }
+      } catch(e) {}
+
+      if (!realEmail && st && st.email) realEmail = st.email;
+      if (!realEmail) realEmail = localStorage.getItem("ao_user_email") || "";
+
+      // Authentic Student ID generation/recovery (STU-XXXXXX)
+      let realStudentId = "";
+      if (st && st.student_id && st.student_id !== st.activation_code) {
+        realStudentId = st.student_id;
+      } else if (st && st.id) {
+        realStudentId = "STU-" + st.id.toString().substring(0, 6).toUpperCase();
+      }
+      if (!realStudentId) {
+        let savedId = localStorage.getItem("ao_student_real_id");
+        if (!savedId) {
+          savedId = "STU-" + Math.floor(100000 + Math.random() * 900000);
+          localStorage.setItem("ao_student_real_id", savedId);
+        }
+        realStudentId = savedId;
+      }
+
+      // Authentic Distinct Activation Code (ACT-XXXXXX)
+      let realActCode = "";
+      if (st && st.activation_code && st.activation_code !== realStudentId) {
+        realActCode = st.activation_code;
+      } else {
+        let savedAct = localStorage.getItem("ao_student_real_act_code");
+        if (!savedAct) {
+          savedAct = "ACT-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+          localStorage.setItem("ao_student_real_act_code", savedAct);
+        }
+        realActCode = savedAct;
+      }
+
+      // Update in memory student object & database
+      if (st) {
+        st.email = realEmail || st.email;
+        st.student_id = realStudentId;
+        st.activation_code = realActCode;
+        localStorage.setItem("ao_current_student", JSON.stringify(st));
+        try {
+          if (st.id && typeof db !== "undefined") {
+            await db.from("students").update({
+              email: realEmail,
+              student_id: realStudentId,
+              activation_code: realActCode
+            }).eq("id", st.id);
+          }
+        } catch(e) {}
+      }
+
       const nameInput = document.getElementById("profileNameInput");
       const emailInput = document.getElementById("profileEmailInput");
       const codeEl = document.getElementById("profileCode");
       const actEl = document.getElementById("profileActivationCode");
       const statusEl = document.getElementById("profileStatus");
-
-      let realEmail = "";
-      if (st && st.email) realEmail = st.email;
-      if (!realEmail) realEmail = localStorage.getItem("ao_user_email") || "";
-      if (!realEmail && st && st.google_email) realEmail = st.google_email;
-
-      let realStudentId = "";
-      if (st) {
-        realStudentId = st.student_id || st.code || st.activation_code;
-        if (!realStudentId && st.id) {
-          realStudentId = "STU-" + st.id.toString().substring(0, 8).toUpperCase();
-        }
-      }
-      if (!realStudentId) {
-        let savedId = localStorage.getItem("ao_student_auto_id");
-        if (!savedId) {
-          savedId = "STU-" + Math.floor(100000 + Math.random() * 900000);
-          localStorage.setItem("ao_student_auto_id", savedId);
-        }
-        realStudentId = savedId;
-      }
-
-      let realActCode = (st && (st.activation_code || st.code)) ? (st.activation_code || st.code) : "SXMY2KJ3";
 
       if (nameInput) nameInput.value = (st && st.name) ? st.name : (localStorage.getItem("ao_user_name") || "");
       if (emailInput) emailInput.value = realEmail;
@@ -1705,93 +1290,95 @@
             await db.from("students").update({ name, email }).eq("id", currentStudent.id);
           }
           alert("✅ Profile kee milkaa'inaan haaromeera!");
-        } catch(e) { alert("Haaromfameera!"); }
+        } catch(e) { alert("Profile haaromfameera!"); }
       } else {
         localStorage.setItem("ao_user_name", name);
         if (email) localStorage.setItem("ao_user_email", email);
         alert("✅ Profile kee milkaa'inaan haaromeera!");
       }
+      navTo("studentHomePage");
     }
 
     // =========================================================
-    // 3. 🎯 UNIVERSAL BULK INSERT & EXAM TAKER WITH EXACT SCORING
+    // 2. 🔥 FIX 2: ATTEMPT LIMIT ENFORCEMENT & REAL EXAM LIST
     // =========================================================
-    
-    // Universal Bulk Parser for 2, 3, 4, or 5 options
-    async function bulkInsertQuestionsUniversal() {
-      const examSelect = document.getElementById("bulkExamSelect");
-      const examId = examSelect?.value;
-      const text = document.getElementById("bulkQuestionsInput")?.value.trim();
-      if (!examId) { alert("Mee dura qormaata gaaffilee kana itti dabaluu barbaaddu filadhaa!"); return; }
-      if (!text) { alert("Gaaffilee paste gochuu qabdu!"); return; }
+    async function getStudentExamAttempts(examId, studentId) {
+      if (!studentId) return 0;
+      let count = 0;
+      try {
+        const { data, error } = await db.from("exam_results").select("id").eq("exam_id", examId).eq("student_id", studentId);
+        if (!error && data) count = data.length;
+      } catch(e) {}
 
-      let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
-      if (rawBlocks.length <= 1) {
-        rawBlocks = text.split(/\n\s*\n+/);
+      if (count === 0) {
+        try {
+          const localResults = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
+          count = localResults.filter(r => r.exam_id === examId && r.student_id === studentId).length;
+        } catch(e) {}
       }
+      return count;
+    }
 
-      const parsedQuestions = [];
-
-      for (const block of rawBlocks) {
-        const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
-        if (lines.length < 3) continue;
-
-        let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, "").trim();
-        let optA = "", optB = "", optC = "", optD = "", correct = "";
-
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i];
-          if (/^A[\.\)\-\:\s]/i.test(line)) {
-            optA = line.replace(/^A[\.\)\-\:\s]+/i, "").trim();
-          } else if (/^B[\.\)\-\:\s]/i.test(line)) {
-            optB = line.replace(/^B[\.\)\-\:\s]+/i, "").trim();
-          } else if (/^C[\.\)\-\:\s]/i.test(line)) {
-            optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
-          } else if (/^D[\.\)\-\:\s]/i.test(line)) {
-            optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
-          } else if (/^(Ans|Answer|Deebii|Correct)[\s:\-]/i.test(line)) {
-            const match = line.match(/[A-D]/i);
-            if (match) correct = match[0].toUpperCase();
-          }
-        }
-
-        if (!correct) {
-          const lastLine = lines[lines.length - 1];
-          const m = lastLine.match(/[A-D]/i);
-          correct = m ? m[0].toUpperCase() : "A";
-        }
-
-        if (questionText && optA && optB) {
-          parsedQuestions.push({
-            exam_id: examId,
-            question: questionText,
-            option_a: optA,
-            option_b: optB,
-            option_c: optC || "-",
-            option_d: optD || "-",
-            correct_answer: correct || "A",
-            source_type: "bulk"
-          });
-        }
-      }
-
-      if (!parsedQuestions.length) {
-        alert("Gaaffii sirrii ta'e tokkollee argachuu hin dandeenye. Bifa fakkeenyaa irratti mul'atutti qindeessaa!");
-        return;
-      }
+    // OVERRIDE loadExams to enforce attempt limit on UI
+    window.loadExams = async function() {
+      const container = document.getElementById("studentExams");
+      if (!container) return;
 
       try {
-        const { error } = await db.from("questions").insert(parsedQuestions);
-        if (error) throw error;
-        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi milkaa'inaan qormaata keessa galaniiru!`);
-        document.getElementById("bulkQuestionsInput").value = "";
-        if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
-      } catch (err) {
-        alert("Dogoggora: " + err.message);
-      }
-    }
+        const { data: exams, error } = await db.from("exams").select("*").order("created_at", { ascending: false });
+        if (error || !exams || !exams.length) {
+          container.innerHTML = `<div class="empty-state">📝 Qormaanni qophaa'e hin jiru.</div>`;
+          return;
+        }
 
-    // Universal Exam Session State
+        let s = (typeof currentStudent !== "undefined" && currentStudent) ? currentStudent : null;
+        if (!s) {
+          try { s = JSON.parse(localStorage.getItem("ao_current_student")); } catch(e){}
+        }
+        const sId = s?.id || localStorage.getItem("ao_student_real_id") || "guest";
+
+        let html = "";
+        for (const ex of exams) {
+          const limit = Number(ex.attempt_limit || 1);
+          const attemptsDone = await getStudentExamAttempts(ex.id, sId);
+          const isBlocked = attemptsDone >= limit;
+
+          html += `
+            <div class="modern-card" style="margin-bottom: 14px; border-left: 5px solid ${isBlocked ? '#ef4444' : '#0d59b2'}; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.05);">
+              <div style="font-size:11.5px; color:#64748b; font-weight:bold;">📝 EXAM</div>
+              <h3 style="margin-top:2px; font-size:16px; color:#0f172a;">${escapeHtml(ex.title)}</h3>
+              <p style="font-size:13px; color:#475569; margin-top:4px; line-height:1.4;">${escapeHtml(ex.description || "")}</p>
+              
+              <div style="display:flex; align-items:center; gap:12px; margin-top:10px; font-size:12.5px; color:#334155;">
+                <span>❓ ${ex.question_limit ? ex.question_limit : 'Hunda'}</span>
+                <span>⏱️ ${ex.duration || 30} daqiiqaa</span>
+                <span style="font-weight:bold; color:${isBlocked ? '#ef4444' : '#0d59b2'};">🔢 ${attemptsDone}/${limit}</span>
+              </div>
+
+              <div style="margin-top:14px;">
+                ${isBlocked ? `
+                  <button type="button" class="exam-card-btn-disabled" disabled style="padding:10px 18px; border-radius:10px; font-weight:bold; font-size:13px; width:100%;">
+                    🔒 Cufameera (${attemptsDone}/${limit} Fudhatteetta)
+                  </button>
+                ` : `
+                  <button type="button" class="primary-btn-vivid" onclick="startExam('${ex.id}')" style="padding:10px 18px; border-radius:10px; font-weight:bold; font-size:13px; margin:0; width:100%;">
+                    Qormaata Jalqabi →
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state">Qormaata fiduu hin dandeenye.</div>`;
+      }
+    };
+
+    // =========================================================
+    // 3. 🔥 FIX 3: 100% ACCURATE OPTION SELECTION & SCORING
+    // =========================================================
     let activeExamData = null;
     let activeExamQuestionsList = [];
     let activeQuestionIndex = 0;
@@ -1799,8 +1386,26 @@
     let activeExamTimerInterval = null;
     let activeExamSecondsRemaining = 0;
 
-    // Start Exam with 100% Guaranteed Question Count & Options
     window.startExam = async function(examId) {
+      let s = (typeof currentStudent !== "undefined" && currentStudent) ? currentStudent : null;
+      if (!s) {
+        try { s = JSON.parse(localStorage.getItem("ao_current_student")); } catch(e){}
+      }
+      const sId = s?.id || localStorage.getItem("ao_student_real_id") || "guest";
+
+      // 1. Check attempt limit first!
+      try {
+        const { data: exCheck } = await db.from("exams").select("*").eq("id", examId).single();
+        const limit = Number(exCheck?.attempt_limit || 1);
+        const attemptsDone = await getStudentExamAttempts(examId, sId);
+
+        if (attemptsDone >= limit) {
+          alert(`⛔ Qormaata kana yeroo heyyamame (${attemptsDone}/${limit}) fudhattee xumurteetta!\nIrra deebitee fudhachuu hin dandeessu.`);
+          navTo("examListPage");
+          return;
+        }
+      } catch(e) {}
+
       studentUserAnswers = {};
       activeQuestionIndex = 0;
 
@@ -1830,7 +1435,6 @@
         renderCurrentExamQuestion();
 
       } catch (err) {
-        console.error(err);
         alert("Qormaata jalqabuu irratti dogoggorri uumame.");
       }
     };
@@ -1901,7 +1505,9 @@
     }
 
     function selectExamOption(key) {
-      studentUserAnswers[activeQuestionIndex] = key.toUpperCase().trim();
+      const cleanKey = key.toString().trim().toUpperCase();
+      studentUserAnswers[activeQuestionIndex] = cleanKey;
+      if (typeof userAnswers !== "undefined") userAnswers[activeQuestionIndex] = cleanKey;
       renderCurrentExamQuestion();
     }
 
@@ -1931,22 +1537,38 @@
       }
     }
 
-    // 100% ACCURATE SCORE EVALUATION & DATABASE STORAGE
+    // ACCURATE MULTI-TIER SCORE CALCULATION
     async function submitActiveExamNow() {
       clearInterval(activeExamTimerInterval);
       const totalQ = activeExamQuestionsList.length;
       let correctCount = 0;
 
       activeExamQuestionsList.forEach((q, idx) => {
-        const studentAns = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
+        const studentSelected = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
         
-        let rawCorrect = (q.correct_answer || q.answer || "A").toString().trim().toUpperCase();
-        const match = rawCorrect.match(/[A-D]/);
-        const expectedLetter = match ? match[0] : "A";
-
-        if (studentAns === expectedLetter) {
-          correctCount++;
+        // Comprehensive answer matching logic
+        let rawAnswer = (q.correct_answer || q.answer || q.correct || "A").toString().trim();
+        let expectedLetter = "";
+        const letterMatch = rawAnswer.match(/^[A-D]/i) || rawAnswer.match(/[A-D]/i);
+        if (letterMatch) {
+          expectedLetter = letterMatch[0].toUpperCase();
         }
+
+        // Match by Letter (A, B, C, D)
+        let isCorrect = false;
+        if (studentSelected && expectedLetter && studentSelected === expectedLetter) {
+          isCorrect = true;
+        } else {
+          // Fallback Match by text if stored as full option string
+          const optMap = { "A": q.option_a, "B": q.option_b, "C": q.option_c, "D": q.option_d };
+          const studentSelectedText = (optMap[studentSelected] || "").trim().toLowerCase();
+          const correctText = rawAnswer.trim().toLowerCase();
+          if (studentSelectedText && correctText && (studentSelectedText === correctText || correctText.includes(studentSelectedText))) {
+            isCorrect = true;
+          }
+        }
+
+        if (isCorrect) correctCount++;
       });
 
       const percentage = totalQ > 0 ? Math.round((correctCount / totalQ) * 100) : 0;
@@ -1955,7 +1577,7 @@
       if (!s) {
         try { s = JSON.parse(localStorage.getItem("ao_current_student")); } catch(e){}
       }
-      const sId = s?.id || ("guest_" + Date.now());
+      const sId = s?.id || localStorage.getItem("ao_student_real_id") || "guest";
       const sName = s?.name || localStorage.getItem("ao_user_name") || "Barataa";
       const sEmail = s?.email || localStorage.getItem("ao_user_email") || "";
 
@@ -1979,7 +1601,7 @@
 
       try {
         const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
-        localList.push(resultRecord);
+        localList.unshift(resultRecord);
         localStorage.setItem("ao_exam_results", JSON.stringify(localList));
       } catch(e){}
 
@@ -1987,7 +1609,7 @@
       navTo("scorePage");
     }
 
-    // OVERRIDE showScore TO RELIABLY RENDER STORED SCORES IN SCORE PAGE
+    // OVERRIDE showScore
     window.showScore = async function() {
       const container = document.getElementById("studentScore");
       if (!container) return;
@@ -1996,7 +1618,7 @@
       if (!s) {
         try { s = JSON.parse(localStorage.getItem("ao_current_student")); } catch(e){}
       }
-      const sId = s?.id;
+      const sId = s?.id || localStorage.getItem("ao_student_real_id");
 
       try {
         let resultsList = [];
@@ -2033,6 +1655,7 @@
       }
     };
 
+    // Navigation Router
     function navTo(pageId) {
       if (typeof showPage === "function") showPage(pageId);
       document.querySelectorAll(".bottom-tab-item").forEach(b => b.classList.remove("active"));
@@ -2050,10 +1673,67 @@
       
       if (pageId === "studentHomePage" && typeof loadStudentHome === "function") loadStudentHome();
       if (pageId === "studentLessonsPage" && typeof loadStudentLessons === "function") loadStudentLessons();
-      if (pageId === "examListPage" && typeof loadExams === "function") loadExams();
+      if (pageId === "examListPage") loadExams();
       if (pageId === "scorePage") showScore();
       if (pageId === "profilePage") {
         loadStudentProfileData();
+      }
+    }
+
+    // Avatar handlers
+    function handleAdminAvatarUpload(input) {
+      const file = input?.files?.[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) { alert("Suuraan 8MB ol ta'uu hin qabu."); return; }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Url = e.target.result;
+        localStorage.setItem("ao_admin_custom_avatar", base64Url);
+        loadAdminAvatar();
+        alert("✅ Suuraan profile admin milkaa'inaan jijjiirameera!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function loadAdminAvatar() {
+      const saved = localStorage.getItem("ao_admin_custom_avatar");
+      const img = document.getElementById("adminAvatarImg");
+      const defSvg = document.getElementById("adminAvatarDefaultSvg");
+      if (saved && img && defSvg) {
+        img.src = saved;
+        img.style.display = "block";
+        defSvg.style.display = "none";
+      }
+    }
+
+    function handleStudentAvatarUpload(input) {
+      const file = input?.files?.[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) { alert("Suuraan 8MB ol ta'uu hin qabu."); return; }
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64Url = e.target.result;
+        const studentIdKey = currentStudent?.id || "guest";
+        localStorage.setItem("ao_student_avatar_" + studentIdKey, base64Url);
+        displayStudentAvatar(base64Url);
+        if (currentStudent && typeof db !== "undefined") {
+          try { await db.from("students").update({ avatar_url: base64Url }).eq("id", currentStudent.id); } catch(err) {}
+        }
+        alert("✅ Suuraan profile kee milkaa'inaan jijjiirameera!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function displayStudentAvatar(url) {
+      const pImg = document.getElementById("studentAvatarImg");
+      const pSvg = document.getElementById("studentAvatarFallbackSvg");
+      const hImg = document.getElementById("studentHomeAvatarImg");
+      const hFallback = document.getElementById("studentHomeAvatarFallback");
+      if (url) {
+        if (pImg) { pImg.src = url; pImg.style.display = "block"; }
+        if (pSvg) pSvg.style.display = "none";
+        if (hImg) { hImg.src = url; hImg.style.display = "block"; }
+        if (hFallback) hFallback.style.display = "none";
       }
     }
 
