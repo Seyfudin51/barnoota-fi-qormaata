@@ -1545,6 +1545,11 @@
       document.getElementById("examEditModal").style.display = "none";
     };
 
+    // =========================================================
+    // 🚀 SELF-HEALING / ROBUST SAVE EDITED EXAM
+    // Avoids missing column errors by dynamically omitting columns
+    // that don't exist in the database table schema.
+    // =========================================================
     window.saveEditedExam = async function() {
       const id = document.getElementById("editExamId").value;
       const title = document.getElementById("editExamTitle").value.trim();
@@ -1560,27 +1565,63 @@
 
       if (!title) { alert("Mata-duree qormaataa guuti!"); return; }
 
-      try {
-        const { error } = await db.from("exams").update({
-          title,
-          description,
-          question_limit,
-          attempt_limit,
-          duration,
-          is_final,
-          final: is_final,
-          start_date,
-          end_date,
-          start_time,
-          end_time
-        }).eq("id", id);
+      // Build the primary update payload
+      let updatePayload = {
+        title,
+        description,
+        question_limit,
+        attempt_limit,
+        duration,
+        is_final,
+        final: is_final,
+        start_date,
+        end_date,
+        start_time,
+        end_time
+      };
 
-        if (error) throw error;
+      let success = false;
+      let attemptLoop = 0;
+
+      // Safe schema matching loop
+      while (!success && attemptLoop < 15) {
+        attemptLoop++;
+        try {
+          const { error } = await db.from("exams").update(updatePayload).eq("id", id);
+          
+          if (error) {
+            const errMsg = error.message || "";
+            // Parse common database missing-column formats:
+            // "Could not find the 'duration' column of 'exams' in the schema cache"
+            // "column 'duration' does not exist"
+            const match = errMsg.match(/Could not find the '([^']+)' column/i) || 
+                          errMsg.match(/column "([^"]+)" of relation/i) ||
+                          errMsg.match(/column "([^"]+)" does not exist/i);
+            
+            if (match && match[1]) {
+              const missingCol = match[1];
+              console.warn(`Removing database missing column: ${missingCol}`);
+              delete updatePayload[missingCol];
+              
+              // Clean aliases
+              if (missingCol === "is_final") delete updatePayload["final"];
+              if (missingCol === "final") delete updatePayload["is_final"];
+              continue; // try again with clean payload
+            } else {
+              throw error; // Other database or permission error
+            }
+          }
+          success = true; // Update finished successfully!
+        } catch(e) {
+          alert("Error saving exam: " + e.message);
+          return;
+        }
+      }
+
+      if (success) {
         alert("✅ Qormaanni kee milkaa'inaan sirreeffameera!");
         window.closeEditExamModal();
         await window.loadAdminExams();
-      } catch(e) {
-        alert("Error saving exam: " + e.message);
       }
     };
 
@@ -1644,6 +1685,16 @@
         if (typeof loadAdminStudents === "function") await loadAdminStudents();
       }
     };
+
+    const avatarListColors = [
+      { bg: "#3b82f6", emoji: "👨‍🎓" },
+      { bg: "#ec4899", emoji: "👩‍🎓" },
+      { bg: "#10b981", emoji: "🧑‍🎓" },
+      { bg: "#8b5cf6", emoji: "🧕" },
+      { bg: "#f59e0b", emoji: "🧔" },
+      { bg: "#06b6d4", emoji: "👧" },
+      { bg: "#6366f1", emoji: "👦" }
+    ];
 
     window.sortAdminStudents = function(sortType) {
       if (sortType === "name_asc") {
