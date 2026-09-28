@@ -1030,9 +1030,9 @@
     </div>
   </div>
 
-  <!-- SUPABASE & APP SCRIPTS -->
+  <!-- SUPABASE & APP SCRIPTS (Cache Busting Version Added) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=3.8"></script>
 
   <!-- PWA Service Worker Registration for Offline Capability -->
   <script>
@@ -1959,7 +1959,7 @@
 
                 const matchExam = 
                   (rExId && (rExId === exId || exId.includes(rExId))) ||
-                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || rExTitle.includes(exTitle)));
+                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || exTitle.includes(rExTitle)));
 
                 return matchStudent && matchExam;
               });
@@ -2632,20 +2632,37 @@
             optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
           } else if (/^D[\.\)\-\:\s]/i.test(line)) {
             optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
-          } else if (/^(Ans|Answer|Deebii|Correct|Sirrii)[\s:\-]/i.test(line)) {
+          } else if (/^(Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s:\-]/i.test(line)) {
             const match = line.match(/[A-D]/i);
             if (match) correctLetter = match[0].toUpperCase();
+          } else {
+            // Also check inline Deebii:B or Deebii: B anywhere in the line
+            const inlineMatch = line.match(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
+            if (inlineMatch && inlineMatch[1]) {
+              correctLetter = inlineMatch[1].toUpperCase();
+            }
           }
         }
 
-        // Fallback search in last line
+        // Fallback search in entire block for Deebii:B
         if (!correctLetter) {
-          const lastLine = lines[lines.length - 1];
-          const match = lastLine.match(/[A-D]/i);
-          if (match) correctLetter = match[0].toUpperCase();
+          const blockMatch = block.match(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
+          if (blockMatch && blockMatch[1]) {
+            correctLetter = blockMatch[1].toUpperCase();
+          }
         }
 
         correctLetter = (correctLetter || "A").trim().toUpperCase();
+
+        // Clean leaked Deebii from options
+        const cleanOpt = (val) => String(val || "")
+          .replace(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*[A-D]/gi, "")
+          .trim();
+
+        optA = cleanOpt(optA);
+        optB = cleanOpt(optB);
+        optC = cleanOpt(optC);
+        optD = cleanOpt(optD);
 
         if (questionText && optA && optB) {
           parsedQuestions.push({
@@ -2662,14 +2679,14 @@
       }
 
       if (!parsedQuestions.length) {
-        alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kana qabateuu mirkaneessaa:\n\n1. Gaaffii?\nA. Filannoo 1\nB. Filannoo 2\nC. Filannoo 3\nD. Filannoo 4\nAnswer: C");
+        alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kana qabateuu mirkaneessaa:\n\n1. Gaaffii?\nA. Filannoo 1\nB. Filannoo 2\nC. Filannoo 3\nD. Filannoo 4\nDeebii: B");
         return;
       }
 
       try {
         const { error } = await db.from("questions").insert(parsedQuestions);
         if (error) throw error;
-        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii sirrii wajjin milkaa'inaan galaniiru!`);
+        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii sirrii (A, B, C, D) wajjin milkaa'inaan galaniiru!`);
         document.getElementById("bulkQuestionsInput").value = "";
         if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
       } catch (err) {
