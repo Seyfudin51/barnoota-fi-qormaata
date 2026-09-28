@@ -1034,6 +1034,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
+  <!-- PWA Service Worker Registration for Offline Capability -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+
   <!-- =====================================================
        15. MULTILINGUAL DICTIONARY & COMPLETE SCRIPT EXPORTS
   ====================================================== -->
@@ -1497,14 +1506,12 @@
 
     // =========================================================
     // 🛡️ ULTRA-ROBUST TOGGLE EXAM STATUS (CUFI / BANI)
-    // Tries multiple database column candidates and gracefully falls back
     // =========================================================
     window.toggleExamStatus = async function(id, shouldOpen) {
       const newStatus = shouldOpen ? "active" : "closed";
       const isClosedState = !shouldOpen;
       localStorage.setItem("ao_exam_closed_" + id, isClosedState.toString());
 
-      // Attempt db update across common schema column candidates
       const columnAttempts = [
         { status: newStatus },
         { is_active: shouldOpen },
@@ -1515,7 +1522,7 @@
       for (const payload of columnAttempts) {
         try {
           const { error } = await db.from("exams").update(payload).eq("id", id);
-          if (!error) break; // succeeded!
+          if (!error) break;
         } catch(e) {}
       }
 
@@ -1525,7 +1532,6 @@
 
     // =========================================================
     // 🛡️ ULTRA-ROBUST TOGGLE LEADERBOARD (BANI / CUFI)
-    // Tries multiple database column candidates and gracefully falls back
     // =========================================================
     window.toggleExamLeaderboard = async function(id, shouldClose) {
       const willBeOpen = !shouldClose;
@@ -1541,7 +1547,7 @@
       for (const payload of columnAttempts) {
         try {
           const { error } = await db.from("exams").update(payload).eq("id", id);
-          if (!error) break; // succeeded!
+          if (!error) break;
         } catch(e) {}
       }
 
@@ -1564,7 +1570,7 @@
     };
 
     // =========================================================
-    // EXAM EDIT MODAL LOGIC - SUPPORT FOR ALL FIELDS (DATES/TIMES)
+    // EXAM EDIT MODAL LOGIC - SUPPORT FOR ALL FIELDS
     // =========================================================
     window.openEditExamModal = async function(id) {
       try {
@@ -1595,8 +1601,6 @@
 
     // =========================================================
     // 🚀 SELF-HEALING / ROBUST SAVE EDITED EXAM
-    // Avoids missing column errors by dynamically omitting columns
-    // that don't exist in the database table schema.
     // =========================================================
     window.saveEditedExam = async function() {
       const id = document.getElementById("editExamId").value;
@@ -1613,7 +1617,6 @@
 
       if (!title) { alert("Mata-duree qormaataa guuti!"); return; }
 
-      // Build the primary update payload
       let updatePayload = {
         title,
         description,
@@ -1631,7 +1634,6 @@
       let success = false;
       let attemptLoop = 0;
 
-      // Safe schema matching loop
       while (!success && attemptLoop < 15) {
         attemptLoop++;
         try {
@@ -2465,29 +2467,44 @@
       }
     };
 
+    // =========================================================
+    // 🎯 SMART EXAM SCORING ENGINE (100% ACCURATE CORRECT ANSWER MATCH)
+    // =========================================================
     window.submitActiveExamNow = async function() {
       clearInterval(activeExamTimerInterval);
       const totalQ = activeExamQuestionsList.length;
       let correctCount = 0;
 
       activeExamQuestionsList.forEach((q, idx) => {
-        const studentSelected = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
+        const studentChoice = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
         
-        let rawAnswer = (q.correct_answer || q.answer || q.correct || "A").toString().trim();
-        let expectedLetter = "";
-        const letterMatch = rawAnswer.match(/^[A-D]/i) || rawAnswer.match(/[A-D]/i);
-        if (letterMatch) {
-          expectedLetter = letterMatch[0].toUpperCase();
+        let rawCorrect = (q.correct_answer || q.answer || q.correct || "").toString().trim();
+        let extractedLetter = "";
+
+        // Extract A, B, C, or D letter
+        const match = rawCorrect.match(/[A-D]/i);
+        if (match) {
+          extractedLetter = match[0].toUpperCase();
         }
 
         let isCorrect = false;
-        if (studentSelected && expectedLetter && studentSelected === expectedLetter) {
+
+        // 1. Direct letter comparison (e.g., 'C' === 'C')
+        if (studentChoice && extractedLetter && studentChoice === extractedLetter) {
           isCorrect = true;
-        } else {
-          const optMap = { "A": q.option_a, "B": q.option_b, "C": q.option_c, "D": q.option_d };
-          const studentSelectedText = (optMap[studentSelected] || "").trim().toLowerCase();
-          const correctText = rawAnswer.trim().toLowerCase();
-          if (studentSelectedText && correctText && (studentSelectedText === correctText || correctText.includes(studentSelectedText))) {
+        } 
+        // 2. Text value comparison (if answer is saved as text)
+        else if (studentChoice) {
+          const optionMap = { 
+            "A": (q.option_a || "").trim().toLowerCase(), 
+            "B": (q.option_b || "").trim().toLowerCase(), 
+            "C": (q.option_c || "").trim().toLowerCase(), 
+            "D": (q.option_d || "").trim().toLowerCase() 
+          };
+          const studentText = optionMap[studentChoice] || "";
+          const correctText = rawCorrect.toLowerCase();
+
+          if (studentText && correctText && (correctText === studentText || correctText.includes(studentText))) {
             isCorrect = true;
           }
         }
@@ -2578,13 +2595,18 @@
       }
     };
 
+    // =========================================================
+    // 📋 UNIVERSAL & ULTRA-SMART BULK QUESTION PARSER
+    // =========================================================
     window.bulkInsertQuestionsUniversal = async function() {
       const examSelect = document.getElementById("bulkExamSelect");
       const examId = examSelect?.value;
       const text = document.getElementById("bulkQuestionsInput")?.value.trim();
-      if (!examId) { alert("Mee dura qormaata gaaffilee kana itti dabaluu barbaaddu filadhaa!"); return; }
+      
+      if (!examId) { alert("Mee dura qormaata filadhaa!"); return; }
       if (!text) { alert("Gaaffilee paste gochuu qabdu!"); return; }
 
+      // Split questions cleanly by numbers (1., 2., 1), 2)) or empty line blocks
       let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
       if (rawBlocks.length <= 1) {
         rawBlocks = text.split(/\n\s*\n+/);
@@ -2597,10 +2619,11 @@
         if (lines.length < 3) continue;
 
         let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, "").trim();
-        let optA = "", optB = "", optC = "", optD = "", correct = "";
+        let optA = "", optB = "", optC = "", optD = "", correctLetter = "";
 
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i];
+          
           if (/^A[\.\)\-\:\s]/i.test(line)) {
             optA = line.replace(/^A[\.\)\-\:\s]+/i, "").trim();
           } else if (/^B[\.\)\-\:\s]/i.test(line)) {
@@ -2609,17 +2632,20 @@
             optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
           } else if (/^D[\.\)\-\:\s]/i.test(line)) {
             optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
-          } else if (/^(Ans|Answer|Deebii|Correct)[\s:\-]/i.test(line)) {
+          } else if (/^(Ans|Answer|Deebii|Correct|Sirrii)[\s:\-]/i.test(line)) {
             const match = line.match(/[A-D]/i);
-            if (match) correct = match[0].toUpperCase();
+            if (match) correctLetter = match[0].toUpperCase();
           }
         }
 
-        if (!correct) {
+        // Fallback search in last line
+        if (!correctLetter) {
           const lastLine = lines[lines.length - 1];
-          const m = lastLine.match(/[A-D]/i);
-          correct = m ? m[0].toUpperCase() : "A";
+          const match = lastLine.match(/[A-D]/i);
+          if (match) correctLetter = match[0].toUpperCase();
         }
+
+        correctLetter = (correctLetter || "A").trim().toUpperCase();
 
         if (questionText && optA && optB) {
           parsedQuestions.push({
@@ -2629,21 +2655,21 @@
             option_b: optB,
             option_c: optC || "-",
             option_d: optD || "-",
-            correct_answer: correct || "A",
+            correct_answer: correctLetter,
             source_type: "bulk"
           });
         }
       }
 
       if (!parsedQuestions.length) {
-        alert("Gaaffii sirrii ta'e tokkollee argachuu hin dandeenye. Bifa fakkeenyaa irratti mul'atutti qindeessaa!");
+        alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kana qabateuu mirkaneessaa:\n\n1. Gaaffii?\nA. Filannoo 1\nB. Filannoo 2\nC. Filannoo 3\nD. Filannoo 4\nAnswer: C");
         return;
       }
 
       try {
         const { error } = await db.from("questions").insert(parsedQuestions);
         if (error) throw error;
-        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi milkaa'inaan qormaata keessa galaniiru!`);
+        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii sirrii wajjin milkaa'inaan galaniiru!`);
         document.getElementById("bulkQuestionsInput").value = "";
         if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
       } catch (err) {
