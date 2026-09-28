@@ -124,17 +124,15 @@ function normalizeQuestion(row) {
 
   let extractedLetter = "";
 
-  // 1. Explicit search: "Answer: B", "Deebii: C", "Ans: A", "Deebiin: B", "Correct: D"
-  const explicitMatch = rawCorrect.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
+  const explicitMatch = rawCorrect.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
   if (explicitMatch && explicitMatch[1]) {
     extractedLetter = explicitMatch[1].toUpperCase();
   } else {
-    // 2. Direct single letter (A, B, C, D)
-    const directMatch = rawCorrect.match(/^([A-D])\b/i) || rawCorrect.match(/([A-D])/i);
+    const directMatch = rawCorrect.match(/([A-D])/i);
     if (directMatch && directMatch[1]) {
       extractedLetter = directMatch[1].toUpperCase();
     } else {
-      extractedLetter = "A"; // Safe default
+      extractedLetter = "A";
     }
   }
 
@@ -1064,7 +1062,6 @@ async function startExam(examId) {
   const attemptNumber =
     completedAttempts.length + 1;
 
-  // Clean up any uncompleted attempts to avoid unique constraint conflict
   await db
     .from("exam_attempts")
     .delete()
@@ -1386,12 +1383,9 @@ async function finishExam() {
 
       let isCorrect = false;
 
-      // 1. Direct letter match (A === A)
       if (studentSelected && expectedCorrect && studentSelected === expectedCorrect) {
         isCorrect = true;
-      } 
-      // 2. Text value match (if raw database answer stored text)
-      else if (studentSelected) {
+      } else if (studentSelected) {
         const optionMap = {
           "A": (question.optionA || "").trim().toLowerCase(),
           "B": (question.optionB || "").trim().toLowerCase(),
@@ -4240,110 +4234,93 @@ async function bulkInsertQuestionsUniversal() {
     return;
   }
 
-  // 1. Check for global Answer Key at bottom (e.g. "Deebiiwwan: 1-A, 2-C, 3-B" or "Answers: 1.A 2.B")
-  const answerKeyMap = {};
-  const answerKeySection = text.match(/(?:Deebiiwwan|Answers|Answer\s*Key)[\s\S]*$/i);
-  if (answerKeySection) {
-    const keyMatches = answerKeySection[0].matchAll(/(\d+)[\.\)\-\:\s]+([A-D])\b/gi);
-    for (const km of keyMatches) {
-      answerKeyMap[km[1]] = km[2].toUpperCase();
-    }
-  }
-
-  // 2. Split into question blocks by number (1., 2., Gaaffii 1:, etc.)
-  let rawBlocks = text.split(/\n(?=\s*(?:Gaaffii\s*)?\d+[\.\)\-:]\s+)/i);
-  if (rawBlocks.length <= 1) {
-    rawBlocks = text.split(/\n\s*\n+/);
-  }
-
+  // Split by Question numbers at the start of a line (e.g. "1. ", "2. ", "Gaaffii 1: ")
+  const rawBlocks = text.split(/\n\s*(?=(?:Gaaffii\s*)?\d+[\.\)\-]\s+)/i);
   const parsedQuestions = [];
 
-  for (let bIndex = 0; bIndex < rawBlocks.length; bIndex++) {
-    const block = rawBlocks[bIndex].trim();
-    if (!block) continue;
+  for (const block of rawBlocks) {
+    const trimmedBlock = block.trim();
+    if (!trimmedBlock) continue;
 
-    // Extract Question Number if present (e.g., "1. Branding..." -> qNum = "1")
-    const qNumMatch = block.match(/^(?:Gaaffii\s*)?(\d+)[\.\)\-:]/i);
-    const qNum = qNumMatch ? qNumMatch[1] : String(bIndex + 1);
+    const lines = trimmedBlock.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length < 3) continue;
 
-    // Extract Question Text (First line or up to Option A)
     let questionText = "";
-    const qTextMatch = block.match(/^(?:Gaaffii\s*\d+[\.\)\-:]?\s*|\d+[\.\)\-:]?\s*)?([\s\S]*?)(?=(?:\n|\s)+[A][\.\)\-\:\s])/i);
-    if (qTextMatch && qTextMatch[1].trim()) {
-      questionText = qTextMatch[1].trim().replace(/\n+/g, " ");
-    } else {
-      const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
-      questionText = lines[0].replace(/^(?:Gaaffii\s*)?\d+[\.\)\-:]?\s*/i, "").trim();
-    }
-
-    // Extract Options A, B, C, D (Handles inline & multi-line options)
-    const optAMatch = block.match(/(?:^|\s|\n)[A][\.\)\-\:\s]+([\s\S]*?)(?=(?:\s+[B][\.\)\-\:\s]|\n\s*[B][\.\)\-\:\s]|$))/i);
-    const optBMatch = block.match(/(?:^|\s|\n)[B][\.\)\-\:\s]+([\s\S]*?)(?=(?:\s+[C][\.\)\-\:\s]|\n\s*[C][\.\)\-\:\s]|$))/i);
-    const optCMatch = block.match(/(?:^|\s|\n)[C][\.\)\-\:\s]+([\s\S]*?)(?=(?:\s+[D][\.\)\-\:\s]|\n\s*[D][\.\)\-\:\s]|$))/i);
-    const optDMatch = block.match(/(?:^|\s|\n)[D][\.\)\-\:\s]+([\s\S]*?)(?=(?:\n\s*(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)|$))/i);
-
-    let rawA = optAMatch ? optAMatch[1].trim() : "";
-    let rawB = optBMatch ? optBMatch[1].trim() : "";
-    let rawC = optCMatch ? optCMatch[1].trim() : "";
-    let rawD = optDMatch ? optDMatch[1].trim() : "";
-
+    let optA = "", optB = "", optC = "", optD = "";
     let correctLetter = "";
 
-    // Check Answer Key map first
-    if (answerKeyMap[qNum]) {
-      correctLetter = answerKeyMap[qNum];
-    }
+    // First line is Question text
+    questionText = lines[0].replace(/^(?:Gaaffii\s*)?\d+[\.\)\-:]\s*/i, "").trim();
 
-    // Check explicit Answer line inside block (e.g., "Deebii: B", "Answer: C", "Ans: A")
-    if (!correctLetter) {
-      const explicitAns = block.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
-      if (explicitAns && explicitAns[1]) {
-        correctLetter = explicitAns[1].toUpperCase();
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+
+      // 1. Check for Answer line: "Deebii:B", "Deebii: B", "Deebii:A", "Answer: C", "Ans: A", "Deebiin: B"
+      const ansMatch = line.match(/^(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
+      if (ansMatch && ansMatch[1]) {
+        correctLetter = ansMatch[1].toUpperCase();
+        continue;
+      }
+
+      // 2. Option A
+      if (/^A[\.\)\-:]\s*/i.test(line)) {
+        optA = line.replace(/^A[\.\)\-:]\s*/i, "").trim();
+      }
+      // 3. Option B
+      else if (/^B[\.\)\-:]\s*/i.test(line)) {
+        optB = line.replace(/^B[\.\)\-:]\s*/i, "").trim();
+      }
+      // 4. Option C
+      else if (/^C[\.\)\-:]\s*/i.test(line)) {
+        optC = line.replace(/^C[\.\)\-:]\s*/i, "").trim();
+      }
+      // 5. Option D
+      else if (/^D[\.\)\-:]\s*/i.test(line)) {
+        optD = line.replace(/^D[\.\)\-:]\s*/i, "").trim();
+      }
+      // 6. Inline answer match if written anywhere in the line
+      else {
+        const subAnsMatch = line.match(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
+        if (subAnsMatch && subAnsMatch[1]) {
+          correctLetter = subAnsMatch[1].toUpperCase();
+        }
       }
     }
 
-    // Check star/checkmark/brackets inside option text
+    // Fallback: search anywhere in the whole block for "Deebii:B", "Deebii:A" etc.
     if (!correctLetter) {
-      if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawA)) correctLetter = "A";
-      else if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawB)) correctLetter = "B";
-      else if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawC)) correctLetter = "C";
-      else if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawD)) correctLetter = "D";
+      const fallbackAnsMatch = trimmedBlock.match(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
+      if (fallbackAnsMatch && fallbackAnsMatch[1]) {
+        correctLetter = fallbackAnsMatch[1].toUpperCase();
+      }
     }
 
-    // Safe Default: A (NEVER default to D!)
-    if (!correctLetter) {
-      correctLetter = "A";
-    }
-
-    // Clean option texts from answer markers
-    const cleanFn = (str) => String(str || "")
-      .replace(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/gi, "")
-      .replace(/[\*✓]/g, "")
-      .replace(/\((?:Deebii|Correct|Sirrii)\)/gi, "")
-      .replace(/\n+/g, " ")
+    // Clean any trailing answer from options if leaked
+    const cleanOpt = (val) => String(val || "")
+      .replace(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*[A-D]/gi, "")
       .trim();
 
-    const cleanA = cleanFn(rawA);
-    const cleanB = cleanFn(rawB);
-    const cleanC = cleanFn(rawC);
-    const cleanD = cleanFn(rawD);
+    optA = cleanOpt(optA);
+    optB = cleanOpt(optB);
+    optC = cleanOpt(optC);
+    optD = cleanOpt(optD);
 
-    if (questionText && cleanA && cleanB) {
+    if (questionText && optA && optB) {
       parsedQuestions.push({
         exam_id: examId,
         question: questionText,
-        option_a: cleanA,
-        option_b: cleanB,
-        option_c: cleanC || "-",
-        option_d: cleanD || "-",
-        correct_answer: correctLetter,
+        option_a: optA,
+        option_b: optB,
+        option_c: optC || "-",
+        option_d: optD || "-",
+        correct_answer: correctLetter || "A",
         source_type: "bulk"
       });
     }
   }
 
   if (!parsedQuestions.length) {
-    alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kanaan barreessaa:\n\n1. Gaaffii?\nA. Filannoo A  B. Filannoo B\nC. Filannoo C  D. Filannoo D\nDeebii: B");
+    alert("Gaaffii sirrii ta'e argachuu hin dandeenye!");
     return;
   }
 
@@ -4351,7 +4328,7 @@ async function bulkInsertQuestionsUniversal() {
     const { error } = await db.from("questions").insert(parsedQuestions);
     if (error) throw error;
 
-    alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii isaanii wajjin milkaa'inaan galaniiru!`);
+    alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii isaanii isa sirrii (A, B, C, D) wajjin milkaa'inaan galaniiru!`);
     const inputArea = document.getElementById("bulkQuestionsInput");
     if (inputArea) inputArea.value = "";
 
