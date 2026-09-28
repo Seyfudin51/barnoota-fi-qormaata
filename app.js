@@ -130,11 +130,11 @@ function normalizeQuestion(row) {
     extractedLetter = explicitMatch[1].toUpperCase();
   } else {
     // 2. Direct single letter (A, B, C, D)
-    const directMatch = rawCorrect.match(/^([A-D])\b/i) || rawCorrect.match(/[A-D]/i);
-    if (directMatch) {
-      extractedLetter = directMatch[0].toUpperCase();
+    const directMatch = rawCorrect.match(/^([A-D])\b/i) || rawCorrect.match(/([A-D])/i);
+    if (directMatch && directMatch[1]) {
+      extractedLetter = directMatch[1].toUpperCase();
     } else {
-      extractedLetter = "A"; // Default fallback
+      extractedLetter = "A"; // Safe default
     }
   }
 
@@ -4220,7 +4220,7 @@ async function deleteExam(
 }
 
 /* =========================================================
-   📋 BULK QUESTION PASTE (100% PRECISE PARSER & DEEBII DETECTOR)
+   📋 BULK QUESTION PASTE (100% PRECISE MULTI-FORMAT PARSER)
 ========================================================= */
 
 async function bulkInsertQuestionsUniversal() {
@@ -4240,74 +4240,102 @@ async function bulkInsertQuestionsUniversal() {
     return;
   }
 
-  // Split blocks by question numbering (1., 2., 3., 1), 2))
-  let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
+  // 1. Check for global Answer Key at bottom (e.g. "Deebiiwwan: 1-A, 2-C, 3-B" or "Answers: 1.A 2.B")
+  const answerKeyMap = {};
+  const answerKeySection = text.match(/(?:Deebiiwwan|Answers|Answer\s*Key)[\s\S]*$/i);
+  if (answerKeySection) {
+    const keyMatches = answerKeySection[0].matchAll(/(\d+)[\.\)\-\:\s]+([A-D])\b/gi);
+    for (const km of keyMatches) {
+      answerKeyMap[km[1]] = km[2].toUpperCase();
+    }
+  }
+
+  // 2. Split into question blocks by number (1., 2., Gaaffii 1:, etc.)
+  let rawBlocks = text.split(/\n(?=\s*(?:Gaaffii\s*)?\d+[\.\)\-:]\s+)/i);
   if (rawBlocks.length <= 1) {
     rawBlocks = text.split(/\n\s*\n+/);
   }
 
   const parsedQuestions = [];
 
-  for (const block of rawBlocks) {
-    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
-    if (lines.length < 3) continue;
+  for (let bIndex = 0; bIndex < rawBlocks.length; bIndex++) {
+    const block = rawBlocks[bIndex].trim();
+    if (!block) continue;
 
-    let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, "").trim();
-    let optA = "", optB = "", optC = "", optD = "", correctLetter = "";
+    // Extract Question Number if present (e.g., "1. Branding..." -> qNum = "1")
+    const qNumMatch = block.match(/^(?:Gaaffii\s*)?(\d+)[\.\)\-:]/i);
+    const qNum = qNumMatch ? qNumMatch[1] : String(bIndex + 1);
 
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i];
-
-      // Match explicit Answer lines first
-      const ansMatch = line.match(/^(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
-      if (ansMatch && ansMatch[1]) {
-        correctLetter = ansMatch[1].toUpperCase();
-        continue;
-      }
-
-      // Match Options A, B, C, D
-      if (/^A[\.\)\-\:\s]/i.test(line)) {
-        optA = line.replace(/^A[\.\)\-\:\s]+/i, "").trim();
-        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "A";
-      } else if (/^B[\.\)\-\:\s]/i.test(line)) {
-        optB = line.replace(/^B[\.\)\-\:\s]+/i, "").trim();
-        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "B";
-      } else if (/^C[\.\)\-\:\s]/i.test(line)) {
-        optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
-        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "C";
-      } else if (/^D[\.\)\-\:\s]/i.test(line)) {
-        optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
-        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "D";
-      } else {
-        // Line that doesn't start with option, check if it contains answer info
-        const insideMatch = line.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
-        if (insideMatch && insideMatch[1]) {
-          correctLetter = insideMatch[1].toUpperCase();
-        }
-      }
+    // Extract Question Text (First line or up to Option A)
+    let questionText = "";
+    const qTextMatch = block.match(/^(?:Gaaffii\s*\d+[\.\)\-:]?\s*|\d+[\.\)\-:]?\s*)?([\s\S]*?)(?=(?:\n|\s)+[A][\.\)\-\:\s])/i);
+    if (qTextMatch && qTextMatch[1].trim()) {
+      questionText = qTextMatch[1].trim().replace(/\n+/g, " ");
+    } else {
+      const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+      questionText = lines[0].replace(/^(?:Gaaffii\s*)?\d+[\.\)\-:]?\s*/i, "").trim();
     }
 
-    // If no explicit answer was stated anywhere, check within the full block text
+    // Extract Options A, B, C, D (Handles inline & multi-line options)
+    const optAMatch = block.match(/(?:^|\s|\n)[A][\.\)\-\:\s]+([\s\S]*?)(?=(?:\s+[B][\.\)\-\:\s]|\n\s*[B][\.\)\-\:\s]|$))/i);
+    const optBMatch = block.match(/(?:^|\s|\n)[B][\.\)\-\:\s]+([\s\S]*?)(?=(?:\s+[C][\.\)\-\:\s]|\n\s*[C][\.\)\-\:\s]|$))/i);
+    const optCMatch = block.match(/(?:^|\s|\n)[C][\.\)\-\:\s]+([\s\S]*?)(?=(?:\s+[D][\.\)\-\:\s]|\n\s*[D][\.\)\-\:\s]|$))/i);
+    const optDMatch = block.match(/(?:^|\s|\n)[D][\.\)\-\:\s]+([\s\S]*?)(?=(?:\n\s*(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)|$))/i);
+
+    let rawA = optAMatch ? optAMatch[1].trim() : "";
+    let rawB = optBMatch ? optBMatch[1].trim() : "";
+    let rawC = optCMatch ? optCMatch[1].trim() : "";
+    let rawD = optDMatch ? optDMatch[1].trim() : "";
+
+    let correctLetter = "";
+
+    // Check Answer Key map first
+    if (answerKeyMap[qNum]) {
+      correctLetter = answerKeyMap[qNum];
+    }
+
+    // Check explicit Answer line inside block (e.g., "Deebii: B", "Answer: C", "Ans: A")
     if (!correctLetter) {
-      const fullBlockMatch = block.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
-      if (fullBlockMatch && fullBlockMatch[1]) {
-        correctLetter = fullBlockMatch[1].toUpperCase();
+      const explicitAns = block.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
+      if (explicitAns && explicitAns[1]) {
+        correctLetter = explicitAns[1].toUpperCase();
       }
     }
 
-    // Safe default to 'A' only if completely missing (NEVER default mistakenly to 'D')
+    // Check star/checkmark/brackets inside option text
+    if (!correctLetter) {
+      if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawA)) correctLetter = "A";
+      else if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawB)) correctLetter = "B";
+      else if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawC)) correctLetter = "C";
+      else if (/[\*✓]|\((?:Deebii|Correct|Sirrii)\)/i.test(rawD)) correctLetter = "D";
+    }
+
+    // Safe Default: A (NEVER default to D!)
     if (!correctLetter) {
       correctLetter = "A";
     }
 
-    if (questionText && optA && optB) {
+    // Clean option texts from answer markers
+    const cleanFn = (str) => String(str || "")
+      .replace(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/gi, "")
+      .replace(/[\*✓]/g, "")
+      .replace(/\((?:Deebii|Correct|Sirrii)\)/gi, "")
+      .replace(/\n+/g, " ")
+      .trim();
+
+    const cleanA = cleanFn(rawA);
+    const cleanB = cleanFn(rawB);
+    const cleanC = cleanFn(rawC);
+    const cleanD = cleanFn(rawD);
+
+    if (questionText && cleanA && cleanB) {
       parsedQuestions.push({
         exam_id: examId,
         question: questionText,
-        option_a: optA,
-        option_b: optB,
-        option_c: optC || "-",
-        option_d: optD || "-",
+        option_a: cleanA,
+        option_b: cleanB,
+        option_c: cleanC || "-",
+        option_d: cleanD || "-",
         correct_answer: correctLetter,
         source_type: "bulk"
       });
@@ -4315,7 +4343,7 @@ async function bulkInsertQuestionsUniversal() {
   }
 
   if (!parsedQuestions.length) {
-    alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kanaan barreessaa:\n\n1. Gaaffii?\nA. Filannoo 1\nB. Filannoo 2\nC. Filannoo 3\nD. Filannoo 4\nAnswer: B");
+    alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kanaan barreessaa:\n\n1. Gaaffii?\nA. Filannoo A  B. Filannoo B\nC. Filannoo C  D. Filannoo D\nDeebii: B");
     return;
   }
 
