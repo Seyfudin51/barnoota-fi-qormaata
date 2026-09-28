@@ -114,23 +114,28 @@ function generateActivationCode() {
 }
 
 /* =========================================================
-   🎯 SMART QUESTION NORMALIZER (DEEBII SIRRII ACCURATE HUBATU)
+   🎯 BULLETPROOF SMART QUESTION NORMALIZER
 ========================================================= */
 
 function normalizeQuestion(row) {
   const rawCorrect = String(
-    row.correct_answer ?? row.correctAnswer ?? row.answer ?? ""
+    row.correct_answer ?? row.correctAnswer ?? row.answer ?? row.correct ?? ""
   ).trim();
 
   let extractedLetter = "";
 
-  // Check explicit pattern: "Answer: C", "Ans: C", "Deebii: C", "Correct: C", "C.", "c"
-  const matchPattern = rawCorrect.match(/(?:Ans|Answer|Deebii|Correct|Sirrii)?[\s:\-\.]*([A-D])\b/i) || rawCorrect.match(/[A-D]/i);
-  
-  if (matchPattern) {
-    extractedLetter = matchPattern[1] ? matchPattern[1].toUpperCase() : matchPattern[0].toUpperCase();
+  // 1. Explicit search: "Answer: B", "Deebii: C", "Ans: A", "Deebiin: B", "Correct: D"
+  const explicitMatch = rawCorrect.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
+  if (explicitMatch && explicitMatch[1]) {
+    extractedLetter = explicitMatch[1].toUpperCase();
   } else {
-    extractedLetter = rawCorrect.toUpperCase().charAt(0) || "A";
+    // 2. Direct single letter (A, B, C, D)
+    const directMatch = rawCorrect.match(/^([A-D])\b/i) || rawCorrect.match(/[A-D]/i);
+    if (directMatch) {
+      extractedLetter = directMatch[0].toUpperCase();
+    } else {
+      extractedLetter = "A"; // Default fallback
+    }
   }
 
   return {
@@ -4215,7 +4220,7 @@ async function deleteExam(
 }
 
 /* =========================================================
-   📋 BULK QUESTION PASTE (ULTRA-ACCURATE PARSER)
+   📋 BULK QUESTION PASTE (100% PRECISE PARSER & DEEBII DETECTOR)
 ========================================================= */
 
 async function bulkInsertQuestionsUniversal() {
@@ -4235,7 +4240,7 @@ async function bulkInsertQuestionsUniversal() {
     return;
   }
 
-  // Split blocks by numbered question start (1., 2.) or blank lines
+  // Split blocks by question numbering (1., 2., 3., 1), 2))
   let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
   if (rawBlocks.length <= 1) {
     rawBlocks = text.split(/\n\s*\n+/);
@@ -4253,27 +4258,47 @@ async function bulkInsertQuestionsUniversal() {
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
 
+      // Match explicit Answer lines first
+      const ansMatch = line.match(/^(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
+      if (ansMatch && ansMatch[1]) {
+        correctLetter = ansMatch[1].toUpperCase();
+        continue;
+      }
+
+      // Match Options A, B, C, D
       if (/^A[\.\)\-\:\s]/i.test(line)) {
         optA = line.replace(/^A[\.\)\-\:\s]+/i, "").trim();
+        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "A";
       } else if (/^B[\.\)\-\:\s]/i.test(line)) {
         optB = line.replace(/^B[\.\)\-\:\s]+/i, "").trim();
+        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "B";
       } else if (/^C[\.\)\-\:\s]/i.test(line)) {
         optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
+        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "C";
       } else if (/^D[\.\)\-\:\s]/i.test(line)) {
         optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
-      } else if (/^(Ans|Answer|Deebii|Correct|Sirrii)[\s:\-]/i.test(line)) {
-        const match = line.match(/[A-D]/i);
-        if (match) correctLetter = match[0].toUpperCase();
+        if (line.includes("✓") || line.includes("(Deebii)") || line.includes("(Correct)")) correctLetter = "D";
+      } else {
+        // Line that doesn't start with option, check if it contains answer info
+        const insideMatch = line.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
+        if (insideMatch && insideMatch[1]) {
+          correctLetter = insideMatch[1].toUpperCase();
+        }
       }
     }
 
+    // If no explicit answer was stated anywhere, check within the full block text
     if (!correctLetter) {
-      const lastLine = lines[lines.length - 1];
-      const match = lastLine.match(/[A-D]/i);
-      if (match) correctLetter = match[0].toUpperCase();
+      const fullBlockMatch = block.match(/(?:Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s*_\-:]*([A-D])\b/i);
+      if (fullBlockMatch && fullBlockMatch[1]) {
+        correctLetter = fullBlockMatch[1].toUpperCase();
+      }
     }
 
-    correctLetter = (correctLetter || "A").trim().toUpperCase();
+    // Safe default to 'A' only if completely missing (NEVER default mistakenly to 'D')
+    if (!correctLetter) {
+      correctLetter = "A";
+    }
 
     if (questionText && optA && optB) {
       parsedQuestions.push({
@@ -4290,7 +4315,7 @@ async function bulkInsertQuestionsUniversal() {
   }
 
   if (!parsedQuestions.length) {
-    alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kana qabachuun mirkaneessaa:\n\n1. Gaaffii?\nA. Option A\nB. Option B\nC. Option C\nD. Option D\nAnswer: C");
+    alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kanaan barreessaa:\n\n1. Gaaffii?\nA. Filannoo 1\nB. Filannoo 2\nC. Filannoo 3\nD. Filannoo 4\nAnswer: B");
     return;
   }
 
@@ -4298,7 +4323,7 @@ async function bulkInsertQuestionsUniversal() {
     const { error } = await db.from("questions").insert(parsedQuestions);
     if (error) throw error;
 
-    alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii sirrii wajjin milkaa'inaan galaniiru!`);
+    alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii isaanii wajjin milkaa'inaan galaniiru!`);
     const inputArea = document.getElementById("bulkQuestionsInput");
     if (inputArea) inputArea.value = "";
 
