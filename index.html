@@ -291,7 +291,7 @@
         </button>
 
         <button type="button" class="student-vivid-tile tile-purple" onclick="navTo('examListPage')">
-          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+          <div class="tile-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg></div>
           <strong class="tile-title" data-i18n="tab_exams">Qormaata</strong>
           <small class="tile-sub" data-i18n="sub_study">Qo'adhu</small>
         </button>
@@ -766,14 +766,14 @@
               <button type="button" class="primary-btn-vivid" onclick="createExam()">➕ Qormaata Uumi</button>
             </div>
 
-            <!-- BULK PASTE -->
+            <!-- BULK PASTE (PERFECTED WITH ALL 4 OPTIONS & AFAAN OROMOO DEEBII) -->
             <div class="admin-panel-card" style="border-left: 5px solid #0284c7; margin-top: 16px;">
               <h4 style="color:#0284c7; margin-bottom:8px;">📋 Gaaffilee Hedduu Bakka Tokkotti Paste Godhi (Bulk Paste)</h4>
               <label>Qormaata Filadhu</label>
               <select id="bulkExamSelect"><option value="">Qormaata filadhu</option></select>
               
               <label>Gaaffilee asitti Paste godhi:</label>
-              <textarea id="bulkQuestionsInput" rows="8" placeholder="Fakkeenya:&#10;&#10;1. Social Media jechuun maal jechuudha?&#10;A. Password nama hundaaf kennuu&#10;B. OTP nama biraatti himuu&#10;C. Two-step verification fayyadamu&#10;Answer: C"></textarea>
+              <textarea id="bulkQuestionsInput" rows="10" placeholder="Fakkeenya:&#10;&#10;1. Channel uumuuf maal qopheessuun barbaachisaa dha?&#10;A. Password qofa&#10;B. Maqaa yaadatamu, logo ifa ta’e fi description&#10;C. Bilbila qofa&#10;D. Poll qofa&#10;Deebii: B&#10;&#10;2. Social media kamtu odeeffannoo ariifachiisaadhaaf filatama?&#10;A. Facebook&#10;B. Telegram&#10;C. Instagram&#10;D. TikTok&#10;Deebii: B"></textarea>
               
               <button type="button" class="primary-btn-vivid" onclick="bulkInsertQuestionsUniversal()" style="background:#0284c7;">
                 📥 Gaaffilee Hunda Galchi (Bulk Save)
@@ -1030,9 +1030,9 @@
     </div>
   </div>
 
-  <!-- SUPABASE & APP SCRIPTS (Cache Busting Version Added) -->
+  <!-- SUPABASE & APP SCRIPTS (V5.0 CACHE BUSTING) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=3.8"></script>
+  <script src="app.js?v=5.0"></script>
 
   <!-- PWA Service Worker Registration for Offline Capability -->
   <script>
@@ -1448,7 +1448,6 @@
         }
 
         container.innerHTML = exams.map(ex => {
-          // Check local fallback storage state
           let localClosed = localStorage.getItem("ao_exam_closed_" + ex.id);
           let localLb = localStorage.getItem("ao_exam_lb_open_" + ex.id);
 
@@ -1599,9 +1598,6 @@
       document.getElementById("examEditModal").style.display = "none";
     };
 
-    // =========================================================
-    // 🚀 SELF-HEALING / ROBUST SAVE EDITED EXAM
-    // =========================================================
     window.saveEditedExam = async function() {
       const id = document.getElementById("editExamId").value;
       const title = document.getElementById("editExamTitle").value.trim();
@@ -1990,10 +1986,6 @@
             ? Math.round((totalEarnedScore / totalQuestionsSum) * 100) 
             : 0;
 
-          const avgScoreVal = examsTakenCount > 0 
-            ? (totalEarnedScore / examsTakenCount) 
-            : 0;
-
           return {
             student: s,
             examScores,
@@ -2001,8 +1993,7 @@
             totalQuestionsSum,
             examsTakenCount,
             wrongCount,
-            overallPct,
-            avgScoreVal
+            overallPct
           };
         });
 
@@ -2468,7 +2459,7 @@
     };
 
     // =========================================================
-    // 🎯 SMART EXAM SCORING ENGINE (100% ACCURATE CORRECT ANSWER MATCH)
+    // 🎯 100% ACCURATE EXAM EVALUATION & SUBMIT ENGINE
     // =========================================================
     window.submitActiveExamNow = async function() {
       clearInterval(activeExamTimerInterval);
@@ -2478,38 +2469,25 @@
       activeExamQuestionsList.forEach((q, idx) => {
         const studentChoice = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
         
-        let rawCorrect = (q.correct_answer || q.answer || q.correct || "").toString().trim();
-        let extractedLetter = "";
+        // Exact letter detection from question payload
+        let rawAnswerStr = (q.correct_answer || q.answer || q.correct || "").toString().trim();
+        let correctLetter = "";
 
-        // Extract A, B, C, or D letter
-        const match = rawCorrect.match(/[A-D]/i);
-        if (match) {
-          extractedLetter = match[0].toUpperCase();
-        }
-
-        let isCorrect = false;
-
-        // 1. Direct letter comparison (e.g., 'C' === 'C')
-        if (studentChoice && extractedLetter && studentChoice === extractedLetter) {
-          isCorrect = true;
-        } 
-        // 2. Text value comparison (if answer is saved as text)
-        else if (studentChoice) {
-          const optionMap = { 
-            "A": (q.option_a || "").trim().toLowerCase(), 
-            "B": (q.option_b || "").trim().toLowerCase(), 
-            "C": (q.option_c || "").trim().toLowerCase(), 
-            "D": (q.option_d || "").trim().toLowerCase() 
-          };
-          const studentText = optionMap[studentChoice] || "";
-          const correctText = rawCorrect.toLowerCase();
-
-          if (studentText && correctText && (correctText === studentText || correctText.includes(studentText))) {
-            isCorrect = true;
+        const ansKeywordMatch = rawAnswerStr.match(/(?:deebii|deebiin|answer|ans|sirrii|correct)\s*[:\-=]?\s*([a-d])\b/i);
+        if (ansKeywordMatch && ansKeywordMatch[1]) {
+          correctLetter = ansKeywordMatch[1].toUpperCase();
+        } else {
+          const directMatch = rawAnswerStr.match(/^[A-D]$/i);
+          if (directMatch) {
+            correctLetter = directMatch[0].toUpperCase();
           }
         }
 
-        if (isCorrect) correctCount++;
+        if (!correctLetter) correctLetter = rawAnswerStr.substring(0, 1).toUpperCase();
+
+        if (studentChoice && correctLetter && studentChoice === correctLetter) {
+          correctCount++;
+        }
       });
 
       const percentage = totalQ > 0 ? Math.round((correctCount / totalQ) * 100) : 0;
@@ -2595,9 +2573,9 @@
       }
     };
 
-    // =========================================================
-    // 📋 UNIVERSAL & ULTRA-SMART BULK QUESTION PARSER
-    // =========================================================
+    // =========================================================================
+    // 📋 ULTRA-ROBUST BULK QUESTION PARSER (FIXES 'DEEBII' MATCHING 'D' BUG)
+    // =========================================================================
     window.bulkInsertQuestionsUniversal = async function() {
       const examSelect = document.getElementById("bulkExamSelect");
       const examId = examSelect?.value;
@@ -2606,7 +2584,7 @@
       if (!examId) { alert("Mee dura qormaata filadhaa!"); return; }
       if (!text) { alert("Gaaffilee paste gochuu qabdu!"); return; }
 
-      // Split questions cleanly by numbers (1., 2., 1), 2)) or empty line blocks
+      // Clean split by numbers like "1.", "2)", "3 -" or 2 blank lines
       let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
       if (rawBlocks.length <= 1) {
         rawBlocks = text.split(/\n\s*\n+/);
@@ -2632,31 +2610,36 @@
             optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
           } else if (/^D[\.\)\-\:\s]/i.test(line)) {
             optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
-          } else if (/^(Ans|Answer|Deebii|Deebiin|Correct|Sirrii)[\s:\-]/i.test(line)) {
-            const match = line.match(/[A-D]/i);
-            if (match) correctLetter = match[0].toUpperCase();
+          }
+
+          // Search strictly for the letter FOLLOWING the keyword (Answer: B, Deebii: B, etc.)
+          const ansMatch = line.match(/(?:deebii|deebiin|answer|ans|sirrii|correct)\s*[:\-=]?\s*([a-d])\b/i);
+          if (ansMatch && ansMatch[1]) {
+            correctLetter = ansMatch[1].toUpperCase();
+          }
+        }
+
+        // If not found yet, inspect entire block using the exact pattern
+        if (!correctLetter) {
+          const blockMatch = block.match(/(?:deebii|deebiin|answer|ans|sirrii|correct)\s*[:\-=]?\s*([a-d])\b/i);
+          if (blockMatch && blockMatch[1]) {
+            correctLetter = blockMatch[1].toUpperCase();
           } else {
-            // Also check inline Deebii:B or Deebii: B anywhere in the line
-            const inlineMatch = line.match(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
-            if (inlineMatch && inlineMatch[1]) {
-              correctLetter = inlineMatch[1].toUpperCase();
+            // Check if last line is just a standalone letter like "B"
+            const lastLine = lines[lines.length - 1];
+            const soloMatch = lastLine.match(/^([a-d])$/i);
+            if (soloMatch) {
+              correctLetter = soloMatch[1].toUpperCase();
             }
           }
         }
 
-        // Fallback search in entire block for Deebii:B
-        if (!correctLetter) {
-          const blockMatch = block.match(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*([A-D])/i);
-          if (blockMatch && blockMatch[1]) {
-            correctLetter = blockMatch[1].toUpperCase();
-          }
-        }
+        // Default fallback if no answer tag was provided
+        if (!correctLetter) correctLetter = "A";
 
-        correctLetter = (correctLetter || "A").trim().toUpperCase();
-
-        // Clean leaked Deebii from options
-        const cleanOpt = (val) => String(val || "")
-          .replace(/(?:Deebii|Deebiin|Answer|Ans|Correct|Sirrii)\s*[:\-=]?\s*[A-D]/gi, "")
+        // Clean out any leaked answer texts from options
+        const cleanOpt = (txt) => String(txt || "")
+          .replace(/(?:deebii|deebiin|answer|ans|sirrii|correct)\s*[:\-=]?\s*[a-d]\b/gi, "")
           .trim();
 
         optA = cleanOpt(optA);
@@ -2684,9 +2667,25 @@
       }
 
       try {
-        const { error } = await db.from("questions").insert(parsedQuestions);
-        if (error) throw error;
-        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii sirrii (A, B, C, D) wajjin milkaa'inaan galaniiru!`);
+        // Safe insert handling both 'correct_answer' and 'answer' database columns
+        let { error } = await db.from("questions").insert(parsedQuestions);
+        
+        if (error) {
+          // If 'correct_answer' column does not exist, retry with 'answer'
+          if (error.message && error.message.includes("correct_answer")) {
+            const fallbackList = parsedQuestions.map(q => {
+              const copy = { ...q, answer: q.correct_answer };
+              delete copy.correct_answer;
+              return copy;
+            });
+            const res2 = await db.from("questions").insert(fallbackList);
+            if (res2.error) throw res2.error;
+          } else {
+            throw error;
+          }
+        }
+
+        alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii sirrii wajjin milkaa'inaan galaniiru!`);
         document.getElementById("bulkQuestionsInput").value = "";
         if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
       } catch (err) {
