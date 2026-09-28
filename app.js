@@ -57,7 +57,6 @@ function truncate(value, length = 120) {
   return text.length > length ? text.slice(0, length) + "..." : text;
 }
 
-// Fixed HTML Entities
 function formatText(value) {
   return escapeHtml(value).replace(/\n/g, "<br>");
 }
@@ -114,7 +113,26 @@ function generateActivationCode() {
   return result;
 }
 
+/* =========================================================
+   🎯 SMART QUESTION NORMALIZER (DEEBII SIRRII ACCURATE HUBATU)
+========================================================= */
+
 function normalizeQuestion(row) {
+  const rawCorrect = String(
+    row.correct_answer ?? row.correctAnswer ?? row.answer ?? ""
+  ).trim();
+
+  let extractedLetter = "";
+
+  // Check explicit pattern: "Answer: C", "Ans: C", "Deebii: C", "Correct: C", "C.", "c"
+  const matchPattern = rawCorrect.match(/(?:Ans|Answer|Deebii|Correct|Sirrii)?[\s:\-\.]*([A-D])\b/i) || rawCorrect.match(/[A-D]/i);
+  
+  if (matchPattern) {
+    extractedLetter = matchPattern[1] ? matchPattern[1].toUpperCase() : matchPattern[0].toUpperCase();
+  } else {
+    extractedLetter = rawCorrect.toUpperCase().charAt(0) || "A";
+  }
+
   return {
     ...row,
     id: row.id,
@@ -124,11 +142,7 @@ function normalizeQuestion(row) {
     optionB: row.option_b ?? row.optionB ?? "",
     optionC: row.option_c ?? row.optionC ?? "",
     optionD: row.option_d ?? row.optionD ?? "",
-    correctAnswer: String(
-      row.correct_answer ?? row.correctAnswer ?? ""
-    )
-      .toUpperCase()
-      .charAt(0)
+    correctAnswer: extractedLetter
   };
 }
 
@@ -733,7 +747,7 @@ function getExamWindowStatus(exam) {
     }
   }
 
-  if (exam.status === "disabled") {
+  if (exam.status === "disabled" || exam.status === "closed" || exam.is_active === false) {
     return {
       available: false,
       reason: "disabled"
@@ -1341,7 +1355,7 @@ function confirmSubmitExam(
 }
 
 /* =========================================================
-   FINISH EXAM
+   FINISH EXAM (ACCURATE SCORING ENGINE)
 ========================================================= */
 
 async function finishExam() {
@@ -1362,12 +1376,32 @@ async function finishExam() {
 
   currentQuestions.forEach(
     (question) => {
-      if (
-        currentAnswers[
-          question.id
-        ] ===
-        question.correctAnswer
-      ) {
+      const studentSelected = (currentAnswers[question.id] || "").toString().trim().toUpperCase();
+      const expectedCorrect = (question.correctAnswer || "").toString().trim().toUpperCase();
+
+      let isCorrect = false;
+
+      // 1. Direct letter match (A === A)
+      if (studentSelected && expectedCorrect && studentSelected === expectedCorrect) {
+        isCorrect = true;
+      } 
+      // 2. Text value match (if raw database answer stored text)
+      else if (studentSelected) {
+        const optionMap = {
+          "A": (question.optionA || "").trim().toLowerCase(),
+          "B": (question.optionB || "").trim().toLowerCase(),
+          "C": (question.optionC || "").trim().toLowerCase(),
+          "D": (question.optionD || "").trim().toLowerCase()
+        };
+        const studentText = optionMap[studentSelected] || "";
+        const rawText = (question.correct_answer || question.correctAnswer || "").toString().trim().toLowerCase();
+
+        if (studentText && rawText && (rawText === studentText || rawText.includes(studentText))) {
+          isCorrect = true;
+        }
+      }
+
+      if (isCorrect) {
         correct++;
       }
     }
@@ -1631,7 +1665,6 @@ async function showScore() {
   const container = document.getElementById("studentScore");
   if (!container) return;
 
-  // 1. Qabxii barataa mataa isaa fidi
   const { data, error } = await db
     .from("results")
     .select("*")
@@ -1665,29 +1698,25 @@ async function showScore() {
       .join("");
   }
 
-  // 2. Leaderboard agarsiisuu (Admin yoo hayyame)
   const leaderboardSec = document.getElementById("studentLeaderboardSection");
   if (!leaderboardSec) return;
 
-  leaderboardSec.style.display = "none"; // Duraan dhoksi
+  leaderboardSec.style.display = "none";
 
-  // Qormaatawwan hunda fidi
   const { data: exams, error: examsError } = await db
     .from("exams")
     .select("id, show_leaderboard");
 
   if (examsError || !exams) return;
 
-  // Qormaatawwan sadarkaan isaanii akka barattootatti mul'atu qofa fidi
   const allowedExamIds = exams
     .filter(e => e.show_leaderboard === true || e.show_leaderboard === "true")
     .map(e => e.id);
 
   if (allowedExamIds.length === 0) {
-    return; // Hayyamni hin kennamne yoo ta'e achumatti dhaabi
+    return;
   }
 
-  // Bu'aa qormaatawwan sana hunda fidi (barattoota hundaaf)
   const { data: allResults, error: allResultsError } = await db
     .from("results")
     .select("student_id, percentage, students(name)")
@@ -1695,7 +1724,6 @@ async function showScore() {
 
   if (allResultsError || !allResults || allResults.length === 0) return;
 
-  // Giddu-galeessa (Average) barataa tokkoo tokkoo qari
   const studentStats = {};
   allResults.forEach((res) => {
     const sid = String(res.student_id || "");
@@ -1709,7 +1737,6 @@ async function showScore() {
     studentStats[sid].count += 1;
   });
 
-  // Sadarkaa qindeessi (Average guddaa irraa gara xiqqaatti)
   const ranking = Object.entries(studentStats)
     .map(([id, stat]) => ({
       id,
@@ -1718,7 +1745,6 @@ async function showScore() {
     }))
     .sort((a, b) => b.average - a.average);
 
-  // HTML Table keessa galchi
   const tbody = document.querySelector("#studentLeaderboardTable tbody");
   if (tbody) {
     tbody.innerHTML = ranking
@@ -1736,7 +1762,7 @@ async function showScore() {
       })
       .join("");
     
-    leaderboardSec.style.display = "block"; // Amma agarsiisi
+    leaderboardSec.style.display = "block";
   }
 }
 
@@ -4152,7 +4178,7 @@ async function deleteExam(
 
     if (attemptsError) throw attemptsError;
 
-    const { error: questionsError = null } = await db
+    const { error: questionsError } = await db
       .from("questions")
       .delete()
       .eq(
@@ -4185,6 +4211,101 @@ async function deleteExam(
       "Qormaata haquun hin danda'amne:\n" +
       getErrorMessage(error)
     );
+  }
+}
+
+/* =========================================================
+   📋 BULK QUESTION PASTE (ULTRA-ACCURATE PARSER)
+========================================================= */
+
+async function bulkInsertQuestionsUniversal() {
+  if (!requireAdmin()) return;
+
+  const examSelect = document.getElementById("bulkExamSelect");
+  const examId = examSelect?.value;
+  const text = document.getElementById("bulkQuestionsInput")?.value.trim();
+
+  if (!examId) {
+    alert("Mee dura qormaata filadhaa!");
+    return;
+  }
+
+  if (!text) {
+    alert("Gaaffilee paste gochuu qabdu!");
+    return;
+  }
+
+  // Split blocks by numbered question start (1., 2.) or blank lines
+  let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
+  if (rawBlocks.length <= 1) {
+    rawBlocks = text.split(/\n\s*\n+/);
+  }
+
+  const parsedQuestions = [];
+
+  for (const block of rawBlocks) {
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+    if (lines.length < 3) continue;
+
+    let questionText = lines[0].replace(/^\d+[\.\)\-]\s*/, "").trim();
+    let optA = "", optB = "", optC = "", optD = "", correctLetter = "";
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (/^A[\.\)\-\:\s]/i.test(line)) {
+        optA = line.replace(/^A[\.\)\-\:\s]+/i, "").trim();
+      } else if (/^B[\.\)\-\:\s]/i.test(line)) {
+        optB = line.replace(/^B[\.\)\-\:\s]+/i, "").trim();
+      } else if (/^C[\.\)\-\:\s]/i.test(line)) {
+        optC = line.replace(/^C[\.\)\-\:\s]+/i, "").trim();
+      } else if (/^D[\.\)\-\:\s]/i.test(line)) {
+        optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
+      } else if (/^(Ans|Answer|Deebii|Correct|Sirrii)[\s:\-]/i.test(line)) {
+        const match = line.match(/[A-D]/i);
+        if (match) correctLetter = match[0].toUpperCase();
+      }
+    }
+
+    if (!correctLetter) {
+      const lastLine = lines[lines.length - 1];
+      const match = lastLine.match(/[A-D]/i);
+      if (match) correctLetter = match[0].toUpperCase();
+    }
+
+    correctLetter = (correctLetter || "A").trim().toUpperCase();
+
+    if (questionText && optA && optB) {
+      parsedQuestions.push({
+        exam_id: examId,
+        question: questionText,
+        option_a: optA,
+        option_b: optB,
+        option_c: optC || "-",
+        option_d: optD || "-",
+        correct_answer: correctLetter,
+        source_type: "bulk"
+      });
+    }
+  }
+
+  if (!parsedQuestions.length) {
+    alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kana qabachuun mirkaneessaa:\n\n1. Gaaffii?\nA. Option A\nB. Option B\nC. Option C\nD. Option D\nAnswer: C");
+    return;
+  }
+
+  try {
+    const { error } = await db.from("questions").insert(parsedQuestions);
+    if (error) throw error;
+
+    alert(`✅ Gaaffilee ${parsedQuestions.length} hundi deebii sirrii wajjin milkaa'inaan galaniiru!`);
+    const inputArea = document.getElementById("bulkQuestionsInput");
+    if (inputArea) inputArea.value = "";
+
+    await loadAdminQuestions();
+    await loadAdminExams();
+  } catch (err) {
+    alert("Dogoggora: " + getErrorMessage(err));
   }
 }
 
@@ -4240,11 +4361,11 @@ async function createQuestion() {
       ?.value.trim() || "";
 
   const correctAnswer =
-    document
+    (document
       .getElementById(
         "correctAnswerInput"
       )
-      ?.value || "";
+      ?.value || "").toString().trim().toUpperCase();
 
   if (
     !examId ||
@@ -5085,13 +5206,6 @@ function initializeAuthListener() {
 ========================================================= */
 
 async function initializeApp() {
-  // Register Service Worker for Offline Cache smoothly (Osoo HTML hin tuqin)
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js")
-      .then(() => console.log("Service Worker registered successfully."))
-      .catch((err) => console.error("Service Worker registration failed:", err));
-  }
-
   initializeAuthListener();
 
   changeAIQuestionSource();
@@ -5142,7 +5256,7 @@ async function initializeApp() {
 }
 
 /* =========================================================
-   INLINE HTML FUNCTIONS
+   INLINE HTML FUNCTIONS (EXPORTS)
 ========================================================= */
 
 window.showPage =
@@ -5267,6 +5381,9 @@ window.googleLogin =
 
 window.telegramLogin =
   telegramLogin;
+
+window.bulkInsertQuestionsUniversal =
+  bulkInsertQuestionsUniversal;
 
 /* =========================================================
    START
