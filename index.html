@@ -1055,6 +1055,21 @@
     </div>
   </div>
 
+  <!-- =====================================================
+       🔍 NEW: STUDENT FULL EXAM RESULT BREAKDOWN MODAL (FOR ADMIN)
+  ====================================================== -->
+  <div id="studentResultDetailModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.65); z-index:9999999; justify-content:center; align-items:center; backdrop-filter:blur(4px); padding:16px; box-sizing:border-box;">
+    <div style="background:#ffffff; width:100%; max-width:550px; border-radius:18px; padding:24px; box-shadow:0 12px 32px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto; box-sizing:border-box; position:relative;">
+      <h3 style="margin-top:0; color:#0f172a; border-bottom:2px solid #e2e8f0; padding-bottom:12px; font-size:1.15rem; display:flex; justify-content:space-between; align-items:center;">
+        <span style="display:flex; align-items:center; gap:8px;">📊 Tarree Qabxii Barataa</span>
+        <button type="button" onclick="closeStudentResultModal()" style="background:none; border:none; font-size:24px; color:#94a3b8; cursor:pointer;">&times;</button>
+      </h3>
+      
+      <div id="studentDetailModalHeader" style="background:#f8fafc; padding:14px; border-radius:12px; margin-bottom:16px; border:1px solid #e2e8f0;"></div>
+      <div id="studentDetailModalContent"></div>
+    </div>
+  </div>
+
   <!-- SUPABASE & APP SCRIPTS (V5.0 CACHE BUSTING) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js?v=5.0"></script>
@@ -1879,6 +1894,9 @@
       window.renderAdminStudentsGrid(filtered);
     };
 
+    // =========================================================
+    // 📊 ULTRA-ACCURATE RESULTS MATRIX & REAL MATCHING ENGINE
+    // =========================================================
     window.loadAdminResultsImage1Matrix = async function() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
       const tbody = document.getElementById("adminResultsMatrixBody");
@@ -1994,16 +2012,16 @@
                 const rSEmail = cleanStr(res.student_email || res.email);
 
                 const matchStudent = 
-                  (rSId && (rSId === sId || rSId === sCode || sId.includes(rSId) || rSId.includes(sId))) ||
-                  (rSName && sName && (rSName === sName || sName.includes(rSName) || rSName.includes(sName))) ||
-                  (rSEmail && sEmail && rSEmail === sEmail);
+                  (rSId && (rSId === sId || rSId === sCode || sId.includes(rSId) || rSId.includes(sId) || sCode.includes(rSId) || rSId.includes(sCode))) ||
+                  (rSEmail && sEmail && rSEmail === sEmail) ||
+                  (rSName && sName && (rSName === sName || sName.includes(rSName) || rSName.includes(sName)));
 
                 const rExId = cleanStr(res.exam_id || res.examId);
                 const rExTitle = cleanStr(res.exam_title || res.title || res.examTitle);
 
                 const matchExam = 
-                  (rExId && (rExId === exId || exId.includes(rExId))) ||
-                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || exTitle.includes(rExTitle)));
+                  (rExId && (rExId === exId || exId.includes(rExId) || rExId.includes(exId))) ||
+                  (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle) || rExTitle.includes(exTitle)));
 
                 return matchStudent && matchExam;
               });
@@ -2017,17 +2035,17 @@
                   ? Number(r.percentage) 
                   : Math.round((scoreVal / totalQ) * 100);
 
-                examScores.push({ score: scoreVal, total: totalQ, percent: pct, hasTaken: true });
+                examScores.push({ score: scoreVal, total: totalQ, percent: pct, hasTaken: true, title: ex.title });
                 totalEarnedScore += scoreVal;
                 totalQuestionsSum += totalQ;
                 examsTakenCount++;
                 wrongCount += Math.max(0, totalQ - scoreVal);
               } else {
-                examScores.push({ score: 0, total: ex.question_limit || 5, percent: 0, hasTaken: false });
+                examScores.push({ score: 0, total: ex.question_limit || 5, percent: 0, hasTaken: false, title: ex.title });
               }
             });
           } else {
-            examScores.push({ score: 0, total: 5, percent: 0, hasTaken: false });
+            examScores.push({ score: 0, total: 5, percent: 0, hasTaken: false, title: "Qormaata" });
           }
 
           const overallPct = examsTakenCount > 0 
@@ -2124,9 +2142,113 @@
       }
     };
 
+    // =========================================================
+    // 🔍 NEW HIGH-FIDELITY STUDENT EXAM BREAKDOWN MODAL
+    // =========================================================
     window.viewStudentFullDetails = async function(studentId) {
       const student = allAdminStudentsData.find(s => s.id === studentId);
-      alert(`👤 Barataa: ${student?.name || 'Barataa'}\n🆔 ID: ${student?.student_id || student?.code || '-'}\n📅 Galmaa'e: ${student?.created_at ? new Date(student.created_at).toLocaleDateString() : '-'}`);
+      const headerEl = document.getElementById("studentDetailModalHeader");
+      const contentEl = document.getElementById("studentDetailModalContent");
+      const modal = document.getElementById("studentResultDetailModal");
+
+      if (!modal || !headerEl || !contentEl) return;
+
+      const sName = student?.name || "Barataa";
+      const sCode = student?.student_id || student?.code || (student?.id ? student.id.substring(0,8) : "-");
+      const sEmail = student?.email || "-";
+
+      headerEl.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:48px; height:48px; border-radius:50%; background:#0d59b2; color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold;">
+            🎓
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:16px; color:#0f172a;">${escapeHtml(sName)}</h3>
+            <p style="margin:2px 0 0 0; font-size:12.5px; color:#64748b;">🆔 ID: <strong>${escapeHtml(sCode)}</strong> | 📧 ${escapeHtml(sEmail)}</p>
+          </div>
+        </div>
+      `;
+
+      // Fetch all exam results for this student
+      let studentResults = [];
+      try {
+        const { data, error } = await db.from("exam_results").select("*");
+        if (!error && data) {
+          studentResults = data.filter(r => {
+            const rSId = (r.student_id || r.user_id || "").toLowerCase();
+            const rSName = (r.student_name || r.name || "").toLowerCase();
+            const rSEmail = (r.student_email || r.email || "").toLowerCase();
+
+            return rSId === (student?.id || "").toLowerCase() ||
+                   rSId === sCode.toLowerCase() ||
+                   (sEmail !== "-" && rSEmail === sEmail.toLowerCase()) ||
+                   (rSName && rSName === sName.toLowerCase());
+          });
+        }
+      } catch(e) {}
+
+      if (!studentResults.length) {
+        try {
+          const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
+          studentResults = localList.filter(r => {
+            const rSId = (r.student_id || r.user_id || "").toLowerCase();
+            const rSName = (r.student_name || r.name || "").toLowerCase();
+            return rSId === (student?.id || "").toLowerCase() ||
+                   rSId === sCode.toLowerCase() ||
+                   (rSName && rSName === sName.toLowerCase());
+          });
+        } catch(e) {}
+      }
+
+      if (!studentResults.length) {
+        contentEl.innerHTML = `
+          <div style="text-align:center; padding:30px; color:#64748b;">
+            <span style="font-size:2rem; display:block; margin-bottom:8px;">📊</span>
+            Barataan kun ammas qormaata tokkollee hin fudhanne.
+          </div>
+        `;
+      } else {
+        contentEl.innerHTML = studentResults.map((r, idx) => {
+          const score = Number(r.score || 0);
+          const total = Number(r.total_questions || 5);
+          const wrong = Math.max(0, total - score);
+          const pct = r.percentage !== undefined ? Number(r.percentage) : Math.round((score / total) * 100);
+          const title = r.exam_title || "Qormaata";
+
+          return `
+            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:10px;">
+                <h4 style="margin:0; font-size:15px; color:#0f172a;">📝 ${escapeHtml(title)}</h4>
+                <span style="background:${pct >= 80 ? '#dcfce7' : pct >= 60 ? '#fef3c7' : '#fee2e2'}; color:${pct >= 80 ? '#166534' : pct >= 60 ? '#92400e' : '#991b1b'}; padding:4px 10px; border-radius:20px; font-weight:bold; font-size:12px;">
+                  ${pct}%
+                </span>
+              </div>
+              
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; color:#334155;">
+                <div style="background:#f0fdf4; padding:8px 12px; border-radius:8px; border:1px solid #bbf7d0;">
+                  <span style="color:#166534; font-weight:bold;">✅ Argate (Correct):</span>
+                  <strong style="font-size:15px; color:#15803d; display:block; margin-top:2px;">${score} / ${total}</strong>
+                </div>
+                <div style="background:#fef2f2; padding:8px 12px; border-radius:8px; border:1px solid #fecaca;">
+                  <span style="color:#991b1b; font-weight:bold;">❌ Dhabe (Wrong):</span>
+                  <strong style="font-size:15px; color:#b91c1c; display:block; margin-top:2px;">${wrong} Gaaffii</strong>
+                </div>
+              </div>
+
+              <div style="font-size:11.5px; color:#94a3b8; margin-top:10px; text-align:right;">
+                🕒 Guyyaa: ${r.created_at ? new Date(r.created_at).toLocaleString() : '-'}
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      modal.style.display = "flex";
+    };
+
+    window.closeStudentResultModal = function() {
+      const modal = document.getElementById("studentResultDetailModal");
+      if (modal) modal.style.display = "none";
     };
 
     window.toggleStudentStatus = async function(id, newStatus) {
@@ -2528,7 +2650,6 @@
       activeExamQuestionsList.forEach((q, idx) => {
         const studentChoice = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
         
-        // Exact letter detection from question payload
         let rawAnswerStr = (q.correct_answer || q.answer || q.correct || "").toString().trim();
         let correctLetter = "";
 
@@ -2561,6 +2682,7 @@
 
       const resultRecord = {
         student_id: sId,
+        user_id: sId,
         student_name: sName,
         student_email: sEmail,
         exam_id: activeExamData?.id || "exam",
@@ -2632,9 +2754,9 @@
       }
     };
 
-    // =========================================================================
+    // =========================================================
     // 📋 ULTRA-ROBUST BULK QUESTION PARSER (FIXES 'DEEBII' MATCHING 'D' BUG)
-    // =========================================================================
+    // =========================================================
     window.bulkInsertQuestionsUniversal = async function() {
       const examSelect = document.getElementById("bulkExamSelect");
       const examId = examSelect?.value;
@@ -2643,7 +2765,6 @@
       if (!examId) { alert("Mee dura qormaata filadhaa!"); return; }
       if (!text) { alert("Gaaffilee paste gochuu qabdu!"); return; }
 
-      // Clean split by numbers like "1.", "2)", "3 -" or 2 blank lines
       let rawBlocks = text.split(/\n(?=\s*\d+[\.\)\-]\s+)/);
       if (rawBlocks.length <= 1) {
         rawBlocks = text.split(/\n\s*\n+/);
@@ -2685,7 +2806,6 @@
           }
         }
 
-        // Default fallback if no answer tag was provided
         if (!correctLetter) {
           const lastLine = lines[lines.length - 1];
           const soloMatch = lastLine.match(/^([a-d])$/i);
@@ -2696,7 +2816,6 @@
 
         if (!correctLetter) correctLetter = "A";
 
-        // Clean out any leaked answer texts from options
         const cleanOpt = (txt) => String(txt || "")
           .replace(/(?:deebii|deebiin|answer|ans|sirrii|correct)\s*[:\-=]?\s*[a-d]\b/gi, "")
           .trim();
@@ -2722,16 +2841,14 @@
       }
 
       if (!parsedQuestions.length) {
-        alert("Gaaffii sirrii ta'e argachuu hin dandeenye! Mee bifa kana qabateuu mirkaneessaa:\n\n1. Gaaffii?\nA. Filannoo 1\nB. Filannoo 2\nC. Filannoo 3\nD. Filannoo 4\nDeebii: B");
+        alert("Gaaffii sirrii ta'e argachuu hin dandeenye!");
         return;
       }
 
       try {
-        // Safe insert handling both 'correct_answer' and 'answer' database columns
         let { error } = await db.from("questions").insert(parsedQuestions);
         
         if (error) {
-          // If 'correct_answer' column does not exist, retry with 'answer'
           if (error.message && error.message.includes("correct_answer")) {
             const fallbackList = parsedQuestions.map(q => {
               const copy = { ...q, answer: q.correct_answer };
