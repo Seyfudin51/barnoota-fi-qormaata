@@ -234,7 +234,7 @@
         <!-- GOOGLE LOGIN -->
         <button id="googleLoginButton" type="button" class="google-login-btn" onclick="googleLogin()">
           <svg width="22" height="22" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.93-4.18 2.93-7.4z"/>
+            <path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69(2.93-4.18) 2.93-7.4z"/>
             <path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.37l-3.14-2.44c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.04H3.28v2.52A9.74 9.74 0 0 0 12 21.5z"/>
             <path fill="#FBBC05" d="M6.53 13.57A5.86 5.86 0 0 1 6.22 12c0-.55.11-1.09.31-1.57V7.91H3.28A9.5 9.5 0 0 0 2.25 12c0 1.47.35 2.86 1.03 4.09l3.25-2.52z"/>
             <path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.45 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.41l3.25 2.52C7.3 8.11 9.46 6.39 12 6.39z"/>
@@ -645,7 +645,7 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL -->
+        <!-- 📊 2. QABXII PANEL (MATRIX VIEW WITH IMPROVED PERF) -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -1894,9 +1894,9 @@
       window.renderAdminStudentsGrid(filtered);
     };
 
-    // =========================================================
-    // 📊 ULTRA-ACCURATE RESULTS MATRIX & REAL MATCHING ENGINE
-    // =========================================================
+    // =========================================================================
+    // 📊 OPTIMIZED RESULTS MATRIX (ULTRA-FAST & REAL TIME EVALUATION)
+    // =========================================================================
     window.loadAdminResultsImage1Matrix = async function() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
       const tbody = document.getElementById("adminResultsMatrixBody");
@@ -1927,30 +1927,29 @@
           } catch(e) {}
         }
 
+        // SPEED IMPROVEMENT: Single fast scan of primary exam_results instead of looping 5 tables!
         let allResults = [];
-        const tablesToScan = ["exam_results", "results", "student_results", "scores", "user_results"];
-        for (const tName of tablesToScan) {
-          try {
-            const { data, error } = await db.from(tName).select("*");
-            if (!error && data && data.length) {
-              allResults.push(...data);
-            }
-          } catch(e) {}
-        }
+        try {
+          const { data, error } = await db.from("exam_results").select("*");
+          if (!error && data) {
+            allResults = data;
+          }
+        } catch(e) {}
 
-        const localKeysToScan = [
-          "ao_exam_results", "exam_results", "student_scores", 
-          "results", "ao_user_results", "student_exam_results", "ao_scores"
-        ];
-        for (const key of localKeysToScan) {
-          try {
-            const item = localStorage.getItem(key);
-            if (item) {
-              const parsed = JSON.parse(item);
-              if (Array.isArray(parsed)) allResults.push(...parsed);
+        // Fallback or merge with localStorage for absolute real-time guarantee
+        try {
+          const item = localStorage.getItem("ao_exam_results");
+          if (item) {
+            const parsed = JSON.parse(item);
+            if (Array.isArray(parsed)) {
+              parsed.forEach(lr => {
+                if (!allResults.some(r => r.id === lr.id || (r.student_id === lr.student_id && r.exam_id === lr.exam_id && r.created_at === lr.created_at))) {
+                  allResults.push(lr);
+                }
+              });
             }
-          } catch(e) {}
-        }
+          }
+        } catch(e) {}
 
         let dynamicHeaderHtml = `
           <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
@@ -1975,7 +1974,7 @@
           <th><span class="th-icon">%</span> %</th>
           <th><span class="th-icon">🎯</span> Qabxii</th>
           <th><span class="th-icon">📊</span> Avregii</th>
-          <th><span class="th-icon">⚙️</span> Sadarkaa</th>
+          <th><span class="th-icon">🏆</span> Sadarkaa</th>
           <th><span class="th-icon">❓</span> Gaaffii Argateef Dhabee</th>
           <th>Ilaalii</th>
         `;
@@ -2063,6 +2062,7 @@
           };
         });
 
+        // Sort descendingly to determine exact ordinal ranking
         studentRowsData.sort((a, b) => {
           if (b.overallPct !== a.overallPct) return b.overallPct - a.overallPct;
           return b.totalEarnedScore - a.totalEarnedScore;
@@ -2074,23 +2074,6 @@
           const avIdx = rankNum % avatarListColors.length;
           const av = avatarListColors[avIdx];
           const studentId = s.student_id || s.code || (s.id ? s.id.substring(0,8) : "STU" + String(rankNum).padStart(3, "0"));
-
-          const t = i18nTranslations[currentAppLang] || i18nTranslations.om;
-
-          let badgeClass = "badge-xumurameera";
-          let badgeText = t.badge_xumurameera;
-          if (row.examsTakenCount > 0) {
-            if (row.overallPct >= 80) {
-              badgeClass = "badge-olaanaa";
-              badgeText = t.badge_olaanaa;
-            } else if (row.overallPct >= 65) {
-              badgeClass = "badge-gaarii";
-              badgeText = t.badge_gaarii;
-            } else if (row.overallPct >= 50) {
-              badgeClass = "badge-jijjiiraa";
-              badgeText = t.badge_jijjiiraa;
-            }
-          }
 
           let pctBadgeColor = "pct-green";
           if (row.overallPct < 60) pctBadgeColor = "pct-orange";
@@ -2126,11 +2109,14 @@
                 </div>
               </td>
               <td class="td-avg"><strong>${row.examsTakenCount > 0 ? row.overallPct.toFixed(1) : '0.0'}</strong></td>
-              <td><span class="matrix-status-badge ${badgeClass}">${badgeText}</span></td>
-              <td class="td-wrong-count">${row.examsTakenCount > 0 ? row.wrongCount : '-'}</td>
+              
+              <!-- 🏆 1ffaa, 2ffaa, 3ffaa Rank output! -->
+              <td><span class="matrix-status-badge badge-olaanaa" style="background:#0d59b2; color:#fff; font-weight:bold; padding:4px 10px; border-radius:6px; display:inline-block; min-width:45px; text-align:center;">${rankNum}ffaa</span></td>
+              
+              <td class="td-wrong-count" style="font-weight:bold;">✅ ${row.totalEarnedScore} / ❌ ${row.wrongCount}</td>
               <td>
                 <button type="button" class="btn-matrix-action" onclick="viewStudentFullDetails('${s.id}')">
-                  ${t.btn_view || 'Ilalii'}
+                  Ilaalii
                 </button>
               </td>
             </tr>
@@ -2143,7 +2129,7 @@
     };
 
     // =========================================================
-    // 🔍 NEW HIGH-FIDELITY STUDENT EXAM BREAKDOWN MODAL
+    // 🔍 NEW HIGH-FIDELITY STUDENT EXAM BREAKDOWN MODAL (ANSWERS SHOWCASE)
     // =========================================================
     window.viewStudentFullDetails = async function(studentId) {
       const student = allAdminStudentsData.find(s => s.id === studentId);
@@ -2169,7 +2155,6 @@
         </div>
       `;
 
-      // Fetch all exam results for this student
       let studentResults = [];
       try {
         const { data, error } = await db.from("exam_results").select("*");
@@ -2215,16 +2200,48 @@
           const pct = r.percentage !== undefined ? Number(r.percentage) : Math.round((score / total) * 100);
           const title = r.exam_title || "Qormaata";
 
+          let breakdownHtml = "";
+          // Check if responses breakdown exists
+          if (r.responses && Array.isArray(r.responses)) {
+            breakdownHtml = `
+              <div style="margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;">
+                <h5 style="margin:0 0 8px 0; color:#334155; font-size:12.5px; font-weight:bold;">📋 Tarree Gaaffilee & Deebii Barataa:</h5>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  ${r.responses.map((resp, rIdx) => {
+                    const isCorrect = resp.is_correct || resp.student_answer === resp.correct_answer;
+                    return `
+                      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:12px;">
+                        <div style="font-weight:bold; color:#0f172a; margin-bottom:4px;">G${rIdx + 1}. ${escapeHtml(resp.question)}</div>
+                        <div style="display:flex; gap:10px; margin-top:2px;">
+                          <span style="color:${isCorrect ? '#166534' : '#991b1b'}; font-weight:bold;">
+                            ${isCorrect ? '✅ Deebii Sirrii' : '❌ Deebise'}: ${escapeHtml(resp.student_answer)}
+                          </span>
+                          ${!isCorrect ? `<span style="color:#166534; font-weight:bold;">🎯 Deebii Sirrii: ${escapeHtml(resp.correct_answer)}</span>` : ''}
+                        </div>
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+            `;
+          } else {
+            breakdownHtml = `
+              <div style="margin-top:10px; font-size:11.5px; color:#64748b; font-style:italic;">
+                ℹ️ Qormaanni kun dur kan qorame waan ta'eef deebiin gadi fageenyaa hin argamne.
+              </div>
+            `;
+          }
+
           return `
-            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+            <div style="background:#ffffff; border:2px solid #cbd5e1; border-radius:14px; padding:16px; margin-bottom:14px; box-shadow:0 3px 8px rgba(0,0,0,0.03);">
               <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:10px;">
-                <h4 style="margin:0; font-size:15px; color:#0f172a;">📝 ${escapeHtml(title)}</h4>
-                <span style="background:${pct >= 80 ? '#dcfce7' : pct >= 60 ? '#fef3c7' : '#fee2e2'}; color:${pct >= 80 ? '#166534' : pct >= 60 ? '#92400e' : '#991b1b'}; padding:4px 10px; border-radius:20px; font-weight:bold; font-size:12px;">
+                <h4 style="margin:0; font-size:14.5px; color:#0f172a;">📝 ${escapeHtml(title)}</h4>
+                <span style="background:${pct >= 85 ? '#dcfce7' : pct >= 65 ? '#fef3c7' : '#fee2e2'}; color:${pct >= 85 ? '#166534' : pct >= 65 ? '#92400e' : '#991b1b'}; padding:4px 10px; border-radius:20px; font-weight:bold; font-size:12px;">
                   ${pct}%
                 </span>
               </div>
               
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; color:#334155;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12.5px; color:#334155;">
                 <div style="background:#f0fdf4; padding:8px 12px; border-radius:8px; border:1px solid #bbf7d0;">
                   <span style="color:#166534; font-weight:bold;">✅ Argate (Correct):</span>
                   <strong style="font-size:15px; color:#15803d; display:block; margin-top:2px;">${score} / ${total}</strong>
@@ -2235,7 +2252,9 @@
                 </div>
               </div>
 
-              <div style="font-size:11.5px; color:#94a3b8; margin-top:10px; text-align:right;">
+              ${breakdownHtml}
+
+              <div style="font-size:11px; color:#94a3b8; margin-top:10px; text-align:right;">
                 🕒 Guyyaa: ${r.created_at ? new Date(r.created_at).toLocaleString() : '-'}
               </div>
             </div>
@@ -2640,16 +2659,16 @@
     };
 
     // =========================================================
-    // 🎯 100% ACCURATE EXAM EVALUATION & SUBMIT ENGINE
+    // 🎯 100% ACCURATE EXAM EVALUATION & SUBMIT ENGINE WITH DETAILED RESPONSE STORAGE
     // =========================================================
     window.submitActiveExamNow = async function() {
       clearInterval(activeExamTimerInterval);
       const totalQ = activeExamQuestionsList.length;
       let correctCount = 0;
 
-      activeExamQuestionsList.forEach((q, idx) => {
+      // Build JSON responses detailed breakdown list for pop-up showcase
+      const responsesArray = activeExamQuestionsList.map((q, idx) => {
         const studentChoice = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
-        
         let rawAnswerStr = (q.correct_answer || q.answer || q.correct || "").toString().trim();
         let correctLetter = "";
 
@@ -2664,10 +2683,22 @@
         }
 
         if (!correctLetter) correctLetter = rawAnswerStr.substring(0, 1).toUpperCase();
+        const isCorrect = studentChoice === correctLetter;
 
-        if (studentChoice && correctLetter && studentChoice === correctLetter) {
+        if (isCorrect) {
           correctCount++;
         }
+
+        return {
+          question: q.question,
+          option_a: q.option_a,
+          option_b: q.option_b,
+          option_c: q.option_c,
+          option_d: q.option_d,
+          student_answer: studentChoice || "-",
+          correct_answer: correctLetter,
+          is_correct: isCorrect
+        };
       });
 
       const percentage = totalQ > 0 ? Math.round((correctCount / totalQ) * 100) : 0;
@@ -2690,6 +2721,7 @@
         score: correctCount,
         total_questions: totalQ,
         percentage: percentage,
+        responses: responsesArray, // Breakdown nested structure!
         created_at: new Date().toISOString()
       };
 
@@ -2699,6 +2731,7 @@
         try { await db.from("results").insert([resultRecord]); } catch(e2){}
       }
 
+      // Sync and store backup locally so admin page reads instantly even on latency drops
       try {
         const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
         localList.unshift(resultRecord);
@@ -2728,7 +2761,7 @@
 
         if (!resultsList.length) {
           const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
-          resultsList = localList;
+          resultsList = localList.filter(r => r.student_id === sId);
         }
 
         if (!resultsList.length) {
