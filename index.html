@@ -234,7 +234,7 @@
         <!-- GOOGLE LOGIN -->
         <button id="googleLoginButton" type="button" class="google-login-btn" onclick="googleLogin()">
           <svg width="22" height="22" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69(2.93-4.18) 2.93-7.4z"/>
+            <path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.27H12v4.3h5.22a4.47 4.47 0 0 1-1.94 2.93v2.44h3.14c1.84-1.69 2.93-4.18 2.93-7.4z"/>
             <path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.37l-3.14-2.44c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.04H3.28v2.52A9.74 9.74 0 0 0 12 21.5z"/>
             <path fill="#FBBC05" d="M6.53 13.57A5.86 5.86 0 0 1 6.22 12c0-.55.11-1.09.31-1.57V7.91H3.28A9.5 9.5 0 0 0 2.25 12c0 1.47.35 2.86 1.03 4.09l3.25-2.52z"/>
             <path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.45 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.41l3.25 2.52C7.3 8.11 9.46 6.39 12 6.39z"/>
@@ -1927,29 +1927,54 @@
           } catch(e) {}
         }
 
-        // SPEED IMPROVEMENT: Single fast scan of primary exam_results instead of looping 5 tables!
+        // SCANS MULTIPLE POTENTIAL TABLES FOR ABSOLUTE GUARANTEE OF EXAM SCORES RETRIEVAL
         let allResults = [];
-        try {
-          const { data, error } = await db.from("exam_results").select("*");
-          if (!error && data) {
-            allResults = data;
-          }
-        } catch(e) {}
-
-        // Fallback or merge with localStorage for absolute real-time guarantee
-        try {
-          const item = localStorage.getItem("ao_exam_results");
-          if (item) {
-            const parsed = JSON.parse(item);
-            if (Array.isArray(parsed)) {
-              parsed.forEach(lr => {
-                if (!allResults.some(r => r.id === lr.id || (r.student_id === lr.student_id && r.exam_id === lr.exam_id && r.created_at === lr.created_at))) {
-                  allResults.push(lr);
+        const tablesToScan = ["exam_results", "results", "student_results", "scores"];
+        for (const tName of tablesToScan) {
+          try {
+            const { data, error } = await db.from(tName).select("*");
+            if (!error && data && data.length) {
+              data.forEach(item => {
+                const isDup = allResults.some(r => 
+                  (r.id && item.id && r.id === item.id) ||
+                  (r.student_id === item.student_id && r.exam_id === item.exam_id && r.created_at === item.created_at)
+                );
+                if (!isDup) {
+                  allResults.push(item);
                 }
               });
             }
-          }
-        } catch(e) {}
+          } catch(e) {}
+        }
+
+        // Merge and deduplicate with LocalStorage for flawless offline-online sync
+        const localKeys = ["ao_exam_results", "exam_results", "results"];
+        localKeys.forEach(key => {
+          try {
+            const item = localStorage.getItem(key);
+            if (item) {
+              const parsed = JSON.parse(item);
+              if (Array.isArray(parsed)) {
+                parsed.forEach(lr => {
+                  const isDup = allResults.some(r => 
+                    (r.id && lr.id && r.id === lr.id) ||
+                    (r.student_id === lr.student_id && r.exam_id === lr.exam_id && r.created_at === lr.created_at)
+                  );
+                  if (!isDup) {
+                    allResults.push(lr);
+                  }
+                });
+              }
+            }
+          } catch(e) {}
+        });
+
+        // Sort descendingly by score/correct count to prioritize highest marks per match
+        allResults.sort((a, b) => {
+          const scoreA = Number(a.score ?? a.correct_answers ?? a.correct ?? a.result ?? 0);
+          const scoreB = Number(b.score ?? b.correct_answers ?? b.correct ?? b.result ?? 0);
+          return scoreB - scoreA;
+        });
 
         let dynamicHeaderHtml = `
           <th style="width: 45px;"><span class="th-icon">👥</span> #</th>
@@ -2006,17 +2031,21 @@
               const exTitle = cleanStr(ex.title);
 
               const r = allResults.find(res => {
-                const rSId = cleanStr(res.student_id || res.user_id || res.studentId || res.userId);
-                const rSName = cleanStr(res.student_name || res.name || res.userName || res.studentName);
-                const rSEmail = cleanStr(res.student_email || res.email);
+                const rSId = cleanStr(res.student_id || res.user_id || res.studentId || res.userId || "");
+                const rSName = cleanStr(res.student_name || res.name || res.userName || res.studentName || "");
+                const rSEmail = cleanStr(res.student_email || res.email || "");
 
+                // Ultra-comprehensive fallback mapping across IDs, activation codes, emails and full names
                 const matchStudent = 
-                  (rSId && (rSId === sId || rSId === sCode || sId.includes(rSId) || rSId.includes(sId) || sCode.includes(rSId) || rSId.includes(sCode))) ||
-                  (rSEmail && sEmail && rSEmail === sEmail) ||
+                  (rSId && (
+                    (sId && (rSId === sId || sId.includes(rSId) || rSId.includes(sId))) ||
+                    (sCode && (rSId === sCode || sCode.includes(rSId) || rSId.includes(sCode)))
+                  )) ||
+                  (rSEmail && sEmail && (rSEmail === sEmail || sEmail.includes(rSEmail) || rSEmail.includes(sEmail))) ||
                   (rSName && sName && (rSName === sName || sName.includes(rSName) || rSName.includes(sName)));
 
-                const rExId = cleanStr(res.exam_id || res.examId);
-                const rExTitle = cleanStr(res.exam_title || res.title || res.examTitle);
+                const rExId = cleanStr(res.exam_id || res.examId || "");
+                const rExTitle = cleanStr(res.exam_title || res.title || res.examTitle || "");
 
                 const matchExam = 
                   (rExId && (rExId === exId || exId.includes(rExId) || rExId.includes(exId))) ||
@@ -2156,34 +2185,48 @@
       `;
 
       let studentResults = [];
-      try {
-        const { data, error } = await db.from("exam_results").select("*");
-        if (!error && data) {
-          studentResults = data.filter(r => {
-            const rSId = (r.student_id || r.user_id || "").toLowerCase();
-            const rSName = (r.student_name || r.name || "").toLowerCase();
-            const rSEmail = (r.student_email || r.email || "").toLowerCase();
+      const tables = ["exam_results", "results"];
+      for (const t of tables) {
+        try {
+          const { data, error } = await db.from(t).select("*");
+          if (!error && data) {
+            const filtered = data.filter(r => {
+              const rSId = (r.student_id || r.user_id || "").toLowerCase();
+              const rSName = (r.student_name || r.name || "").toLowerCase();
+              const rSEmail = (r.student_email || r.email || "").toLowerCase();
 
-            return rSId === (student?.id || "").toLowerCase() ||
-                   rSId === sCode.toLowerCase() ||
-                   (sEmail !== "-" && rSEmail === sEmail.toLowerCase()) ||
-                   (rSName && rSName === sName.toLowerCase());
-          });
-        }
-      } catch(e) {}
+              return rSId === (student?.id || "").toLowerCase() ||
+                     rSId === sCode.toLowerCase() ||
+                     (sEmail !== "-" && rSEmail === sEmail.toLowerCase()) ||
+                     (rSName && rSName === sName.toLowerCase());
+            });
+            studentResults.push(...filtered);
+          }
+        } catch(e) {}
+      }
 
       if (!studentResults.length) {
         try {
           const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
-          studentResults = localList.filter(r => {
+          const filteredLocal = localList.filter(r => {
             const rSId = (r.student_id || r.user_id || "").toLowerCase();
             const rSName = (r.student_name || r.name || "").toLowerCase();
             return rSId === (student?.id || "").toLowerCase() ||
                    rSId === sCode.toLowerCase() ||
                    (rSName && rSName === sName.toLowerCase());
           });
+          studentResults.push(...filteredLocal);
         } catch(e) {}
       }
+
+      // Deduplicate results
+      const uniqueStudentResults = [];
+      studentResults.forEach(r => {
+        if (!uniqueStudentResults.some(ur => ur.exam_id === r.exam_id && ur.created_at === r.created_at)) {
+          uniqueStudentResults.push(r);
+        }
+      });
+      studentResults = uniqueStudentResults;
 
       if (!studentResults.length) {
         contentEl.innerHTML = `
@@ -2205,7 +2248,7 @@
           if (r.responses && Array.isArray(r.responses)) {
             breakdownHtml = `
               <div style="margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;">
-                <h5 style="margin:0 0 8px 0; color:#334155; font-size:12.5px; font-weight:bold;">📋 Tarree Gaaffilee & Deebii Barataa:</h5>
+                <h5 style="margin:0 0 8px 0; color:#334155; font-size:12.5px; font-weight:bold;">📋 Tarree Gaaffilee &amp; Deebii Barataa:</h5>
                 <div style="display:flex; flex-direction:column; gap:8px;">
                   ${r.responses.map((resp, rIdx) => {
                     const isCorrect = resp.is_correct || resp.student_answer === resp.correct_answer;
@@ -2751,25 +2794,48 @@
         try { s = JSON.parse(localStorage.getItem("ao_current_student")); } catch(e){}
       }
       const sId = s?.id || localStorage.getItem("ao_student_real_id");
+      const sEmail = s?.email || localStorage.getItem("ao_user_email") || "";
 
       try {
         let resultsList = [];
         if (sId) {
-          const { data } = await db.from("exam_results").select("*").eq("student_id", sId).order("created_at", { ascending: false });
-          if (data && data.length) resultsList = data;
+          const tables = ["exam_results", "results"];
+          for (const t of tables) {
+            try {
+              const { data: d1 } = await db.from(t).select("*").eq("student_id", sId);
+              if (d1 && d1.length) resultsList.push(...d1);
+              
+              const { data: d2 } = await db.from(t).select("*").eq("user_id", sId);
+              if (d2 && d2.length) resultsList.push(...d2);
+
+              if (sEmail) {
+                const { data: d3 } = await db.from(t).select("*").eq("student_email", sEmail);
+                if (d3 && d3.length) resultsList.push(...d3);
+              }
+            } catch(err){}
+          }
         }
 
-        if (!resultsList.length) {
+        const uniqueResults = [];
+        resultsList.forEach(r => {
+          if (!uniqueResults.some(ur => ur.exam_id === r.exam_id && ur.created_at === r.created_at)) {
+            uniqueResults.push(r);
+          }
+        });
+        uniqueResults.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+        if (!uniqueResults.length) {
           const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
-          resultsList = localList.filter(r => r.student_id === sId);
+          const filteredLocal = localList.filter(r => r.student_id === sId || r.user_id === sId || (sEmail && r.student_email === sEmail));
+          uniqueResults.push(...filteredLocal);
         }
 
-        if (!resultsList.length) {
+        if (!uniqueResults.length) {
           container.innerHTML = `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
           return;
         }
 
-        container.innerHTML = resultsList.map(res => `
+        container.innerHTML = uniqueResults.map(res => `
           <div class="modern-card" style="margin-bottom:12px; border-left:5px solid #10b981; background:#ffffff; padding:18px; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
             <h3 style="color:#0f172a; font-size:16px; margin-bottom:6px;">📝 ${escapeHtml(res.exam_title || "Qormaata")}</h3>
             <p style="margin-top:2px; font-size:14px; color:#334155;">
