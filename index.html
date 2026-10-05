@@ -579,7 +579,7 @@
               <span class="tile-label" data-i18n="tab_students">Barataa</span>
             </button>
 
-            <button type="button" class="admin-vivid-tile tile-amber" onclick="openAdminPanel('results')">
+            <button type="button" class="admin-vivid-tile tile-green" onclick="openAdminPanel('results')">
               <div class="tile-icon-wrap"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg></div>
               <span class="tile-label" data-i18n="tab_score">Qabxii</span>
             </button>
@@ -711,7 +711,7 @@
 
           <!-- SUB-VIEW 1: QORMAATA UUMUU (FORMS & INPUTS ONLY) -->
           <div id="examSubViewCreate" class="exam-subview-content">
-            <!-- CREATE EXAM CARD -->
+            <!-- CREATE EXAM CARD WITH SHUFFLE ANTI-CHEATING SUPPORT -->
             <div class="admin-panel-card">
               <h4 style="margin-bottom:10px;">➕ Qormaata Haaraa Uumi</h4>
               <input id="examTitleInput" type="text" placeholder="Mata-duree qormaataa">
@@ -763,6 +763,19 @@
                 <div><label>Saa'a xumuraa</label><input id="examEndTimeInput" type="time"></div>
               </div>
 
+              <!-- ANTI-CHEATING SHUFFLE CONTROLS -->
+              <div style="background:#f1f5f9; padding:12px; border-radius:10px; margin:12px 0; font-size:13px; color:#1e293b; border-left:4px solid #0d59b2;">
+                <label style="font-weight:bold; display:block; margin-bottom:6px; color:#0d59b2;">🔒 Ittisa Hattran (Anti-Cheating Shuffling):</label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="checkbox" id="shuffleQuestionsInput" style="width:auto; margin:0;"> 
+                  <span>🔀 Gaaffilee Waljala jijjiiri (Shuffle Questions)</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:8px;">
+                  <input type="checkbox" id="shuffleOptionsInput" style="width:auto; margin:0;"> 
+                  <span>🔄 Filannoowwan Waljala jijjiiri (Shuffle Options)</span>
+                </label>
+              </div>
+
               <button type="button" class="primary-btn-vivid" onclick="createExam()">➕ Qormaata Uumi</button>
             </div>
 
@@ -783,7 +796,6 @@
             <!-- AI SECTION -->
             <div class="admin-panel-card" style="border-left: 5px solid #9333ea; margin-top: 16px;">
               <h4 style="color:#9333ea; margin-bottom:10px;">🤖 AI'n Gaaffii Uumi</h4>
-              <label>Qormaata</label>
               <select id="aiQuestionExamSelect"><option value="">Qormaata filadhu</option></select>
               <label>Madda gaaffii</label>
               <select id="aiQuestionSourceType" onchange="changeAIQuestionSource()">
@@ -843,7 +855,7 @@
 
         </div>
 
-        <!-- 📢 5. BEEKSIISA PANEL -->
+        <!-- 📢 5. BEEKSIISA PAGE -->
         <div id="adminAnnouncementsPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -859,7 +871,7 @@
           <div id="adminAnnouncementsList"></div>
         </div>
 
-        <!-- 💬 6. YAADAA PANEL -->
+        <!-- 💬 6. YAADAA PAGE -->
         <div id="adminFeedbacksPanel" class="admin-content-panel" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -936,7 +948,7 @@
   </nav>
 
   <!-- =====================================================
-       📝 MODERN HIGH-FIDELITY EXAM EDIT MODAL
+       📝 MODERN HIGH-FIDELITY EXAM EDIT MODAL WITH SHUFFLE TOGGLES
   ====================================================== -->
   <div id="examEditModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); z-index:9999999; justify-content:center; align-items:center; backdrop-filter:blur(4px); padding:20px; box-sizing:border-box;">
     <div style="background:#ffffff; width:100%; max-width:500px; border-radius:16px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.15); max-height:90vh; overflow-y:auto; box-sizing:border-box; position:relative;">
@@ -1020,6 +1032,19 @@
             <label style="font-weight:700; font-size:12px; color:#334155; display:block; margin-bottom:4px;">Saa'a xumuraa</label>
             <input id="editExamEndTime" type="time" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font-size:13.5px;">
           </div>
+        </div>
+
+        <!-- SHUFFLE TOGGLES FOR EDIT -->
+        <div style="background:#f1f5f9; padding:10px; border-radius:8px; font-size:12.5px; color:#334155; margin-top:4px;">
+          <label style="font-weight:700; display:block; margin-bottom:4px; color:#0d59b2;">🔀 Ittisa Hattran (Anti-Cheating):</label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="editShuffleQuestions" style="width:auto; margin:0;"> 
+            <span>Gaaffilee Waljala jijjiiri (Shuffle Questions)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-top:6px;">
+            <input type="checkbox" id="editShuffleOptions" style="width:auto; margin:0;"> 
+            <span>Filannoowwan Waljala jijjiiri (Shuffle Options)</span>
+          </label>
         </div>
         
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px; border-top:1px solid #e2e8f0; padding-top:14px;">
@@ -1421,6 +1446,18 @@
     };
 
     // =========================================================
+    // 🔀 SHUFFLE UTILITY FUNCTION
+    // =========================================================
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // =========================================================
     // 🛠️ EXAM CONTROL ACTIONS: 100% WORKING BACKEND INTERFACES
     // =========================================================
     window.loadAdminExams = async function() {
@@ -1465,6 +1502,9 @@
             isLbOpen = ex.leaderboard_status === "open" || ex.leaderboard_open === true || ex.leaderboard_open === undefined;
           }
 
+          const hasSq = ex.shuffle_questions || false;
+          const hasSo = ex.shuffle_options || false;
+
           return `
             <div class="modern-card" style="margin-bottom:16px; border-left:5px solid ${isClosed ? '#f59e0b' : '#0d59b2'}; background:#ffffff; padding:18px; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
               <h3 style="margin:0; font-size:16px; color:#0f172a;">${escapeHtml(ex.title)}</h3>
@@ -1474,9 +1514,9 @@
                 <span>❓ <strong>Gaaffii:</strong> ${ex.question_limit || "Hunda"}</span>
                 <span>🔢 <strong>Attempt:</strong> ${ex.attempt_limit || 1}</span>
                 <span>⏱️ <strong>Yeroo:</strong> ${ex.duration || 30} min</span>
-                <span>📅 <strong>Guyyaa:</strong> ${ex.start_date || "-"} to ${ex.end_date || "-"}</span>
-                <span>⏰ <strong>Saa'a:</strong> ${ex.start_time || "-"} to ${ex.end_time || "-"}</span>
                 <span>🟢 <strong>Haala:</strong> <strong style="color:${isClosed ? '#ef4444' : '#10b981'};">${isClosed ? 'Cufameera' : 'Active'}</strong></span>
+                ${hasSq ? `<span class="shuffle-badge shuffle-badge-q">🔀 Shuffled Q</span>` : ''}
+                ${hasSo ? `<span class="shuffle-badge shuffle-badge-o">🔄 Shuffled O</span>` : ''}
               </div>
 
               <!-- HIGH-FIDELITY ACTION GRID -->
@@ -1569,7 +1609,7 @@
     };
 
     // =========================================================
-    // EXAM EDIT MODAL LOGIC - SUPPORT FOR ALL FIELDS
+    // EXAM EDIT MODAL LOGIC - SUPPORT FOR ALL FIELDS INCLUDING SHUFFLES
     // =========================================================
     window.openEditExamModal = async function(id) {
       try {
@@ -1587,6 +1627,10 @@
         document.getElementById("editExamEndDate").value = data.end_date || "";
         document.getElementById("editExamStartTime").value = data.start_time || "";
         document.getElementById("editExamEndTime").value = data.end_time || "";
+        
+        // Set shuffle checkboxes
+        document.getElementById("editShuffleQuestions").checked = data.shuffle_questions || false;
+        document.getElementById("editShuffleOptions").checked = data.shuffle_options || false;
         
         document.getElementById("examEditModal").style.display = "flex";
       } catch(e) {
@@ -1610,6 +1654,8 @@
       const end_date = document.getElementById("editExamEndDate").value;
       const start_time = document.getElementById("editExamStartTime").value;
       const end_time = document.getElementById("editExamEndTime").value;
+      const shuffle_questions = document.getElementById("editShuffleQuestions").checked;
+      const shuffle_options = document.getElementById("editShuffleOptions").checked;
 
       if (!title) { alert("Mata-duree qormaataa guuti!"); return; }
 
@@ -1624,7 +1670,9 @@
         start_date,
         end_date,
         start_time,
-        end_time
+        end_time,
+        shuffle_questions,
+        shuffle_options
       };
 
       let success = false;
@@ -2212,7 +2260,7 @@
     };
 
     // =========================================================
-    // EXAM ENGINE & ATTEMPT LOCKS
+    // EXAM ENGINE WITH ANTI-CHEATING SHUFFLE SUPPORT
     // =========================================================
     window.getStudentExamAttempts = async function(examId, studentId) {
       if (!studentId) return 0;
@@ -2340,11 +2388,17 @@
           return;
         }
 
+        let loadedQuestions = questions;
         const limit = Number(activeExamData?.question_limit || 0);
         if (limit > 0 && questions.length > limit) {
-          activeExamQuestionsList = questions.slice(0, limit);
+          loadedQuestions = questions.slice(0, limit);
+        }
+
+        // 🔀 Anti-Cheating: Shuffle Questions if enabled by Admin
+        if (activeExamData?.shuffle_questions) {
+          activeExamQuestionsList = shuffleArray(loadedQuestions);
         } else {
-          activeExamQuestionsList = questions;
+          activeExamQuestionsList = loadedQuestions;
         }
 
         const durationMin = Number(activeExamData?.duration || 30);
@@ -2393,11 +2447,16 @@
       if (numEl) numEl.textContent = `${activeQuestionIndex + 1}/${totalQ}`;
       if (textEl) textEl.textContent = q.question;
 
-      const options = [];
+      let options = [];
       if (q.option_a && q.option_a !== "-") options.push({ key: "A", text: q.option_a });
       if (q.option_b && q.option_b !== "-") options.push({ key: "B", text: q.option_b });
       if (q.option_c && q.option_c !== "-") options.push({ key: "C", text: q.option_c });
       if (q.option_d && q.option_d !== "-") options.push({ key: "D", text: q.option_d });
+
+      // 🔄 Anti-Cheating: Shuffle Options if enabled by Admin
+      if (activeExamData?.shuffle_options) {
+        options = shuffleArray(options);
+      }
 
       const currentSelectedKey = studentUserAnswers[activeQuestionIndex];
 
@@ -2611,30 +2670,30 @@
           } else if (/^D[\.\)\-\:\s]/i.test(line)) {
             optD = line.replace(/^D[\.\)\-\:\s]+/i, "").trim();
           }
-
-          // Search strictly for the letter FOLLOWING the keyword (Answer: B, Deebii: B, etc.)
-          const ansMatch = line.match(/(?:deebii|deebiin|answer|ans|sirrii|correct)\s*[:\-=]?\s*([a-d])\b/i);
-          if (ansMatch && ansMatch[1]) {
-            correctLetter = ansMatch[1].toUpperCase();
-          }
         }
 
-        // If not found yet, inspect entire block using the exact pattern
-        if (!correctLetter) {
-          const blockMatch = block.match(/(?:deebii|deebiin|answer|ans|sirrii|correct)\s*[:\-=]?\s*([a-d])\b/i);
-          if (blockMatch && blockMatch[1]) {
-            correctLetter = blockMatch[1].toUpperCase();
-          } else {
-            // Check if last line is just a standalone letter like "B"
-            const lastLine = lines[lines.length - 1];
-            const soloMatch = lastLine.match(/^([a-d])$/i);
-            if (soloMatch) {
-              correctLetter = soloMatch[1].toUpperCase();
+        // 🌟 THE BIG FIX: Strip out keywords first to prevent their "D" from being chosen!
+        for (const line of lines) {
+          const lowerLine = line.toLowerCase();
+          if (lowerLine.includes("deebii") || lowerLine.includes("deebiin") || lowerLine.includes("answer") || lowerLine.includes("ans") || lowerLine.includes("sirrii") || lowerLine.includes("correct")) {
+            const cleanLine = line.replace(/deebii|deebiin|answer|ans|correct|sirrii/i, "").trim();
+            const match = cleanLine.match(/\b([A-D])\b/i) || cleanLine.match(/([A-D])/i);
+            if (match) {
+              correctLetter = match[1].toUpperCase();
+              break;
             }
           }
         }
 
         // Default fallback if no answer tag was provided
+        if (!correctLetter) {
+          const lastLine = lines[lines.length - 1];
+          const soloMatch = lastLine.match(/^([a-d])$/i);
+          if (soloMatch) {
+            correctLetter = soloMatch[1].toUpperCase();
+          }
+        }
+
         if (!correctLetter) correctLetter = "A";
 
         // Clean out any leaked answer texts from options
@@ -2656,6 +2715,7 @@
             option_c: optC || "-",
             option_d: optD || "-",
             correct_answer: correctLetter,
+            answer: correctLetter,
             source_type: "bulk"
           });
         }
@@ -2690,6 +2750,76 @@
         if (typeof loadAdminQuestions === "function") await loadAdminQuestions();
       } catch (err) {
         alert("Dogoggora: " + err.message);
+      }
+    };
+
+    // =========================================================
+    // EXAM CREATION WITH SHUFFLE TOGGLES
+    // =========================================================
+    window.createExam = async function() {
+      const title = document.getElementById("examTitleInput").value.trim();
+      const description = document.getElementById("examDescriptionInput").value.trim();
+      const question_limit = Number(document.getElementById("examQuestionLimitInput").value);
+      const attempt_limit = Number(document.getElementById("examAttemptLimitInput").value);
+      const duration = Number(document.getElementById("examDurationInput").value);
+      const is_final = document.getElementById("examFinalInput").value === "true";
+      const start_date = document.getElementById("examStartDateInput").value;
+      const end_date = document.getElementById("examEndDateInput").value;
+      const start_time = document.getElementById("examStartTimeInput").value;
+      const end_time = document.getElementById("examEndTimeInput").value;
+      const shuffle_questions = document.getElementById("shuffleQuestionsInput").checked;
+      const shuffle_options = document.getElementById("shuffleOptionsInput").checked;
+
+      if (!title) { alert("Mata-duree qormaataa guuti!"); return; }
+
+      let insertPayload = {
+        title,
+        description,
+        question_limit,
+        attempt_limit,
+        duration,
+        is_final,
+        final: is_final,
+        start_date,
+        end_date,
+        start_time,
+        end_time,
+        shuffle_questions,
+        shuffle_options
+      };
+
+      let success = false;
+      let attemptLoop = 0;
+
+      while (!success && attemptLoop < 15) {
+        attemptLoop++;
+        try {
+          const { error } = await db.from("exams").insert([insertPayload]);
+          if (error) {
+            const errMsg = error.message || "";
+            const match = errMsg.match(/Could not find the '([^']+)' column/i) || 
+                          errMsg.match(/column "([^"]+)" of relation/i) ||
+                          errMsg.match(/column "([^"]+)" does not exist/i);
+            if (match && match[1]) {
+              const missingCol = match[1];
+              delete insertPayload[missingCol];
+              continue;
+            } else {
+              throw error;
+            }
+          }
+          success = true;
+        } catch(e) {
+          alert("Error: " + e.message);
+          return;
+        }
+      }
+
+      if (success) {
+        alert("✅ Qormaanni milkaa'inaan uumameera!");
+        document.getElementById("examTitleInput").value = "";
+        document.getElementById("examDescriptionInput").value = "";
+        await window.loadAdminExams();
       }
     };
 
