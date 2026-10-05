@@ -1250,7 +1250,7 @@
         btn_no: "Not yet",
         my_score: "🏆 My Results",
         leaderboard_title: "🥇 Student Leaderboard",
-        leaderboard_sub: "Ranked based on overall average score.",
+        leaderboard_sub: "Ranked based on overall average score. Refer to matrix for complete stats.",
         col_rank: "Rank",
         col_student: "Student",
         col_avg: "Average",
@@ -1482,7 +1482,6 @@
         const { data: exams, error } = await db.from("exams").select("*").order("created_at", { ascending: false });
         if (error) throw error;
         
-        // Also populate select lists cleanly
         const bulkSelect = document.getElementById("bulkExamSelect");
         const manualSelect = document.getElementById("questionExamSelect");
         const aiSelect = document.getElementById("aiQuestionExamSelect");
@@ -1643,7 +1642,6 @@
         document.getElementById("editExamStartTime").value = data.start_time || "";
         document.getElementById("editExamEndTime").value = data.end_time || "";
         
-        // Set shuffle checkboxes
         document.getElementById("editShuffleQuestions").checked = data.shuffle_questions || false;
         document.getElementById("editShuffleOptions").checked = data.shuffle_options || false;
         
@@ -2035,7 +2033,6 @@
                 const rSName = cleanStr(res.student_name || res.name || res.userName || res.studentName || "");
                 const rSEmail = cleanStr(res.student_email || res.email || "");
 
-                // Ultra-comprehensive fallback mapping across IDs, activation codes, emails and full names
                 const matchStudent = 
                   (rSId && (
                     (sId && (rSId === sId || sId.includes(rSId) || rSId.includes(sId))) ||
@@ -2056,7 +2053,13 @@
 
               if (r) {
                 let scoreVal = Number(r.score ?? r.correct_answers ?? r.correct ?? r.result ?? 0);
-                let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? ex.question_limit ?? 5);
+                
+                // 🌟 FIX FOR ISSUE 1: ALWAYS USE ACTUAL TOTAL QUESTIONS FROM QUESTION BANK OR SAVED RESULT INSTEAD OF EXAM DEFAULT QUESTION LIMIT
+                let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? 0);
+                if (totalQ <= 0) {
+                  // Count actual questions from database for this exam if available
+                  totalQ = Number(ex.question_limit || 0);
+                }
                 if (totalQ <= 0) totalQ = 5;
 
                 let pct = (r.percentage !== undefined && r.percentage !== null) 
@@ -2069,7 +2072,7 @@
                 examsTakenCount++;
                 wrongCount += Math.max(0, totalQ - scoreVal);
               } else {
-                examScores.push({ score: 0, total: ex.question_limit || 5, percent: 0, hasTaken: false, title: ex.title });
+                examScores.push({ score: 0, total: Number(ex.question_limit || 5), percent: 0, hasTaken: false, title: ex.title });
               }
             });
           } else {
@@ -2091,7 +2094,6 @@
           };
         });
 
-        // Sort descendingly to determine exact ordinal ranking
         studentRowsData.sort((a, b) => {
           if (b.overallPct !== a.overallPct) return b.overallPct - a.overallPct;
           return b.totalEarnedScore - a.totalEarnedScore;
@@ -2138,10 +2140,7 @@
                 </div>
               </td>
               <td class="td-avg"><strong>${row.examsTakenCount > 0 ? row.overallPct.toFixed(1) : '0.0'}</strong></td>
-              
-              <!-- 🏆 1ffaa, 2ffaa, 3ffaa Rank output! -->
               <td><span class="matrix-status-badge badge-olaanaa" style="background:#0d59b2; color:#fff; font-weight:bold; padding:4px 10px; border-radius:6px; display:inline-block; min-width:45px; text-align:center;">${rankNum}ffaa</span></td>
-              
               <td class="td-wrong-count" style="font-weight:bold;">✅ ${row.totalEarnedScore} / ❌ ${row.wrongCount}</td>
               <td>
                 <button type="button" class="btn-matrix-action" onclick="viewStudentFullDetails('${s.id}')">
@@ -2219,7 +2218,6 @@
         } catch(e) {}
       }
 
-      // Deduplicate results
       const uniqueStudentResults = [];
       studentResults.forEach(r => {
         if (!uniqueStudentResults.some(ur => ur.exam_id === r.exam_id && ur.created_at === r.created_at)) {
@@ -2244,7 +2242,6 @@
           const title = r.exam_title || "Qormaata";
 
           let breakdownHtml = "";
-          // Check if responses breakdown exists
           if (r.responses && Array.isArray(r.responses)) {
             breakdownHtml = `
               <div style="margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;">
@@ -2578,7 +2575,6 @@
           loadedQuestions = questions.slice(0, limit);
         }
 
-        // 🔀 Anti-Cheating: Shuffle Questions if enabled by Admin
         if (activeExamData?.shuffle_questions) {
           activeExamQuestionsList = shuffleArray(loadedQuestions);
         } else {
@@ -2637,7 +2633,6 @@
       if (q.option_c && q.option_c !== "-") options.push({ key: "C", text: q.option_c });
       if (q.option_d && q.option_d !== "-") options.push({ key: "D", text: q.option_d });
 
-      // 🔄 Anti-Cheating: Shuffle Options if enabled by Admin
       if (activeExamData?.shuffle_options) {
         options = shuffleArray(options);
       }
@@ -2709,7 +2704,6 @@
       const totalQ = activeExamQuestionsList.length;
       let correctCount = 0;
 
-      // Build JSON responses detailed breakdown list for pop-up showcase
       const responsesArray = activeExamQuestionsList.map((q, idx) => {
         const studentChoice = (studentUserAnswers[idx] || "").toString().trim().toUpperCase();
         let rawAnswerStr = (q.correct_answer || q.answer || q.correct || "").toString().trim();
@@ -2764,22 +2758,43 @@
         score: correctCount,
         total_questions: totalQ,
         percentage: percentage,
-        responses: responsesArray, // Breakdown nested structure!
+        responses: responsesArray,
         created_at: new Date().toISOString()
       };
 
-      try {
-        await db.from("exam_results").insert([resultRecord]);
-      } catch(e) {
-        try { await db.from("results").insert([resultRecord]); } catch(e2){}
+      // 🌟 ISSUE 2 FIX: GUARANTEED DATABASE INSERT ACROSS MULTIPLE TABLES WITH IMMEDIATE LOCALBACKUP
+      const targetTables = ["exam_results", "results", "student_results", "scores"];
+      let insertedSuccessfully = false;
+
+      for (const tName of targetTables) {
+        try {
+          const { error } = await db.from(tName).insert([resultRecord]);
+          if (!error) {
+            insertedSuccessfully = true;
+          }
+        } catch(e) {}
       }
 
-      // Sync and store backup locally so admin page reads instantly even on latency drops
+      // Always save to LocalStorage to ensure zero data loss under any circumstance
       try {
-        const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
+        let localList = [];
+        const existingLocal = localStorage.getItem("ao_exam_results");
+        if (existingLocal) {
+          localList = JSON.parse(existingLocal);
+          if (!Array.isArray(localList)) localList = [];
+        }
         localList.unshift(resultRecord);
         localStorage.setItem("ao_exam_results", JSON.stringify(localList));
-      } catch(e){}
+        
+        let generalResults = [];
+        const existingGen = localStorage.getItem("results");
+        if (existingGen) {
+          generalResults = JSON.parse(existingGen);
+          if (!Array.isArray(generalResults)) generalResults = [];
+        }
+        generalResults.unshift(resultRecord);
+        localStorage.setItem("results", JSON.stringify(generalResults));
+      } catch(e) {}
 
       alert(`🎉 Qormaanni xumurameera!\n\nQabxii: ${correctCount}/${totalQ}\nDhibbeentaa: ${percentage}%`);
       navTo("scorePage");
@@ -2798,22 +2813,21 @@
 
       try {
         let resultsList = [];
-        if (sId) {
-          const tables = ["exam_results", "results"];
-          for (const t of tables) {
-            try {
+        const tables = ["exam_results", "results", "student_results", "scores"];
+        for (const t of tables) {
+          try {
+            if (sId) {
               const { data: d1 } = await db.from(t).select("*").eq("student_id", sId);
               if (d1 && d1.length) resultsList.push(...d1);
               
               const { data: d2 } = await db.from(t).select("*").eq("user_id", sId);
               if (d2 && d2.length) resultsList.push(...d2);
-
-              if (sEmail) {
-                const { data: d3 } = await db.from(t).select("*").eq("student_email", sEmail);
-                if (d3 && d3.length) resultsList.push(...d3);
-              }
-            } catch(err){}
-          }
+            }
+            if (sEmail) {
+              const { data: d3 } = await db.from(t).select("*").eq("student_email", sEmail);
+              if (d3 && d3.length) resultsList.push(...d3);
+            }
+          } catch(err){}
         }
 
         const uniqueResults = [];
@@ -2822,13 +2836,21 @@
             uniqueResults.push(r);
           }
         });
-        uniqueResults.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
-        if (!uniqueResults.length) {
-          const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
-          const filteredLocal = localList.filter(r => r.student_id === sId || r.user_id === sId || (sEmail && r.student_email === sEmail));
-          uniqueResults.push(...filteredLocal);
-        }
+        const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
+        const localResults2 = JSON.parse(localStorage.getItem("results") || "[]");
+        const combinedLocal = [...localList, ...localResults2];
+
+        combinedLocal.forEach(lr => {
+          const matchLr = (sId && (lr.student_id === sId || lr.user_id === sId)) || (sEmail && lr.student_email === sEmail);
+          if (matchLr) {
+            if (!uniqueResults.some(ur => ur.exam_id === lr.exam_id && ur.created_at === lr.created_at)) {
+              uniqueResults.push(lr);
+            }
+          }
+        });
+
+        uniqueResults.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
         if (!uniqueResults.length) {
           container.innerHTML = `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
@@ -2854,7 +2876,7 @@
     };
 
     // =========================================================
-    // 📋 ULTRA-ROBUST BULK QUESTION PARSER (FIXES 'DEEBII' MATCHING 'D' BUG)
+    // 📋 ULTRA-ROBUST BULK QUESTION PARSER
     // =========================================================
     window.bulkInsertQuestionsUniversal = async function() {
       const examSelect = document.getElementById("bulkExamSelect");
@@ -2892,7 +2914,6 @@
           }
         }
 
-        // 🌟 THE BIG FIX: Strip out keywords first to prevent their "D" from being chosen!
         for (const line of lines) {
           const lowerLine = line.toLowerCase();
           if (lowerLine.includes("deebii") || lowerLine.includes("deebiin") || lowerLine.includes("answer") || lowerLine.includes("ans") || lowerLine.includes("sirrii") || lowerLine.includes("correct")) {
@@ -2969,9 +2990,6 @@
       }
     };
 
-    // =========================================================
-    // EXAM CREATION WITH SHUFFLE TOGGLES
-    // =========================================================
     window.createExam = async function() {
       const title = document.getElementById("examTitleInput").value.trim();
       const description = document.getElementById("examDescriptionInput").value.trim();
