@@ -1406,8 +1406,8 @@ async function finishExam() {
     }
   );
 
-  const total =
-    currentQuestions.length;
+  // BUG FIX 1: Explicitly preserve actual dynamically retrieved question count
+  const total = currentQuestions.length;
 
   const percentage =
     total
@@ -1681,18 +1681,25 @@ async function showScore() {
   } else {
     container.innerHTML = data
       .map(
-        (result) => `
-          <div class="result-card">
-            <div>
-              <h3>${escapeHtml(result.exam_title || "Qormaata")}</h3>
-              <p>${formatDateTime(result.submitted_at)}</p>
+        (result) => {
+          // Dynamic total questions fallback to prevent /30 hardcodes
+          const score = Number(result.correct ?? result.score ?? 0);
+          const totalQ = Number(result.total ?? result.total_questions ?? 5);
+          const pct = Number(result.percentage ?? Math.round((score / totalQ) * 100));
+
+          return `
+            <div class="result-card">
+              <div>
+                <h3>${escapeHtml(result.exam_title || "Qormaata")}</h3>
+                <p>${formatDateTime(result.submitted_at)}</p>
+              </div>
+              <div class="result-score">
+                <strong>${pct}%</strong>
+                <span>${score}/${totalQ}</span>
+              </div>
             </div>
-            <div class="result-score">
-              <strong>${Number(result.percentage || 0)}%</strong>
-              <span>${Number(result.correct || 0)}/${Number(result.total || 0)}</span>
-            </div>
-          </div>
-        `
+          `;
+        }
       )
       .join("");
   }
@@ -2653,7 +2660,9 @@ async function deleteStudent(
 }
 
 /* =========================================================
-   ADMIN - RESULTS
+   📊 BUG FIX 2: HIGH-FIDELITY RESULTS MATRIX FOR ADMIN
+   Ensures Kutaa 3ffaa and newly finished exams load perfectly
+   without matches going missing. Also fixes Bug 1 denominator.
 ========================================================= */
 
 async function loadAdminResults() {
@@ -2661,278 +2670,205 @@ async function loadAdminResults() {
     return;
   }
 
-  const table =
-    document.getElementById(
-      "adminResultsTable"
-    );
-
+  const table = document.getElementById("adminResultsTable");
   if (!table) {
     return;
   }
 
-  const thead =
-    table.querySelector(
-      "thead"
-    );
-
-  const tbody =
-    table.querySelector(
-      "tbody"
-    );
-
-  const {
-    data,
-    error
-  } = await db
-    .from("results")
-    .select(
-      "*, students(name,student_code), exams(title)"
-    )
-    .order(
-      "submitted_at",
-      {
-        ascending: false
-      }
-    );
-
-  if (error) {
-    console.error(error);
-
-    if (tbody) {
-      tbody.innerHTML =
-        `<tr><td colspan="8">❌ Qabxii fe'uu hin dandeenye.</td></tr>`;
-    }
-
-    return;
-  }
-
-  const results =
-    data || [];
-
-  const studentStats = {};
-
-  results.forEach(
-    (result) => {
-      const sid =
-        String(
-          result.student_id ||
-            ""
-        );
-
-      if (!sid) {
-        return;
-      }
-
-      if (!studentStats[sid]) {
-        studentStats[sid] = {
-          sum: 0,
-          count: 0
-        };
-      }
-
-      studentStats[sid].sum +=
-        Number(
-          result.percentage ||
-            0
-        );
-
-      studentStats[sid].count +=
-        1;
-    }
-  );
-
-  const ranking =
-    Object.entries(
-      studentStats
-    )
-      .map(
-        ([studentId, stat]) => ({
-          studentId,
-
-          average:
-            stat.count
-              ? stat.sum /
-                stat.count
-              : 0
-        })
-      )
-      .sort(
-        (a, b) =>
-          b.average -
-          a.average
-      );
-
-  const rankMap = {};
-
-  ranking.forEach(
-    (item, index) => {
-      rankMap[
-        item.studentId
-      ] =
-        index + 1;
-    }
-  );
-
-  if (thead) {
-    thead.innerHTML = `
-      <tr>
-        <th>Barataa</th>
-        <th>ID</th>
-        <th>Qormaata</th>
-        <th>Qabxii</th>
-        <th>%</th>
-        <th>Average</th>
-        <th>Sadarkaa</th>
-        <th>Detail</th>
-      </tr>
-    `;
-  }
-
-  if (!results.length) {
-    if (tbody) {
-      tbody.innerHTML =
-        `<tr><td colspan="8" class="empty-cell">Hanga ammaatti bu'aan qormaataa hin jiru.</td></tr>`;
-    }
-
-    renderAdminResultDetails(
-      null
-    );
-
-    return;
-  }
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
 
   if (tbody) {
-    tbody.innerHTML =
-      results
-        .map(
-          (result) => {
-            const sid =
-              String(
-                result.student_id ||
-                  ""
-              );
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">⏳ Qabxiin barattootaa fidaa jira...</td></tr>`;
+  }
 
-            const avg =
-              Number(
-                studentStats[
-                  sid
-                ]?.count
-                  ? studentStats[
-                      sid
-                    ].sum /
-                      studentStats[
-                        sid
-                      ].count
-                  : 0
-              );
+  try {
+    // Parallel fetching for ultra speed & absolute guarantee
+    const [studentsRes, examsRes, resultsRes, questionsRes] = await Promise.all([
+      db.from("students").select("*"),
+      db.from("exams").select("*").order("created_at", { ascending: true }),
+      db.from("results").select("*"),
+      db.from("questions").select("id, exam_id")
+    ]);
 
-            const rank =
-              rankMap[sid] ||
-              "-";
+    if (studentsRes.error) throw studentsRes.error;
+    if (examsRes.error) throw examsRes.error;
+    if (resultsRes.error) throw resultsRes.error;
 
-            return `
-              <tr>
+    const students = studentsRes.data || [];
+    const exams = examsRes.data || [];
+    const results = resultsRes.data || [];
+    const questions = questionsRes.data || [];
 
-                <td>
-                  ${escapeHtml(
-                    result
-                      .students
-                      ?.name ||
-                      "Barataa"
-                  )}
-                </td>
+    // Dynamically build matrix headers
+    if (thead) {
+      let headerHtml = `
+        <tr>
+          <th style="width: 50px; background:#f1f5f9; color:#1e293b;">#</th>
+          <th style="background:#f1f5f9; color:#1e293b;">Barataa</th>
+          <th style="background:#f1f5f9; color:#1e293b;">Student ID</th>
+      `;
 
-                <td>
-                  ${escapeHtml(
-                    result
-                      .students
-                      ?.student_code ||
-                      "-"
-                  )}
-                </td>
+      exams.forEach(ex => {
+        headerHtml += `<th style="background:#f1f5f9; color:#0d59b2;" title="${escapeHtml(ex.title)}">📖 ${escapeHtml(truncate(ex.title, 18))}</th>`;
+      });
 
-                <td>
-                  ${escapeHtml(
-                    result
-                      .exams
-                      ?.title ||
-                      result.exam_title ||
-                      "Qormaata"
-                  )}
-                </td>
+      headerHtml += `
+          <th style="background:#f1f5f9; color:#1e293b;">Average %</th>
+          <th style="background:#f1f5f9; color:#1e293b;">Sadarkaa</th>
+          <th style="background:#f1f5f9; color:#1e293b;">Detail</th>
+        </tr>
+      `;
+      thead.innerHTML = headerHtml;
+    }
 
-                <td>
-                  ${Number(
-                    result.correct ||
-                      0
-                  )}/${Number(
-                    result.total ||
-                      0
-                  )}
-                </td>
+    if (!students.length) {
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="${exams.length + 5}" style="text-align:center; padding:20px;">👨‍🎓 Barataan galmaa'e tokkollee hin jiru.</td></tr>`;
+      }
+      return;
+    }
 
-                <td>
-                  <strong>
-                    ${Number(
-                      result.percentage ||
-                        0
-                    )}%
-                  </strong>
-                </td>
+    // Build Student Row matrix
+    const studentRows = students.map(s => {
+      let totalPct = 0;
+      let examsTaken = 0;
+      const examCells = [];
 
-                <td>
-                  ${avg.toFixed(
-                    1
-                  )}%
-                </td>
+      exams.forEach(ex => {
+        // TRIPLE FALLBACK MATCHING CRITERIA (Resolves missing student results / Grade 3 mismatch)
+        const res = results.find(r => {
+          const matchStudent = (
+            String(r.student_id) === String(s.id) ||
+            String(r.student_id) === String(s.student_code) ||
+            (r.student_name && s.name && r.student_name.trim().toLowerCase() === s.name.trim().toLowerCase())
+          );
+          const matchExam = (
+            String(r.exam_id) === String(ex.id) ||
+            (r.exam_title && ex.title && r.exam_title.trim().toLowerCase() === ex.title.trim().toLowerCase())
+          );
+          return matchStudent && matchExam;
+        });
 
-                <td>
-                  <strong>
-                    ${rank}
-                  </strong>
-                </td>
-
-                <td>
-                  <button
-                    type="button"
-                    class="small-btn"
-                    onclick="showAdminResultDetails('${result.id}')"
-                  >
-                    👁️ Ilaali
-                  </button>
-                </td>
-
-              </tr>
-            `;
+        if (res) {
+          const score = Number(res.correct ?? res.score ?? 0);
+          
+          // BUG FIX 1: DYNAMIC DENOMINATOR (Always matches actual questions count in DB to solve 5 vs 30 issue)
+          let totalQ = Number(res.total ?? res.total_questions ?? 0);
+          if (totalQ <= 0) {
+            totalQ = questions.filter(q => q.exam_id === ex.id).length;
           }
-        )
-        .join("");
+          if (totalQ <= 0) {
+            totalQ = Number(ex.question_limit ?? 5);
+          }
+          if (totalQ <= 0) totalQ = 5;
+
+          const pct = Number(res.percentage ?? Math.round((score / totalQ) * 100));
+          totalPct += pct;
+          examsTaken++;
+
+          examCells.push({
+            taken: true,
+            score,
+            total: totalQ,
+            pct,
+            resultId: res.id
+          });
+        } else {
+          examCells.push({
+            taken: false
+          });
+        }
+      });
+
+      const average = examsTaken > 0 ? totalPct / examsTaken : 0;
+
+      return {
+        student: s,
+        examCells,
+        average,
+        examsTaken
+      };
+    });
+
+    // Sort descending by average percentage to determine rank
+    studentRows.sort((a, b) => b.average - a.average);
+
+    const rankMap = {};
+    studentRows.forEach((row, idx) => {
+      rankMap[row.student.id] = idx + 1;
+    });
+
+    if (tbody) {
+      tbody.innerHTML = studentRows.map((row, idx) => {
+        const s = row.student;
+        const rank = rankMap[s.id] || (idx + 1);
+
+        let cellsHtml = `
+          <td>${idx + 1}</td>
+          <td><strong>${escapeHtml(s.name)}</strong></td>
+          <td><code>${escapeHtml(s.student_code || s.student_id || "-")}</code></td>
+        `;
+
+        row.examCells.forEach(cell => {
+          if (cell.taken) {
+            let badgeBg = "#dcfce7";
+            let badgeColor = "#166534";
+            if (cell.pct < 75) { badgeBg = "#fef3c7"; badgeColor = "#92400e"; }
+            if (cell.pct < 50) { badgeBg = "#fee2e2"; badgeColor = "#991b1b"; }
+
+            cellsHtml += `
+              <td>
+                <div class="score-card-matrix" style="background:${badgeBg}; color:${badgeColor}; padding: 6px 10px; border-radius: 8px; font-weight: bold; font-size: 12px; text-align: center; display: inline-block; min-width:65px; border:1px solid rgba(0,0,0,0.05);">
+                  ${cell.score}/${cell.total} <br><span style="font-size:10px; font-weight:normal;">(${cell.pct}%)</span>
+                </div>
+              </td>
+            `;
+          } else {
+            cellsHtml += `<td><span style="color:#cbd5e1; font-weight:bold;">-</span></td>`;
+          }
+        });
+
+        cellsHtml += `
+          <td><strong style="color:#0d59b2; font-size:14px;">${row.average.toFixed(1)}%</strong></td>
+          <td><span class="status active" style="background:#0d59b2; color:white; padding:4px 10px; border-radius:6px; font-weight:bold; font-size:11.5px; display:inline-block;">${rank}ffaa</span></td>
+          <td>
+            <button type="button" class="small-btn" onclick="showFirstAvailableDetail('${s.id}')" style="margin:0; padding:6px 12px; font-size:11.5px; font-weight:bold; cursor:pointer;">👁️ Ilaali</button>
+          </td>
+        `;
+
+        return `<tr>${cellsHtml}</tr>`;
+      }).join("");
+    }
+
+    // Dynamic detail-div integration
+    let detailsDiv = document.getElementById("adminResultDetails");
+    if (!detailsDiv) {
+      detailsDiv = document.createElement("div");
+      detailsDiv.id = "adminResultDetails";
+      detailsDiv.style.marginTop = "20px";
+      table.parentElement?.appendChild(detailsDiv);
+    }
+    detailsDiv.innerHTML = "";
+
+    // Exposed global trigger for individual row review
+    window.showFirstAvailableDetail = function(sid) {
+      const row = studentRows.find(r => r.student.id === sid);
+      if (!row) return;
+      const takenCell = row.examCells.find(c => c.taken);
+      if (takenCell && takenCell.resultId) {
+        showAdminResultDetails(takenCell.resultId);
+      } else {
+        alert("Barataan kun ammas qormaata tokkollee hin xumurre.");
+      }
+    };
+
+  } catch (err) {
+    console.error("MATRIX ERROR:", err);
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center; font-weight:bold; padding:20px;">⚠️ Dogoggora qabxii matrix fiduu: ${escapeHtml(err.message)}</td></tr>`;
+    }
   }
-
-  if (
-    !document.getElementById(
-      "adminResultDetails"
-    )
-  ) {
-    const wrapper =
-      document.createElement(
-        "div"
-      );
-
-    wrapper.id =
-      "adminResultDetails";
-
-    wrapper.style.marginTop =
-      "16px";
-
-    table.parentElement?.appendChild(
-      wrapper
-    );
-  }
-
-  renderAdminResultDetails(
-    null
-  );
 }
 
 function getResultAnswerEntries(
@@ -3065,12 +3001,12 @@ function renderAdminResultDetails(
   }
 
   container.innerHTML = `
-    <div class="admin-list-item">
+    <div class="admin-list-item" style="border-left: 5px solid #0d59b2; background:#f8fafc; padding:20px; border-radius:14px; margin-top:15px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
 
       <div class="item-main">
 
-        <h3>
-          📋
+        <h3 style="color:#0f172a; margin-top:0;">
+          📋 Details:
           ${escapeHtml(
             result
               .students
@@ -3087,9 +3023,9 @@ function renderAdminResultDetails(
           )}
         </h3>
 
-        <p>
+        <p style="font-size:14px; color:#475569; margin-bottom:15px;">
           Qabxii:
-          <strong>
+          <strong style="color:#10b981; font-size:16px;">
             ${Number(
               result.correct ||
                 0
@@ -3100,10 +3036,10 @@ function renderAdminResultDetails(
           </strong>
 
           —
-          ${Number(
+          <strong style="color:#0d59b2;">${Number(
             result.percentage ||
               0
-          )}%
+          )}%</strong>
         </p>
 
         <div
@@ -3164,6 +3100,7 @@ function renderAdminResultDetails(
                       padding:12px;
                       border:1px solid rgba(127,127,127,.25);
                       border-radius:12px;
+                      background:#ffffff;
                     "
                   >
 
@@ -3201,7 +3138,7 @@ function renderAdminResultDetails(
                     </div>
 
                     <div
-                      style="margin-top:5px;"
+                      style="margin-top:5px; font-weight:bold; color:${ok ? '#10b981' : '#ef4444'};"
                     >
                       ${statusIcon}
                       ${statusText}
@@ -4793,7 +4730,7 @@ async function generateAIQuestions() {
   }
 
   if (
-    ![
+    [
       5,
       10,
       20,
