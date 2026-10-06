@@ -38,7 +38,7 @@ let examTimer = null;
 let examSecondsLeft = 0;
 let pendingSubmit = false;
 let authListenerReady = false;
-let allAdminStudentsData = []; // Preserves loaded student list for precise matching & cascading deletion
+let allAdminStudentsData = []; // Preserves database state for cascading deletion
 
 /* =========================================================
    🎯 100% UNIFIED STUDENT ID & ACTIVATION CODE GENERATORS
@@ -500,7 +500,7 @@ async function studentLogin() {
     const { data: students, error: loadErr } = await db.from("students").select("*");
     if (loadErr) throw loadErr;
 
-    // Direct flexible search ensuring we can log in with formatted display ID or database code
+    // Flexible search matching either student_code, student_id or UUID fragment
     const student = (students || []).find(s => {
       const dId = getStudentDisplayId(s).toLowerCase();
       const rawCode = String(s.student_code || "").toLowerCase();
@@ -515,6 +515,7 @@ async function studentLogin() {
         "Student ID ykn Activation Code sirrii miti.",
         "error"
       );
+
       return;
     }
 
@@ -3148,7 +3149,7 @@ function renderAdminResultDetails(
             )}/${Number(
               result.total ||
                 0
-            )}
+          )}
           </strong>
 
           —
