@@ -40,7 +40,7 @@ let pendingSubmit = false;
 let authListenerReady = false;
 
 /* =========================================================
-   🎯 100% UNIFIED STUDENT ID ENGINE (ABSOLUTELY BULLETPROOF)
+   🎯 100% UNIFIED STUDENT ID ENGINE
 ========================================================= */
 
 function getStudentDisplayId(student) {
@@ -2301,7 +2301,7 @@ async function deleteExam(examId) {
 }
 
 /* =========================================================
-   📋 BULK QUESTION PASTE (100% PRECISE MULTI-FORMAT PARSER)
+   📋 BULK QUESTION PASTE
 ========================================================= */
 
 async function bulkInsertQuestionsUniversal() {
@@ -2662,19 +2662,15 @@ async function generateAIQuestions() {
 }
 
 /* =========================================================
-   GOOGLE LOGIN (WITH REDIRECT FIX FOR 400 MALFORMED ERROR)
+   GOOGLE LOGIN (DIRECT REDIRECT FIX)
 ========================================================= */
 
 async function googleLogin() {
   try {
-    const currentOrigin = window.location.origin;
-    const currentPath = window.location.pathname;
-    const cleanRedirect = currentOrigin + currentPath;
-
     const { error } = await db.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: cleanRedirect,
+        redirectTo: window.location.origin + window.location.pathname,
         queryParams: {
           prompt: "select_account"
         }
@@ -2748,39 +2744,37 @@ async function refreshAllAdminLists() {
 }
 
 /* =========================================================
-   AUTH STATE
+   AUTH STATE (ROBUST PERSISTENCE & AUTO-RESUME)
 ========================================================= */
 
 function initializeAuthListener() {
   if (authListenerReady) return;
   authListenerReady = true;
 
-  db.auth.onAuthStateChange(async (_event, session) => {
-    await handleAuthSession(session);
+  db.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      await handleAuthSession(session);
+    }
   });
 }
 
 /* =========================================================
-   INITIALIZATION
+   INITIALIZATION (FIXED LOGIC FLOW TO PREVENT STUCK ON LOGIN)
 ========================================================= */
 
 async function initializeApp() {
   initializeAuthListener();
   changeAIQuestionSource();
 
-  const { data: sessionData } = await db.auth.getSession();
-  if (sessionData?.session?.user) {
+  // 1. Check if Supabase already has an active OAuth / Session in URL or Storage
+  const { data: sessionData, error: sessionError } = await db.auth.getSession();
+  
+  if (!sessionError && sessionData?.session?.user) {
     await handleAuthSession(sessionData.session);
     return;
   }
 
-  const student = await restoreStudent();
-  if (student) {
-    showPage("studentHomePage");
-    await loadStudentHome();
-    return;
-  }
-
+  // 2. Check if Admin is already stored locally
   const admin = await restoreAdmin();
   if (admin) {
     showPage(getAdminPageId());
@@ -2788,6 +2782,15 @@ async function initializeApp() {
     return;
   }
 
+  // 3. Check if Student is already stored locally
+  const student = await restoreStudent();
+  if (student) {
+    showPage("studentHomePage");
+    await loadStudentHome();
+    return;
+  }
+
+  // 4. Fallback: Show Public Login page
   showPublicLoginPage();
 }
 
@@ -2812,7 +2815,6 @@ window.loadExams = loadExams;
 window.startExam = startExam;
 window.selectAnswer = selectAnswer;
 window.nextQuestion = nextQuestion;
-window.requestSubmitExam = requestSubmit;
 window.requestSubmitExam = requestSubmitExam;
 window.confirmSubmitExam = confirmSubmitExam;
 window.showScore = showScore;
@@ -2852,5 +2854,4 @@ window.bulkInsertQuestionsUniversal = bulkInsertQuestionsUniversal;
    START
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", initializeApplication = initializeApp);
 document.addEventListener("DOMContentLoaded", initializeApp);
