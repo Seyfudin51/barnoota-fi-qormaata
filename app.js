@@ -41,7 +41,6 @@ let authListenerReady = false;
 
 /* =========================================================
    🎯 100% UNIFIED STUDENT ID ENGINE (ABSOLUTELY BULLETPROOF)
-   Ensures Student ID displayed in Profile, Student Home & Admin Matrix are identical
 ========================================================= */
 
 function getStudentDisplayId(student) {
@@ -2663,16 +2662,22 @@ async function generateAIQuestions() {
 }
 
 /* =========================================================
-   GOOGLE LOGIN
+   GOOGLE LOGIN (WITH REDIRECT FIX FOR 400 MALFORMED ERROR)
 ========================================================= */
 
 async function googleLogin() {
   try {
+    const currentOrigin = window.location.origin;
+    const currentPath = window.location.pathname;
+    const cleanRedirect = currentOrigin + currentPath;
+
     const { error } = await db.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin + window.location.pathname,
-        queryParams: { prompt: "select_account" }
+        redirectTo: cleanRedirect,
+        queryParams: {
+          prompt: "select_account"
+        }
       }
     });
 
@@ -2807,6 +2812,7 @@ window.loadExams = loadExams;
 window.startExam = startExam;
 window.selectAnswer = selectAnswer;
 window.nextQuestion = nextQuestion;
+window.requestSubmitExam = requestSubmit;
 window.requestSubmitExam = requestSubmitExam;
 window.confirmSubmitExam = confirmSubmitExam;
 window.showScore = showScore;
@@ -2830,7 +2836,7 @@ window.toggleLeaderboardVisibility = toggleLeaderboardVisibility;
 window.editExam = editExam;
 window.deleteExam = deleteExam;
 
-window.createQuestion = loadAdminQuestions;
+window.createQuestion = createQuestion;
 window.loadAdminQuestions = loadAdminQuestions;
 window.showAdminResultDetails = showAdminResultDetails;
 window.deleteQuestion = deleteQuestion;
@@ -2846,4 +2852,5 @@ window.bulkInsertQuestionsUniversal = bulkInsertQuestionsUniversal;
    START
 ========================================================= */
 
+document.addEventListener("DOMContentLoaded", initializeApplication = initializeApp);
 document.addEventListener("DOMContentLoaded", initializeApp);
