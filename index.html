@@ -1056,7 +1056,7 @@
   </div>
 
   <!-- =====================================================
-       15. NEW: STUDENT FULL EXAM RESULT BREAKDOWN MODAL (FOR ADMIN)
+       15. STUDENT FULL EXAM RESULT BREAKDOWN MODAL (FOR ADMIN)
   ====================================================== -->
   <div id="studentResultDetailModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.65); z-index:9999999; justify-content:center; align-items:center; backdrop-filter:blur(4px); padding:16px; box-sizing:border-box;">
     <div style="background:#ffffff; width:100%; max-width:550px; border-radius:18px; padding:24px; box-shadow:0 12px 32px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto; box-sizing:border-box; position:relative;">
@@ -1303,6 +1303,14 @@
 
     const nativeShowPage = window.showPage;
     window.showPage = function(pageId) {
+      if (pageId !== "splashPage") {
+        const splash = document.getElementById("splashPage");
+        if (splash && (splashPassed || pageId === "studentHomePage" || pageId === "adminDashboardPage" || pageId === "adminPage")) {
+          splashPassed = true;
+          splash.style.setProperty("display", "none", "important");
+          splash.classList.remove("active");
+        }
+      }
       if (!splashPassed && pageId !== "splashPage") return;
       if (typeof nativeShowPage === "function") {
         nativeShowPage(pageId);
@@ -1333,6 +1341,12 @@
     };
 
     window.showAdminDashboardDirect = function() {
+      splashPassed = true;
+      const splash = document.getElementById("splashPage");
+      if (splash) {
+        splash.style.setProperty("display", "none", "important");
+        splash.classList.remove("active");
+      }
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
       const adminDash = document.getElementById("adminDashboardPage");
       if (adminDash) {
@@ -1416,9 +1430,6 @@
       }
     };
 
-    // =========================================================
-    // 🌟 PERFECT EXAM SUB-TAB SWITCHING (CLEAN & ISOLATED)
-    // =========================================================
     window.switchExamSubTab = async function(tab) {
       const views = {
         create: document.getElementById("examSubViewCreate"),
@@ -1447,9 +1458,6 @@
       }
     };
 
-    // =========================================================
-    // Global Safe escapeHtml
-    // =========================================================
     window.escapeHtml = function(text) {
       if (!text) return "";
       return text.toString()
@@ -1460,9 +1468,6 @@
         .replace(/'/g, "&#039;");
     };
 
-    // =========================================================
-    // 🔀 SHUFFLE UTILITY FUNCTION
-    // =========================================================
     function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -1472,9 +1477,6 @@
       return arr;
     }
 
-    // =========================================================
-    // 🛡️ UNIFIED BULLETPROOF STUDENT-RESULT MATCHER
-    // =========================================================
     window.isStudentResultMatch = function(s, r) {
       if (!s || !r) return false;
       const clean = (val) => String(val || "").replace(/[^A-Z0-9]/gi, "").toLowerCase().trim();
@@ -1488,13 +1490,9 @@
       const rEmail = String(r.student_email || r.email || "").toLowerCase().trim();
       const rName = String(r.student_name || r.name || r.userName || r.studentName || "").toLowerCase().trim();
 
-      // 1. Direct UUID Match
       if (sIdRaw && rSIdRaw && sIdRaw === rSIdRaw) return true;
-      
-      // 2. Direct Student Code Match
       if (sCodeRaw && rSIdRaw && sCodeRaw === rSIdRaw) return true;
       
-      // 3. Raw Short UUID Match (e.g., student display ID matches start of actual UUID)
       if (sIdRaw && rSIdRaw) {
         const shortR = rSIdRaw.replace(/^stu|^st|^act/, "");
         if (shortR && (sIdRaw.startsWith(shortR) || shortR.startsWith(sIdRaw.substring(0, 6)))) {
@@ -1502,18 +1500,12 @@
         }
       }
 
-      // 4. Fallback Email Match
       if (sEmail && rEmail && sEmail === rEmail && sEmail !== "guest" && sEmail !== "") return true;
-
-      // 5. Fallback Name Match
       if (sName && rName && sName === rName && sName !== "") return true;
 
       return false;
     };
 
-    // =========================================================
-    // 🛠️ EXAM CONTROL ACTIONS: 100% WORKING BACKEND INTERFACES
-    // =========================================================
     window.loadAdminExams = async function() {
       const container = document.getElementById("adminExamsList");
       if (!container) return;
@@ -1572,7 +1564,6 @@
                 ${hasSo ? `<span class="shuffle-badge shuffle-badge-o">🔄 Shuffled O</span>` : ''}
               </div>
 
-              <!-- HIGH-FIDELITY ACTION GRID -->
               <div style="display:flex; flex-wrap:wrap; gap:8px;">
                 <button type="button" class="primary-btn" onclick="toggleExamStatus('${ex.id}', ${isClosed})" style="background:${isClosed ? '#10b981' : '#f59e0b'}; padding:8px 14px; font-size:12px; border-radius:8px; font-weight:700; cursor:pointer; margin:0; border:none; color:#fff;">
                   ${isClosed ? '🔓 Bani' : '⏸️ Cufi'}
@@ -1596,9 +1587,6 @@
       }
     };
 
-    // =========================================================
-    // 🛡️ ULTRA-ROBUST TOGGLE EXAM STATUS (CUFI / BANI)
-    // =========================================================
     window.toggleExamStatus = async function(id, shouldOpen) {
       const newStatus = shouldOpen ? "active" : "closed";
       const isClosedState = !shouldOpen;
@@ -1622,9 +1610,6 @@
       await window.loadAdminExams();
     };
 
-    // =========================================================
-    // 🛡️ ULTRA-ROBUST TOGGLE LEADERBOARD (BANI / CUFI)
-    // =========================================================
     window.toggleExamLeaderboard = async function(id, shouldClose) {
       const willBeOpen = !shouldClose;
       localStorage.setItem("ao_exam_lb_open_" + id, willBeOpen.toString());
@@ -1661,9 +1646,6 @@
       }
     };
 
-    // =========================================================
-    // EXAM EDIT MODAL LOGIC - SUPPORT FOR ALL FIELDS INCLUDING SHUFFLES
-    // =========================================================
     window.openEditExamModal = async function(id) {
       try {
         const { data, error } = await db.from("exams").select("*").eq("id", id).single();
@@ -1765,9 +1747,6 @@
       }
     };
 
-    // =========================================================
-    // QUESTIONS LIST LOADER (SUB-TAB 3)
-    // =========================================================
     window.loadAdminQuestions = async function() {
       const container = document.getElementById("adminQuestionsList");
       if (!container) return;
@@ -1812,9 +1791,6 @@
       }
     };
 
-    // =========================================================
-    // EXPORTED ADMIN FUNCTIONS (STUDENTS & RESULTS MATRIX)
-    // =========================================================
     window.loadAdminStudentsImage2Layout = async function() {
       try {
         const { data, error } = await db.from("students").select("*");
@@ -1871,7 +1847,6 @@
         const av = avatarListColors[avIdx];
         const isBlocked = s.status === "blocked";
         
-        // 🎯 100% ID UNIFICATION FIX
         const studentId = typeof getStudentDisplayId === "function" 
           ? getStudentDisplayId(s) 
           : (s.student_id || s.code || (s.id ? "STU-" + s.id.replace(/-/g, "").substring(0, 6).toUpperCase() : "-"));
@@ -1932,7 +1907,6 @@
         return;
       }
       
-      // 🎯 UNIFIED ID SEARCH EXPANSION
       const filtered = allAdminStudentsData.filter(s => {
         const sName = (s.name || "").toLowerCase();
         const dispId = (typeof getStudentDisplayId === "function" ? getStudentDisplayId(s) : "").toLowerCase();
@@ -1944,9 +1918,6 @@
       window.renderAdminStudentsGrid(filtered);
     };
 
-    // =========================================================================
-    // 📊 OPTIMIZED RESULTS MATRIX (ULTRA-FAST & REAL TIME EVALUATION)
-    // =========================================================================
     window.loadAdminResultsImage1Matrix = async function() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
       const tbody = document.getElementById("adminResultsMatrixBody");
@@ -1977,7 +1948,6 @@
           } catch(e) {}
         }
 
-        // SCANS MULTIPLE POTENTIAL TABLES FOR ABSOLUTE GUARANTEE OF EXAM SCORES RETRIEVAL
         let allResults = [];
         const tablesToScan = ["exam_results", "results", "student_results", "scores"];
         for (const tName of tablesToScan) {
@@ -1997,7 +1967,6 @@
           } catch(e) {}
         }
 
-        // Merge and deduplicate with LocalStorage for flawless offline-online sync
         const localKeys = ["ao_exam_results", "exam_results", "results"];
         localKeys.forEach(key => {
           try {
@@ -2019,7 +1988,6 @@
           } catch(e) {}
         });
 
-        // Sort descendingly by score/correct count to prioritize highest marks per match
         allResults.sort((a, b) => {
           const scoreA = Number(a.score ?? a.correct_answers ?? a.correct ?? a.result ?? 0);
           const scoreB = Number(b.score ?? b.correct_answers ?? b.correct ?? b.result ?? 0);
@@ -2071,7 +2039,6 @@
           if (realExams.length > 0) {
             realExams.forEach((ex) => {
               const r = allResults.find(res => {
-                // 🎯 100% ACCURATE AND ROBUST DYNAMIC MATCHING
                 const matchStudent = window.isStudentResultMatch(s, res);
 
                 const exId = (ex.id || "").toString().trim().toLowerCase();
@@ -2089,7 +2056,6 @@
               if (r) {
                 let scoreVal = Number(r.score ?? r.correct_answers ?? r.correct ?? r.result ?? 0);
                 
-                // 🌟 DYNAMIC TOTAL QUESTIONS EVALUATION
                 let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? 0);
                 if (totalQ <= 0) {
                   totalQ = Number(ex.question_limit || 0);
@@ -2139,7 +2105,6 @@
           const avIdx = rankNum % avatarListColors.length;
           const av = avatarListColors[avIdx];
           
-          // 🎯 EXACT DISPLAY ID MATCH GURANATEE
           const studentId = typeof getStudentDisplayId === "function" 
             ? getStudentDisplayId(s) 
             : (s.student_id || s.code || (s.id ? "STU-" + s.id.replace(/-/g, "").substring(0, 6).toUpperCase() : "-"));
@@ -2194,9 +2159,6 @@
       }
     };
 
-    // =========================================================
-    // 🔍 NEW HIGH-FIDELITY STUDENT EXAM BREAKDOWN MODAL (ANSWERS SHOWCASE)
-    // =========================================================
     window.viewStudentFullDetails = async function(studentId) {
       const student = allAdminStudentsData.find(s => s.id === studentId);
       const headerEl = document.getElementById("studentDetailModalHeader");
@@ -2207,7 +2169,6 @@
 
       const sName = student?.name || "Barataa";
       
-      // 🎯 EXACT ID MATCH GUARANTEE FOR DETAIL POPUP
       const sCode = typeof getStudentDisplayId === "function" 
         ? getStudentDisplayId(student) 
         : (student?.student_id || student?.code || (student?.id ? "STU-" + student.id.replace(/-/g, "").substring(0, 6).toUpperCase() : "-"));
@@ -2353,9 +2314,6 @@
       } catch(e) { alert("Dogoggora: " + e.message); }
     };
 
-    // =========================================================
-    // PROFILE & AUTH FUNCTIONS
-    // =========================================================
     window.loadStudentProfileData = async function() {
       let st = null;
       if (typeof currentStudent !== "undefined" && currentStudent) {
@@ -2379,7 +2337,6 @@
       if (!realEmail && st && st.email) realEmail = st.email;
       if (!realEmail) realEmail = localStorage.getItem("ao_user_email") || "";
 
-      // 🎯 EXACT PROFILE ID GENERATION UNIFICATION
       let realStudentId = typeof getStudentDisplayId === "function" ? getStudentDisplayId(st) : "";
       if (!realStudentId || realStudentId === "-") {
         if (st && st.student_id && st.student_id !== st.activation_code) {
@@ -2471,9 +2428,6 @@
       navTo("studentHomePage");
     };
 
-    // =========================================================
-    // EXAM ENGINE WITH ANTI-CHEATING SHUFFLE SUPPORT
-    // =========================================================
     window.getStudentExamAttempts = async function(examId, studentId) {
       if (!studentId) return 0;
       let count = 0;
@@ -2727,9 +2681,6 @@
       }
     };
 
-    // =========================================================
-    // 🎯 100% ACCURATE EXAM EVALUATION & SUBMIT ENGINE WITH DETAILED RESPONSE STORAGE
-    // =========================================================
     window.submitActiveExamNow = async function() {
       clearInterval(activeExamTimerInterval);
       const totalQ = activeExamQuestionsList.length;
@@ -2793,20 +2744,14 @@
         created_at: new Date().toISOString()
       };
 
-      // 🌟 DYNAMIC DATABASE INSERTION OVER MULTIPLE STRUCTURAL CANDIDATES
       const targetTables = ["exam_results", "results", "student_results", "scores"];
-      let insertedSuccessfully = false;
 
       for (const tName of targetTables) {
         try {
-          const { error } = await db.from(tName).insert([resultRecord]);
-          if (!error) {
-            insertedSuccessfully = true;
-          }
+          await db.from(tName).insert([resultRecord]);
         } catch(e) {}
       }
 
-      // Always save to LocalStorage to ensure zero data loss under any circumstance
       try {
         let localList = [];
         const existingLocal = localStorage.getItem("ao_exam_results");
@@ -2906,9 +2851,6 @@
       }
     };
 
-    // =========================================================
-    // 📋 ULTRA-ROBUST BULK QUESTION PARSER
-    // =========================================================
     window.bulkInsertQuestionsUniversal = async function() {
       const examSelect = document.getElementById("bulkExamSelect");
       const examId = examSelect?.value;
@@ -3174,4 +3116,3 @@
 
 </body>
 </html>
-```
