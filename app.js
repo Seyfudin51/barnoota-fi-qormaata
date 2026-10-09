@@ -1,8 +1,3 @@
-# КОРРЕКТИРОВКА КОДА ДЛЯ AKKAADAAMII OROMIYAA (app.js)
-
-Ниже представлен исправленный файл `app.js`. Все оригинальные функции, включая Google OAuth, таймеры, AI-генератор вопросов и Bulk Paste, сохранены в полной целостности. Изменена и укреплена только логика сопоставления ID, чтобы исключить расхождения.
-
-```javascript
 /* =========================================================
    AKKAADAAMII OROMIYAA - app.js
    Supabase version (Guutuu - Google Login, RLS, Bulk Paste & Leaderboard)
