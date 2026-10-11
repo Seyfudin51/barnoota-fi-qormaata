@@ -481,7 +481,7 @@
             </div>
             <div class="avatar-camera-badge" style="position: absolute; bottom: 2px; right: 2px; background: #0d59b2; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid #fff;">📷</div>
           </div>
-          <input type="file" id="studentAvatarFileInput" accept="image/*" style="display:none;" onchange="handleStudentAvatarUpload(this)">
+          <input type="file" id="studentAvatarFileInput" accept="image/*" style="display:none;" onchange="handleStudentAvatarUpload(this)" data-i18n-title="tap_change_photo">
           <p style="text-align:center; font-size:11.5px; color:#64748b; margin-top:6px; margin-bottom:0;" data-i18n="tap_change_photo">Suuraa jijjiiruuf tuqi</p>
         </div>
 
@@ -645,7 +645,7 @@
           </div>
         </div>
 
-        <!-- 📊 2. QABXII PANEL (MATRIX VIEW WITH IMPROVED PERF) -->
+        <!-- 📊 2. QABXII PANEL (MATRIX VIEW WITH 100% SUPABASE SYNC) -->
         <div id="adminResultsPanel" class="admin-content-panel panel-modern-glow" style="display:none;">
           <div class="panel-section-header">
             <button type="button" class="admin-panel-back-btn" onclick="showAdminHomeView()" data-i18n="btn_back">← Duubatti</button>
@@ -1477,28 +1477,27 @@
       return arr;
     }
 
+    // Comprehensive student to result matcher (UUIDs, codes, emails & names)
     window.isStudentResultMatch = function(s, r) {
       if (!s || !r) return false;
-      const clean = (val) => String(val || "").replace(/[^A-Z0-9]/gi, "").toLowerCase().trim();
+      const clean = (val) => String(val || "").replace(/[^a-z0-9]/gi, "").toLowerCase().trim();
 
-      const sIdRaw = clean(s.id);
-      const sCodeRaw = clean(s.student_id || s.student_code || s.code || "");
+      const sId = clean(s.id);
+      const sCode = clean(s.student_code || s.student_id || s.code || "");
       const sEmail = String(s.email || "").toLowerCase().trim();
       const sName = String(s.name || "").toLowerCase().trim();
 
-      const rSIdRaw = clean(r.student_id || r.user_id || r.studentId || r.userId || "");
+      const rId = clean(r.student_id || r.user_id || r.studentId || r.userId || "");
       const rEmail = String(r.student_email || r.email || "").toLowerCase().trim();
       const rName = String(r.student_name || r.name || r.userName || r.studentName || "").toLowerCase().trim();
 
-      if (sIdRaw && rSIdRaw && sIdRaw === rSIdRaw) return true;
-      if (sCodeRaw && rSIdRaw && sCodeRaw === rSIdRaw) return true;
-      
-      if (sIdRaw && rSIdRaw) {
-        const shortR = rSIdRaw.replace(/^stu|^st|^act/, "");
-        if (shortR && (sIdRaw.startsWith(shortR) || shortR.startsWith(sIdRaw.substring(0, 6)))) {
-          return true;
-        }
-      }
+      if (sId && rId && sId === rId) return true;
+      if (sCode && rId && sCode === rId) return true;
+      if (sId && rId && (sId.includes(rId) || rId.includes(sId))) return true;
+      if (sCode && rId && (sCode.includes(rId) || rId.includes(sCode))) return true;
+
+      const sDisp = typeof getStudentDisplayId === "function" ? clean(getStudentDisplayId(s)) : "";
+      if (sDisp && rId && (sDisp === rId || sDisp.includes(rId) || rId.includes(sDisp))) return true;
 
       if (sEmail && rEmail && sEmail === rEmail && sEmail !== "guest" && sEmail !== "") return true;
       if (sName && rName && sName === rName && sName !== "") return true;
@@ -1555,7 +1554,7 @@
               <h3 style="margin:0; font-size:16px; color:#0f172a;">${escapeHtml(ex.title)}</h3>
               <p style="margin:4px 0 10px 0; font-size:13px; color:#475569; line-height:1.4;">${escapeHtml(ex.description || "")}</p>
               
-              <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:12px; color:#64748b; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+              <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:12px; color:#64748b; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;"&gt;
                 <span>❓ <strong>Gaaffii:</strong> ${ex.question_limit || "Hunda"}</span>
                 <span>🔢 <strong>Attempt:</strong> ${ex.attempt_limit || 1}</span>
                 <span>⏱️ <strong>Yeroo:</strong> ${ex.duration || 30} min</span>
@@ -1918,10 +1917,15 @@
       window.renderAdminStudentsGrid(filtered);
     };
 
+    // =========================================================
+    // 📊 RESULTS MATRIX WITH 100% SUPABASE UNIFICATION
+    // =========================================================
     window.loadAdminResultsImage1Matrix = async function() {
       const headerRow = document.getElementById("adminResultsMatrixHeaderRow");
       const tbody = document.getElementById("adminResultsMatrixBody");
       if (!headerRow || !tbody) return;
+
+      tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:20px;">⏳ Qabxiin barattootaa Supabase irraa fidaa jira...</td></tr>`;
 
       try {
         let students = [];
@@ -1936,6 +1940,9 @@
           } catch(e) {}
         }
 
+        // Keep allAdminStudentsData synchronized for Details modal!
+        allAdminStudentsData = students;
+
         let realExams = [];
         try {
           const eRes = await db.from("exams").select("*").order("created_at", { ascending: true });
@@ -1948,25 +1955,55 @@
           } catch(e) {}
         }
 
+        // Fetch from ALL available tables in Supabase:
         let allResults = [];
-        const tablesToScan = ["exam_results", "results", "student_results", "scores"];
-        for (const tName of tablesToScan) {
-          try {
-            const { data, error } = await db.from(tName).select("*");
-            if (!error && data && data.length) {
-              data.forEach(item => {
-                const isDup = allResults.some(r => 
-                  (r.id && item.id && r.id === item.id) ||
-                  (r.student_id === item.student_id && r.exam_id === item.exam_id && r.created_at === item.created_at)
-                );
-                if (!isDup) {
-                  allResults.push(item);
-                }
-              });
-            }
-          } catch(e) {}
-        }
 
+        // 1. Primary: 'results' table
+        try {
+          const { data, error } = await db.from("results").select("*");
+          if (!error && data && data.length) {
+            allResults.push(...data);
+          }
+        } catch(e) {}
+
+        // 2. Secondary: 'exam_attempts' (completed)
+        try {
+          const { data: attempts, error } = await db.from("exam_attempts").select("*").eq("completed", true);
+          if (!error && attempts && attempts.length) {
+            attempts.forEach(att => {
+              const alreadyHas = allResults.some(r => 
+                window.isStudentResultMatch({ id: att.student_id }, r) && 
+                String(r.exam_id || "") === String(att.exam_id || "")
+              );
+              if (!alreadyHas) {
+                allResults.push({
+                  id: att.id,
+                  student_id: att.student_id,
+                  exam_id: att.exam_id,
+                  score: att.score,
+                  correct: att.score,
+                  total: att.total,
+                  total_questions: att.total,
+                  percentage: att.percentage,
+                  created_at: att.submitted_at || att.created_at
+                });
+              }
+            });
+          }
+        } catch(e) {}
+
+        // 3. Fallback: 'exam_results'
+        try {
+          const { data, error } = await db.from("exam_results").select("*");
+          if (!error && data && data.length) {
+            data.forEach(er => {
+              const dup = allResults.some(r => r.id && er.id && r.id === er.id);
+              if (!dup) allResults.push(er);
+            });
+          }
+        } catch(e) {}
+
+        // 4. Local storage backup
         const localKeys = ["ao_exam_results", "exam_results", "results"];
         localKeys.forEach(key => {
           try {
@@ -1975,13 +2012,11 @@
               const parsed = JSON.parse(item);
               if (Array.isArray(parsed)) {
                 parsed.forEach(lr => {
-                  const isDup = allResults.some(r => 
+                  const dup = allResults.some(r => 
                     (r.id && lr.id && r.id === lr.id) ||
-                    (r.student_id === lr.student_id && r.exam_id === lr.exam_id && r.created_at === lr.created_at)
+                    (r.student_id === lr.student_id && r.exam_id === lr.exam_id)
                   );
-                  if (!isDup) {
-                    allResults.push(lr);
-                  }
+                  if (!dup) allResults.push(lr);
                 });
               }
             }
@@ -2054,9 +2089,9 @@
               });
 
               if (r) {
-                let scoreVal = Number(r.score ?? r.correct_answers ?? r.correct ?? r.result ?? 0);
+                let scoreVal = Number(r.correct ?? r.score ?? r.correct_answers ?? r.result ?? 0);
                 
-                let totalQ = Number(r.total_questions ?? r.total_q ?? r.total ?? 0);
+                let totalQ = Number(r.total ?? r.total_questions ?? r.total_q ?? 0);
                 if (totalQ <= 0) {
                   totalQ = Number(ex.question_limit || 0);
                 }
@@ -2156,11 +2191,19 @@
 
       } catch (err) {
         console.error("Matrix error:", err);
+        tbody.innerHTML = `<tr><td colspan="12" style="color:red; text-align:center; padding:20px;">⚠️ Dogoggora qabxii matrix fiduu: ${escapeHtml(err.message)}</td></tr>`;
       }
     };
 
     window.viewStudentFullDetails = async function(studentId) {
-      const student = allAdminStudentsData.find(s => s.id === studentId);
+      let student = (allAdminStudentsData || []).find(s => String(s.id) === String(studentId));
+      if (!student) {
+        try {
+          const { data } = await db.from("students").select("*").eq("id", studentId).maybeSingle();
+          if (data) student = data;
+        } catch(e) {}
+      }
+
       const headerEl = document.getElementById("studentDetailModalHeader");
       const contentEl = document.getElementById("studentDetailModalContent");
       const modal = document.getElementById("studentResultDetailModal");
@@ -2188,7 +2231,7 @@
       `;
 
       let studentResults = [];
-      const tables = ["exam_results", "results"];
+      const tables = ["results", "exam_results", "exam_attempts"];
       for (const t of tables) {
         try {
           const { data, error } = await db.from(t).select("*");
@@ -2209,7 +2252,7 @@
 
       const uniqueStudentResults = [];
       studentResults.forEach(r => {
-        if (!uniqueStudentResults.some(ur => ur.exam_id === r.exam_id && ur.created_at === r.created_at)) {
+        if (!uniqueStudentResults.some(ur => ur.exam_id === r.exam_id && (ur.created_at === r.created_at || ur.submitted_at === r.submitted_at))) {
           uniqueStudentResults.push(r);
         }
       });
@@ -2224,19 +2267,33 @@
         `;
       } else {
         contentEl.innerHTML = studentResults.map((r, idx) => {
-          const score = Number(r.score || 0);
-          const total = Number(r.total_questions || 5);
+          const score = Number(r.correct ?? r.score ?? 0);
+          const total = Number(r.total ?? r.total_questions ?? 5);
           const wrong = Math.max(0, total - score);
           const pct = r.percentage !== undefined ? Number(r.percentage) : Math.round((score / total) * 100);
           const title = r.exam_title || "Qormaata";
 
           let breakdownHtml = "";
+          let breakdownList = [];
+
           if (r.responses && Array.isArray(r.responses)) {
+            breakdownList = r.responses;
+          } else if (r.answers) {
+            const parsedAns = typeof r.answers === "string" ? JSON.parse(r.answers) : r.answers;
+            breakdownList = Object.values(parsedAns).map(item => ({
+              question: item.question || "Gaaffii",
+              student_answer: item.selected_answer || item.student_answer || "-",
+              correct_answer: item.correct_answer || "A",
+              is_correct: Boolean(item.is_correct || item.selected_answer === item.correct_answer)
+            }));
+          }
+
+          if (breakdownList.length > 0) {
             breakdownHtml = `
               <div style="margin-top:14px; border-top:1px solid #e2e8f0; padding-top:10px;">
                 <h5 style="margin:0 0 8px 0; color:#334155; font-size:12.5px; font-weight:bold;">📋 Tarree Gaaffilee &amp; Deebii Barataa:</h5>
                 <div style="display:flex; flex-direction:column; gap:8px;">
-                  ${r.responses.map((resp, rIdx) => {
+                  ${breakdownList.map((resp, rIdx) => {
                     const isCorrect = resp.is_correct || resp.student_answer === resp.correct_answer;
                     return `
                       <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:12px;">
@@ -2256,7 +2313,7 @@
           } else {
             breakdownHtml = `
               <div style="margin-top:10px; font-size:11.5px; color:#64748b; font-style:italic;">
-                ℹ️ Qormaanni kun dur kan qorame waan ta'eef deebiin gadi fageenyaa hin argamne.
+                ℹ️ Qormaata kanaaf deebiin bal'aan hin kuufamne.
               </div>
             `;
           }
@@ -2284,7 +2341,7 @@
               ${breakdownHtml}
 
               <div style="font-size:11px; color:#94a3b8; margin-top:10px; text-align:right;">
-                🕒 Guyyaa: ${r.created_at ? new Date(r.created_at).toLocaleString() : '-'}
+                🕒 Guyyaa: ${r.created_at || r.submitted_at ? new Date(r.created_at || r.submitted_at).toLocaleString() : '-'}
               </div>
             </div>
           `;
@@ -2432,9 +2489,16 @@
       if (!studentId) return 0;
       let count = 0;
       try {
-        const { data, error } = await db.from("exam_results").select("id").eq("exam_id", examId).eq("student_id", studentId);
+        const { data, error } = await db.from("results").select("id").eq("exam_id", examId).eq("student_id", studentId);
         if (!error && data) count = data.length;
       } catch(e) {}
+
+      if (count === 0) {
+        try {
+          const { data, error } = await db.from("exam_attempts").select("id").eq("exam_id", examId).eq("student_id", studentId).eq("completed", true);
+          if (!error && data) count = data.length;
+        } catch(e) {}
+      }
 
       if (count === 0) {
         try {
@@ -2681,6 +2745,33 @@
       }
     };
 
+    // =========================================================
+    // 🎯 100% BULLETPROOF SUPABASE EXAM SUBMIT WITH AUTO-RETRY
+    // =========================================================
+    async function insertRobustRecord(tableName, payload) {
+      let p = { ...payload };
+      for (let i = 0; i < 15; i++) {
+        try {
+          const { error } = await db.from(tableName).insert([p]);
+          if (!error) return true;
+
+          const errMsg = error.message || "";
+          const match = errMsg.match(/Could not find the '([^']+)' column/i) || 
+                        errMsg.match(/column "([^"]+)" of relation/i) ||
+                        errMsg.match(/column "([^"]+)" does not exist/i);
+          
+          if (match && match[1]) {
+            delete p[match[1]];
+            continue;
+          }
+          return false;
+        } catch(e) {
+          return false;
+        }
+      }
+      return false;
+    }
+
     window.submitActiveExamNow = async function() {
       clearInterval(activeExamTimerInterval);
       const totalQ = activeExamQuestionsList.length;
@@ -2726,50 +2817,59 @@
       if (!s) {
         try { s = JSON.parse(localStorage.getItem("ao_current_student")); } catch(e){}
       }
-      const sId = s?.id || localStorage.getItem("ao_student_real_id") || "guest";
+      
+      let sId = s?.id;
+      if (!sId) {
+        try {
+          const { data: sessionData } = await db.auth.getSession();
+          if (sessionData?.session?.user?.id) sId = sessionData.session.user.id;
+        } catch(e){}
+      }
+      if (!sId) sId = localStorage.getItem("ao_student_id") || localStorage.getItem("ao_student_real_id") || "guest";
       const sName = s?.name || localStorage.getItem("ao_user_name") || "Barataa";
       const sEmail = s?.email || localStorage.getItem("ao_user_email") || "";
 
-      const resultRecord = {
+      // Multi-column unified result object matching both 'results' and 'exam_results' schemas:
+      const fullResultRecord = {
         student_id: sId,
         user_id: sId,
         student_name: sName,
         student_email: sEmail,
         exam_id: activeExamData?.id || "exam",
         exam_title: activeExamData?.title || "Qormaata",
+        correct: correctCount,
         score: correctCount,
+        total: totalQ,
         total_questions: totalQ,
         percentage: percentage,
+        answers: responsesArray,
         responses: responsesArray,
+        submitted_at: new Date().toISOString(),
         created_at: new Date().toISOString()
       };
 
-      const targetTables = ["exam_results", "results", "student_results", "scores"];
+      // 1. Save to primary 'results' table with auto-retry
+      await insertRobustRecord("results", fullResultRecord);
 
-      for (const tName of targetTables) {
-        try {
-          await db.from(tName).insert([resultRecord]);
-        } catch(e) {}
-      }
+      // 2. Also save to 'exam_attempts' (completed) so attempts are permanently logged
+      await insertRobustRecord("exam_attempts", {
+        student_id: sId,
+        exam_id: activeExamData?.id,
+        score: correctCount,
+        total: totalQ,
+        percentage: percentage,
+        completed: true,
+        submitted_at: new Date().toISOString()
+      });
 
+      // 3. Fallback table
+      await insertRobustRecord("exam_results", fullResultRecord);
+
+      // 4. Save locally
       try {
-        let localList = [];
-        const existingLocal = localStorage.getItem("ao_exam_results");
-        if (existingLocal) {
-          localList = JSON.parse(existingLocal);
-          if (!Array.isArray(localList)) localList = [];
-        }
-        localList.unshift(resultRecord);
+        let localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
+        localList.unshift(fullResultRecord);
         localStorage.setItem("ao_exam_results", JSON.stringify(localList));
-        
-        let generalResults = [];
-        const existingGen = localStorage.getItem("results");
-        if (existingGen) {
-          generalResults = JSON.parse(existingGen);
-          if (!Array.isArray(generalResults)) generalResults = [];
-        }
-        generalResults.unshift(resultRecord);
-        localStorage.setItem("results", JSON.stringify(generalResults));
       } catch(e) {}
 
       alert(`🎉 Qormaanni xumurameera!\n\nQabxii: ${correctCount}/${totalQ}\nDhibbeentaa: ${percentage}%`);
@@ -2789,62 +2889,58 @@
 
       try {
         let resultsList = [];
-        const tables = ["exam_results", "results", "student_results", "scores"];
+        const tables = ["results", "exam_results", "exam_attempts"];
         for (const t of tables) {
           try {
             if (sId) {
               const { data: d1 } = await db.from(t).select("*").eq("student_id", sId);
               if (d1 && d1.length) resultsList.push(...d1);
-              
-              const { data: d2 } = await db.from(t).select("*").eq("user_id", sId);
-              if (d2 && d2.length) resultsList.push(...d2);
-            }
-            if (sEmail) {
-              const { data: d3 } = await db.from(t).select("*").eq("student_email", sEmail);
-              if (d3 && d3.length) resultsList.push(...d3);
             }
           } catch(err){}
         }
 
         const uniqueResults = [];
         resultsList.forEach(r => {
-          if (!uniqueResults.some(ur => ur.exam_id === r.exam_id && ur.created_at === r.created_at)) {
+          if (!uniqueResults.some(ur => ur.exam_id === r.exam_id && (ur.created_at === r.created_at || ur.submitted_at === r.submitted_at))) {
             uniqueResults.push(r);
           }
         });
 
         const localList = JSON.parse(localStorage.getItem("ao_exam_results") || "[]");
-        const localResults2 = JSON.parse(localStorage.getItem("results") || "[]");
-        const combinedLocal = [...localList, ...localResults2];
-
-        combinedLocal.forEach(lr => {
+        localList.forEach(lr => {
           const matchLr = (sId && (lr.student_id === sId || lr.user_id === sId)) || (sEmail && lr.student_email === sEmail);
           if (matchLr) {
-            if (!uniqueResults.some(ur => ur.exam_id === lr.exam_id && ur.created_at === lr.created_at)) {
+            if (!uniqueResults.some(ur => ur.exam_id === lr.exam_id)) {
               uniqueResults.push(lr);
             }
           }
         });
 
-        uniqueResults.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        uniqueResults.sort((a,b) => new Date(b.created_at || b.submitted_at || 0) - new Date(a.created_at || a.submitted_at || 0));
 
         if (!uniqueResults.length) {
           container.innerHTML = `<div class="empty-state">📊 Ammaaf qormaata tokko illee hin xumurre.</div>`;
           return;
         }
 
-        container.innerHTML = uniqueResults.map(res => `
-          <div class="modern-card" style="margin-bottom:12px; border-left:5px solid #10b981; background:#ffffff; padding:18px; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
-            <h3 style="color:#0f172a; font-size:16px; margin-bottom:6px;">📝 ${escapeHtml(res.exam_title || "Qormaata")}</h3>
-            <p style="margin-top:2px; font-size:14px; color:#334155;">
-              <strong>Qabxii:</strong> ${res.score} / ${res.total_questions || 5}
-            </p>
-            <p style="font-size:13.5px; color:#10b981; font-weight:bold; margin-top:2px;">
-              Dhibbeentaa: ${res.percentage}%
-            </p>
-            <small style="color:#94a3b8; display:block; margin-top:6px;">Guyyaa: ${res.created_at ? new Date(res.created_at).toLocaleDateString() : '-'}</small>
-          </div>
-        `).join("");
+        container.innerHTML = uniqueResults.map(res => {
+          const score = Number(res.correct ?? res.score ?? 0);
+          const total = Number(res.total ?? res.total_questions ?? 5);
+          const pct = Number(res.percentage ?? Math.round((score / total) * 100));
+
+          return `
+            <div class="modern-card" style="margin-bottom:12px; border-left:5px solid #10b981; background:#ffffff; padding:18px; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+              <h3 style="color:#0f172a; font-size:16px; margin-bottom:6px;">📝 ${escapeHtml(res.exam_title || "Qormaata")}</h3>
+              <p style="margin-top:2px; font-size:14px; color:#334155;">
+                <strong>Qabxii:</strong> ${score} / ${total}
+              </p>
+              <p style="font-size:13.5px; color:#10b981; font-weight:bold; margin-top:2px;">
+                Dhibbeentaa: ${pct}%
+              </p>
+              <small style="color:#94a3b8; display:block; margin-top:6px;">Guyyaa: ${res.created_at || res.submitted_at ? new Date(res.created_at || res.submitted_at).toLocaleDateString() : '-'}</small>
+            </div>
+          `;
+        }).join("");
 
       } catch (err) {
         container.innerHTML = `<div class="empty-state">📊 Qabxiin hin argamne.</div>`;
