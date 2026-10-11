@@ -681,7 +681,7 @@ async function loadExams() {
   }
 
   if (!data?.length) {
-    container.innerHTML = `<div class="empty-state">📝 Ammaaf qormaanni hin jiru.</div>`;
+    container.innerHTML = `<div class="empty-state">📝 Ammaaf qormaanni hin jiru.&lt;/div>`;
     return;
   }
 
@@ -1704,7 +1704,7 @@ async function deleteStudent(studentId) {
 }
 
 /* =========================================================
-   RESULTS MATRIX FOR ADMIN
+   RESULTS MATRIX FOR ADMIN (Sirreeffame)
 ========================================================= */
 
 async function loadAdminResults() {
@@ -1721,20 +1721,21 @@ async function loadAdminResults() {
   }
 
   try {
-    const [studentsRes, examsRes, resultsRes, questionsRes] = await Promise.all([
+    const [studentsRes, examsRes, resultsRes, attemptsRes, questionsRes] = await Promise.all([
       db.from("students").select("*"),
       db.from("exams").select("*").order("created_at", { ascending: true }),
       db.from("results").select("*"),
+      db.from("exam_attempts").select("*").eq("completed", true),
       db.from("questions").select("id, exam_id")
     ]);
 
     if (studentsRes.error) throw studentsRes.error;
     if (examsRes.error) throw examsRes.error;
-    if (resultsRes.error) throw resultsRes.error;
 
     const students = studentsRes.data || [];
     const exams = examsRes.data || [];
     const results = resultsRes.data || [];
+    const attempts = attemptsRes.data || [];
     const questions = questionsRes.data || [];
 
     if (thead) {
@@ -1773,36 +1774,63 @@ async function loadAdminResults() {
       const studentDisplayId = getStudentDisplayId(s);
 
       exams.forEach(ex => {
-        const res = results.find(r => {
-          const rSId = String(r.student_id || r.user_id || "").trim();
+        // 1. Minjaala results keessaa barbaadi
+        let res = results.find(r => {
+          const rSId = String(r.student_id || r.user_id || "").trim().toLowerCase();
+          const sId = String(s.id || "").trim().toLowerCase();
+          const sCode = String(s.student_code || "").trim().toLowerCase();
+          const dId = studentDisplayId.trim().toLowerCase();
           const rSName = String(r.student_name || r.name || "").trim().toLowerCase();
           const sName = String(s.name || "").trim().toLowerCase();
 
           const matchStudent = (
-            rSId === String(s.id).trim() ||
-            rSId === String(s.student_code || "").trim() ||
-            rSId === studentDisplayId ||
+            (rSId && (rSId === sId || rSId === sCode || rSId === dId || sId.includes(rSId) || rSId.includes(sId))) ||
             (rSName && sName && rSName === sName)
           );
 
-          const rExId = String(r.exam_id || "").trim();
+          const rExId = String(r.exam_id || "").trim().toLowerCase();
+          const exId = String(ex.id || "").trim().toLowerCase();
           const rExTitle = String(r.exam_title || "").trim().toLowerCase();
           const exTitle = String(ex.title || "").trim().toLowerCase();
 
           const matchExam = (
-            rExId === String(ex.id).trim() ||
-            (rExTitle && exTitle && rExTitle === exTitle)
+            (rExId && (rExId === exId || exId.includes(rExId))) ||
+            (rExTitle && exTitle && (rExTitle === exTitle || exTitle.includes(rExTitle)))
           );
 
           return matchStudent && matchExam;
         });
+
+        // 2. Yoo results keessatti hin argamin, exam_attempts keessaa barbaadi (backup)
+        if (!res) {
+          const att = attempts.find(a => {
+            const aSId = String(a.student_id || "").trim().toLowerCase();
+            const sId = String(s.id || "").trim().toLowerCase();
+            const sCode = String(s.student_code || "").trim().toLowerCase();
+            const matchStudent = (aSId && (aSId === sId || aSId === sCode || sId.includes(aSId) || aSId.includes(sId)));
+
+            const aExId = String(a.exam_id || "").trim().toLowerCase();
+            const exId = String(ex.id || "").trim().toLowerCase();
+            return matchStudent && (aExId === exId);
+          });
+
+          if (att) {
+            res = {
+              id: att.id,
+              correct: att.score,
+              total: att.total,
+              percentage: att.percentage,
+              is_attempt: true
+            };
+          }
+        }
 
         if (res) {
           const score = Number(res.correct ?? res.score ?? 0);
           
           let totalQ = Number(res.total ?? res.total_questions ?? 0);
           if (totalQ <= 0) {
-            totalQ = questions.filter(q => q.exam_id === ex.id).length;
+            totalQ = questions.filter(q => String(q.exam_id) === String(ex.id)).length;
           }
           if (totalQ <= 0) {
             totalQ = Number(ex.question_limit ?? 5);
